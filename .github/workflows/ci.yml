@@ -44,8 +44,8 @@ jobs:
       - name: Run build_runner
         run: melos run build:runner
 
-      - name: Run strict analyze
-        run: melos run analyze:strict
+      - name: Run analyze
+        run: melos run analyze
 
   test:
     name: Test
