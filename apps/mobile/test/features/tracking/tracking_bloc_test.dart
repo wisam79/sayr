@@ -12,6 +12,14 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.d
 class MockTripRepository extends Mock implements TripRepository {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(RouteId('fallback'));
+    registerFallbackValue(TripId('fallback'));
+    registerFallbackValue(DriverId('fallback'));
+    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(TripEvent.depart);
+  });
+
   late MockTripRepository mockRepo;
   late TrackingBloc bloc;
 

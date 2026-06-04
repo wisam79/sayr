@@ -12,6 +12,11 @@ import 'package:sayr_mobile/features/payment/presentation/bloc/payment_state.dar
 class MockTripRepository extends Mock implements TripRepository {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(RouteId('fallback'));
+    registerFallbackValue(TripId('fallback'));
+  });
+
   late MockTripRepository mockRepo;
   late PaymentBloc bloc;
 
