@@ -17,7 +17,7 @@ void main() {
     registerFallbackValue(TripId('fallback'));
     registerFallbackValue(DriverId('fallback'));
     registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
-    registerFallbackValue(TripEvent.depart);
+    registerFallbackValue(TripEvent.start);
   });
 
   late MockTripRepository mockRepo;
