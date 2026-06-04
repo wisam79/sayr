@@ -16,11 +16,12 @@ class TripRepository {
   /// Get all active trips for the current user (student view).
   Future<Either<Failure, List<Trip>>> getActiveTrips() async {
     try {
-      final response = await _supabase.client
-          .from('trips')
-          .select()
-          .inFilter('status', ['scheduled', 'driver_waiting', 'in_transit'])
-          .order('scheduled_at', ascending: true);
+      final response = await _supabase.client.from('trips').select().inFilter(
+          'status', [
+        'scheduled',
+        'driver_waiting',
+        'in_transit'
+      ]).order('scheduled_at', ascending: true);
 
       final trips = (response as List)
           .cast<Map<String, dynamic>>()
@@ -125,11 +126,13 @@ class TripRepository {
 
   /// Bulk update locations (for offline sync).
   Future<Either<Failure, Unit>> bulkUpdateLocations(
-    List<({
-      TripId tripId,
-      double lat,
-      double lng,
-    })> locations,
+    List<
+            ({
+              TripId tripId,
+              double lat,
+              double lng,
+            })>
+        locations,
   ) async {
     try {
       final locationsJson = locations

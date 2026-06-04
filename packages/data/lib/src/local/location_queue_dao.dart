@@ -35,8 +35,7 @@ class LocationQueueDao {
 
   /// Mark updates as synced after successful upload.
   Future<void> markSynced(List<int> ids) async {
-    await (_db.update(_db.pendingLocationUpdate)
-          ..where((t) => t.id.isIn(ids)))
+    await (_db.update(_db.pendingLocationUpdate)..where((t) => t.id.isIn(ids)))
         .write(const PendingLocationUpdateCompanion(synced: Value(true)));
   }
 

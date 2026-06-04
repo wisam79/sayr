@@ -24,7 +24,8 @@ void main() {
 
     test('isAdmin/isStudent/isDriver', () {
       const admin = User(id: UserId('1'), email: 'a@a', role: UserRole.admin);
-      const student = User(id: UserId('2'), email: 's@s', role: UserRole.student);
+      const student =
+          User(id: UserId('2'), email: 's@s', role: UserRole.student);
       const driver = User(id: UserId('3'), email: 'd@d', role: UserRole.driver);
 
       expect(admin.isAdmin, isTrue);

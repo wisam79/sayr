@@ -18,8 +18,7 @@ abstract class DataRepositoriesModule {
   TripRepository get tripRepository => TripRepository();
 
   @lazySingleton
-  SubscriptionRepository get subscriptionRepository =>
-      SubscriptionRepository();
+  SubscriptionRepository get subscriptionRepository => SubscriptionRepository();
 
   @lazySingleton
   ChatRepository get chatRepository => ChatRepository();

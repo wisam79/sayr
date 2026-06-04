@@ -70,11 +70,8 @@ class UserModel {
     final user = client.auth.currentUser;
     if (user == null) return null;
 
-    final response = await client
-        .from('profiles')
-        .select()
-        .eq('id', user.id)
-        .maybeSingle();
+    final response =
+        await client.from('profiles').select().eq('id', user.id).maybeSingle();
 
     if (response == null) return null;
     return UserModel.fromJson(response);

@@ -21,9 +21,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    context
-        .read<NotificationsBloc>()
-        .add(const NotificationsLoadRequested());
+    context.read<NotificationsBloc>().add(const NotificationsLoadRequested());
   }
 
   @override
@@ -66,7 +64,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         },
         builder: (context, state) {
           return switch (state) {
-            NotificationsInitial() || NotificationsLoading() =>
+            NotificationsInitial() ||
+            NotificationsLoading() =>
               const Center(child: CircularProgressIndicator()),
             NotificationsError() => _ErrorBody(
                 failure: state.failure,

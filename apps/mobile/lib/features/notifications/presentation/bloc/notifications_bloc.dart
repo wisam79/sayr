@@ -68,11 +68,11 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     );
 
     _subscription = _repository.watchMyNotifications().listen(
-      (List<AppNotification> list) => add(_NotificationsUpdated(list)),
-      onError: (Object e) => add(
-        _NotificationsStreamErrored(ServerFailure(message: e.toString())),
-      ),
-    );
+          (List<AppNotification> list) => add(_NotificationsUpdated(list)),
+          onError: (Object e) => add(
+            _NotificationsStreamErrored(ServerFailure(message: e.toString())),
+          ),
+        );
   }
 
   Future<void> _onRefreshRequested(

@@ -161,7 +161,8 @@ class _MessageBubble extends StatelessWidget {
             color: isMe
                 ? AppColors.primary.withValues(alpha: 0.15)
                 : AppColors.surface,
-            textStyle: Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
+            textStyle:
+                Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
             seen: message.isRead,
             tail: true,
           ),

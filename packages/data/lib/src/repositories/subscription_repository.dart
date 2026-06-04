@@ -28,7 +28,8 @@ class SubscriptionRepository {
           .order('start_date', ascending: false);
 
       final subs = (response as List<dynamic>)
-          .map<Subscription>((dynamic json) => _fromJson(json as Map<String, dynamic>))
+          .map<Subscription>(
+              (dynamic json) => _fromJson(json as Map<String, dynamic>))
           .toList();
 
       return Right<Failure, List<Subscription>>(subs);
@@ -62,7 +63,8 @@ class SubscriptionRepository {
   }
 
   /// Activate a license code (creates a pending subscription).
-  Future<Either<Failure, SubscriptionId>> activateLicense(LicenseCode code) async {
+  Future<Either<Failure, SubscriptionId>> activateLicense(
+      LicenseCode code) async {
     try {
       final response = await _supabase.client.rpc<String>(
         'activate_license',

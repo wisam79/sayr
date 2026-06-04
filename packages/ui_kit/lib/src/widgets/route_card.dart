@@ -56,10 +56,9 @@ class RouteCard extends StatelessWidget {
                       ),
                       child: Text(
                         'متاح',
-                        style:
-                            Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AppColors.success,
-                                ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.success,
+                            ),
                       ),
                     )
                   else
@@ -75,10 +74,9 @@ class RouteCard extends StatelessWidget {
                       ),
                       child: Text(
                         'مكتمل',
-                        style:
-                            Theme.of(context).textTheme.labelSmall?.copyWith(
-                                  color: AppColors.error,
-                                ),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppColors.error,
+                            ),
                       ),
                     ),
                 ],
@@ -102,7 +100,8 @@ class RouteCard extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsetsDirectional.only(start: 7),
-                child: VerticalDivider(width: 1, thickness: 1, color: AppColors.border),
+                child: VerticalDivider(
+                    width: 1, thickness: 1, color: AppColors.border),
               ),
               Row(
                 children: [

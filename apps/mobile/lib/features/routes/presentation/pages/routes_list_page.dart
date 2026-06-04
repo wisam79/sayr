@@ -36,9 +36,7 @@ class RoutesListPage extends StatelessWidget {
               ),
             RoutesLoaded(:final routes) => RefreshIndicator(
                 onRefresh: () async {
-                  context
-                      .read<RoutesBloc>()
-                      .add(const RoutesLoadRequested());
+                  context.read<RoutesBloc>().add(const RoutesLoadRequested());
                 },
                 child: ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),

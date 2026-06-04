@@ -31,8 +31,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     _OnboardingData(
       icon: Icons.security,
       title: 'آمن وموثوق',
-      description:
-          'نظام تراخيص مسبق الدفع يضمن لك مقعدك ويحمي حقوقك.',
+      description: 'نظام تراخيص مسبق الدفع يضمن لك مقعدك ويحمي حقوقك.',
       color: AppColors.success,
     ),
   ];
@@ -106,9 +105,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         const SizedBox(height: AppSpacing.md),
                         Text(
                           page.description,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -147,7 +147,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 horizontal: AppSpacing.xl,
               ),
               child: PrimaryButton(
-                label: _currentPage < _pages.length - 1 ? 'التالي' : 'ابدأ الآن',
+                label:
+                    _currentPage < _pages.length - 1 ? 'التالي' : 'ابدأ الآن',
                 onPressed: _onNext,
                 icon: _currentPage == _pages.length - 1
                     ? Icons.check

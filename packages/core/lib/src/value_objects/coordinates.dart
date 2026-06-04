@@ -74,8 +74,7 @@ class Coordinates extends Equatable {
       math.sin(lat1) + math.sin(lat2),
       math.sqrt((math.cos(lat1) + bx) * (math.cos(lat1) + bx) + by * by),
     );
-    final lng3 =
-        lng1 + math.atan2(by, math.cos(lat1) + bx);
+    final lng3 = lng1 + math.atan2(by, math.cos(lat1) + bx);
 
     return Coordinates(
       latitude: _rad2deg(lat3),

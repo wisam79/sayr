@@ -75,14 +75,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ),
     );
 
-    _messagesSubscription = _chatRepository
-        .watchMessages(event.conversationId)
-        .listen(
-      (List<Message> messages) => add(_ChatMessagesUpdated(messages)),
-      onError: (Object e) => add(
-        _ChatStreamErrored(ServerFailure(message: e.toString())),
-      ),
-    );
+    _messagesSubscription =
+        _chatRepository.watchMessages(event.conversationId).listen(
+              (List<Message> messages) => add(_ChatMessagesUpdated(messages)),
+              onError: (Object e) => add(
+                _ChatStreamErrored(ServerFailure(message: e.toString())),
+              ),
+            );
   }
 
   void _onMessagesUpdated(

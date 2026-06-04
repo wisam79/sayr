@@ -144,7 +144,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
     final trip = state.trip;
     final cameraPosition = CameraPosition(
       target: state.currentLocation != null
-          ? LatLng(state.currentLocation!.latitude, state.currentLocation!.longitude)
+          ? LatLng(
+              state.currentLocation!.latitude, state.currentLocation!.longitude)
           : SayrMap.defaultCenter,
       zoom: 15,
     );

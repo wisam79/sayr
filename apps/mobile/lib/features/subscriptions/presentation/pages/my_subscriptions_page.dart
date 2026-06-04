@@ -40,7 +40,8 @@ class MySubscriptionsPage extends StatelessWidget {
                       .add(const SubscriptionsLoadRequested());
                 },
               ),
-            SubscriptionsLoaded(:final subscriptions) when subscriptions.isEmpty =>
+            SubscriptionsLoaded(:final subscriptions)
+                when subscriptions.isEmpty =>
               const EmptyState(
                 icon: Icons.confirmation_number_outlined,
                 title: 'لا يوجد اشتراكات',

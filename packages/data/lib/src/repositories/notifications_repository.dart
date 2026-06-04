@@ -69,13 +69,10 @@ class NotificationsRepository {
   /// Mark a single notification as read.
   Future<Either<Failure, Unit>> markAsRead(NotificationId id) async {
     try {
-      await _supabase.client
-          .from('notification_log')
-          .update({
-            'is_read': true,
-            'read_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', id.value);
+      await _supabase.client.from('notification_log').update({
+        'is_read': true,
+        'read_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', id.value);
       return const Right<Failure, Unit>(unit);
     } catch (e) {
       return Left<Failure, Unit>(ServerFailure(message: e.toString()));

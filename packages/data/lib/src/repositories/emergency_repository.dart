@@ -95,13 +95,10 @@ class EmergencyRepository {
   /// Resolve (cancel) an active report.
   Future<Either<Failure, Unit>> resolveReport(EmergencyReportId id) async {
     try {
-      await _supabase.client
-          .from('emergency_reports')
-          .update({
-            'status': 'resolved',
-            'resolved_at': DateTime.now().toUtc().toIso8601String(),
-          })
-          .eq('id', id.value);
+      await _supabase.client.from('emergency_reports').update({
+        'status': 'resolved',
+        'resolved_at': DateTime.now().toUtc().toIso8601String(),
+      }).eq('id', id.value);
       return const Right<Failure, Unit>(unit);
     } catch (e) {
       return Left<Failure, Unit>(ServerFailure(message: e.toString()));

@@ -27,9 +27,8 @@ class NotificationCard extends StatelessWidget {
             : AppColors.primary.withValues(alpha: 0.15),
         child: Icon(
           _iconForType(notification.data['type'] as String?),
-          color: notification.isRead
-              ? AppColors.textSecondary
-              : AppColors.primary,
+          color:
+              notification.isRead ? AppColors.textSecondary : AppColors.primary,
         ),
       ),
       title: Text(

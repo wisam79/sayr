@@ -38,7 +38,8 @@ class AuthRepository {
         password: password,
       );
       if (response.user == null) {
-        return const Left(UnauthorizedFailure(message: 'بيانات الدخول غير صحيحة'));
+        return const Left(
+            UnauthorizedFailure(message: 'بيانات الدخول غير صحيحة'));
       }
       return Right(_userFromAuth(response.user!));
     } on supabase.AuthException catch (e) {
@@ -82,7 +83,8 @@ class AuthRepository {
     try {
       final ok = await _supabase.signInWithGoogle();
       if (!ok) {
-        return const Left(UnauthorizedFailure(message: 'فشل تسجيل الدخول عبر Google'));
+        return const Left(
+            UnauthorizedFailure(message: 'فشل تسجيل الدخول عبر Google'));
       }
       return const Right(unit);
     } on supabase.AuthException catch (e) {
@@ -96,8 +98,7 @@ class AuthRepository {
   Future<void> signOut() => _supabase.signOut();
 
   /// Stream of auth state changes.
-  Stream<supabase.AuthState> get authStateChanges =>
-      _supabase.authStateChanges;
+  Stream<supabase.AuthState> get authStateChanges => _supabase.authStateChanges;
 
   User _userFromAuth(supabase.User user) => User(
         id: UserId(user.id),
