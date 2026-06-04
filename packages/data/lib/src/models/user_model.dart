@@ -1,35 +1,28 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-import '../supabase/supabase_client.dart';
+part 'user_model.freezed.dart';
+part 'user_model.g.dart';
 
-/// DTO for User from Supabase.
-class UserModel {
-  const UserModel({
-    required this.id,
-    required this.email,
-    required this.role,
-    this.fullName,
-    this.phone,
-    this.institutionId,
-    this.isVerified = false,
-    this.avatarUrl,
-  });
+/// DTO for User from Supabase (freezed version).
+@freezed
+abstract class UserModel with _$UserModel {
+  const factory UserModel({
+    required String id,
+    @Default('') String email,
+    required UserRole role,
+    @JsonKey(name: 'full_name') String? fullName,
+    String? phone,
+    @JsonKey(name: 'institution_id') String? institutionId,
+    @Default(false) @JsonKey(name: 'is_verified') bool isVerified,
+    @JsonKey(name: 'avatar_url') String? avatarUrl,
+  }) = _UserModel;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as String,
-      email: json['email'] as String? ?? '',
-      role: UserRole.fromString(json['role'] as String? ?? 'student'),
-      fullName: json['full_name'] as String?,
-      phone: json['phone'] as String?,
-      institutionId: json['institution_id'] != null
-          ? InstitutionId(json['institution_id'] as String)
-          : null,
-      isVerified: json['is_verified'] as bool? ?? false,
-      avatarUrl: json['avatar_url'] as String?,
-    );
-  }
+  const UserModel._();
+
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
 
   factory UserModel.fromAuthUser(supabase.User user) {
     return UserModel(
@@ -43,15 +36,6 @@ class UserModel {
     );
   }
 
-  final String id;
-  final String email;
-  final UserRole role;
-  final String? fullName;
-  final String? phone;
-  final InstitutionId? institutionId;
-  final bool isVerified;
-  final String? avatarUrl;
-
   /// Convert to a domain entity.
   User toEntity() => User(
         id: UserId(id),
@@ -59,21 +43,9 @@ class UserModel {
         role: role,
         fullName: fullName,
         phone: phone,
-        institutionId: institutionId,
+        institutionId:
+            institutionId != null ? InstitutionId(institutionId!) : null,
         isVerified: isVerified,
         avatarUrl: avatarUrl,
       );
-
-  /// Fetch the current user's profile from Supabase.
-  static Future<UserModel?> fetchCurrent() async {
-    final client = SayrSupabase.instance.client;
-    final user = client.auth.currentUser;
-    if (user == null) return null;
-
-    final response =
-        await client.from('profiles').select().eq('id', user.id).maybeSingle();
-
-    if (response == null) return null;
-    return UserModel.fromJson(response);
-  }
 }

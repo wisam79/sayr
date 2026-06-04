@@ -23,7 +23,7 @@ class NotificationCard extends StatelessWidget {
           : AppColors.primary.withValues(alpha: 0.05),
       leading: CircleAvatar(
         backgroundColor: notification.isRead
-            ? AppColors.surface
+            ? Theme.of(context).colorScheme.surface
             : AppColors.primary.withValues(alpha: 0.15),
         child: Icon(
           _iconForType(notification.data['type'] as String?),

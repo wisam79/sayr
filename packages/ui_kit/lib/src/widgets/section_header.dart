@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_spacing.dart';
+import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 
 /// A section header with title and optional action.
 class SectionHeader extends StatelessWidget {
+  /// Creates a [SectionHeader].
   const SectionHeader({
-    super.key,
     required this.title,
+    super.key,
     this.action,
   });
 
+  /// The header title.
   final String title;
+
+  /// Optional action widget.
   final Widget? action;
 
   @override

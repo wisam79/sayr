@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_core/sayr_core.dart';
 
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -14,6 +14,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoginRequested>(_onLoginRequested);
     on<AuthSignupRequested>(_onSignupRequested);
     on<AuthGoogleSignInRequested>(_onGoogleSignInRequested);
+    on<AuthPasswordResetRequested>(_onPasswordResetRequested);
+    on<AuthPasswordUpdateRequested>(_onPasswordUpdateRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthUserChanged>(_onUserChanged);
   }
@@ -95,6 +97,36 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     await _authRepository.signOut();
     emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onPasswordResetRequested(
+    AuthPasswordResetRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    final result = await _authRepository.sendPasswordResetEmail(
+      event.email.trim(),
+    );
+
+    result.fold(
+      (failure) => emit(AuthError(failure)),
+      (_) => emit(AuthPasswordResetEmailSent(event.email.trim())),
+    );
+  }
+
+  Future<void> _onPasswordUpdateRequested(
+    AuthPasswordUpdateRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    final result = await _authRepository.updatePassword(event.password);
+
+    result.fold(
+      (failure) => emit(AuthError(failure)),
+      (_) => emit(const AuthPasswordUpdated()),
+    );
   }
 
   void _onUserChanged(AuthUserChanged event, Emitter<AuthState> emit) {

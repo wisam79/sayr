@@ -52,6 +52,38 @@ Deno.serve(async (req) => {
     const adminQuery = await supabase.from('profiles').select('id').eq('role', 'admin');
     const admins = adminQuery.data ?? [];
 
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (supabaseUrl && serviceRoleKey && admins.length > 0) {
+      const sendNotificationUrl = `${supabaseUrl}/functions/v1/send-push-notification`;
+      for (const admin of admins) {
+        try {
+          await fetch(sendNotificationUrl, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${serviceRoleKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              userId: admin.id,
+              title: 'Emergency Alert!',
+              body: description || 'A student has reported an emergency.',
+              data: {
+                studentId,
+                routeId,
+                tripId,
+                lat: String(lat),
+                lng: String(lng),
+              },
+            }),
+          });
+        } catch (err) {
+          console.error(`Error notifying admin ${admin.id}:`, err);
+        }
+      }
+    }
+
     return new Response(JSON.stringify({
       reportId: report?.id,
       notifiedAdmins: admins.length,

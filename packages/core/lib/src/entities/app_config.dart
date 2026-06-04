@@ -1,25 +1,22 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'app_config.freezed.dart';
+part 'app_config.g.dart';
 
 /// Application configuration (force update, maintenance mode, etc.)
-class AppConfig extends Equatable {
-  const AppConfig({
-    required this.minVersion,
-    this.maintenanceMode = false,
-    this.maintenanceMessage,
-    this.updateUrl,
-  });
+@freezed
+abstract class AppConfig with _$AppConfig {
+  const factory AppConfig({
+    required String minVersion,
+    @Default(false) bool maintenanceMode,
+    String? maintenanceMessage,
+    String? updateUrl,
+  }) = _AppConfig;
 
-  /// Minimum required app version (e.g., "3.0.0").
-  final String minVersion;
+  const AppConfig._();
 
-  /// Whether maintenance mode is enabled.
-  final bool maintenanceMode;
-
-  /// Message shown in maintenance mode.
-  final String? maintenanceMessage;
-
-  /// URL to download the latest version.
-  final String? updateUrl;
+  factory AppConfig.fromJson(Map<String, dynamic> json) =>
+      _$AppConfigFromJson(json);
 
   /// Whether the given version is below the minimum required.
   bool isVersionOutdated(String currentVersion) {
@@ -36,12 +33,4 @@ class AppConfig extends Equatable {
     }
     return 0;
   }
-
-  @override
-  List<Object?> get props => [
-        minVersion,
-        maintenanceMode,
-        maintenanceMessage,
-        updateUrl,
-      ];
 }

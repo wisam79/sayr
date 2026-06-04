@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 import '../../../../core/sayr_flash.dart';
@@ -159,10 +158,15 @@ class _MessageBubble extends StatelessWidget {
             text: message.body,
             isSender: isMe,
             color: isMe
-                ? AppColors.primary.withValues(alpha: 0.15)
-                : AppColors.surface,
+                ? Theme.of(context).colorScheme.primaryContainer
+                : Theme.of(context).colorScheme.surfaceVariant,
             textStyle:
-                Theme.of(context).textTheme.bodyMedium ?? const TextStyle(),
+                (Theme.of(context).textTheme.bodyMedium ?? const TextStyle())
+                    .copyWith(
+              color: isMe
+                  ? Theme.of(context).colorScheme.onPrimaryContainer
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             seen: message.isRead,
             tail: true,
           ),

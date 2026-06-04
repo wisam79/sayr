@@ -2,48 +2,45 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import '../supabase/supabase_client.dart';
+import '../datasources/remote_datasource.dart';
+import '../datasources/local_datasource.dart';
+import '../models/message_model.dart';
+import '../models/conversation_model.dart';
 
-/// Repository for chat operations (conversations + messages).
-@lazySingleton
-class ChatRepository {
-  ChatRepository({SayrSupabase? supabase})
-      : _supabase = supabase ?? SayrSupabase.instance;
+/// Concrete implementation of ChatRepository using Remote and Local data sources.
+@LazySingleton(as: ChatRepository)
+class ChatRepositoryImpl implements ChatRepository {
+  final RemoteDatasource _remoteDatasource;
+  final LocalDatasource _localDatasource;
 
-  final SayrSupabase _supabase;
+  ChatRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required LocalDatasource localDatasource,
+  })  : _remoteDatasource = remoteDatasource,
+        _localDatasource = localDatasource;
 
-  /// Get all conversations the current user participates in, ordered
-  /// by most recent message. Joins with [routes] and [profiles] to
-  /// denormalize the route title and the other participant's name.
+  @override
   Future<Either<Failure, List<Conversation>>> getMyConversations() async {
     try {
-      final currentUserId = _supabase.client.auth.currentUser?.id;
+      final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
         return const Left<Failure, List<Conversation>>(UnauthorizedFailure());
       }
 
-      final response = await _supabase.client
-          .from('conversations')
-          .select('''
-            id,
-            route_id,
-            student_id,
-            driver_user_id,
-            last_message_at,
-            last_message_preview,
-            created_at,
-            updated_at,
-            routes:route_id ( title ),
-            student:profiles!conversations_student_id_fkey ( full_name ),
-            driver:profiles!conversations_driver_user_id_fkey ( full_name )
-          ''')
-          .or('student_id.eq.$currentUserId,driver_user_id.eq.$currentUserId')
-          .order('updated_at', ascending: false);
+      final response =
+          await _remoteDatasource.getMyConversations(currentUserId);
+      final conversations = response.map((json) {
+        final otherName =
+            _resolveOtherUserName(json: json, currentUserId: currentUserId);
+        final routeName = _resolveRouteName(json: json);
+        final map = {
+          ...json,
+          'route_name': routeName,
+          'other_user_name': otherName,
+        };
+        return ConversationModel.fromJson(map).toEntity();
+      }).toList();
 
-      final conversations = (response as List)
-          .cast<Map<String, dynamic>>()
-          .map((json) => _conversationFromJson(json, currentUserId))
-          .toList();
       return Right<Failure, List<Conversation>>(conversations);
     } catch (e) {
       return Left<Failure, List<Conversation>>(
@@ -52,66 +49,79 @@ class ChatRepository {
     }
   }
 
-  /// Subscribe to changes on the user's conversations list.
+  @override
   Stream<List<Conversation>> watchMyConversations() {
-    return _supabase.client
-        .from('conversations')
-        .stream(primaryKey: ['id'])
-        .order('updated_at', ascending: false)
-        .map((rows) {
-          final currentUserId = _supabase.client.auth.currentUser?.id;
-          return rows
-              .cast<Map<String, dynamic>>()
-              .where(
-                (r) =>
-                    r['student_id'] == currentUserId ||
-                    r['driver_user_id'] == currentUserId,
-              )
-              .map((json) => _conversationFromJson(json, currentUserId))
-              .toList();
-        });
+    final currentUserId = _remoteDatasource.currentUser?.id;
+    if (currentUserId == null) {
+      return Stream.value([]);
+    }
+    return _remoteDatasource.watchMyConversations(currentUserId).map((rows) {
+      return rows
+          .where(
+        (r) =>
+            r['student_id'] == currentUserId ||
+            r['driver_user_id'] == currentUserId,
+      )
+          .map((json) {
+        final otherName =
+            _resolveOtherUserName(json: json, currentUserId: currentUserId);
+        final routeName = _resolveRouteName(json: json);
+        final map = {
+          ...json,
+          'route_name': routeName,
+          'other_user_name': otherName,
+        };
+        return ConversationModel.fromJson(map).toEntity();
+      }).toList();
+    });
   }
 
-  /// Look up an existing conversation for (route, student) or create one.
-  /// Returns the conversation row regardless.
+  @override
   Future<Either<Failure, Conversation>> getOrCreateConversation({
     required RouteId routeId,
     required UserId driverUserId,
   }) async {
     try {
-      final currentUserId = _supabase.client.auth.currentUser?.id;
+      final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
         return const Left<Failure, Conversation>(UnauthorizedFailure());
       }
 
-      final existing = await _supabase.client
-          .from('conversations')
-          .select()
-          .eq('route_id', routeId.value)
-          .eq('student_id', currentUserId)
-          .maybeSingle();
+      final existing = await _remoteDatasource.getConversation(
+        routeId: routeId.value,
+        studentId: currentUserId,
+      );
 
       if (existing != null) {
+        final otherName =
+            _resolveOtherUserName(json: existing, currentUserId: currentUserId);
+        final routeName = _resolveRouteName(json: existing);
+        final map = {
+          ...existing,
+          'route_name': routeName,
+          'other_user_name': otherName,
+        };
         return Right<Failure, Conversation>(
-          _conversationFromJson(
-            existing as Map<String, dynamic>,
-            currentUserId,
-          ),
+          ConversationModel.fromJson(map).toEntity(),
         );
       }
 
-      final created = await _supabase.client
-          .from('conversations')
-          .insert({
-            'route_id': routeId.value,
-            'student_id': currentUserId,
-            'driver_user_id': driverUserId.value,
-          })
-          .select()
-          .single();
+      final created = await _remoteDatasource.createConversation(
+        routeId: routeId.value,
+        studentId: currentUserId,
+        driverUserId: driverUserId.value,
+      );
 
+      final otherName =
+          _resolveOtherUserName(json: created, currentUserId: currentUserId);
+      final routeName = _resolveRouteName(json: created);
+      final map = {
+        ...created,
+        'route_name': routeName,
+        'other_user_name': otherName,
+      };
       return Right<Failure, Conversation>(
-        _conversationFromJson(created, currentUserId),
+        ConversationModel.fromJson(map).toEntity(),
       );
     } catch (e) {
       return Left<Failure, Conversation>(
@@ -120,21 +130,14 @@ class ChatRepository {
     }
   }
 
-  /// Get messages for a specific conversation.
+  @override
   Future<Either<Failure, List<Message>>> getMessages(
-    ConversationId conversationId,
-  ) async {
+      ConversationId conversationId) async {
     try {
-      final response = await _supabase.client
-          .from('messages')
-          .select()
-          .eq('conversation_id', conversationId.value)
-          .order('created_at', ascending: true)
-          .limit(50);
-
-      final messages = (response as List)
-          .cast<Map<String, dynamic>>()
-          .map(_messageFromJson)
+      final response =
+          await _remoteDatasource.getMessages(conversationId.value);
+      final messages = response
+          .map((json) => MessageModel.fromJson(json).toEntity())
           .toList();
       return Right<Failure, List<Message>>(messages);
     } catch (e) {
@@ -144,112 +147,65 @@ class ChatRepository {
     }
   }
 
-  /// Subscribe to messages via Realtime.
+  @override
   Stream<List<Message>> watchMessages(ConversationId conversationId) {
-    return _supabase.client
-        .from('messages')
-        .stream(primaryKey: ['id'])
-        .eq('conversation_id', conversationId.value)
-        .map((rows) => rows.map(_messageFromJson).toList());
+    return _remoteDatasource.watchMessages(conversationId.value).map(
+          (rows) => rows
+              .map((json) => MessageModel.fromJson(json).toEntity())
+              .toList(),
+        );
   }
 
-  /// Send a new message. Realtime stream will propagate the new row to
-  /// [watchMessages] subscribers automatically.
+  @override
   Future<Either<Failure, Message>> sendMessage({
     required ConversationId conversationId,
     required String body,
   }) async {
     try {
-      final currentUserId = _supabase.client.auth.currentUser?.id;
+      final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
         return const Left<Failure, Message>(UnauthorizedFailure());
       }
 
-      final response = await _supabase.client
-          .from('messages')
-          .insert({
-            'conversation_id': conversationId.value,
-            'sender_id': currentUserId,
-            'body': body,
-          })
-          .select()
-          .single();
+      final response = await _remoteDatasource.sendMessage(
+        conversationId: conversationId.value,
+        senderId: currentUserId,
+        body: body,
+      );
 
-      await _updateConversationPreview(conversationId.value, body);
-      return Right<Failure, Message>(_messageFromJson(response));
+      await _remoteDatasource.updateConversationPreview(
+        conversationId: conversationId.value,
+        body: body,
+        updatedAt: DateTime.now().toUtc().toIso8601String(),
+      );
+      return Right<Failure, Message>(
+          MessageModel.fromJson(response).toEntity());
     } catch (e) {
       return Left<Failure, Message>(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Mark a message as read.
+  @override
   Future<Either<Failure, Unit>> markAsRead(MessageId messageId) async {
     try {
-      await _supabase.client.from('messages').update({
-        'is_read': true,
-        'read_at': DateTime.now().toUtc().toIso8601String(),
-      }).eq('id', messageId.value);
+      await _remoteDatasource.markMessageAsRead(
+        messageId: messageId.value,
+        readAt: DateTime.now().toUtc().toIso8601String(),
+      );
       return const Right<Failure, Unit>(unit);
     } catch (e) {
       return Left<Failure, Unit>(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Get total unread message count via the existing RPC.
+  @override
   Future<Either<Failure, int>> getUnreadCount() async {
     try {
-      final result = await _supabase.client.rpc<int>('get_unread_count');
+      final result = await _remoteDatasource.getUnreadChatCount();
       return Right<Failure, int>(result);
     } catch (e) {
       return Left<Failure, int>(ServerFailure(message: e.toString()));
     }
-  }
-
-  Future<void> _updateConversationPreview(
-    String conversationId,
-    String body,
-  ) async {
-    final preview = body.length > 100 ? body.substring(0, 100) : body;
-    await _supabase.client.from('conversations').update({
-      'last_message_at': DateTime.now().toUtc().toIso8601String(),
-      'last_message_preview': preview,
-    }).eq('id', conversationId);
-  }
-
-  Message _messageFromJson(Map<String, dynamic> json) {
-    return Message(
-      id: MessageId(json['id'] as String),
-      conversationId: ConversationId(json['conversation_id'] as String),
-      senderId: UserId(json['sender_id'] as String),
-      body: json['body'] as String,
-      isRead: json['is_read'] as bool? ?? false,
-      createdAt: DateTime.parse(json['created_at'] as String),
-    );
-  }
-
-  Conversation _conversationFromJson(
-    Map<String, dynamic> json,
-    String? currentUserId,
-  ) {
-    final String? otherName = _resolveOtherUserName(
-      json: json,
-      currentUserId: currentUserId,
-    );
-    final String? routeName = _resolveRouteName(json: json);
-
-    final dynamic lastAt = json['last_message_at'];
-    return Conversation(
-      id: ConversationId(json['id'] as String),
-      routeId: RouteId(json['route_id'] as String),
-      studentId: UserId(json['student_id'] as String),
-      driverUserId: UserId(json['driver_user_id'] as String),
-      lastMessageAt: lastAt is String ? DateTime.parse(lastAt) : null,
-      lastMessagePreview: json['last_message_preview'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-      routeName: routeName,
-      otherUserName: otherName,
-    );
   }
 
   String? _resolveOtherUserName({

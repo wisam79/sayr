@@ -9,21 +9,43 @@ import '../bloc/subscriptions_bloc.dart';
 import '../bloc/subscriptions_event.dart';
 import '../bloc/subscriptions_state.dart';
 
-class MySubscriptionsPage extends StatelessWidget {
-  const MySubscriptionsPage({super.key});
+class MySubscriptionsPage extends StatefulWidget {
+  const MySubscriptionsPage({super.key, this.showAppBar = true});
+  final bool showAppBar;
+
+  @override
+  State<MySubscriptionsPage> createState() => _MySubscriptionsPageState();
+}
+
+class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.mySubscriptions),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/activate-license'),
-        icon: const Icon(Icons.add),
-        label: const Text('تفعيل ترخيص'),
+      appBar: widget.showAppBar
+          ? AppBar(
+              title: Text(l10n.mySubscriptions),
+            )
+          : null,
+      floatingActionButton: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
+        builder: (context, state) {
+          final showFab =
+              state is SubscriptionsLoaded && state.subscriptions.isNotEmpty;
+          if (!showFab) return const SizedBox.shrink();
+
+          return FloatingActionButton.extended(
+            onPressed: () => context.push('/activate-license'),
+            icon: const Icon(Icons.add),
+            label: const Text('تفعيل ترخيص'),
+          );
+        },
       ),
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
@@ -42,10 +64,16 @@ class MySubscriptionsPage extends StatelessWidget {
               ),
             SubscriptionsLoaded(:final subscriptions)
                 when subscriptions.isEmpty =>
-              const EmptyState(
+              EmptyState(
                 icon: Icons.confirmation_number_outlined,
                 title: 'لا يوجد اشتراكات',
                 subtitle: 'فعّل ترخيصك الأول للبدء',
+                action: PrimaryButton(
+                  label: 'تفعيل ترخيص',
+                  icon: Icons.add,
+                  isExpanded: false,
+                  onPressed: () => context.push('/activate-license'),
+                ),
               ),
             SubscriptionsLoaded(:final subscriptions) => ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.pagePadding),

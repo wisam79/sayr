@@ -1,73 +1,48 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/coordinates.dart';
 import '../value_objects/ids.dart';
 import '../value_objects/money.dart';
+import '../utils/json_converters.dart';
+
+part 'route.freezed.dart';
+part 'route.g.dart';
 
 /// A bus route from start location to end location.
-class Route extends Equatable {
-  const Route({
-    required this.id,
-    required this.driverId,
-    required this.title,
-    required this.startLocation,
-    required this.endLocation,
-    required this.price,
-    required this.capacity,
-    required this.availableSeats,
-    required this.isActive,
-    this.institutionId,
-    this.startCoordinates,
-    this.endCoordinates,
-    this.departureTime,
-    this.returnTime,
-    this.daysOfWeek = const <String>[],
-  });
+@freezed
+abstract class Route with _$Route {
+  const factory Route({
+    @JsonKey(fromJson: routeIdFromJson, toJson: routeIdToJson)
+    required RouteId id,
+    @JsonKey(fromJson: driverIdFromJson, toJson: driverIdToJson)
+    required DriverId driverId,
+    required String title,
+    required String startLocation,
+    required String endLocation,
+    @JsonKey(fromJson: moneyFromJson, toJson: moneyToJson) required Money price,
+    required int capacity,
+    required int availableSeats,
+    required bool isActive,
+    @JsonKey(
+        fromJson: nullableInstitutionIdFromJson,
+        toJson: nullableInstitutionIdToJson)
+    InstitutionId? institutionId,
+    @JsonKey(
+        fromJson: nullableCoordinatesFromJson,
+        toJson: nullableCoordinatesToJson)
+    Coordinates? startCoordinates,
+    @JsonKey(
+        fromJson: nullableCoordinatesFromJson,
+        toJson: nullableCoordinatesToJson)
+    Coordinates? endCoordinates,
+    String? departureTime,
+    String? returnTime,
+    @Default(<String>[]) List<String> daysOfWeek,
+  }) = _Route;
 
-  /// Unique route ID.
-  final RouteId id;
+  const Route._();
 
-  /// Assigned driver.
-  final DriverId driverId;
-
-  /// Display title (e.g., "جامعة بغداد - الكرادة").
-  final String title;
-
-  /// Start location name (e.g., "جامعة بغداد").
-  final String startLocation;
-
-  /// End location name (e.g., "الكرادة").
-  final String endLocation;
-
-  /// Subscription price.
-  final Money price;
-
-  /// Total vehicle capacity.
-  final int capacity;
-
-  /// Currently available seats.
-  final int availableSeats;
-
-  /// Whether the route is active (visible to students).
-  final bool isActive;
-
-  /// Institution (university) the route serves.
-  final InstitutionId? institutionId;
-
-  /// Start location coordinates.
-  final Coordinates? startCoordinates;
-
-  /// End location coordinates.
-  final Coordinates? endCoordinates;
-
-  /// Daily departure time (HH:mm format).
-  final String? departureTime;
-
-  /// Daily return time (HH:mm format).
-  final String? returnTime;
-
-  /// Days of week when the route operates (e.g., ["sun", "mon", ...]).
-  final List<String> daysOfWeek;
+  factory Route.fromJson(Map<String, dynamic> json) => _$RouteFromJson(json);
 
   /// Whether the route has available seats.
   bool get hasSeats => availableSeats > 0;
@@ -77,23 +52,4 @@ class Route extends Equatable {
     if (capacity == 0) return 0;
     return (capacity - availableSeats) / capacity;
   }
-
-  @override
-  List<Object?> get props => [
-        id,
-        driverId,
-        title,
-        startLocation,
-        endLocation,
-        price,
-        capacity,
-        availableSeats,
-        isActive,
-        institutionId,
-        startCoordinates,
-        endCoordinates,
-        departureTime,
-        returnTime,
-        daysOfWeek,
-      ];
 }

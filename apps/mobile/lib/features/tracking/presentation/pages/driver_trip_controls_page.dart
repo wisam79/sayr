@@ -91,6 +91,13 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
             if (_positionSubscription == null) {
               _startLocationTracking(state.trip.id);
             }
+          } else if (state is TrackingError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.failure.message ?? 'حدث خطأ'),
+                backgroundColor: AppColors.error,
+              ),
+            );
           } else {
             _stopLocationTracking();
           }
@@ -100,6 +107,10 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
             return _buildDriverView(state);
           }
           if (state is TrackingError) {
+            final previous = state.previousState;
+            if (previous is TrackingDriverActive) {
+              return _buildDriverView(previous);
+            }
             return Center(
               child: Text(
                 state.failure.message ?? 'حدث خطأ',
@@ -177,7 +188,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
               const SizedBox(height: AppSpacing.md),
               if (trip.duration != null)
                 Text(
-                  'المدة: ${_formatDuration(trip.duration!)}',
+                  'المدة: ${formatDurationAr(trip.duration!)}',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               const SizedBox(height: AppSpacing.lg),
@@ -194,8 +205,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
       ],
     );
   }
-
-  String _formatDuration(Duration d) => formatDurationAr(d);
 }
 
 class _ActionButtons extends StatelessWidget {

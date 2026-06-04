@@ -1,4 +1,3 @@
-import 'package:empty_widget/empty_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -104,15 +103,11 @@ class _ChatListBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (conversations.isEmpty) {
-      return Center(
-        child: EmptyWidget(
-          image: null,
+      return const Center(
+        child: EmptyState(
+          icon: Icons.chat_bubble_outline,
           title: 'لا توجد محادثات',
-          subTitle: 'ابدأ محادثة مع سائق من صفحة تفاصيل الخط',
-          titleTextStyle: Theme.of(context).textTheme.titleMedium,
-          subtitleTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+          subtitle: 'ابدأ محادثة مع سائق من صفحة تفاصيل الخط',
         ),
       );
     }

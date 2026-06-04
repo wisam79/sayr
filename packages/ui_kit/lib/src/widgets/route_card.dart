@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:sayr_core/sayr_core.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_spacing.dart';
+import 'package:sayr_ui_kit/src/theme/app_colors.dart';
+import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 
-/// A card showing route information.
+/// A card displaying bus route details.
 class RouteCard extends StatelessWidget {
+  /// Creates a [RouteCard].
   const RouteCard({
-    super.key,
     required this.route,
+    super.key,
+    this.availableLabel = 'Available',
+    this.completedLabel = 'Full',
     this.onTap,
   });
 
+  /// The route entity to display.
   final Route route;
+
+  /// The localized label for available seats.
+  final String availableLabel;
+
+  /// The localized label for a full route.
+  final String completedLabel;
+
+  /// Optional callback when the card is tapped.
   final VoidCallback? onTap;
 
   @override
@@ -55,7 +67,7 @@ class RouteCard extends StatelessWidget {
                             BorderRadius.circular(AppSpacing.inputRadius),
                       ),
                       child: Text(
-                        'متاح',
+                        availableLabel,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: AppColors.success,
                             ),
@@ -73,7 +85,7 @@ class RouteCard extends StatelessWidget {
                             BorderRadius.circular(AppSpacing.inputRadius),
                       ),
                       child: Text(
-                        'مكتمل',
+                        completedLabel,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
                               color: AppColors.error,
                             ),
@@ -100,8 +112,14 @@ class RouteCard extends StatelessWidget {
               ),
               const Padding(
                 padding: EdgeInsetsDirectional.only(start: 7),
-                child: VerticalDivider(
-                    width: 1, thickness: 1, color: AppColors.border),
+                child: SizedBox(
+                  height: 16,
+                  child: VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: AppColors.border,
+                  ),
+                ),
               ),
               Row(
                 children: [

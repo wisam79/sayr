@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'app_colors.dart';
+import 'package:sayr_ui_kit/src/theme/app_colors.dart';
 
-/// Sayr typography - uses Cairo font for Arabic-first design.
+/// Sayr typography - uses IBM Plex Sans Arabic font for Arabic-first design.
 class AppTypography {
   AppTypography._();
 
@@ -14,92 +14,92 @@ class AppTypography {
   static TextTheme get dark => _buildTextTheme(AppColors.white);
 
   static TextTheme _buildTextTheme(Color baseColor) {
-    return GoogleFonts.cairoTextTheme().copyWith(
-      displayLarge: GoogleFonts.cairo(
+    return GoogleFonts.ibmPlexSansArabicTextTheme().copyWith(
+      displayLarge: GoogleFonts.ibmPlexSansArabic(
         fontSize: 48,
         fontWeight: FontWeight.w700,
         color: baseColor,
         height: 1.2,
       ),
-      displayMedium: GoogleFonts.cairo(
+      displayMedium: GoogleFonts.ibmPlexSansArabic(
         fontSize: 36,
         fontWeight: FontWeight.w700,
         color: baseColor,
         height: 1.2,
       ),
-      displaySmall: GoogleFonts.cairo(
+      displaySmall: GoogleFonts.ibmPlexSansArabic(
         fontSize: 28,
         fontWeight: FontWeight.w700,
         color: baseColor,
         height: 1.3,
       ),
-      headlineLarge: GoogleFonts.cairo(
+      headlineLarge: GoogleFonts.ibmPlexSansArabic(
         fontSize: 24,
         fontWeight: FontWeight.w700,
         color: baseColor,
         height: 1.3,
       ),
-      headlineMedium: GoogleFonts.cairo(
+      headlineMedium: GoogleFonts.ibmPlexSansArabic(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: baseColor,
         height: 1.3,
       ),
-      headlineSmall: GoogleFonts.cairo(
+      headlineSmall: GoogleFonts.ibmPlexSansArabic(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: baseColor,
         height: 1.4,
       ),
-      titleLarge: GoogleFonts.cairo(
+      titleLarge: GoogleFonts.ibmPlexSansArabic(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: baseColor,
         height: 1.4,
       ),
-      titleMedium: GoogleFonts.cairo(
+      titleMedium: GoogleFonts.ibmPlexSansArabic(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: baseColor,
         height: 1.4,
       ),
-      titleSmall: GoogleFonts.cairo(
+      titleSmall: GoogleFonts.ibmPlexSansArabic(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: baseColor,
         height: 1.4,
       ),
-      bodyLarge: GoogleFonts.cairo(
+      bodyLarge: GoogleFonts.ibmPlexSansArabic(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         color: baseColor,
         height: 1.5,
       ),
-      bodyMedium: GoogleFonts.cairo(
+      bodyMedium: GoogleFonts.ibmPlexSansArabic(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         color: baseColor,
         height: 1.5,
       ),
-      bodySmall: GoogleFonts.cairo(
+      bodySmall: GoogleFonts.ibmPlexSansArabic(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         color: baseColor,
         height: 1.5,
       ),
-      labelLarge: GoogleFonts.cairo(
+      labelLarge: GoogleFonts.ibmPlexSansArabic(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: baseColor,
         height: 1.4,
       ),
-      labelMedium: GoogleFonts.cairo(
+      labelMedium: GoogleFonts.ibmPlexSansArabic(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         color: baseColor,
         height: 1.4,
       ),
-      labelSmall: GoogleFonts.cairo(
+      labelSmall: GoogleFonts.ibmPlexSansArabic(
         fontSize: 11,
         fontWeight: FontWeight.w500,
         color: baseColor,

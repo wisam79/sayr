@@ -8,14 +8,14 @@ environment:
   flutter: ">=3.22.0"
 
 dependencies:
-  flutter:
-    sdk: flutter
-  sayr_core:
-    path: ../core
-  google_fonts: ^6.2.1
-  flutter_svg: ^2.0.10
   cached_network_image: ^3.4.1
   equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  flutter_svg: ^2.0.10
+  google_fonts: ^6.2.1
+  sayr_core:
+    path: ../core
 
 dev_dependencies:
   flutter_test:

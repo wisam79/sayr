@@ -1,10 +1,13 @@
 /// Supabase configuration loaded from environment.
+///
+/// Contains only public-safe keys. The service role key is never
+/// included in client-side configuration to prevent exposure in the binary.
 class SupabaseConfig {
   const SupabaseConfig({
     required this.url,
     required this.anonKey,
-    this.serviceRoleKey,
-  });
+  })  : assert(url != '', 'url cannot be empty'),
+        assert(anonKey != '', 'anonKey cannot be empty');
 
   /// The Supabase project URL.
   final String url;
@@ -12,14 +15,10 @@ class SupabaseConfig {
   /// The anon (public) API key.
   final String anonKey;
 
-  /// The service role key (server-side only, never expose to client).
-  final String? serviceRoleKey;
-
   /// Build from environment variables.
   factory SupabaseConfig.fromEnv() {
     const url = String.fromEnvironment('SUPABASE_URL');
     const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
-    const serviceRoleKey = String.fromEnvironment('SUPABASE_SERVICE_ROLE_KEY');
 
     if (url.isEmpty || anonKey.isEmpty) {
       throw StateError(
@@ -29,10 +28,6 @@ class SupabaseConfig {
       );
     }
 
-    return SupabaseConfig(
-      url: url,
-      anonKey: anonKey,
-      serviceRoleKey: serviceRoleKey.isEmpty ? null : serviceRoleKey,
-    );
+    return SupabaseConfig(url: url, anonKey: anonKey);
   }
 }

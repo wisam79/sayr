@@ -1,48 +1,25 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/ids.dart';
+import '../utils/json_converters.dart';
+
+part 'driver.freezed.dart';
+part 'driver.g.dart';
 
 /// A driver profile with vehicle information.
-class Driver extends Equatable {
-  const Driver({
-    required this.id,
-    required this.userId,
-    required this.vehicleModel,
-    required this.vehiclePlate,
-    required this.capacity,
-    this.isVerified = false,
-    this.rating = 0,
-  });
+@freezed
+abstract class Driver with _$Driver {
+  const factory Driver({
+    @JsonKey(fromJson: driverIdFromJson, toJson: driverIdToJson)
+    required DriverId id,
+    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson)
+    required UserId userId,
+    required String vehicleModel,
+    required String vehiclePlate,
+    required int capacity,
+    @Default(false) bool isVerified,
+    @Default(0.0) double rating,
+  }) = _Driver;
 
-  /// Driver record ID.
-  final DriverId id;
-
-  /// Associated user ID.
-  final UserId userId;
-
-  /// Vehicle model (e.g., "Toyota Coaster").
-  final String vehicleModel;
-
-  /// License plate number.
-  final String vehiclePlate;
-
-  /// Vehicle passenger capacity.
-  final int capacity;
-
-  /// Whether the driver is verified by admin.
-  final bool isVerified;
-
-  /// Average rating (0-5).
-  final double rating;
-
-  @override
-  List<Object?> get props => [
-        id,
-        userId,
-        vehicleModel,
-        vehiclePlate,
-        capacity,
-        isVerified,
-        rating,
-      ];
+  factory Driver.fromJson(Map<String, dynamic> json) => _$DriverFromJson(json);
 }

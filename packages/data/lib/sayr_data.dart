@@ -26,3 +26,7 @@ export 'src/local/tables.dart';
 
 // Secure storage
 export 'src/storage/secure_storage.dart';
+
+// Datasources
+export 'src/datasources/remote_datasource.dart';
+export 'src/datasources/local_datasource.dart';

@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 import '../../../../core/formatting.dart';
+import '../../../../di/di.dart';
 import '../../../emergency/presentation/widgets/emergency_sos_button.dart';
 import '../bloc/tracking_bloc.dart';
 import '../bloc/tracking_event.dart';
@@ -23,29 +24,65 @@ class TripTrackingPage extends StatefulWidget {
 }
 
 class _TripTrackingPageState extends State<TripTrackingPage> {
+  late final TrackingBloc _trackingBloc;
+  Route? _route;
+  bool _isLoadingRoute = false;
+
   @override
   void initState() {
     super.initState();
-    context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: widget.tripId));
+    _trackingBloc = context.read<TrackingBloc>();
+    _trackingBloc.add(TrackingWatchTrip(tripId: widget.tripId));
   }
 
   @override
   void dispose() {
-    context.read<TrackingBloc>().add(const TrackingStopWatching());
+    _trackingBloc.add(const TrackingStopWatching());
     super.dispose();
+  }
+
+  Future<void> _loadRouteDetails(RouteId routeId) async {
+    if (_isLoadingRoute || _route != null) return;
+    _isLoadingRoute = true;
+    final result = await sl<RouteRepository>().getById(routeId);
+    if (mounted) {
+      setState(() {
+        _isLoadingRoute = false;
+        result.fold(
+          (failure) => null,
+          (route) => _route = route,
+        );
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('تتبع الرحلة')),
-      body: BlocBuilder<TrackingBloc, TrackingState>(
+      body: BlocConsumer<TrackingBloc, TrackingState>(
+        listener: (context, state) {
+          if (state is TrackingTripWatching) {
+            _loadRouteDetails(state.trip.routeId);
+          } else if (state is TrackingError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.failure.message ?? 'حدث خطأ'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
         builder: (context, state) {
           if (state is TrackingTripWatching) {
             return _buildTrackingView(state);
           }
 
           if (state is TrackingError) {
+            final previous = state.previousState;
+            if (previous is TrackingTripWatching) {
+              return _buildTrackingView(previous);
+            }
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -159,18 +196,16 @@ class _TripTrackingPageState extends State<TripTrackingPage> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                if (trip.routeStartLat != null && trip.routeStartLng != null)
-                  _LocationTile(
-                    icon: Icons.circle,
-                    color: AppColors.primary,
-                    label: trip.routeStartLat.toString(),
-                  ),
-                if (trip.routeEndLat != null && trip.routeEndLng != null)
-                  _LocationTile(
-                    icon: Icons.location_on,
-                    color: AppColors.error,
-                    label: trip.routeEndLat.toString(),
-                  ),
+                _LocationTile(
+                  icon: Icons.circle,
+                  color: AppColors.primary,
+                  label: _route?.startLocation ?? 'البداية',
+                ),
+                _LocationTile(
+                  icon: Icons.location_on,
+                  color: AppColors.error,
+                  label: _route?.endLocation ?? 'الوجهة',
+                ),
                 if (!hasLocation && trip.status == TripStatus.scheduled)
                   const Padding(
                     padding: EdgeInsets.only(top: AppSpacing.lg),

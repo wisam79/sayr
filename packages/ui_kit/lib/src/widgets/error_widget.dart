@@ -1,17 +1,29 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_spacing.dart';
+import 'package:sayr_ui_kit/src/theme/app_colors.dart';
+import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 
 /// A reusable error widget.
 class AppErrorWidget extends StatelessWidget {
+  /// Creates an [AppErrorWidget].
   const AppErrorWidget({
-    super.key,
     required this.message,
+    super.key,
+    this.title = 'Error',
+    this.retryLabel = 'Retry',
     this.onRetry,
   });
 
+  /// The error message.
   final String message;
+
+  /// The error title.
+  final String title;
+
+  /// The retry button label.
+  final String retryLabel;
+
+  /// Optional callback when retry is clicked.
   final VoidCallback? onRetry;
 
   @override
@@ -29,7 +41,7 @@ class AppErrorWidget extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
-              'حدث خطأ',
+              title,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -45,7 +57,7 @@ class AppErrorWidget extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('إعادة المحاولة'),
+                label: Text(retryLabel),
               ),
             ],
           ],

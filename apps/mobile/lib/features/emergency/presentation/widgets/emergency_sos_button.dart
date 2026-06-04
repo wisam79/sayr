@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart' as geo;
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
@@ -61,19 +62,30 @@ class EmergencySosButton extends StatelessWidget {
   }
 
   Future<Coordinates?> _captureLocation() async {
-    // Implementation note: We use the geolocator package here. The actual
-    // permission flow + fix is handled by the caller (trip page) so we
-    // don't block the UI on a fresh permission request. If location
-    // services are unavailable we return null and the UI surfaces the
-    // failure.
     try {
-      // Avoid an explicit import dependency on geolocator at this layer.
-      // The trip page already runs geolocator streams and exposes a
-      // last-known position via the bloc; the SOS button dispatches the
-      // event with whatever location is in scope. For the standalone
-      // case, we return a fallback (Baghdad) so the user can still
-      // submit and the admin receives context (trip_id + route_id).
-      return null;
+      final permission = await geo.Geolocator.checkPermission();
+      if (permission == geo.LocationPermission.denied) {
+        final requested = await geo.Geolocator.requestPermission();
+        if (requested == geo.LocationPermission.denied) {
+          return null;
+        }
+      }
+
+      if (permission == geo.LocationPermission.deniedForever) {
+        return null;
+      }
+
+      final position = await geo.Geolocator.getCurrentPosition(
+        locationSettings: const geo.LocationSettings(
+          accuracy: geo.LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      return Coordinates(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
     } catch (_) {
       return null;
     }

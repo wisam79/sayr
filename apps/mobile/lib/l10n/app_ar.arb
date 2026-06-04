@@ -9,6 +9,22 @@
   "password": "كلمة المرور",
   "passwordHint": "أدخل كلمة المرور",
   "forgotPassword": "نسيت كلمة المرور؟",
+  "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+  "resetPasswordSubtitle": "أدخل كلمة مرور جديدة لحسابك",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmPassword": "تأكيد كلمة المرور",
+  "confirmPasswordHint": "أعد إدخال كلمة المرور",
+  "updatePassword": "تحديث كلمة المرور",
+  "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
+  "passwordRequired": "كلمة المرور مطلوبة",
+  "passwordTooShort": "كلمة المرور قصيرة جداً",
+  "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+  "passwordResetEmailSent": "تم إرسال رابط استعادة كلمة المرور إلى {email}",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
   "loginButton": "تسجيل الدخول",
   "orContinueWith": "أو تابع باستخدام",
   "loginWithGoogle": "متابعة باستخدام Google",
@@ -45,6 +61,7 @@
   "profile": "الملف الشخصي",
   "settings": "الإعدادات",
   "language": "اللغة",
+  "chooseLanguage": "اختر اللغة",
   "arabic": "العربية",
   "english": "English",
   "logout": "تسجيل الخروج",
@@ -65,5 +82,25 @@
   "noInternet": "لا يوجد اتصال بالإنترنت",
   "maintenanceMode": "التطبيق تحت الصيانة",
   "updateRequired": "التحديث مطلوب",
-  "updateMessage": "يتوفر إصدار جديد من سير. يرجى التحديث للمتابعة."
+  "updateMessage": "يتوفر إصدار جديد من سير. يرجى التحديث للمتابعة.",
+
+  "routeDetails": "تفاصيل الخط",
+  "startLocation": "نقطة البداية",
+  "endLocation": "نقطة النهاية",
+  "price": "السعر",
+  "availableSeats": "المقاعد المتاحة",
+  "departureTime": "وقت المغادرة",
+  "returnTime": "وقت العودة",
+  "operatingDays": "أيام العمل",
+  "subscribe": "اشترك الآن",
+
+  "chats": "المحادثات",
+  "help": "المساعدة",
+  "privacyPolicy": "سياسة الخصوصية",
+
+  "activeTrips": "الرحلات النشطة",
+  "noActiveTrips": "لا توجد رحلات نشطة حالياً",
+  "activeTripsAvailable": "يوجد رحلات نشطة، اضغط للمتابعة",
+  "noRoutesAvailable": "لا توجد خطوط متاحة",
+  "tryAgainLater": "حاول مرة أخرى لاحقاً"
 }

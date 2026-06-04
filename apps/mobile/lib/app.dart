@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'core/app_bloc_observer.dart';
 import 'core/fcm_service.dart';
+import 'core/locale_cubit.dart';
 import 'di/di.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
@@ -16,6 +18,7 @@ import 'features/chat/presentation/bloc/chat_bloc.dart';
 import 'features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'features/payment/presentation/bloc/payment_bloc.dart';
 import 'features/routes/presentation/bloc/routes_bloc.dart';
 import 'features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'features/tracking/presentation/bloc/tracking_bloc.dart';
@@ -79,44 +82,58 @@ class SayrApp extends StatelessWidget {
             emergencyRepository: sl<EmergencyRepository>(),
           ),
         ),
+        BlocProvider<PaymentBloc>(
+          create: (_) => PaymentBloc(
+            tripRepository: sl<TripRepository>(),
+          ),
+        ),
+        BlocProvider<LocaleCubit>(
+          create: (_) => LocaleCubit()..load(),
+        ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
         listener: (context, state) {
-          final location =
-              router.config.routerDelegate.currentConfiguration.uri.toString();
-          final isPublic = AppRouter.publicPaths.contains(location);
+          final uri = router.config.routerDelegate.currentConfiguration.uri;
+          final path = uri.path;
+          final isPublic = AppRouter.publicPaths.contains(path);
+          final isAuthEntry = AppRouter.authEntryPaths.contains(path);
 
-          if (state is AuthAuthenticated && isPublic) {
+          if (state is AuthAuthenticated && isAuthEntry) {
             router.config.go('/');
           } else if (state is AuthUnauthenticated && !isPublic) {
             router.config.go('/login');
           }
         },
-        child: MaterialApp.router(
-          title: 'Sayr',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          darkTheme: AppTheme.dark,
-          themeMode: ThemeMode.light,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('ar'),
-            Locale('en'),
-          ],
-          locale: const Locale('ar'),
-          builder: (context, child) {
-            return Directionality(
-              textDirection: TextDirection.rtl,
-              child: child ?? const SizedBox.shrink(),
+        child: BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            final isRtl = locale.languageCode == 'ar';
+            return MaterialApp.router(
+              title: 'Sayr',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: ThemeMode.light,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              supportedLocales: const [
+                Locale('ar'),
+                Locale('en'),
+              ],
+              locale: locale,
+              builder: (context, child) {
+                return Directionality(
+                  textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
+                  child: child ?? const SizedBox.shrink(),
+                );
+              },
+              routerConfig: router.config,
             );
           },
-          routerConfig: router.config,
         ),
       ),
     );
@@ -148,6 +165,9 @@ Future<void> runSayrApp() async {
 
   // Initialize GetIt service locator
   await initDependencies();
+
+  // Initialize FCM service
+  await FcmService.init();
 
   // Set up bloc observer
   Bloc.observer = AppBlocObserver();

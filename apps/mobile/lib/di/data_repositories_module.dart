@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 
 /// Bridges the data package's repositories into this app's DI graph.
@@ -9,26 +10,80 @@ import 'package:sayr_data/sayr_data.dart';
 @module
 abstract class DataRepositoriesModule {
   @lazySingleton
-  AuthRepository get authRepository => AuthRepository();
+  RemoteDatasource get remoteDatasource => RemoteDatasourceImpl();
 
   @lazySingleton
-  RouteRepository get routeRepository => RouteRepository();
+  LocalDatasource get localDatasource => LocalDatasourceImpl();
 
   @lazySingleton
-  TripRepository get tripRepository => TripRepository();
+  AuthRepository authRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      AuthRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
 
   @lazySingleton
-  SubscriptionRepository get subscriptionRepository => SubscriptionRepository();
+  RouteRepository routeRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      RouteRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
 
   @lazySingleton
-  ChatRepository get chatRepository => ChatRepository();
+  TripRepository tripRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      TripRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
 
   @lazySingleton
-  NotificationsRepository get notificationsRepository =>
-      NotificationsRepository();
+  SubscriptionRepository subscriptionRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      SubscriptionRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
 
   @lazySingleton
-  EmergencyRepository get emergencyRepository => EmergencyRepository();
+  ChatRepository chatRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      ChatRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
+
+  @lazySingleton
+  NotificationsRepository notificationsRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      NotificationsRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
+
+  @lazySingleton
+  EmergencyRepository emergencyRepository(
+    RemoteDatasource remote,
+    LocalDatasource local,
+  ) =>
+      EmergencyRepositoryImpl(
+        remoteDatasource: remote,
+        localDatasource: local,
+      );
 
   @lazySingleton
   SecureStorageService get secureStorageService => SecureStorageService();

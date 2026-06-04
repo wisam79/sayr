@@ -53,6 +53,14 @@ class _LoginPageState extends State<LoginPage> {
                   backgroundColor: AppColors.error,
                 ),
               );
+            } else if (state is AuthPasswordResetEmailSent) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'تم إرسال رابط استعادة كلمة المرور إلى ${state.email}',
+                  ),
+                ),
+              );
             } else if (state is AuthAuthenticated) {
               context.go('/');
             }
@@ -130,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: isLoading ? null : _showPasswordResetDialog,
                         child: Text(l10n.forgotPassword),
                       ),
                     ),
@@ -187,5 +195,57 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showPasswordResetDialog() async {
+    final controller = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+    final formKey = GlobalKey<FormState>();
+
+    final email = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('استعادة كلمة المرور'),
+          content: Form(
+            key: formKey,
+            child: AppTextField(
+              label: 'البريد الإلكتروني',
+              hint: 'example@sayr.app',
+              controller: controller,
+              keyboardType: TextInputType.emailAddress,
+              prefixIcon: Icons.email_outlined,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'البريد مطلوب';
+                }
+                if (!value.contains('@')) {
+                  return 'بريد غير صحيح';
+                }
+                return null;
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('إلغاء'),
+            ),
+            FilledButton(
+              onPressed: () {
+                if (!formKey.currentState!.validate()) return;
+                Navigator.of(context).pop(controller.text.trim());
+              },
+              child: const Text('إرسال'),
+            ),
+          ],
+        );
+      },
+    );
+
+    controller.dispose();
+    if (email == null || !mounted) return;
+    context.read<AuthBloc>().add(AuthPasswordResetRequested(email));
   }
 }

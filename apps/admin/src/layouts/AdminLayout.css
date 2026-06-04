@@ -1,0 +1,335 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 100;
+  transition: transform var(--transition-normal);
+}
+
+.sidebar-header {
+  height: var(--topbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  background-color: var(--primary);
+  color: white;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.logo-box h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+/* Sidebar Navigation Links */
+.sidebar-nav {
+  flex: 1;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.nav-item:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.nav-icon {
+  transition: color var(--transition-fast);
+}
+
+.nav-item.active .nav-icon {
+  color: var(--primary);
+}
+
+/* Sidebar Footer Profile block */
+.sidebar-footer {
+  padding: 24px 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-profile .avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-profile .info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-profile .name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.user-profile .email {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.signout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 40px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  color: var(--danger);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.signout-btn:hover {
+  background-color: rgba(239, 68, 68, 0.05);
+  border-color: var(--danger);
+}
+
+/* Main Content wrapper */
+.main-content-wrapper {
+  flex: 1;
+  margin-right: var(--sidebar-width); /* Space for fixed sidebar */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Topbar Header styling */
+.topbar {
+  height: var(--topbar-height);
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background-color var(--transition-normal);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-toggle-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.topbar .page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Page Body container */
+.page-body {
+  flex: 1;
+  padding: 32px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Responsive configurations */
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(100%); /* Hide sidebar offscreen on tablets/mobile */
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-close-btn {
+    display: block;
+  }
+  
+  .main-content-wrapper {
+    margin-right: 0;
+  }
+  
+  .menu-toggle-btn {
+    display: block;
+  }
+  
+  .topbar {
+    padding: 0 20px;
+  }
+  
+  .page-body {
+    padding: 20px;
+  }
+  
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+  }
+}
+
+/* ================================================
+   PREMIUM LAYOUT ENHANCEMENTS
+   ================================================ */
+
+/* 1. Sidebar link active indicator — 3px bar on the left side (visually right in RTL) */
+.nav-item.active {
+  position: relative;
+}
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background-color: var(--primary);
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  animation: indicatorSlide 0.25s ease forwards;
+}
+@keyframes indicatorSlide {
+  from { height: 0; opacity: 0; }
+  to { height: 60%; opacity: 1; }
+}
+
+/* 2. Sidebar hover scale — very subtle scale on link hover */
+.nav-item {
+  transform-origin: center right;
+}
+.nav-item:hover {
+  transform: scale(1.01);
+}
+.nav-item:active {
+  transform: scale(0.98);
+}
+
+/* 3. Brand logo pulse — subtle glow animation on the logo icon */
+@keyframes logoPulse {
+  0% { box-shadow: var(--shadow-sm), 0 0 0 0 hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.3); }
+  50% { box-shadow: var(--shadow-sm), 0 0 12px 3px hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.15); }
+  100% { box-shadow: var(--shadow-sm), 0 0 0 0 hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.3); }
+}
+.logo-icon {
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+/* 4. Topbar shadow — bottom shadow that appears (CSS-only via subtle always-on shadow) */
+.topbar {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+}
+[data-theme="dark"] .topbar {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 4px 12px -2px rgba(0, 0, 0, 0.15);
+}
+
+/* 5. Smooth page content transition — fade-in when content loads */
+@keyframes pageContentFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-body {
+  animation: pageContentFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

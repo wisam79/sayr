@@ -2,7 +2,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'emergency_state.dart';
 

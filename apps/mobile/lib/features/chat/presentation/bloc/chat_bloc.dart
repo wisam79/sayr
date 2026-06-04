@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'chat_state.dart';
 
@@ -41,6 +40,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatRepository _chatRepository;
   StreamSubscription<List<Message>>? _messagesSubscription;
   ConversationId? _conversationId;
+
+  ConversationId? get conversationId =>
+      _conversationId ??
+      state.maybeWhen(
+        loaded: (id, _, __) => id,
+        orElse: () => null,
+      );
 
   @override
   Future<void> close() {
@@ -88,7 +94,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatMessagesUpdated event,
     Emitter<ChatState> emit,
   ) {
-    final ConversationId? id = _conversationId;
+    final ConversationId? id = conversationId;
     if (id == null) return;
     emit(ChatState.loaded(conversationId: id, messages: event.messages));
   }
@@ -97,7 +103,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatStreamErrored event,
     Emitter<ChatState> emit,
   ) {
-    final ConversationId? id = _conversationId;
+    final ConversationId? id = conversationId;
     if (id == null) return;
     emit(
       ChatState.loaded(
@@ -111,7 +117,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     ChatMessageSent event,
     Emitter<ChatState> emit,
   ) async {
-    final ConversationId? id = _conversationId;
+    final ConversationId? id = conversationId;
     if (id == null) return;
 
     final String trimmed = event.body.trim();
@@ -143,7 +149,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatSendCompleted event,
     Emitter<ChatState> emit,
   ) {
-    final ConversationId? id = _conversationId;
+    final ConversationId? id = conversationId;
     if (id == null) return;
 
     emit(ChatState.loaded(conversationId: id, messages: _currentMessages()));

@@ -3,37 +3,36 @@ import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-import '../supabase/supabase_client.dart';
+import '../datasources/remote_datasource.dart';
+import '../datasources/local_datasource.dart';
+import '../models/user_model.dart';
 
-/// Repository for authentication and user management.
-@lazySingleton
-class AuthRepository {
-  AuthRepository({SayrSupabase? supabase})
-      : _supabase = supabase ?? SayrSupabase.instance;
+/// Concrete implementation of AuthRepository using Remote and Local data sources.
+@LazySingleton(as: AuthRepository)
+class AuthRepositoryImpl implements AuthRepository {
+  final RemoteDatasource _remoteDatasource;
+  final LocalDatasource _localDatasource;
 
-  final SayrSupabase _supabase;
+  AuthRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required LocalDatasource localDatasource,
+  })  : _remoteDatasource = remoteDatasource,
+        _localDatasource = localDatasource;
 
-  /// The currently signed-in user.
+  @override
   User? get currentUser {
-    final authUser = _supabase.currentUser;
+    final authUser = _remoteDatasource.currentUser;
     if (authUser == null) return null;
-    return User(
-      id: UserId(authUser.id),
-      email: authUser.email ?? '',
-      role: UserRole.fromString(
-        authUser.appMetadata['role'] as String? ?? 'student',
-      ),
-      fullName: authUser.userMetadata?['full_name'] as String?,
-    );
+    return UserModel.fromAuthUser(authUser).toEntity();
   }
 
-  /// Sign in with email and password.
+  @override
   Future<Either<Failure, User>> signInWithPassword({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await _supabase.signInWithPassword(
+      final response = await _remoteDatasource.signInWithPassword(
         email: email,
         password: password,
       );
@@ -41,7 +40,9 @@ class AuthRepository {
         return const Left(
             UnauthorizedFailure(message: 'بيانات الدخول غير صحيحة'));
       }
-      return Right(_userFromAuth(response.user!));
+      final user = UserModel.fromAuthUser(response.user!).toEntity();
+      await _localDatasource.setUserId(user.id.value);
+      return Right(user);
     } on supabase.AuthException catch (e) {
       return Left(UnauthorizedFailure(message: e.message));
     } catch (e) {
@@ -49,7 +50,7 @@ class AuthRepository {
     }
   }
 
-  /// Sign up with email and password.
+  @override
   Future<Either<Failure, User>> signUp({
     required String email,
     required String password,
@@ -57,7 +58,7 @@ class AuthRepository {
     String? phone,
   }) async {
     try {
-      final response = await _supabase.signUp(
+      final response = await _remoteDatasource.signUp(
         email: email,
         password: password,
         fullName: fullName,
@@ -66,7 +67,9 @@ class AuthRepository {
       if (response.user == null) {
         return const Left(ValidationFailure(message: 'فشل إنشاء الحساب'));
       }
-      return Right(_userFromAuth(response.user!));
+      final user = UserModel.fromAuthUser(response.user!).toEntity();
+      await _localDatasource.setUserId(user.id.value);
+      return Right(user);
     } on supabase.AuthException catch (e) {
       return Left(ValidationFailure(message: e.message));
     } catch (e) {
@@ -74,17 +77,17 @@ class AuthRepository {
     }
   }
 
-  /// Sign in with Google.
-  ///
-  /// The OAuth flow completes asynchronously; the resulting user is
-  /// delivered through [authStateChanges] rather than this method's
-  /// return value.
+  @override
   Future<Either<Failure, Unit>> signInWithGoogle() async {
     try {
-      final ok = await _supabase.signInWithGoogle();
+      final ok = await _remoteDatasource.signInWithGoogle();
       if (!ok) {
         return const Left(
             UnauthorizedFailure(message: 'فشل تسجيل الدخول عبر Google'));
+      }
+      final user = _remoteDatasource.currentUser;
+      if (user != null) {
+        await _localDatasource.setUserId(user.id);
       }
       return const Right(unit);
     } on supabase.AuthException catch (e) {
@@ -94,18 +97,37 @@ class AuthRepository {
     }
   }
 
-  /// Sign out.
-  Future<void> signOut() => _supabase.signOut();
+  @override
+  Future<Either<Failure, Unit>> sendPasswordResetEmail(String email) async {
+    try {
+      await _remoteDatasource.sendPasswordResetEmail(email);
+      return const Right(unit);
+    } on supabase.AuthException catch (e) {
+      return Left(ValidationFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
 
-  /// Stream of auth state changes.
-  Stream<supabase.AuthState> get authStateChanges => _supabase.authStateChanges;
+  @override
+  Future<Either<Failure, Unit>> updatePassword(String password) async {
+    try {
+      await _remoteDatasource.updatePassword(password);
+      return const Right(unit);
+    } on supabase.AuthException catch (e) {
+      return Left(ValidationFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
 
-  User _userFromAuth(supabase.User user) => User(
-        id: UserId(user.id),
-        email: user.email ?? '',
-        role: UserRole.fromString(
-          user.appMetadata['role'] as String? ?? 'student',
-        ),
-        fullName: user.userMetadata?['full_name'] as String?,
-      );
+  @override
+  Future<void> signOut() async {
+    await _localDatasource.clearSecureStorage();
+    await _localDatasource.clearCachedTrips();
+    await _remoteDatasource.signOut();
+  }
+
+  @override
+  Stream<dynamic> get authStateChanges => _remoteDatasource.authStateChanges;
 }

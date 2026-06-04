@@ -1,48 +1,26 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/ids.dart';
+import '../utils/json_converters.dart';
+
+part 'notification.freezed.dart';
+part 'notification.g.dart';
 
 /// A notification sent to a user.
-class AppNotification extends Equatable {
-  const AppNotification({
-    required this.id,
-    required this.userId,
-    required this.title,
-    required this.body,
-    required this.isRead,
-    required this.createdAt,
-    this.data = const <String, dynamic>{},
-  });
+@freezed
+abstract class AppNotification with _$AppNotification {
+  const factory AppNotification({
+    @JsonKey(fromJson: notificationIdFromJson, toJson: notificationIdToJson)
+    required NotificationId id,
+    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson)
+    required UserId userId,
+    required String title,
+    required String body,
+    required bool isRead,
+    required DateTime createdAt,
+    @Default(<String, dynamic>{}) Map<String, dynamic> data,
+  }) = _AppNotification;
 
-  /// Unique notification ID.
-  final NotificationId id;
-
-  /// The recipient user.
-  final UserId userId;
-
-  /// Notification title.
-  final String title;
-
-  /// Notification body.
-  final String body;
-
-  /// Whether the notification has been read.
-  final bool isRead;
-
-  /// When the notification was created.
-  final DateTime createdAt;
-
-  /// Optional payload data.
-  final Map<String, dynamic> data;
-
-  @override
-  List<Object?> get props => [
-        id,
-        userId,
-        title,
-        body,
-        isRead,
-        createdAt,
-        data,
-      ];
+  factory AppNotification.fromJson(Map<String, dynamic> json) =>
+      _$AppNotificationFromJson(json);
 }

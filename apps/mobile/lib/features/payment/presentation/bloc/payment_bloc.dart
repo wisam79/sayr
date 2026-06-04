@@ -63,6 +63,40 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     emit(PaymentState.awaitingCompletion(paymentId: event.paymentId));
 
     _pollTimer?.cancel();
+
+    // Check status immediately
+    final Either<Failure, PaymentInfo> initialResult =
+        await _tripRepository.getPaymentStatus(event.paymentId);
+
+    bool stopPolling = false;
+
+    initialResult.fold(
+      (Failure failure) {
+        if (failure is! NetworkFailure) {
+          emit(PaymentState.failed(failure: failure));
+          stopPolling = true;
+        }
+      },
+      (PaymentInfo payment) {
+        if (payment.status == 'completed') {
+          emit(PaymentState.success(
+            subscriptionId: SubscriptionId(payment.subscriptionId),
+          ));
+          stopPolling = true;
+        } else if (payment.status == 'failed' || payment.status == 'expired') {
+          emit(PaymentState.failed(
+            failure: BusinessRuleFailure(
+              message: 'فشل الدفع: ${payment.status}',
+            ),
+          ));
+          stopPolling = true;
+        }
+      },
+    );
+
+    if (stopPolling || isClosed) return;
+
+    // Only start timer if still pending/network failure
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
       if (isClosed) return;
 

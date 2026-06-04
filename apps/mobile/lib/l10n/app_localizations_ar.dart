@@ -33,6 +33,41 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forgotPassword => 'نسيت كلمة المرور؟';
 
   @override
+  String get resetPasswordTitle => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get resetPasswordSubtitle => 'أدخل كلمة مرور جديدة لحسابك';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get confirmPasswordHint => 'أعد إدخال كلمة المرور';
+
+  @override
+  String get updatePassword => 'تحديث كلمة المرور';
+
+  @override
+  String get passwordUpdated => 'تم تحديث كلمة المرور بنجاح';
+
+  @override
+  String get passwordRequired => 'كلمة المرور مطلوبة';
+
+  @override
+  String get passwordTooShort => 'كلمة المرور قصيرة جداً';
+
+  @override
+  String get passwordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String passwordResetEmailSent(String email) {
+    return 'تم إرسال رابط استعادة كلمة المرور إلى $email';
+  }
+
+  @override
   String get loginButton => 'تسجيل الدخول';
 
   @override
@@ -128,6 +163,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get language => 'اللغة';
 
   @override
+  String get chooseLanguage => 'اختر اللغة';
+
+  @override
   String get arabic => 'العربية';
 
   @override
@@ -183,4 +221,55 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateMessage => 'يتوفر إصدار جديد من سير. يرجى التحديث للمتابعة.';
+
+  @override
+  String get routeDetails => 'تفاصيل الخط';
+
+  @override
+  String get startLocation => 'نقطة البداية';
+
+  @override
+  String get endLocation => 'نقطة النهاية';
+
+  @override
+  String get price => 'السعر';
+
+  @override
+  String get availableSeats => 'المقاعد المتاحة';
+
+  @override
+  String get departureTime => 'وقت المغادرة';
+
+  @override
+  String get returnTime => 'وقت العودة';
+
+  @override
+  String get operatingDays => 'أيام العمل';
+
+  @override
+  String get subscribe => 'اشترك الآن';
+
+  @override
+  String get chats => 'المحادثات';
+
+  @override
+  String get help => 'المساعدة';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get activeTrips => 'الرحلات النشطة';
+
+  @override
+  String get noActiveTrips => 'لا توجد رحلات نشطة حالياً';
+
+  @override
+  String get activeTripsAvailable => 'يوجد رحلات نشطة، اضغط للمتابعة';
+
+  @override
+  String get noRoutesAvailable => 'لا توجد خطوط متاحة';
+
+  @override
+  String get tryAgainLater => 'حاول مرة أخرى لاحقاً';
 }

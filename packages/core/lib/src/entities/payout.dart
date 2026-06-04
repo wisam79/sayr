@@ -1,53 +1,34 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../enums/payout_status.dart';
 import '../value_objects/ids.dart';
 import '../value_objects/money.dart';
+import '../utils/json_converters.dart';
+
+part 'payout.freezed.dart';
+part 'payout.g.dart';
 
 /// A driver's payout request.
-class Payout extends Equatable {
-  const Payout({
-    required this.id,
-    required this.driverId,
-    required this.amount,
-    required this.status,
-    required this.createdAt,
-    required this.updatedAt,
-    this.referenceNote,
-  });
+@freezed
+abstract class Payout with _$Payout {
+  const factory Payout({
+    @JsonKey(fromJson: payoutIdFromJson, toJson: payoutIdToJson)
+    required PayoutId id,
+    @JsonKey(fromJson: driverIdFromJson, toJson: driverIdToJson)
+    required DriverId driverId,
+    @JsonKey(fromJson: moneyFromJson, toJson: moneyToJson)
+    required Money amount,
+    @JsonKey(fromJson: payoutStatusFromJson, toJson: payoutStatusToJson)
+    required PayoutStatus status,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    String? referenceNote,
+  }) = _Payout;
 
-  /// Unique payout ID.
-  final PayoutId id;
+  const Payout._();
 
-  /// The driver requesting the payout.
-  final DriverId driverId;
-
-  /// Amount to be paid.
-  final Money amount;
-
-  /// Current status.
-  final PayoutStatus status;
-
-  /// Reference note from admin.
-  final String? referenceNote;
-
-  /// When the payout was requested.
-  final DateTime createdAt;
-
-  /// When the status was last changed.
-  final DateTime updatedAt;
+  factory Payout.fromJson(Map<String, dynamic> json) => _$PayoutFromJson(json);
 
   /// Whether the payout is awaiting review.
   bool get isPending => status.isPending;
-
-  @override
-  List<Object?> get props => [
-        id,
-        driverId,
-        amount,
-        status,
-        referenceNote,
-        createdAt,
-        updatedAt,
-      ];
 }

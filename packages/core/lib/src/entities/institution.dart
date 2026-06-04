@@ -1,28 +1,22 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/ids.dart';
+import '../utils/json_converters.dart';
+
+part 'institution.freezed.dart';
+part 'institution.g.dart';
 
 /// A university or educational institution.
-class Institution extends Equatable {
-  const Institution({
-    required this.id,
-    required this.name,
-    this.city,
-    this.createdAt,
-  });
+@freezed
+abstract class Institution with _$Institution {
+  const factory Institution({
+    @JsonKey(fromJson: institutionIdFromJson, toJson: institutionIdToJson)
+    required InstitutionId id,
+    required String name,
+    String? city,
+    DateTime? createdAt,
+  }) = _Institution;
 
-  /// Unique institution ID.
-  final InstitutionId id;
-
-  /// Institution name (e.g., "جامعة بغداد").
-  final String name;
-
-  /// City where the institution is located.
-  final String? city;
-
-  /// When the institution was added.
-  final DateTime? createdAt;
-
-  @override
-  List<Object?> get props => [id, name, city, createdAt];
+  factory Institution.fromJson(Map<String, dynamic> json) =>
+      _$InstitutionFromJson(json);
 }

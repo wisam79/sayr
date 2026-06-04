@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
@@ -120,6 +119,32 @@ void main() {
           'status',
           TripStatus.driverWaiting,
         ),
+      ],
+    );
+
+    blocTest<TrackingBloc, TrackingState>(
+      'emits [Loading, DriverActive] after creating a trip',
+      build: () {
+        when(() => mockRepo.createTrip(
+              routeId: any(named: 'routeId'),
+              scheduledAt: any(named: 'scheduledAt'),
+            )).thenAnswer(
+          (_) async => Right<Failure, Trip>(testTrip),
+        );
+        when(() => mockRepo.watchTrip(any())).thenAnswer(
+          (_) => const Stream.empty(),
+        );
+        return TrackingBloc(tripRepository: mockRepo);
+      },
+      act: (bloc) => bloc.add(
+        TrackingCreateTrip(
+          routeId: const RouteId('route-1'),
+          scheduledAt: DateTime.now().add(const Duration(hours: 1)),
+        ),
+      ),
+      expect: () => [
+        isA<TrackingLoading>(),
+        isA<TrackingDriverActive>(),
       ],
     );
   });

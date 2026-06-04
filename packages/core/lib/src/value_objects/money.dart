@@ -43,6 +43,9 @@ class Money extends Equatable {
   /// Whether the amount is negative.
   bool get isNegative => amountInFils < 0;
 
+  /// Get the amount in IQD.
+  int get inIQD => amountInFils;
+
   /// Format as currency string (IQD).
   String format({String locale = 'ar'}) {
     final formatted = amountInFils.toString().replaceAllMapped(

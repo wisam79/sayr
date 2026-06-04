@@ -10,6 +10,22 @@
   "password": "Password",
   "passwordHint": "Enter your password",
   "forgotPassword": "Forgot password?",
+  "resetPasswordTitle": "Reset password",
+  "resetPasswordSubtitle": "Enter a new password for your account",
+  "newPassword": "New password",
+  "confirmPassword": "Confirm password",
+  "confirmPasswordHint": "Re-enter your password",
+  "updatePassword": "Update password",
+  "passwordUpdated": "Password updated successfully",
+  "passwordRequired": "Password is required",
+  "passwordTooShort": "Password is too short",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "passwordResetEmailSent": "Password reset link sent to {email}",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
   "loginButton": "Sign in",
   "orContinueWith": "Or continue with",
   "loginWithGoogle": "Continue with Google",
@@ -51,6 +67,7 @@
   "profile": "Profile",
   "settings": "Settings",
   "language": "Language",
+  "chooseLanguage": "Choose language",
   "arabic": "العربية",
   "english": "English",
   "logout": "Log out",
@@ -71,5 +88,25 @@
   "noInternet": "No internet connection",
   "maintenanceMode": "App under maintenance",
   "updateRequired": "Update required",
-  "updateMessage": "A new version of Sayr is available. Please update to continue."
+  "updateMessage": "A new version of Sayr is available. Please update to continue.",
+
+  "routeDetails": "Route details",
+  "startLocation": "Start location",
+  "endLocation": "End location",
+  "price": "Price",
+  "availableSeats": "Available seats",
+  "departureTime": "Departure time",
+  "returnTime": "Return time",
+  "operatingDays": "Operating days",
+  "subscribe": "Subscribe now",
+
+  "chats": "Chats",
+  "help": "Help",
+  "privacyPolicy": "Privacy policy",
+
+  "activeTrips": "Active Trips",
+  "noActiveTrips": "No active trips right now",
+  "activeTripsAvailable": "Active trips available, tap to follow",
+  "noRoutesAvailable": "No routes available",
+  "tryAgainLater": "Try again later"
 }

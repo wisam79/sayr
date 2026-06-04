@@ -80,7 +80,9 @@ class FcmService {
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
 
     final token = await FirebaseMessaging.instance.getToken();
-    debugPrint('FCM Token: $token');
+    if (token != null) {
+      debugPrint('FCM: token obtained');
+    }
   }
 
   /// Subscribe to all-students topic.

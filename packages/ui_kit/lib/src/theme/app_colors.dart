@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  /// Primary brand color (deep blue).
-  static const Color primary = Color(0xFF1E5BFF);
+  /// Primary brand color (green).
+  static const Color primary = Color(0xFF10B981);
 
-  /// Secondary brand color (green).
-  static const Color secondary = Color(0xFF10B981);
+  /// Secondary brand color (deep blue).
+  static const Color secondary = Color(0xFF1E5BFF);
 
   /// Success color.
   static const Color success = Color(0xFF22C55E);
@@ -40,11 +40,20 @@ class AppColors {
   /// Surface color (cards, sheets).
   static const Color surface = Color(0xFFFFFFFF);
 
+  /// Dark surface color.
+  static const Color darkSurface = Color(0xFF1F2937);
+
   /// Border color.
   static const Color border = Color(0xFFE5E7EB);
 
+  /// Dark border color.
+  static const Color borderDark = Color(0xFF374151);
+
   /// Divider color.
   static const Color divider = Color(0xFFF3F4F6);
+
+  /// Dark divider color.
+  static const Color dividerDark = Color(0xFF374151);
 
   /// White.
   static const Color white = Color(0xFFFFFFFF);
@@ -56,10 +65,21 @@ class AppColors {
   static const Color transparent = Color(0x00000000);
 
   /// Status colors for trip states.
+  /// Scheduled status.
   static const Color statusScheduled = Color(0xFF6B7280);
+
+  /// Driver waiting status.
   static const Color statusDriverWaiting = Color(0xFFF59E0B);
+
+  /// In transit status.
   static const Color statusInTransit = Color(0xFF1E5BFF);
+
+  /// Completed status.
   static const Color statusCompleted = Color(0xFF22C55E);
+
+  /// Absent status.
   static const Color statusAbsent = Color(0xFFEF4444);
+
+  /// Cancelled status.
   static const Color statusCancelled = Color(0xFF9CA3AF);
 }

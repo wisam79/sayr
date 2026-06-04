@@ -1,3 +1,5 @@
+import '../utils/string_utils.dart';
+
 /// Trip status - states in the trip state machine.
 ///
 /// The transition rules are defined in [TripStateMachine].
@@ -56,15 +58,5 @@ enum TripStatus {
       (e) => e.name == normalized,
       orElse: () => TripStatus.scheduled,
     );
-  }
-}
-
-extension on String {
-  /// Convert snake_case to camelCase.
-  String toCamelCase() {
-    final parts = split('_');
-    if (parts.length == 1) return this;
-    return parts.first +
-        parts.skip(1).map((p) => p[0].toUpperCase() + p.substring(1)).join();
   }
 }

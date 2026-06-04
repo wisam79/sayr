@@ -1,71 +1,36 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-/// DTO for Route from Supabase.
-class RouteModel {
-  const RouteModel({
-    required this.id,
-    required this.driverId,
-    required this.title,
-    required this.startLocation,
-    required this.endLocation,
-    required this.price,
-    required this.capacity,
-    required this.availableSeats,
-    required this.isActive,
-    this.institutionId,
-    this.startLat,
-    this.startLng,
-    this.endLat,
-    this.endLng,
-    this.departureTime,
-    this.returnTime,
-    this.daysOfWeek = const <String>[],
-  });
+part 'route_model.freezed.dart';
+part 'route_model.g.dart';
 
-  factory RouteModel.fromJson(Map<String, dynamic> json) {
-    return RouteModel(
-      id: json['id'] as String,
-      driverId: json['driver_id'] as String,
-      title: json['title'] as String,
-      startLocation: json['start_location'] as String,
-      endLocation: json['end_location'] as String,
-      price: Money((json['price'] as num).toInt()),
-      capacity: (json['capacity'] as num).toInt(),
-      availableSeats: (json['available_seats'] as num).toInt(),
-      isActive: json['is_active'] as bool? ?? true,
-      institutionId: json['institution_id'] != null
-          ? InstitutionId(json['institution_id'] as String)
-          : null,
-      startLat: (json['start_lat'] as num?)?.toDouble(),
-      startLng: (json['start_lng'] as num?)?.toDouble(),
-      endLat: (json['end_lat'] as num?)?.toDouble(),
-      endLng: (json['end_lng'] as num?)?.toDouble(),
-      departureTime: json['departure_time'] as String?,
-      returnTime: json['return_time'] as String?,
-      daysOfWeek: (json['days_of_week'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const <String>[],
-    );
-  }
+/// DTO for Route from Supabase (freezed version).
+@freezed
+abstract class RouteModel with _$RouteModel {
+  const factory RouteModel({
+    required String id,
+    @JsonKey(name: 'driver_id') required String driverId,
+    required String title,
+    @JsonKey(name: 'start_location') required String startLocation,
+    @JsonKey(name: 'end_location') required String endLocation,
+    required int price,
+    required int capacity,
+    @JsonKey(name: 'available_seats') required int availableSeats,
+    @JsonKey(name: 'is_active') @Default(true) bool isActive,
+    @JsonKey(name: 'institution_id') String? institutionId,
+    @JsonKey(name: 'start_lat') double? startLat,
+    @JsonKey(name: 'start_lng') double? startLng,
+    @JsonKey(name: 'end_lat') double? endLat,
+    @JsonKey(name: 'end_lng') double? endLng,
+    @JsonKey(name: 'departure_time') String? departureTime,
+    @JsonKey(name: 'return_time') String? returnTime,
+    @JsonKey(name: 'days_of_week') @Default(<String>[]) List<String> daysOfWeek,
+  }) = _RouteModel;
 
-  final String id;
-  final String driverId;
-  final String title;
-  final String startLocation;
-  final String endLocation;
-  final Money price;
-  final int capacity;
-  final int availableSeats;
-  final bool isActive;
-  final InstitutionId? institutionId;
-  final double? startLat;
-  final double? startLng;
-  final double? endLat;
-  final double? endLng;
-  final String? departureTime;
-  final String? returnTime;
-  final List<String> daysOfWeek;
+  const RouteModel._();
+
+  factory RouteModel.fromJson(Map<String, dynamic> json) =>
+      _$RouteModelFromJson(json);
 
   /// Convert to a domain entity.
   Route toEntity() => Route(
@@ -74,11 +39,12 @@ class RouteModel {
         title: title,
         startLocation: startLocation,
         endLocation: endLocation,
-        price: price,
+        price: Money(price),
         capacity: capacity,
         availableSeats: availableSeats,
         isActive: isActive,
-        institutionId: institutionId,
+        institutionId:
+            institutionId != null ? InstitutionId(institutionId!) : null,
         startCoordinates: (startLat != null && startLng != null)
             ? Coordinates(latitude: startLat!, longitude: startLng!)
             : null,

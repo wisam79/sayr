@@ -23,6 +23,7 @@ export 'src/entities/notification.dart';
 export 'src/entities/message.dart';
 export 'src/entities/emergency_report.dart';
 export 'src/entities/app_config.dart';
+export 'src/entities/payment_info.dart';
 
 // Value Objects
 export 'src/value_objects/money.dart';
@@ -38,4 +39,7 @@ export 'src/fsm/trip_event.dart';
 export 'src/failures/failure.dart';
 
 // Utils
-export 'src/utils/retry.dart';
+export 'src/utils/string_utils.dart';
+
+// Repositories
+export 'src/repositories/repository_interfaces.dart';

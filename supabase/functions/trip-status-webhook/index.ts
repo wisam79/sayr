@@ -42,9 +42,19 @@ Deno.serve(async (req) => {
 
     const supabase = createAdminClient();
 
+    const statusMap: Record<string, string> = {
+      'arrive': 'driver_waiting',
+      'start': 'in_transit',
+      'complete': 'completed',
+      'cancel': 'cancelled',
+      'mark_absent': 'absent'
+    };
+
+    const mappedStatus = statusMap[status] || status;
+
     const { data, error } = await supabase.rpc('update_trip_status', {
       p_trip_id: tripId,
-      p_new_status: status,
+      p_new_status: mappedStatus,
       p_lat: lat ?? null,
       p_lng: lng ?? null,
     });

@@ -84,6 +84,21 @@ class SayrSupabase {
     );
   }
 
+  /// Send a password reset email.
+  Future<void> sendPasswordResetEmail(String email) {
+    return _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'com.sayr.app://reset-password',
+    );
+  }
+
+  /// Update the current user's password.
+  Future<void> updatePassword(String password) async {
+    await _client.auth.updateUser(
+      supabase.UserAttributes(password: password),
+    );
+  }
+
   /// Sign out the current user.
   Future<void> signOut() async {
     await _client.auth.signOut();

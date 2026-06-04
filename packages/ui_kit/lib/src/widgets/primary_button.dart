@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_spacing.dart';
+import 'package:sayr_ui_kit/src/theme/app_colors.dart';
+import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 
 /// A primary call-to-action button.
 class PrimaryButton extends StatelessWidget {
+  /// Creates a [PrimaryButton].
   const PrimaryButton({
-    super.key,
     required this.label,
     required this.onPressed,
+    super.key,
     this.icon,
     this.isLoading = false,
     this.isExpanded = true,

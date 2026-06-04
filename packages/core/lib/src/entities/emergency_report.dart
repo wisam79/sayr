@@ -1,52 +1,35 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/coordinates.dart';
 import '../value_objects/ids.dart';
+import '../utils/json_converters.dart';
+
+part 'emergency_report.freezed.dart';
+part 'emergency_report.g.dart';
 
 /// An emergency report (SOS) from a participant in a trip.
-class EmergencyReport extends Equatable {
-  const EmergencyReport({
-    required this.id,
-    required this.userId,
-    required this.tripId,
-    required this.location,
-    required this.createdAt,
-    this.resolvedAt,
-    this.notes,
-  });
+@freezed
+abstract class EmergencyReport with _$EmergencyReport {
+  const factory EmergencyReport({
+    @JsonKey(
+        fromJson: emergencyReportIdFromJson, toJson: emergencyReportIdToJson)
+    required EmergencyReportId id,
+    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson)
+    required UserId userId,
+    @JsonKey(fromJson: tripIdFromJson, toJson: tripIdToJson)
+    required TripId tripId,
+    @JsonKey(fromJson: coordinatesFromJson, toJson: coordinatesToJson)
+    required Coordinates location,
+    required DateTime createdAt,
+    DateTime? resolvedAt,
+    String? notes,
+  }) = _EmergencyReport;
 
-  /// Unique report ID.
-  final EmergencyReportId id;
+  const EmergencyReport._();
 
-  /// The user who reported the emergency.
-  final UserId userId;
-
-  /// The trip during which the emergency occurred.
-  final TripId tripId;
-
-  /// Location at the time of the report.
-  final Coordinates location;
-
-  /// When the report was created.
-  final DateTime createdAt;
-
-  /// When the report was resolved.
-  final DateTime? resolvedAt;
-
-  /// Admin notes.
-  final String? notes;
+  factory EmergencyReport.fromJson(Map<String, dynamic> json) =>
+      _$EmergencyReportFromJson(json);
 
   /// Whether the report is still active.
   bool get isActive => resolvedAt == null;
-
-  @override
-  List<Object?> get props => [
-        id,
-        userId,
-        tripId,
-        location,
-        createdAt,
-        resolvedAt,
-        notes,
-      ];
 }

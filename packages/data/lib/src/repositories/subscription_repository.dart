@@ -1,35 +1,34 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-import '../supabase/supabase_client.dart';
+import '../datasources/remote_datasource.dart';
+import '../datasources/local_datasource.dart';
+import '../models/subscription_model.dart';
 
-/// Repository for subscription operations.
-@lazySingleton
-class SubscriptionRepository {
-  SubscriptionRepository({SayrSupabase? supabase})
-      : _supabase = supabase ?? SayrSupabase.instance;
+/// Concrete implementation of SubscriptionRepository using Remote and Local data sources.
+@LazySingleton(as: SubscriptionRepository)
+class SubscriptionRepositoryImpl implements SubscriptionRepository {
+  final RemoteDatasource _remoteDatasource;
+  final LocalDatasource _localDatasource;
 
-  final SayrSupabase _supabase;
+  SubscriptionRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required LocalDatasource localDatasource,
+  })  : _remoteDatasource = remoteDatasource,
+        _localDatasource = localDatasource;
 
-  /// Get all subscriptions for the current user.
+  @override
   Future<Either<Failure, List<Subscription>>> getMySubscriptions() async {
     try {
-      final user = _supabase.currentUser;
+      final user = _remoteDatasource.currentUser;
       if (user == null) {
         return const Left(UnauthorizedFailure());
       }
 
-      final response = await _supabase.client
-          .from('subscriptions')
-          .select()
-          .eq('student_id', user.id)
-          .order('start_date', ascending: false);
-
-      final subs = (response as List<dynamic>)
-          .map<Subscription>(
-              (dynamic json) => _fromJson(json as Map<String, dynamic>))
+      final response = await _remoteDatasource.getMySubscriptions(user.id);
+      final subs = response
+          .map((json) => SubscriptionModel.fromJson(json).toEntity())
           .toList();
 
       return Right<Failure, List<Subscription>>(subs);
@@ -40,7 +39,7 @@ class SubscriptionRepository {
     }
   }
 
-  /// Get active subscriptions.
+  @override
   Future<Either<Failure, List<Subscription>>> getActiveSubscriptions() async {
     final result = await getMySubscriptions();
     return result.map(
@@ -49,27 +48,21 @@ class SubscriptionRepository {
     );
   }
 
-  /// Cancel a subscription.
+  @override
   Future<Either<Failure, Unit>> cancel(SubscriptionId id) async {
     try {
-      await _supabase.client.rpc<void>(
-        'cancel_subscription',
-        params: {'p_subscription_id': id.value},
-      );
+      await _remoteDatasource.cancelSubscription(id.value);
       return const Right<Failure, Unit>(unit);
     } catch (e) {
       return Left<Failure, Unit>(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Activate a license code (creates a pending subscription).
+  @override
   Future<Either<Failure, SubscriptionId>> activateLicense(
       LicenseCode code) async {
     try {
-      final response = await _supabase.client.rpc<String>(
-        'activate_license',
-        params: {'p_code': code.value},
-      );
+      final response = await _remoteDatasource.activateLicense(code.value);
       return Right<Failure, SubscriptionId>(SubscriptionId(response));
     } catch (e) {
       final message = e.toString();
@@ -89,21 +82,5 @@ class SubscriptionRepository {
       }
       return Left(ServerFailure(message: message));
     }
-  }
-
-  Subscription _fromJson(Map<String, dynamic> json) {
-    return Subscription(
-      id: SubscriptionId(json['id'] as String),
-      studentId: UserId(json['student_id'] as String),
-      routeId: RouteId(json['route_id'] as String),
-      status: SubscriptionStatus.fromString(json['status'] as String),
-      startDate: DateTime.parse(json['start_date'] as String),
-      endDate: json['end_date'] != null
-          ? DateTime.parse(json['end_date'] as String)
-          : null,
-      cancelledAt: json['cancelled_at'] != null
-          ? DateTime.parse(json['cancelled_at'] as String)
-          : null,
-    );
   }
 }

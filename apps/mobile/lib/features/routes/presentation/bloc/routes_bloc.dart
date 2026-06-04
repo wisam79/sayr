@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_core/sayr_core.dart';
 
 import 'routes_event.dart';
 import 'routes_state.dart';

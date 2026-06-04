@@ -146,6 +146,72 @@ abstract class AppLocalizations {
   /// **'Forgot password?'**
   String get forgotPassword;
 
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new password for your account'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get updatePassword;
+
+  /// No description provided for @passwordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get passwordUpdated;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get passwordRequired;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is too short'**
+  String get passwordTooShort;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordResetEmailSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset link sent to {email}'**
+  String passwordResetEmailSent(String email);
+
   /// No description provided for @loginButton.
   ///
   /// In en, this message translates to:
@@ -332,6 +398,12 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get language;
 
+  /// No description provided for @chooseLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose language'**
+  String get chooseLanguage;
+
   /// No description provided for @arabic.
   ///
   /// In en, this message translates to:
@@ -445,6 +517,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A new version of Sayr is available. Please update to continue.'**
   String get updateMessage;
+
+  /// No description provided for @routeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Route details'**
+  String get routeDetails;
+
+  /// No description provided for @startLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Start location'**
+  String get startLocation;
+
+  /// No description provided for @endLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'End location'**
+  String get endLocation;
+
+  /// No description provided for @price.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get price;
+
+  /// No description provided for @availableSeats.
+  ///
+  /// In en, this message translates to:
+  /// **'Available seats'**
+  String get availableSeats;
+
+  /// No description provided for @departureTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Departure time'**
+  String get departureTime;
+
+  /// No description provided for @returnTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Return time'**
+  String get returnTime;
+
+  /// No description provided for @operatingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Operating days'**
+  String get operatingDays;
+
+  /// No description provided for @subscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe now'**
+  String get subscribe;
+
+  /// No description provided for @chats.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats'**
+  String get chats;
+
+  /// No description provided for @help.
+  ///
+  /// In en, this message translates to:
+  /// **'Help'**
+  String get help;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @activeTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Active Trips'**
+  String get activeTrips;
+
+  /// No description provided for @noActiveTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'No active trips right now'**
+  String get noActiveTrips;
+
+  /// No description provided for @activeTripsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Active trips available, tap to follow'**
+  String get activeTripsAvailable;
+
+  /// No description provided for @noRoutesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No routes available'**
+  String get noRoutesAvailable;
+
+  /// No description provided for @tryAgainLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again later'**
+  String get tryAgainLater;
 }
 
 class _AppLocalizationsDelegate

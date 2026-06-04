@@ -1,15 +1,17 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Route;
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/onboarding_page.dart';
+import '../features/auth/presentation/pages/reset_password_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
 import '../features/chat/presentation/pages/chat_list_page.dart';
 import '../features/chat/presentation/pages/chat_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
+import '../features/routes/presentation/pages/route_details_page.dart';
 import '../features/routes/presentation/pages/routes_list_page.dart';
 import '../features/subscriptions/presentation/pages/my_subscriptions_page.dart';
 import '../features/subscriptions/presentation/pages/activate_license_page.dart';
@@ -28,6 +30,14 @@ class AppRouter {
 
   /// Routes accessible without authentication.
   static const publicPaths = <String>{
+    '/onboarding',
+    '/login',
+    '/signup',
+    '/reset-password',
+  };
+
+  /// Public entry screens that should redirect home after authentication.
+  static const authEntryPaths = <String>{
     '/onboarding',
     '/login',
     '/signup',
@@ -52,6 +62,11 @@ class AppRouter {
         builder: (context, state) => const SignupPage(),
       ),
       GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        builder: (context, state) => const ResetPasswordPage(),
+      ),
+      GoRoute(
         path: '/',
         name: 'home',
         builder: (context, state) => const HomePage(),
@@ -60,6 +75,15 @@ class AppRouter {
         path: '/routes',
         name: 'routes',
         builder: (context, state) => const RoutesListPage(),
+      ),
+      GoRoute(
+        path: '/route/:routeId',
+        name: 'route-details',
+        builder: (context, state) {
+          final route = state.extra as Route?;
+          final routeId = RouteId(state.pathParameters['routeId']!);
+          return RouteDetailsPage(route: route, routeId: routeId);
+        },
       ),
       GoRoute(
         path: '/subscriptions',

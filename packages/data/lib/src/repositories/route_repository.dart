@@ -1,52 +1,54 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import '../datasources/remote_datasource.dart';
+import '../datasources/local_datasource.dart';
 import '../models/route_model.dart';
-import '../supabase/supabase_client.dart';
 
-/// Repository for route operations.
-@lazySingleton
-class RouteRepository {
-  RouteRepository({SayrSupabase? supabase})
-      : _supabase = supabase ?? SayrSupabase.instance;
+/// Concrete implementation of RouteRepository using Remote and Local data sources.
+@LazySingleton(as: RouteRepository)
+class RouteRepositoryImpl implements RouteRepository {
+  final RemoteDatasource _remoteDatasource;
+  final LocalDatasource _localDatasource;
 
-  final SayrSupabase _supabase;
+  RouteRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required LocalDatasource localDatasource,
+  })  : _remoteDatasource = remoteDatasource,
+        _localDatasource = localDatasource;
 
-  /// Fetch all active routes.
+  @override
   Future<Either<Failure, List<Route>>> getActiveRoutes() async {
     try {
-      final response = await _supabase.client
-          .from('routes')
-          .select()
-          .eq('is_active', true)
-          .order('title');
-
-      final routes = (response as List<dynamic>)
-          .map((json) => RouteModel.fromJson(json as Map<String, dynamic>))
-          .map((model) => model.toEntity())
-          .toList();
-
+      final response = await _remoteDatasource.getActiveRoutes();
+      final routes =
+          response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
       return Right(routes);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));
     }
   }
 
-  /// Fetch a route by ID.
+  @override
+  Future<Either<Failure, List<Route>>> getMyDriverRoutes() async {
+    try {
+      final response = await _remoteDatasource.getMyDriverRoutes();
+      final routes =
+          response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
+      return Right(routes);
+    } catch (e) {
+      return Left(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Route>> getById(RouteId id) async {
     try {
-      final response = await _supabase.client
-          .from('routes')
-          .select()
-          .eq('id', id.value)
-          .maybeSingle();
-
+      final response = await _remoteDatasource.getRouteById(id.value);
       if (response == null) {
         return Left(NotFoundFailure(resource: 'route'));
       }
-
       final route = RouteModel.fromJson(response).toEntity();
       return Right(route);
     } catch (e) {
@@ -54,21 +56,12 @@ class RouteRepository {
     }
   }
 
-  /// Search routes by query.
+  @override
   Future<Either<Failure, List<Route>>> search(String query) async {
     try {
-      final response = await _supabase.client
-          .from('routes')
-          .select()
-          .eq('is_active', true)
-          .or('title.ilike.%$query%,start_location.ilike.%$query%,end_location.ilike.%$query%')
-          .order('title');
-
-      final routes = (response as List<dynamic>)
-          .map((json) => RouteModel.fromJson(json as Map<String, dynamic>))
-          .map((model) => model.toEntity())
-          .toList();
-
+      final response = await _remoteDatasource.searchRoutes(query);
+      final routes =
+          response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
       return Right(routes);
     } catch (e) {
       return Left(ServerFailure(message: e.toString()));

@@ -1,61 +1,56 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../enums/trip_status.dart';
 import '../value_objects/coordinates.dart';
 import '../value_objects/ids.dart';
+import '../utils/json_converters.dart';
+
+part 'trip.freezed.dart';
+part 'trip.g.dart';
 
 /// A scheduled or in-progress trip on a route.
-class Trip extends Equatable {
-  const Trip({
-    required this.id,
-    required this.routeId,
-    required this.driverId,
-    required this.status,
-    required this.scheduledAt,
-    this.startedAt,
-    this.endedAt,
-    this.lastLocation,
-    this.routeStartLat,
-    this.routeStartLng,
-    this.routeEndLat,
-    this.routeEndLng,
-  });
+@freezed
+abstract class Trip with _$Trip {
+  const factory Trip({
+    @JsonKey(fromJson: tripIdFromJson, toJson: tripIdToJson) required TripId id,
+    @JsonKey(fromJson: routeIdFromJson, toJson: routeIdToJson)
+    required RouteId routeId,
+    @JsonKey(fromJson: driverIdFromJson, toJson: driverIdToJson)
+    required DriverId driverId,
+    @JsonKey(fromJson: tripStatusFromJson, toJson: tripStatusToJson)
+    required TripStatus status,
+    required DateTime scheduledAt,
+    DateTime? startedAt,
+    DateTime? endedAt,
+    @JsonKey(
+        fromJson: nullableCoordinatesFromJson,
+        toJson: nullableCoordinatesToJson)
+    Coordinates? lastLocation,
+    @JsonKey(
+        fromJson: nullableCoordinatesFromJson,
+        toJson: nullableCoordinatesToJson)
+    Coordinates? routeStartLocation,
+    @JsonKey(
+        fromJson: nullableCoordinatesFromJson,
+        toJson: nullableCoordinatesToJson)
+    Coordinates? routeEndLocation,
+  }) = _Trip;
 
-  /// Unique trip ID.
-  final TripId id;
+  const Trip._();
 
-  /// The route this trip belongs to.
-  final RouteId routeId;
+  factory Trip.fromJson(Map<String, dynamic> json) => _$TripFromJson(json);
 
-  /// The assigned driver.
-  final DriverId driverId;
+  /// Expose routeStartLat for backward compatibility.
+  double? get routeStartLat => routeStartLocation?.latitude;
 
-  /// Current trip status.
-  final TripStatus status;
+  /// Expose routeStartLng for backward compatibility.
+  double? get routeStartLng => routeStartLocation?.longitude;
 
-  /// Scheduled start time.
-  final DateTime scheduledAt;
+  /// Expose routeEndLat for backward compatibility.
+  double? get routeEndLat => routeEndLocation?.latitude;
 
-  /// Actual start time (when status became inTransit).
-  final DateTime? startedAt;
-
-  /// Actual end time (when status became completed/cancelled).
-  final DateTime? endedAt;
-
-  /// Last known location of the vehicle.
-  final Coordinates? lastLocation;
-
-  /// Route start latitude (cached for quick access).
-  final double? routeStartLat;
-
-  /// Route start longitude.
-  final double? routeStartLng;
-
-  /// Route end latitude.
-  final double? routeEndLat;
-
-  /// Route end longitude.
-  final double? routeEndLng;
+  /// Expose routeEndLng for backward compatibility.
+  double? get routeEndLng => routeEndLocation?.longitude;
 
   /// Whether the trip is in a terminal state.
   bool get isCompleted => status == TripStatus.completed;
@@ -75,20 +70,4 @@ class Trip extends Equatable {
     final end = endedAt ?? DateTime.now();
     return end.difference(startedAt!);
   }
-
-  @override
-  List<Object?> get props => [
-        id,
-        routeId,
-        driverId,
-        status,
-        scheduledAt,
-        startedAt,
-        endedAt,
-        lastLocation,
-        routeStartLat,
-        routeStartLng,
-        routeEndLat,
-        routeEndLng,
-      ];
 }

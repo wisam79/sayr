@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/tracking_bloc.dart';
 import '../bloc/tracking_event.dart';
 import '../bloc/tracking_state.dart';
@@ -11,7 +13,8 @@ import '../widgets/map_widget.dart';
 
 /// Student view: shows all active trips on a map.
 class ActiveTripsPage extends StatefulWidget {
-  const ActiveTripsPage({super.key});
+  const ActiveTripsPage({super.key, this.showAppBar = true});
+  final bool showAppBar;
 
   @override
   State<ActiveTripsPage> createState() => _ActiveTripsPageState();
@@ -26,8 +29,10 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('الرحلات النشطة')),
+      appBar: widget.showAppBar ? AppBar(title: Text(l10n.activeTrips)) : null,
       body: BlocBuilder<TrackingBloc, TrackingState>(
         builder: (context, state) {
           if (state is TrackingLoading) {
@@ -43,12 +48,12 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
                       size: 48, color: AppColors.error),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    state.failure.message ?? 'حدث خطأ',
+                    state.failure.message ?? l10n.error,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: AppSpacing.md),
                   PrimaryButton(
-                    label: 'إعادة المحاولة',
+                    label: l10n.retry,
                     onPressed: () => context
                         .read<TrackingBloc>()
                         .add(const TrackingLoadActiveTrips()),
@@ -144,9 +149,10 @@ class _TripCard extends StatelessWidget {
               ),
         ),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => context.read<TrackingBloc>().add(
-              TrackingWatchTrip(tripId: trip.id),
-            ),
+        onTap: () {
+          context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: trip.id));
+          context.push('/trip/${trip.id.value}');
+        },
       ),
     );
   }

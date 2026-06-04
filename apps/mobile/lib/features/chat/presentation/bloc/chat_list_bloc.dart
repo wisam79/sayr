@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'chat_list_state.dart';
 
@@ -75,7 +74,25 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     _ChatListUpdated event,
     Emitter<ChatListState> emit,
   ) {
-    emit(ChatListState.loaded(conversations: event.conversations));
+    final current = state;
+    if (current is ChatListLoaded) {
+      final merged = event.conversations.map((newConv) {
+        final oldConv = current.conversations.cast<Conversation?>().firstWhere(
+              (c) => c!.id == newConv.id,
+              orElse: () => null,
+            );
+        if (oldConv != null) {
+          return newConv.copyWith(
+            routeName: newConv.routeName ?? oldConv.routeName,
+            otherUserName: newConv.otherUserName ?? oldConv.otherUserName,
+          );
+        }
+        return newConv;
+      }).toList();
+      emit(ChatListState.loaded(conversations: merged));
+    } else {
+      emit(ChatListState.loaded(conversations: event.conversations));
+    }
   }
 
   void _onStreamErrored(

@@ -28,6 +28,19 @@ class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated();
 }
 
+class AuthPasswordResetEmailSent extends AuthState {
+  const AuthPasswordResetEmailSent(this.email);
+
+  final String email;
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class AuthPasswordUpdated extends AuthState {
+  const AuthPasswordUpdated();
+}
+
 class AuthError extends AuthState {
   const AuthError(this.failure);
   final Failure failure;

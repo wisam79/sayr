@@ -33,6 +33,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotPassword => 'Forgot password?';
 
   @override
+  String get resetPasswordTitle => 'Reset password';
+
+  @override
+  String get resetPasswordSubtitle => 'Enter a new password for your account';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get confirmPasswordHint => 'Re-enter your password';
+
+  @override
+  String get updatePassword => 'Update password';
+
+  @override
+  String get passwordUpdated => 'Password updated successfully';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get passwordTooShort => 'Password is too short';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String passwordResetEmailSent(String email) {
+    return 'Password reset link sent to $email';
+  }
+
+  @override
   String get loginButton => 'Sign in';
 
   @override
@@ -128,6 +163,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
+  String get chooseLanguage => 'Choose language';
+
+  @override
   String get arabic => 'العربية';
 
   @override
@@ -184,4 +222,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateMessage =>
       'A new version of Sayr is available. Please update to continue.';
+
+  @override
+  String get routeDetails => 'Route details';
+
+  @override
+  String get startLocation => 'Start location';
+
+  @override
+  String get endLocation => 'End location';
+
+  @override
+  String get price => 'Price';
+
+  @override
+  String get availableSeats => 'Available seats';
+
+  @override
+  String get departureTime => 'Departure time';
+
+  @override
+  String get returnTime => 'Return time';
+
+  @override
+  String get operatingDays => 'Operating days';
+
+  @override
+  String get subscribe => 'Subscribe now';
+
+  @override
+  String get chats => 'Chats';
+
+  @override
+  String get help => 'Help';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get activeTrips => 'Active Trips';
+
+  @override
+  String get noActiveTrips => 'No active trips right now';
+
+  @override
+  String get activeTripsAvailable => 'Active trips available, tap to follow';
+
+  @override
+  String get noRoutesAvailable => 'No routes available';
+
+  @override
+  String get tryAgainLater => 'Try again later';
 }

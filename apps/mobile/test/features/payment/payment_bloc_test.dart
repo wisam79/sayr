@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_event.dart';
@@ -32,6 +31,33 @@ void main() {
   final testPayment = PaymentInfo(
     id: 'pay-1',
     status: 'pending',
+    paymentUrl: 'https://zaincash.example.com/pay/123',
+    amount: 50000,
+    currency: 'IQD',
+    subscriptionId: '',
+  );
+
+  final completedPayment = PaymentInfo(
+    id: 'pay-1',
+    status: 'completed',
+    paymentUrl: 'https://zaincash.example.com/pay/123',
+    amount: 50000,
+    currency: 'IQD',
+    subscriptionId: 'sub-1',
+  );
+
+  final failedPayment = PaymentInfo(
+    id: 'pay-1',
+    status: 'failed',
+    paymentUrl: 'https://zaincash.example.com/pay/123',
+    amount: 50000,
+    currency: 'IQD',
+    subscriptionId: '',
+  );
+
+  final expiredPayment = PaymentInfo(
+    id: 'pay-1',
+    status: 'expired',
     paymentUrl: 'https://zaincash.example.com/pay/123',
     amount: 50000,
     currency: 'IQD',
@@ -106,6 +132,108 @@ void main() {
       build: () => PaymentBloc(tripRepository: mockRepo),
       act: (bloc) => bloc.add(const PaymentReset()),
       expect: () => [isA<PaymentInitial>()],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'polling: payment status "completed" emits Success with SubscriptionId',
+      build: () {
+        when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
+          (_) async => Right<Failure, PaymentInfo>(completedPayment),
+        );
+        return PaymentBloc(tripRepository: mockRepo);
+      },
+      seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
+      act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
+      expect: () => [
+        isA<PaymentSuccess>().having(
+          (s) => s.subscriptionId,
+          'subscriptionId',
+          const SubscriptionId('sub-1'),
+        ),
+      ],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'polling: payment status "failed" emits Failed',
+      build: () {
+        when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
+          (_) async => Right<Failure, PaymentInfo>(failedPayment),
+        );
+        return PaymentBloc(tripRepository: mockRepo);
+      },
+      seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
+      act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
+      expect: () => [
+        isA<PaymentFailed>(),
+      ],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'polling: payment status "expired" emits Failed',
+      build: () {
+        when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
+          (_) async => Right<Failure, PaymentInfo>(expiredPayment),
+        );
+        return PaymentBloc(tripRepository: mockRepo);
+      },
+      seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
+      act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
+      expect: () => [
+        isA<PaymentFailed>(),
+      ],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'polling: NetworkFailure continues polling (does not emit Failed)',
+      build: () {
+        when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
+          (_) async => const Left<Failure, PaymentInfo>(
+            NetworkFailure(message: 'No connection'),
+          ),
+        );
+        return PaymentBloc(tripRepository: mockRepo);
+      },
+      seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
+      act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
+      expect: () => <dynamic>[],
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'close() cancels the poll timer',
+      build: () {
+        when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
+          (_) async => Right<Failure, PaymentInfo>(testPayment),
+        );
+        return PaymentBloc(tripRepository: mockRepo);
+      },
+      seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
+      act: (bloc) async {
+        bloc.add(const PaymentPollStatus(paymentId: 'pay-1'));
+        await Future<void>.delayed(Duration.zero);
+        await bloc.close();
+      },
+      verify: (_) {
+        verify(() => mockRepo.getPaymentStatus('pay-1')).called(1);
+      },
+    );
+
+    blocTest<PaymentBloc, PaymentState>(
+      'reset cancels active timer',
+      build: () {
+        when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
+          (_) async => Right<Failure, PaymentInfo>(testPayment),
+        );
+        return PaymentBloc(tripRepository: mockRepo);
+      },
+      seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
+      act: (bloc) async {
+        bloc.add(const PaymentPollStatus(paymentId: 'pay-1'));
+        await Future<void>.delayed(Duration.zero);
+        bloc.add(const PaymentReset());
+      },
+      expect: () => [
+        isA<PaymentInitial>(),
+      ],
     );
   });
 }

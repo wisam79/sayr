@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'notifications_state.dart';
 
@@ -123,17 +122,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     final List<AppNotification> current = _currentList();
     final List<AppNotification> updated = current
         .map(
-          (n) => n.id == event.id
-              ? AppNotification(
-                  id: n.id,
-                  userId: n.userId,
-                  title: n.title,
-                  body: n.body,
-                  isRead: true,
-                  createdAt: n.createdAt,
-                  data: n.data,
-                )
-              : n,
+          (n) => n.id == event.id ? n.copyWith(isRead: true) : n,
         )
         .toList();
 
