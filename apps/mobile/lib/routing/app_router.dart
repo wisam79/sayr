@@ -6,6 +6,7 @@ import 'package:sayr_core/sayr_core.dart';
 import '../features/auth/presentation/pages/login_page.dart';
 import '../features/auth/presentation/pages/onboarding_page.dart';
 import '../features/auth/presentation/pages/signup_page.dart';
+import '../features/chat/presentation/pages/chat_list_page.dart';
 import '../features/chat/presentation/pages/chat_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/notifications/presentation/pages/notifications_page.dart';
@@ -112,12 +113,18 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/chats',
+        name: 'chats',
+        builder: (context, state) => const ChatListPage(),
+      ),
+      GoRoute(
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const NotificationsPage(),
       ),
     ],
-    errorBuilder: (context, state) => _ErrorPage(error: state.error?.toString()),
+    errorBuilder: (context, state) =>
+        _ErrorPage(error: state.error?.toString()),
   );
 }
 

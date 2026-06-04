@@ -47,8 +47,14 @@ class Conversation extends Equatable {
   const Conversation({
     required this.id,
     required this.routeId,
+    required this.studentId,
+    required this.driverUserId,
     required this.createdAt,
     required this.updatedAt,
+    this.lastMessageAt,
+    this.lastMessagePreview,
+    this.routeName,
+    this.otherUserName,
   });
 
   /// Unique conversation ID.
@@ -57,12 +63,41 @@ class Conversation extends Equatable {
   /// The route this conversation is about.
   final RouteId routeId;
 
+  /// The student who initiated the conversation.
+  final UserId studentId;
+
+  /// The driver who is the other participant.
+  final UserId driverUserId;
+
   /// When the conversation was created.
   final DateTime createdAt;
 
-  /// When the last message was sent.
+  /// When the conversation was last updated.
   final DateTime updatedAt;
 
+  /// Timestamp of the most recent message, if any.
+  final DateTime? lastMessageAt;
+
+  /// Preview of the most recent message, truncated to 100 chars.
+  final String? lastMessagePreview;
+
+  /// Route title (denormalized for list rendering, optional).
+  final String? routeName;
+
+  /// Display name of the other participant (denormalized, optional).
+  final String? otherUserName;
+
   @override
-  List<Object?> get props => [id, routeId, createdAt, updatedAt];
+  List<Object?> get props => [
+        id,
+        routeId,
+        studentId,
+        driverUserId,
+        createdAt,
+        updatedAt,
+        lastMessageAt,
+        lastMessagePreview,
+        routeName,
+        otherUserName,
+      ];
 }

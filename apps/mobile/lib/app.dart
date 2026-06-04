@@ -13,6 +13,7 @@ import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 import 'features/auth/presentation/bloc/auth_state.dart';
 import 'features/chat/presentation/bloc/chat_bloc.dart';
+import 'features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'features/routes/presentation/bloc/routes_bloc.dart';
@@ -63,6 +64,11 @@ class SayrApp extends StatelessWidget {
             chatRepository: sl<ChatRepository>(),
           ),
         ),
+        BlocProvider<ChatListBloc>(
+          create: (_) => ChatListBloc(
+            chatRepository: sl<ChatRepository>(),
+          ),
+        ),
         BlocProvider<NotificationsBloc>(
           create: (_) => NotificationsBloc(
             notificationsRepository: sl<NotificationsRepository>(),
@@ -77,8 +83,8 @@ class SayrApp extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
         listener: (context, state) {
-          final location = router.config.routerDelegate.currentConfiguration
-              .uri.toString();
+          final location =
+              router.config.routerDelegate.currentConfiguration.uri.toString();
           final isPublic = AppRouter.publicPaths.contains(location);
 
           if (state is AuthAuthenticated && isPublic) {

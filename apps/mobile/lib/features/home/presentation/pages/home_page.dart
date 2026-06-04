@@ -28,6 +28,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.chat_outlined),
+            tooltip: 'المحادثات',
+            onPressed: () => context.push('/chats'),
+          ),
           BlocBuilder<NotificationsBloc, NotificationsState>(
             buildWhen: (prev, curr) =>
                 prev.maybeWhen(loaded: (a, b) => b, orElse: () => 0) !=
@@ -181,7 +186,8 @@ class _HomeTab extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.directions_bus, color: AppColors.primary),
+              leading:
+                  const Icon(Icons.directions_bus, color: AppColors.primary),
               title: const Text('تصفح الخطوط'),
               subtitle: const Text('اعثر على خط يناسبك'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -323,7 +329,9 @@ class _ProfileTab extends StatelessWidget {
                         style: TextStyle(color: AppColors.error),
                       ),
                       onTap: () {
-                        context.read<AuthBloc>().add(const AuthLogoutRequested());
+                        context
+                            .read<AuthBloc>()
+                            .add(const AuthLogoutRequested());
                         context.go('/login');
                       },
                     ),
