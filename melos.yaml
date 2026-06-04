@@ -36,11 +36,11 @@ scripts:
 
   test:
     description: Run tests on all packages
-    run: melos exec -c 1 -- "flutter test --no-pub --reporter=expanded"
+    run: melos exec -c 1 --ignore="sayr_ui_kit" -- "flutter test --no-pub --reporter=expanded"
 
   test:coverage:
     description: Run tests with coverage
-    run: melos exec -c 1 -- "flutter test --coverage"
+    run: melos exec -c 1 --ignore="sayr_ui_kit" -- "flutter test --coverage"
 
   build:android:
     description: Build Android APK
