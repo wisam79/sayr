@@ -1,0 +1,41 @@
+/// Sayr Core - Domain layer (pure Dart)
+library sayr_core;
+
+// Enums
+export 'src/enums/user_role.dart';
+export 'src/enums/trip_status.dart';
+export 'src/enums/license_status.dart';
+export 'src/enums/subscription_status.dart';
+export 'src/enums/payout_status.dart';
+export 'src/enums/support_status.dart';
+
+// Entities
+export 'src/entities/user.dart';
+export 'src/entities/route.dart';
+export 'src/entities/trip.dart';
+export 'src/entities/subscription.dart';
+export 'src/entities/license.dart';
+export 'src/entities/driver.dart';
+export 'src/entities/institution.dart';
+export 'src/entities/payout.dart';
+export 'src/entities/rating.dart';
+export 'src/entities/notification.dart';
+export 'src/entities/message.dart';
+export 'src/entities/emergency_report.dart';
+export 'src/entities/app_config.dart';
+
+// Value Objects
+export 'src/value_objects/money.dart';
+export 'src/value_objects/coordinates.dart';
+export 'src/value_objects/license_code.dart';
+export 'src/value_objects/ids.dart';
+
+// FSM
+export 'src/fsm/trip_state_machine.dart';
+export 'src/fsm/trip_event.dart';
+
+// Failures
+export 'src/failures/failure.dart';
+
+// Utils
+export 'src/utils/retry.dart';

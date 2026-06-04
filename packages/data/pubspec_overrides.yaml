@@ -1,0 +1,4 @@
+# melos_managed_dependency_overrides: sayr_core
+dependency_overrides:
+  sayr_core:
+    path: ..\\core

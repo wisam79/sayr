@@ -1,0 +1,28 @@
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.dart"
+      run: dart format {staged_files}
+      stage_fixed: true
+    analyze:
+      glob: "*.dart"
+      run: flutter analyze {staged_files}
+      skip:
+        - "**/*.g.dart"
+        - "**/*.freezed.dart"
+        - "**/*.gr.dart"
+    test:
+      glob: "*.dart"
+      run: flutter test --no-pub --reporter=compact
+
+pre-push:
+  parallel: false
+  commands:
+    test:all:
+      run: melos run test
+
+commit-msg:
+  commands:
+    conventional:
+      run: cz commit --hook

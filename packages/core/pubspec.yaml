@@ -1,0 +1,21 @@
+name: sayr_core
+description: Sayr v3 - Domain layer (pure Dart, no dependencies)
+version: 3.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  equatable: ^2.0.5
+  freezed_annotation: ^3.0.0
+  json_annotation: ^4.9.0
+  latlong2: ^0.9.1
+
+dev_dependencies:
+  test: ^1.25.0
+  very_good_analysis: ^6.0.0
+  coverage: ^1.7.2
+  build_runner: ^2.4.13
+  freezed: ^3.0.0
+  json_serializable: ^6.8.0

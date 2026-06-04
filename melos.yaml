@@ -1,0 +1,67 @@
+name: sayr
+
+repository: https://github.com/your-org/sayr
+
+packages:
+  - apps/*
+  - packages/*
+
+command:
+  bootstrap:
+    runPubGetInParallel: false
+    usePubspecLock: false
+
+  clean:
+    hooks:
+      post: |
+        find . -name "build" -type d -prune -exec rm -rf {} +
+        find . -name ".dart_tool" -type d -prune -exec rm -rf {} +
+
+scripts:
+  analyze:
+    description: Run flutter analyze on all packages (errors only, CI-strict)
+    run: melos exec -c 1 -- "flutter analyze --no-fatal-warnings --no-fatal-infos"
+
+  analyze:strict:
+    description: Run flutter analyze with all lints as errors
+    run: melos exec -c 1 -- "flutter analyze --fatal-infos"
+
+  format:
+    description: Format all Dart files
+    run: melos exec -c 1 -- "dart format ."
+
+  format:check:
+    description: Check Dart formatting
+    run: melos exec -c 1 -- "dart format --set-exit-if-changed ."
+
+  test:
+    description: Run tests on all packages
+    run: melos exec -c 1 -- "flutter test --no-pub --reporter=expanded"
+
+  test:coverage:
+    description: Run tests with coverage
+    run: melos exec -c 1 -- "flutter test --coverage"
+
+  build:android:
+    description: Build Android APK
+    run: melos exec --dir-exists="android" -- "flutter build apk --release"
+
+  build:appbundle:
+    description: Build Android App Bundle
+    run: melos exec --dir-exists="android" -- "flutter build appbundle --release"
+
+  build:runner:
+    description: Run build_runner code generation
+    run: melos exec -c 1 -- "dart run build_runner build --delete-conflicting-outputs"
+
+  build:runner:watch:
+    description: Run build_runner in watch mode
+    run: melos exec -c 1 -- "dart run build_runner watch --delete-conflicting-outputs"
+
+  lint:fix:
+    description: Auto-fix lint issues
+    run: melos exec -c 1 -- "dart fix --apply"
+
+  clean:full:
+    description: Deep clean all packages
+    run: melos clean

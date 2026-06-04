@@ -1,0 +1,75 @@
+{
+  "@@locale": "en",
+  "appTitle": "Sayr",
+  "@appTitle": {},
+
+  "loginTitle": "Login",
+  "loginSubtitle": "Welcome back! Please sign in to continue",
+  "email": "Email",
+  "emailHint": "example@sayr.app",
+  "password": "Password",
+  "passwordHint": "Enter your password",
+  "forgotPassword": "Forgot password?",
+  "loginButton": "Sign in",
+  "orContinueWith": "Or continue with",
+  "loginWithGoogle": "Continue with Google",
+  "noAccount": "Don't have an account?",
+  "signup": "Sign up",
+
+  "signupTitle": "Create account",
+  "signupSubtitle": "Join Sayr to manage your university transit",
+  "fullName": "Full name",
+  "fullNameHint": "Ahmed Ali",
+  "phone": "Phone (optional)",
+  "phoneHint": "07901234567",
+  "signupButton": "Create account",
+  "haveAccount": "Already have an account?",
+  "signin": "Sign in",
+
+  "homeTitle": "Home",
+  "routesTitle": "Available routes",
+  "mySubscriptions": "My subscriptions",
+  "searchRoutes": "Search routes...",
+
+  "activateLicense": "Activate license",
+  "enterLicenseCode": "Enter the 8-character license code",
+  "licenseCodeHint": "A1B2C3D4",
+  "activate": "Activate",
+  "licenseActivated": "License activated successfully!",
+
+  "activeSubscription": "Active subscription",
+  "noActiveSubscription": "No active subscription",
+  "getSubscription": "Get a subscription",
+  "expiresOn": "Expires on",
+  "daysRemaining": "{days} days remaining",
+  "@daysRemaining": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+
+  "profile": "Profile",
+  "settings": "Settings",
+  "language": "Language",
+  "arabic": "العربية",
+  "english": "English",
+  "logout": "Log out",
+  "logoutConfirm": "Are you sure you want to log out?",
+
+  "loading": "Loading...",
+  "error": "Error",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  "save": "Save",
+  "next": "Next",
+  "back": "Back",
+  "done": "Done",
+  "yes": "Yes",
+  "no": "No",
+
+  "noInternet": "No internet connection",
+  "maintenanceMode": "App under maintenance",
+  "updateRequired": "Update required",
+  "updateMessage": "A new version of Sayr is available. Please update to continue."
+}

@@ -1,0 +1,24 @@
+include: package:very_good_analysis/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  language:
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    invalid_annotation_target: ignore
+    todo: ignore
+
+linter:
+  rules:
+    public_member_api_docs: true
+    flutter_style_todos: true
+    prefer_single_quotes: true
+    directives_ordering: true
+    one_member_abstracts: true
+    avoid_classes_with_only_static_members: true
+    require_trailing_commas: true
+    sort_constructors_first: true

@@ -1,0 +1,11 @@
+name: sayr
+description: Sayr v3 - Smart transit platform for Iraqi university students
+version: 3.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dev_dependencies:
+  melos: ^6.0.0
