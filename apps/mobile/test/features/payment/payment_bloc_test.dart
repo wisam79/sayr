@@ -44,7 +44,7 @@ void main() {
     });
 
     blocTest<PaymentBloc, PaymentState>(
-      'emits [Loading, UrlReady] when payment creation succeeds',
+      'emits [Loading, UrlReady, AwaitingCompletion] when payment creation succeeds',
       build: () {
         when(() => mockRepo.createPayment(
               routeId: any(named: 'routeId'),
@@ -52,6 +52,9 @@ void main() {
               currency: any(named: 'currency'),
               method: any(named: 'method'),
             )).thenAnswer(
+          (_) async => Right<Failure, PaymentInfo>(testPayment),
+        );
+        when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
           (_) async => Right<Failure, PaymentInfo>(testPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
@@ -68,6 +71,7 @@ void main() {
           'paymentUrl',
           'https://zaincash.example.com/pay/123',
         ),
+        isA<PaymentAwaitingCompletion>(),
       ],
     );
 
