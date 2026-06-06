@@ -45,7 +45,7 @@ void main() {
       expect(find.text('Custom Error Title'), findsOneWidget);
       expect(find.text('Try Again'), findsOneWidget);
 
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.tap(find.text('Try Again'));
       await tester.pump();
 
       expect(isRetried, isTrue);
