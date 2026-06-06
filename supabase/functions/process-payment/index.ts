@@ -87,7 +87,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const isValid = await verifySignature(rawBody, signature, merchantSecret);
+    // Strip signature and meta from object to prevent circular dependency in HMAC signature calculation
+    const signedData = {
+      orderId: payload.orderId,
+      status: payload.status,
+      amount: payload.amount,
+      currency: payload.currency,
+      studentId: payload.studentId,
+      routeId: payload.routeId,
+      ...(payload.meta ? { meta: payload.meta } : {})
+    };
+    const cleanBody = JSON.stringify(signedData);
+
+    const isValid = await verifySignature(cleanBody, signature, merchantSecret);
     if (!isValid) {
       console.error(`Invalid signature for order ${orderId}`);
       return new Response(JSON.stringify({ error: 'invalid signature' }), {
@@ -95,6 +107,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     const supabase = createAdminClient();
 
@@ -134,19 +147,7 @@ Deno.serve(async (req) => {
     }
 
     if (status === 'success') {
-      // First, update the payment status to 'completed'
-      const { error: updateError } = await supabase
-        .from('payments')
-        .update({
-          status: 'completed',
-          paid_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', orderId);
-
-      if (updateError) throw updateError;
-
-      // Call the atomic SQL function with correct 4 UUID parameters
+      // Call the atomic SQL function with correct 4 UUID parameters (handles payment status update internally)
       const { data, error } = await supabase.rpc(
         'complete_payment_and_activate_subscription',
         {
