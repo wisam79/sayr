@@ -13,6 +13,7 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:sayr_core/sayr_core.dart' as _i385;
 import 'package:sayr_data/sayr_data.dart' as _i773;
+import 'package:sayr_mobile/core/services/osrm_service.dart' as _i105;
 import 'package:sayr_mobile/di/data_repositories_module.dart' as _i1014;
 import 'package:sayr_mobile/routing/app_router.dart' as _i290;
 
@@ -28,6 +29,7 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     final dataRepositoriesModule = _$DataRepositoriesModule();
+    gh.lazySingleton<_i105.OsrmService>(() => _i105.OsrmService());
     gh.lazySingleton<_i773.RemoteDatasource>(
         () => dataRepositoriesModule.remoteDatasource);
     gh.lazySingleton<_i773.AppDatabase>(

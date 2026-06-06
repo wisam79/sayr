@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/formatting.dart';
+import 'package:sayr_mobile/core/services/osrm_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
@@ -50,6 +51,9 @@ class _TripTrackingView extends StatefulWidget {
 class _TripTrackingViewState extends State<_TripTrackingView> {
   late final TrackingBloc _trackingBloc;
   bool _ratingShown = false;
+  List<LatLng>? _routePoints;
+  RouteId? _loadedRouteId;
+  bool _isFetchingRoute = false;
 
   @override
   void initState() {
@@ -103,6 +107,42 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
     );
   }
 
+  Future<void> _fetchRoutePathIfNeeded(Trip trip) async {
+    if (_isFetchingRoute) return;
+    if (trip.routeId == _loadedRouteId) return;
+
+    final start = trip.routeStartLocation;
+    final end = trip.routeEndLocation;
+
+    if (start != null && end != null) {
+      _isFetchingRoute = true;
+      try {
+        final points = await sl<OsrmService>().getRoute(
+          LatLng(start.latitude, start.longitude),
+          LatLng(end.latitude, end.longitude),
+        );
+        if (mounted) {
+          setState(() {
+            _routePoints = points;
+            _loadedRouteId = trip.routeId;
+          });
+        }
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _routePoints = [
+              LatLng(start.latitude, start.longitude),
+              LatLng(end.latitude, end.longitude),
+            ];
+            _loadedRouteId = trip.routeId;
+          });
+        }
+      } finally {
+        _isFetchingRoute = false;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -122,6 +162,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
                 if (state.trip.status == TripStatus.completed) {
                   _checkAndShowRating(context, state.trip);
                 }
+                _fetchRoutePathIfNeeded(state.trip);
               } else if (state is TrackingError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -260,6 +301,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
           child: SayrMap(
             initialCameraPosition: cameraPosition,
             markers: markers,
+            routePoints: _routePoints,
           ),
         ),
         Positioned(

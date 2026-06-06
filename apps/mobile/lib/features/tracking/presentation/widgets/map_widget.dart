@@ -15,6 +15,7 @@ class SayrMap extends StatefulWidget {
     this.onMapCreated,
     this.onMapLongClick,
     this.markers = const [],
+    this.routePoints,
     this.myLocationEnabled = false,
   });
 
@@ -30,6 +31,9 @@ class SayrMap extends StatefulWidget {
   /// List of markers to place on the map.
   final List<SayrMarker> markers;
 
+  /// List of route coordinates to draw a polyline on the map.
+  final List<LatLng>? routePoints;
+
   /// Whether current user location is displayed.
   final bool myLocationEnabled;
 
@@ -43,12 +47,14 @@ class SayrMap extends StatefulWidget {
 class _SayrMapState extends State<SayrMap> {
   MapLibreMapController? _controller;
   final Map<String, Symbol> _symbols = {};
+  Line? _routeLine;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_syncMarkers());
+      unawaited(_syncRouteLine());
     });
   }
 
@@ -57,6 +63,39 @@ class _SayrMapState extends State<SayrMap> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.markers != widget.markers) {
       unawaited(_syncMarkers());
+    }
+    if (oldWidget.routePoints != widget.routePoints) {
+      unawaited(_syncRouteLine());
+    }
+  }
+
+  Future<void> _syncRouteLine() async {
+    final controller = _controller;
+    if (controller == null) return;
+
+    try {
+      final oldLine = _routeLine;
+      if (oldLine != null) {
+        _routeLine = null;
+        await controller.removeLine(oldLine);
+      }
+
+      final points = widget.routePoints;
+      if (points != null && points.isNotEmpty) {
+        _routeLine = await controller.addLine(
+          LineOptions(
+            geometry: points,
+            lineColor: '#3B82F6',
+            lineWidth: 5.0,
+            lineOpacity: 0.8,
+          ),
+        );
+      }
+    } catch (_) {
+      // Retry in the next frame if the controller or layout is not ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_syncRouteLine());
+      });
     }
   }
 
@@ -130,6 +169,7 @@ class _SayrMapState extends State<SayrMap> {
         _controller = controller;
         widget.onMapCreated?.call(controller);
         unawaited(_syncMarkers());
+        unawaited(_syncRouteLine());
       },
       onMapLongClick: widget.onMapLongClick,
     );
