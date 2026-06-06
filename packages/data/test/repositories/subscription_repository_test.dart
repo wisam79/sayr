@@ -33,7 +33,7 @@ void main() {
       'start_date': '2026-06-01T00:00:00Z',
       'end_date': '2026-06-30T00:00:00Z',
       'is_active': true,
-      'payment_method': 'zain_cash',
+      'payment_method': 'zaincash',
       'status': 'active',
     };
 

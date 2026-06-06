@@ -21,7 +21,7 @@ class RouteDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (route != null) {
-      return _RouteDetailsContent(initialRoute: route);
+      return _RouteDetailsBody(route: route!);
     }
     if (routeId != null) {
       return BlocProvider(
@@ -188,12 +188,75 @@ class _RouteDetailsBody extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
               label: l10n.subscribe,
-              onPressed: () => context.push('/activate-license', extra: route),
+              onPressed: () => _showSubscriptionMethodSelector(context, route),
               icon: Icons.confirmation_number,
             ),
           ],
         ),
       ),
+    );
+  }
+
+  void _showSubscriptionMethodSelector(BuildContext context, Route route) {
+    final l10n = AppLocalizations.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (bottomSheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.choosePaymentMethod,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    child: const Icon(Icons.key, color: AppColors.primary),
+                  ),
+                  title: Text(l10n.activateLicense),
+                  subtitle: Text(l10n.enterVoucherCode),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.pop(bottomSheetContext);
+                    context.push('/activate-license', extra: route);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.success.withValues(alpha: 0.1),
+                    child: const Icon(Icons.payment, color: AppColors.success),
+                  ),
+                  title: Text(l10n.paymentViaZainCash),
+                  subtitle: Text(
+                    'دفع إلكتروني مباشر بقيمة ${route.price.format()}',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.pop(bottomSheetContext);
+                    context.push(
+                      '/payment/${route.id.value}/${route.price.inIQD}',
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.md),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -48,13 +48,35 @@ void main() {
 
     group('AuthCheckRequested', () {
       blocTest<AuthBloc, AuthState>(
-        'emits AuthAuthenticated when currentUser is not null',
+        'emits [AuthLoading, AuthAuthenticated] when currentUser is not '
+        'null and profile is complete',
         build: () {
-          when(() => mockRepo.currentUser).thenReturn(testUser);
+          when(() => mockRepo.currentUser).thenReturn(completeTestUser);
+          when(() => mockRepo.fetchFullProfile())
+              .thenAnswer((_) async => completeTestUser);
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(const AuthCheckRequested()),
-        expect: () => [isA<AuthAuthenticated>()],
+        expect: () => [
+          isA<AuthLoading>(),
+          isA<AuthAuthenticated>(),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [AuthLoading, AuthProfileIncomplete] when currentUser is not '
+        'null but profile is incomplete',
+        build: () {
+          when(() => mockRepo.currentUser).thenReturn(testUser);
+          when(() => mockRepo.fetchFullProfile())
+              .thenAnswer((_) async => testUser);
+          return AuthBloc(authRepository: mockRepo);
+        },
+        act: (bloc) => bloc.add(const AuthCheckRequested()),
+        expect: () => [
+          isA<AuthLoading>(),
+          isA<AuthProfileIncomplete>(),
+        ],
       );
 
       blocTest<AuthBloc, AuthState>(

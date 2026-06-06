@@ -151,11 +151,26 @@ DECLARE
 BEGIN
   FOR v_loc IN SELECT * FROM jsonb_array_elements(p_locations)
   LOOP
-    PERFORM public.update_trip_location(
-      (v_loc->>'trip_id')::UUID,
-      (v_loc->>'lat')::NUMERIC,
-      (v_loc->>'lng')::NUMERIC
-    );
+    BEGIN
+      PERFORM public.update_trip_location(
+        (v_loc->>'trip_id')::UUID,
+        (v_loc->>'lat')::NUMERIC,
+        (v_loc->>'lng')::NUMERIC
+      );
+    EXCEPTION WHEN OTHERS THEN
+      INSERT INTO public.audit_logs (user_id, action, entity_type, entity_id, details)
+      VALUES (
+        auth.uid(),
+        'bulk_update_location_failed',
+        'trip',
+        (v_loc->>'trip_id')::UUID,
+        jsonb_build_object(
+          'error', SQLERRM,
+          'lat', v_loc->>'lat',
+          'lng', v_loc->>'lng'
+        )
+      );
+    END;
   END LOOP;
 END;
 $$;

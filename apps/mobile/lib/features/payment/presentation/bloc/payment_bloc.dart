@@ -39,7 +39,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       routeId: event.routeId,
       amount: event.amount,
       currency: event.currency,
-      method: 'zain_cash',
+      method: 'zaincash',
     );
 
     result.fold(

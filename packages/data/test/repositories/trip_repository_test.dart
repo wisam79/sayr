@@ -390,7 +390,7 @@ void main() {
           'amount': 5000,
           'currency': 'IQD',
           'status': 'pending',
-          'method': 'zain_cash',
+          'method': 'zaincash',
           'payment_url': 'https://pay.zaincash.iq/transaction?id=123',
         };
 
@@ -399,7 +399,7 @@ void main() {
             routeId: 'route-1',
             amount: 5000,
             currency: 'IQD',
-            method: 'zain_cash',
+            method: 'zaincash',
           ),
         ).thenAnswer((_) async => mockPaymentJson);
 
@@ -407,7 +407,7 @@ void main() {
           routeId: const RouteId('route-1'),
           amount: 5000,
           currency: 'IQD',
-          method: 'zain_cash',
+          method: 'zaincash',
         );
 
         expect(result.isRight(), true);
@@ -430,7 +430,7 @@ void main() {
             routeId: 'route-1',
             amount: 5000,
             currency: 'IQD',
-            method: 'zain_cash',
+            method: 'zaincash',
           ),
         ).thenThrow(Exception('Payment service offline'));
 
@@ -438,7 +438,7 @@ void main() {
           routeId: const RouteId('route-1'),
           amount: 5000,
           currency: 'IQD',
-          method: 'zain_cash',
+          method: 'zaincash',
         );
 
         expect(result.isLeft(), true);
@@ -456,7 +456,7 @@ void main() {
           'amount': 5000,
           'currency': 'IQD',
           'status': 'completed',
-          'method': 'zain_cash',
+          'method': 'zaincash',
           'payment_url': 'https://pay.zaincash.iq/transaction?id=123',
         };
 

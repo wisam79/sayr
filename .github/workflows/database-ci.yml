@@ -1,0 +1,39 @@
+name: Database & Migrations CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  GOOGLE_CLIENT_ID: "dummy-client-id-for-ci"
+  GOOGLE_CLIENT_SECRET: "dummy-client-secret-for-ci"
+
+jobs:
+  test-database:
+    name: Lint & Verify Migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Verify migration files structure and syntax (Lint)
+      - name: Verify Migration Files
+        run: supabase db lint
+
+      # Start local Supabase using Docker (pre-installed on runner)
+      - name: Start Supabase Local Stack
+        run: supabase start
+
+      # Verify database status and that all migrations applied successfully
+      - name: Verify Database Status
+        run: supabase db status

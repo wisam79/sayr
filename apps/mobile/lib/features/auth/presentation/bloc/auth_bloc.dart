@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
@@ -29,9 +28,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
-    final user = _authRepository.currentUser;
-    if (user != null) {
-      emit(AuthAuthenticated(user));
+    final currentUser = _authRepository.currentUser;
+    if (currentUser != null) {
+      emit(const AuthLoading());
+      final user = await _authRepository.fetchFullProfile();
+      if (user != null) {
+        final isComplete = user.phone != null && user.institutionId != null;
+        if (isComplete) {
+          emit(AuthAuthenticated(user));
+        } else {
+          emit(AuthProfileIncomplete(user));
+        }
+      } else {
+        emit(const AuthUnauthenticated());
+      }
     } else {
       emit(const AuthUnauthenticated());
     }

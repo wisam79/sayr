@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
     // Idempotency check: skip if payment already processed
     const { data: existingPayment, error: fetchError } = await supabase
       .from('payments')
-      .select('status, license_id, subscription_id, user_id')
+      .select('status, license_id, subscription_id, user_id, amount')
       .eq('id', orderId)
       .single();
 
@@ -113,6 +113,14 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         },
       );
+    }
+
+    if (Number(payload.amount) !== Number(existingPayment.amount)) {
+      console.error(`Payment amount mismatch for order ${orderId}: expected ${existingPayment.amount}, got ${payload.amount}`);
+      return new Response(JSON.stringify({ error: 'amount mismatch' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (existingPayment.status !== 'pending') {
