@@ -86,8 +86,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (_) async {
         // Fetch full profile from `profiles` table to check completeness.
         // JWT alone doesn't carry phone / institution_id for Google users.
-        final repo = _authRepository as AuthRepositoryImpl;
-        final user = await repo.fetchFullProfile();
+        final user = await _authRepository.fetchFullProfile();
         if (user == null) {
           emit(const AuthUnauthenticated());
           return;
@@ -117,8 +116,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await result.fold(
       (failure) async => emit(AuthError(failure)),
       (_) async {
-        final repo = _authRepository as AuthRepositoryImpl;
-        final user = await repo.fetchFullProfile();
+        final user = await _authRepository.fetchFullProfile();
         if (user != null) {
           emit(AuthAuthenticated(user));
         } else {

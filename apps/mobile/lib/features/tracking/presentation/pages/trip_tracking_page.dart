@@ -229,6 +229,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
     final markers = <SayrMarker>[
       if (hasLocation)
         SayrMarker(
+          id: 'driver_location',
           position: LatLng(
             state.driverLocation!.latitude,
             state.driverLocation!.longitude,

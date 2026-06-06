@@ -71,13 +71,27 @@ Deno.serve(async (req) => {
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        },
-      );
-    }
-
     // Send via Firebase Admin SDK (HTTP v1 API)
     const firebaseProjectId = Deno.env.get('FIREBASE_PROJECT_ID');
     const firebaseServiceAccount = Deno.env.get('FIREBASE_SERVICE_ACCOUNT');
+    const supabase = createAdminClient();
+
+    // Get user's FCM tokens from push_tokens table (supports multiple active devices)
+    const { data: tokens, error: tokensError } = await supabase
+      .from('push_tokens')
+      .select('token')
+      .eq('user_id', userId)
+      .eq('is_active', true);
+
+    if (tokensError || !tokens || tokens.length === 0) {
+      return new Response(
+        JSON.stringify({ skipped: true, reason: 'no active fcm token' }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
+    }
 
     if (!firebaseProjectId || !firebaseServiceAccount) {
       console.error('Firebase credentials not configured');
@@ -94,46 +108,57 @@ Deno.serve(async (req) => {
     const serviceAccount = JSON.parse(firebaseServiceAccount);
     const accessToken = await getFirebaseAccessToken(serviceAccount);
 
-    // Send FCM message via HTTP v1 API
-    const fcmResponse = await fetch(
-      `https://fcm.googleapis.com/v1/projects/${firebaseProjectId}/messages:send`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: {
-            token: profile.fcm_token,
-            notification: { title, body },
-            data: data ?? {},
-            android: { priority: 'high' },
+    let sentCount = 0;
+    for (const item of tokens) {
+      try {
+        // Send FCM message via HTTP v1 API
+        const fcmResponse = await fetch(
+          `https://fcm.googleapis.com/v1/projects/${firebaseProjectId}/messages:send`,
+          {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: {
+                token: item.token,
+                notification: { title, body },
+                data: data ?? {},
+                android: { priority: 'high' },
+              },
+            }),
           },
-        }),
-      },
-    );
+        );
 
-    if (!fcmResponse.ok) {
-      const fcmError = await fcmResponse.text();
-      console.error(`FCM send failed: ${fcmResponse.status} ${fcmError}`);
+        if (fcmResponse.ok) {
+          sentCount++;
+        } else {
+          const fcmError = await fcmResponse.text();
+          console.error(`FCM send failed for token ${item.token}: ${fcmResponse.status} ${fcmError}`);
 
-      // If token is invalid, remove it from profile
-      if (fcmResponse.status === 404 || fcmResponse.status === 400) {
-        await supabase
-          .from('profiles')
-          .update({ fcm_token: null })
-          .eq('id', userId);
+          // If token is invalid (404 Not Found or 400 Bad Request), mark it as inactive
+          if (fcmResponse.status === 404 || fcmResponse.status === 400) {
+            await supabase
+              .from('push_tokens')
+              .update({ is_active: false })
+              .eq('token', item.token);
+          }
+        }
+      } catch (err) {
+        console.error(`Error sending to token ${item.token}:`, err);
       }
+    }
 
-      return new Response(JSON.stringify({ sent: false, error: 'fcm send failed' }), {
+    if (sentCount === 0) {
+      return new Response(JSON.stringify({ sent: false, error: 'fcm send failed for all tokens' }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // Never return tokens in response
-    return new Response(JSON.stringify({ sent: true }), {
+    return new Response(JSON.stringify({ sent: true, sentCount }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

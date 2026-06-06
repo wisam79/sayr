@@ -8,9 +8,9 @@ class AppErrorWidget extends StatelessWidget {
   /// Creates an [AppErrorWidget].
   const AppErrorWidget({
     required this.message,
+    required this.title,
+    required this.retryLabel,
     super.key,
-    this.title = 'Error',
-    this.retryLabel = 'Retry',
     this.onRetry,
   });
 

@@ -13,9 +13,17 @@ abstract class DataRepositoriesModule {
   @lazySingleton
   RemoteDatasource get remoteDatasource => RemoteDatasourceImpl();
 
+  /// Provides the singleton instance of [AppDatabase].
+  @lazySingleton
+  AppDatabase get appDatabase => AppDatabase();
+
   /// Provides the singleton instance of [LocalDatasource].
   @lazySingleton
-  LocalDatasource get localDatasource => LocalDatasourceImpl();
+  LocalDatasource localDatasource(AppDatabase db) => LocalDatasourceImpl(
+        locationQueueDao: LocationQueueDao(db: db),
+        tripCacheDao: TripCacheDao(db: db),
+        routeCacheDao: RouteCacheDao(db: db),
+      );
 
   /// Provides the singleton instance of [AuthRepository].
   @lazySingleton

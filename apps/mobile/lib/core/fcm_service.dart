@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'dart:io' show Platform;
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart' show Color;
 
 import 'package:sayr_mobile/core/firebase_config.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
 
 /// Firebase Cloud Messaging service using `awesome_notifications` for
 /// cross-platform local notifications (channels, actions, scheduling built-in).
@@ -137,6 +140,31 @@ class FcmService {
       return;
     }
     handler(Map<String, dynamic>.from(message.data));
+  }
+
+  /// Fetches the current FCM token and registers it using the [NotificationsBloc].
+  static Future<void> registerDeviceToken(NotificationsBloc bloc) async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        final platform = Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
+        bloc.add(NotificationRegisterTokenRequested(
+          fcmToken: token,
+          platform: platform,
+        ));
+      }
+
+      // Also listen to token refresh events.
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+        final platform = Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
+        bloc.add(NotificationRegisterTokenRequested(
+          fcmToken: newToken,
+          platform: platform,
+        ));
+      });
+    } catch (e) {
+      // Failed to retrieve or register token
+    }
   }
 }
 

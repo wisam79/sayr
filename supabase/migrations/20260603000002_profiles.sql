@@ -12,7 +12,11 @@ $$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN AS $$
-  SELECT COALESCE((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin', false);
+  SELECT COALESCE(
+    (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin'
+    OR auth.role() = 'service_role',
+    false
+  );
 $$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public;
 
 CREATE OR REPLACE FUNCTION public.is_driver()

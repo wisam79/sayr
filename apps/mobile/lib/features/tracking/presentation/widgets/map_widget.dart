@@ -42,11 +42,11 @@ class SayrMap extends StatefulWidget {
 
 class _SayrMapState extends State<SayrMap> {
   MapLibreMapController? _controller;
+  final Map<String, Symbol> _symbols = {};
 
   @override
   void initState() {
     super.initState();
-    // Sync markers when controller is ready.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_syncMarkers());
     });
@@ -65,15 +65,45 @@ class _SayrMapState extends State<SayrMap> {
     if (controller == null) return;
 
     try {
-      await controller.clearSymbols();
-      for (final marker in widget.markers) {
-        await controller.addSymbol(
-          SymbolOptions(
-            geometry: marker.position,
-            iconImage: marker.iconImage ?? 'bus-icon',
-            iconSize: marker.iconSize ?? 0.08,
-          ),
-        );
+      final activeIds = <String>{};
+
+      for (var i = 0; i < widget.markers.length; i++) {
+        final marker = widget.markers[i];
+        final id = marker.id ?? 'marker_$i';
+        activeIds.add(id);
+
+        final existingSymbol = _symbols[id];
+        if (existingSymbol != null) {
+          if (existingSymbol.options.geometry != marker.position ||
+              existingSymbol.options.iconImage != (marker.iconImage ?? 'bus-icon') ||
+              existingSymbol.options.iconSize != (marker.iconSize ?? 0.08)) {
+            await controller.updateSymbol(
+              existingSymbol,
+              SymbolOptions(
+                geometry: marker.position,
+                iconImage: marker.iconImage ?? 'bus-icon',
+                iconSize: marker.iconSize ?? 0.08,
+              ),
+            );
+          }
+        } else {
+          final symbol = await controller.addSymbol(
+            SymbolOptions(
+              geometry: marker.position,
+              iconImage: marker.iconImage ?? 'bus-icon',
+              iconSize: marker.iconSize ?? 0.08,
+            ),
+          );
+          _symbols[id] = symbol;
+        }
+      }
+
+      final idsToRemove = _symbols.keys.where((id) => !activeIds.contains(id)).toList();
+      for (final id in idsToRemove) {
+        final symbol = _symbols.remove(id);
+        if (symbol != null) {
+          await controller.removeSymbol(symbol);
+        }
       }
     } catch (e) {
       // The symbol manager or channel may not be initialized yet.
@@ -109,6 +139,7 @@ class SayrMarker {
   /// Creates a [SayrMarker].
   const SayrMarker({
     required this.position,
+    this.id,
     this.iconImage,
     this.iconSize,
     this.data,
@@ -116,6 +147,9 @@ class SayrMarker {
 
   /// Coordinates of the marker.
   final LatLng position;
+
+  /// Optional unique identifier.
+  final String? id;
 
   /// Optional icon asset name.
   final String? iconImage;

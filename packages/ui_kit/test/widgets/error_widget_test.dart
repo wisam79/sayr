@@ -11,6 +11,8 @@ void main() {
           home: Scaffold(
             body: AppErrorWidget(
               message: 'Failed to load data',
+              title: 'Error',
+              retryLabel: 'Retry',
             ),
           ),
         ),

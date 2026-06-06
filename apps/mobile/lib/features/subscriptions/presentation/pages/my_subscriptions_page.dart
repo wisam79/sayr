@@ -59,6 +59,8 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             LicenseActivated() => const LoadingWidget(),
             SubscriptionsError(:final failure) => AppErrorWidget(
                 message: failure.message ?? l10n.errorOccurred,
+                title: l10n.error,
+                retryLabel: l10n.retry,
                 onRetry: () {
                   context
                       .read<SubscriptionsBloc>()

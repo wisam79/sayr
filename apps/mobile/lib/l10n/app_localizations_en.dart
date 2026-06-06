@@ -251,6 +251,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscribe => 'Subscribe now';
 
   @override
+  String get available => 'Available';
+
+  @override
+  String get full => 'Full';
+
+  @override
   String get chats => 'Chats';
 
   @override

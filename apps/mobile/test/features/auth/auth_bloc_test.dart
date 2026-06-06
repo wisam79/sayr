@@ -32,6 +32,15 @@ void main() {
     fullName: 'Test User',
   );
 
+  const completeTestUser = User(
+    id: UserId('user-1'),
+    email: 'test@sayr.com',
+    role: UserRole.student,
+    fullName: 'Test User',
+    phone: '07701234567',
+    institutionId: InstitutionId('inst-1'),
+  );
+
   group('AuthBloc', () {
     test('initial state is AuthInitial', () {
       expect(bloc.state, isA<AuthInitial>());
@@ -181,7 +190,10 @@ void main() {
           when(() => mockRepo.signInWithGoogle()).thenAnswer(
             (_) async => const Right<Failure, Unit>(unit),
           );
-          when(() => mockRepo.currentUser).thenReturn(testUser);
+          when(() => mockRepo.currentUser).thenReturn(completeTestUser);
+          when(() => mockRepo.fetchFullProfile()).thenAnswer(
+            (_) async => completeTestUser,
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(const AuthGoogleSignInRequested()),
@@ -199,6 +211,9 @@ void main() {
             (_) async => const Right<Failure, Unit>(unit),
           );
           when(() => mockRepo.currentUser).thenReturn(null);
+          when(() => mockRepo.fetchFullProfile()).thenAnswer(
+            (_) async => null,
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(const AuthGoogleSignInRequested()),

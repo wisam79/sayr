@@ -25,6 +25,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
 
     on<_NotificationsUpdated>(_onUpdated);
     on<_NotificationsStreamErrored>(_onStreamErrored);
+    on<NotificationRegisterTokenRequested>(_onRegisterTokenRequested);
   }
 
   final NotificationsRepository _repository;
@@ -160,5 +161,16 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     );
 
     await _repository.markAllAsRead();
+  }
+
+  Future<void> _onRegisterTokenRequested(
+    NotificationRegisterTokenRequested event,
+    Emitter<NotificationsState> emit,
+  ) async {
+    await _repository.registerPushToken(
+      fcmToken: event.fcmToken,
+      platform: event.platform,
+      deviceId: event.deviceId,
+    );
   }
 }

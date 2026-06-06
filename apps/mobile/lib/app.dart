@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_mobile/core/app_bloc_observer.dart';
@@ -105,8 +106,13 @@ class SayrApp extends StatelessWidget {
           final isPublic = AppRouter.publicPaths.contains(path);
           final isAuthEntry = AppRouter.authEntryPaths.contains(path);
 
-          if (state is AuthAuthenticated && isAuthEntry) {
-            router.config.go('/');
+          if (state is AuthAuthenticated) {
+            // Register current FCM push token for notifications
+            unawaited(FcmService.registerDeviceToken(context.read<NotificationsBloc>()));
+
+            if (isAuthEntry) {
+              router.config.go('/');
+            }
           } else if (state is AuthUnauthenticated && !isPublic) {
             router.config.go('/login');
           } else if (state is AuthProfileIncomplete) {
@@ -153,6 +159,9 @@ class SayrApp extends StatelessWidget {
 /// Top-level wrapper that initializes Sentry and other services.
 Future<void> runSayrApp() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
 
   // Initialize Firebase
   await Firebase.initializeApp();

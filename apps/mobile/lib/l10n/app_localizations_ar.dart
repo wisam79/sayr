@@ -250,6 +250,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subscribe => 'اشترك الآن';
 
   @override
+  String get available => 'متوفر';
+
+  @override
+  String get full => 'ممتلئ';
+
+  @override
   String get chats => 'المحادثات';
 
   @override

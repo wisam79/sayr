@@ -54,3 +54,19 @@ class _NotificationsStreamErrored extends NotificationsEvent {
   @override
   List<Object?> get props => [failure];
 }
+
+/// Request registering/updating the device push token on the server.
+class NotificationRegisterTokenRequested extends NotificationsEvent {
+  const NotificationRegisterTokenRequested({
+    required this.fcmToken,
+    required this.platform,
+    this.deviceId,
+  });
+
+  final String fcmToken;
+  final String platform;
+  final String? deviceId;
+
+  @override
+  List<Object?> get props => [fcmToken, platform, deviceId];
+}

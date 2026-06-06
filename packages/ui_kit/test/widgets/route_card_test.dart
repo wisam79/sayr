@@ -1,41 +1,24 @@
-import 'package:flutter/material.dart' hide Route;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 void main() {
   group('RouteCard Widget Tests', () {
-    const testRoute = Route(
-      id: RouteId('route-1'),
-      driverId: DriverId('driver-1'),
-      title: 'Karrada - University of Baghdad',
-      startLocation: 'Karrada',
-      endLocation: 'Jadriyah',
-      price: Money(15000),
-      capacity: 20,
-      availableSeats: 5,
-      isActive: true,
-    );
-
-    const testRouteFull = Route(
-      id: RouteId('route-2'),
-      driverId: DriverId('driver-1'),
-      title: 'Mansour - University of Technology',
-      startLocation: 'Mansour',
-      endLocation: 'Sinaa St',
-      price: Money(12000),
-      capacity: 15,
-      availableSeats: 0,
-      isActive: true,
-    );
-
     testWidgets('renders route details and formatted price',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: RouteCard(
-              route: testRoute,
+              title: 'Karrada - University of Baghdad',
+              startLocation: 'Karrada',
+              endLocation: 'Jadriyah',
+              availableSeats: 5,
+              capacity: 20,
+              formattedPrice: '15,000 د.ع',
+              hasSeats: true,
+              availableLabel: 'Available',
+              completedLabel: 'Full',
             ),
           ),
         ),
@@ -45,7 +28,6 @@ void main() {
       expect(find.text('Karrada'), findsOneWidget);
       expect(find.text('Jadriyah'), findsOneWidget);
       expect(find.text('5/20'), findsOneWidget);
-      // check formatted price: 15,000 د.ع
       expect(find.text('15,000 د.ع'), findsOneWidget);
     });
 
@@ -55,8 +37,15 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: RouteCard(
-              route: testRoute,
+              title: 'Karrada - University of Baghdad',
+              startLocation: 'Karrada',
+              endLocation: 'Jadriyah',
+              availableSeats: 5,
+              capacity: 20,
+              formattedPrice: '15,000 د.ع',
+              hasSeats: true,
               availableLabel: 'Seats Available',
+              completedLabel: 'Full',
             ),
           ),
         ),
@@ -72,7 +61,14 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: RouteCard(
-              route: testRouteFull,
+              title: 'Mansour - University of Technology',
+              startLocation: 'Mansour',
+              endLocation: 'Sinaa St',
+              availableSeats: 0,
+              capacity: 15,
+              formattedPrice: '12,000 د.ع',
+              hasSeats: false,
+              availableLabel: 'Available',
               completedLabel: 'Fully Booked',
             ),
           ),
@@ -91,7 +87,15 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: RouteCard(
-              route: testRoute,
+              title: 'Karrada - University of Baghdad',
+              startLocation: 'Karrada',
+              endLocation: 'Jadriyah',
+              availableSeats: 5,
+              capacity: 20,
+              formattedPrice: '15,000 د.ع',
+              hasSeats: true,
+              availableLabel: 'Available',
+              completedLabel: 'Full',
               onTap: () {
                 isTapped = true;
               },

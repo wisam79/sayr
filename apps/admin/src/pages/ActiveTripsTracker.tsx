@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useToast } from '../components/Toast';
 import { EmptyState } from '../components/EmptyState';
+import { getDistance } from 'geolib';
 import { 
   Bus, 
   Phone, 
@@ -332,7 +333,7 @@ export const ActiveTripsTracker: React.FC = () => {
     }
   };
 
-  // Haversine formula to compute live distance & simulated ETA
+  // Compute live distance using geolib & simulated ETA
   const getDistanceAndEta = (trip: Trip) => {
     const driverLat = trip.last_lat;
     const driverLng = trip.last_lng;
@@ -341,21 +342,11 @@ export const ActiveTripsTracker: React.FC = () => {
 
     if (!driverLat || !driverLng || !startLat || !startLng) return null;
 
-    const R = 6371e3; // meters
-    const phi1 = (driverLat * Math.PI) / 180;
-    const phi2 = (startLat * Math.PI) / 180;
-    const deltaPhi = ((startLat - driverLat) * Math.PI) / 180;
-    const deltaLambda = ((startLng - driverLng) * Math.PI) / 180;
+    const distance = getDistance(
+      { latitude: driverLat, longitude: driverLng },
+      { latitude: startLat, longitude: startLng }
+    ); // distance in meters
 
-    const a =
-      Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-      Math.cos(phi1) *
-        Math.cos(phi2) *
-        Math.sin(deltaLambda / 2) *
-        Math.sin(deltaLambda / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-    const distance = R * c; // meters
     const distanceKm = (distance / 1000).toFixed(1);
     const etaMins = Math.max(1, Math.round(distance / 500)); // 30 km/h is ~500m per min
 

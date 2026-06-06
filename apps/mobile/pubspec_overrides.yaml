@@ -1,8 +1,0 @@
-# melos_managed_dependency_overrides: sayr_core,sayr_data,sayr_ui_kit
-dependency_overrides:
-  sayr_core:
-    path: ..\\..\\packages\\core
-  sayr_data:
-    path: ..\\..\\packages\\data
-  sayr_ui_kit:
-    path: ..\\..\\packages\\ui_kit

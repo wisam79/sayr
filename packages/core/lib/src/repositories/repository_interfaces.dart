@@ -59,6 +59,9 @@ abstract class AuthRepository {
 
   /// Stream of auth state changes (un-typed to avoid dependency on database client).
   Stream<dynamic> get authStateChanges;
+
+  /// Fetches the full profile from data storage.
+  Future<User?> fetchFullProfile();
 }
 
 /// Interface for route operations repository.

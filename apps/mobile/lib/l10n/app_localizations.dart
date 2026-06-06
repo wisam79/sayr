@@ -572,6 +572,18 @@ abstract class AppLocalizations {
   /// **'Subscribe now'**
   String get subscribe;
 
+  /// No description provided for @available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get available;
+
+  /// No description provided for @full.
+  ///
+  /// In en, this message translates to:
+  /// **'Full'**
+  String get full;
+
   /// No description provided for @chats.
   ///
   /// In en, this message translates to:

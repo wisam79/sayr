@@ -44,6 +44,8 @@ class _RoutesListPageState extends State<RoutesListPage> {
               ),
             RoutesError(:final failure) => AppErrorWidget(
                 message: failure.message ?? l10n.error,
+                title: l10n.error,
+                retryLabel: l10n.retry,
                 onRetry: () {
                   context.read<RoutesBloc>().add(const RoutesLoadRequested());
                 },
@@ -63,12 +65,21 @@ class _RoutesListPageState extends State<RoutesListPage> {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
+                    final route = routes[index];
                     return RouteCard(
-                      route: routes[index],
+                      title: route.title,
+                      startLocation: route.startLocation,
+                      endLocation: route.endLocation,
+                      availableSeats: route.availableSeats,
+                      capacity: route.capacity,
+                      formattedPrice: route.price.format(),
+                      hasSeats: route.hasSeats,
+                      availableLabel: l10n.available,
+                      completedLabel: l10n.full,
                       onTap: () {
                         context.push(
-                          '/route/${routes[index].id.value}',
-                          extra: routes[index],
+                          '/route/${route.id.value}',
+                          extra: route,
                         );
                       },
                     );

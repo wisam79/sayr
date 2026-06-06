@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart' hide Route;
-import 'package:sayr_core/sayr_core.dart';
+import 'package:flutter/material.dart';
 
 import 'package:sayr_ui_kit/src/theme/app_colors.dart';
 import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
@@ -8,15 +7,39 @@ import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 class RouteCard extends StatelessWidget {
   /// Creates a [RouteCard].
   const RouteCard({
-    required this.route,
+    required this.title,
+    required this.startLocation,
+    required this.endLocation,
+    required this.availableSeats,
+    required this.capacity,
+    required this.formattedPrice,
+    required this.hasSeats,
+    required this.availableLabel,
+    required this.completedLabel,
     super.key,
-    this.availableLabel = 'Available',
-    this.completedLabel = 'Full',
     this.onTap,
   });
 
-  /// The route entity to display.
-  final Route route;
+  /// The title of the route.
+  final String title;
+
+  /// The start location name.
+  final String startLocation;
+
+  /// The end location name.
+  final String endLocation;
+
+  /// The number of available seats.
+  final int availableSeats;
+
+  /// The total capacity of the route.
+  final int capacity;
+
+  /// The formatted price of the route.
+  final String formattedPrice;
+
+  /// Whether the route has seats available.
+  final bool hasSeats;
 
   /// The localized label for available seats.
   final String availableLabel;
@@ -51,11 +74,11 @@ class RouteCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      route.title,
+                      title,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ),
-                  if (route.hasSeats)
+                  if (hasSeats)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
@@ -104,7 +127,7 @@ class RouteCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      route.startLocation,
+                      startLocation,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -131,7 +154,7 @@ class RouteCard extends StatelessWidget {
                   const SizedBox(width: AppSpacing.xs),
                   Expanded(
                     child: Text(
-                      route.endLocation,
+                      endLocation,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -150,13 +173,13 @@ class RouteCard extends StatelessWidget {
                       ),
                       const SizedBox(width: AppSpacing.xs),
                       Text(
-                        '${route.availableSeats}/${route.capacity}',
+                        '$availableSeats/$capacity',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
                   Text(
-                    route.price.format(),
+                    formattedPrice,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: AppColors.primary,
                           fontWeight: FontWeight.w700,

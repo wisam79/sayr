@@ -102,6 +102,7 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
         .where((t) => t.lastLocation != null)
         .map(
           (trip) => SayrMarker(
+            id: trip.id.value,
             position: LatLng(
               trip.lastLocation!.latitude,
               trip.lastLocation!.longitude,

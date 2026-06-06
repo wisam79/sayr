@@ -46,7 +46,8 @@ dependencies:
   sayr_ui_kit:
     path: ../../packages/ui_kit
   sentry_flutter: ^8.8.0
-  shared_preferences: ^2.3.2
+  hive_ce: ^2.19.3
+  hive_ce_flutter: ^2.3.4
   skeletonizer: ^2.1.3
   talker_flutter: ^4.9.3
   url_launcher: ^6.3.1

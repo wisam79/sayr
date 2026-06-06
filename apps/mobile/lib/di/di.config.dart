@@ -30,8 +30,8 @@ extension GetItInjectableX on _i174.GetIt {
     final dataRepositoriesModule = _$DataRepositoriesModule();
     gh.lazySingleton<_i773.RemoteDatasource>(
         () => dataRepositoriesModule.remoteDatasource);
-    gh.lazySingleton<_i773.LocalDatasource>(
-        () => dataRepositoriesModule.localDatasource);
+    gh.lazySingleton<_i773.AppDatabase>(
+        () => dataRepositoriesModule.appDatabase);
     gh.lazySingleton<_i773.SecureStorageService>(
         () => dataRepositoriesModule.secureStorageService);
     gh.lazySingleton<_i290.AppRouter>(() => _i290.AppRouter());
@@ -43,6 +43,8 @@ extension GetItInjectableX on _i174.GetIt {
         .notificationsRepository(gh<_i773.RemoteDatasource>()));
     gh.lazySingleton<_i385.EmergencyRepository>(() => dataRepositoriesModule
         .emergencyRepository(gh<_i773.RemoteDatasource>()));
+    gh.lazySingleton<_i773.LocalDatasource>(
+        () => dataRepositoriesModule.localDatasource(gh<_i773.AppDatabase>()));
     gh.lazySingleton<_i385.AuthRepository>(
         () => dataRepositoriesModule.authRepository(
               gh<_i773.RemoteDatasource>(),

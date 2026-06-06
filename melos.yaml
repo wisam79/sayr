@@ -11,11 +11,7 @@ command:
     runPubGetInParallel: false
     usePubspecLock: false
 
-  clean:
-    hooks:
-      post: |
-        find . -name "build" -type d -prune -exec rm -rf {} +
-        find . -name ".dart_tool" -type d -prune -exec rm -rf {} +
+
 
 scripts:
   analyze:
@@ -36,11 +32,11 @@ scripts:
 
   test:
     description: Run tests on all packages
-    run: melos exec -c 1 --ignore="sayr_ui_kit" -- "flutter test --no-pub --reporter=expanded"
+    run: melos exec -c 1 -- "flutter test --no-pub --reporter=expanded"
 
   test:coverage:
     description: Run tests with coverage
-    run: melos exec -c 1 --ignore="sayr_ui_kit" -- "flutter test --coverage"
+    run: melos exec -c 1 -- "flutter test --coverage"
 
   build:android:
     description: Build Android APK
