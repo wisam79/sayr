@@ -11,10 +11,10 @@ class MockEmergencyRepository extends Mock implements EmergencyRepository {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(TripId('fallback'));
-    registerFallbackValue(RouteId('fallback'));
-    registerFallbackValue(EmergencyReportId('fallback'));
-    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(const TripId('fallback'));
+    registerFallbackValue(const RouteId('fallback'));
+    registerFallbackValue(const EmergencyReportId('fallback'));
+    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
   });
 
   late MockEmergencyRepository mockRepo;
@@ -43,21 +43,25 @@ void main() {
     blocTest<EmergencyBloc, EmergencyState>(
       'emits [Sending, Active] on trigger success',
       build: () {
-        when(() => mockRepo.triggerEmergency(
-              tripId: any(named: 'tripId'),
-              routeId: any(named: 'routeId'),
-              location: any(named: 'location'),
-              message: any(named: 'message'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.triggerEmergency(
+            tripId: any(named: 'tripId'),
+            routeId: any(named: 'routeId'),
+            location: any(named: 'location'),
+            message: any(named: 'message'),
+          ),
+        ).thenAnswer(
           (_) async => Right<Failure, EmergencyReport>(testReport),
         );
         return EmergencyBloc(emergencyRepository: mockRepo);
       },
-      act: (bloc) => bloc.add(EmergencyTriggered(
-        tripId: const TripId('trip-1'),
-        routeId: const RouteId('route-1'),
-        location: const Coordinates(latitude: 33.3, longitude: 44.3),
-      )),
+      act: (bloc) => bloc.add(
+        const EmergencyTriggered(
+          tripId: TripId('trip-1'),
+          routeId: RouteId('route-1'),
+          location: Coordinates(latitude: 33.3, longitude: 44.3),
+        ),
+      ),
       expect: () => [
         isA<EmergencySending>(),
         isA<EmergencyActive>(),
@@ -67,23 +71,27 @@ void main() {
     blocTest<EmergencyBloc, EmergencyState>(
       'emits [Sending, Failed] on trigger failure',
       build: () {
-        when(() => mockRepo.triggerEmergency(
-              tripId: any(named: 'tripId'),
-              routeId: any(named: 'routeId'),
-              location: any(named: 'location'),
-              message: any(named: 'message'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.triggerEmergency(
+            tripId: any(named: 'tripId'),
+            routeId: any(named: 'routeId'),
+            location: any(named: 'location'),
+            message: any(named: 'message'),
+          ),
+        ).thenAnswer(
           (_) async => const Left<Failure, EmergencyReport>(
             ServerFailure(message: 'Failed'),
           ),
         );
         return EmergencyBloc(emergencyRepository: mockRepo);
       },
-      act: (bloc) => bloc.add(EmergencyTriggered(
-        tripId: const TripId('trip-1'),
-        routeId: const RouteId('route-1'),
-        location: const Coordinates(latitude: 33.3, longitude: 44.3),
-      )),
+      act: (bloc) => bloc.add(
+        const EmergencyTriggered(
+          tripId: TripId('trip-1'),
+          routeId: RouteId('route-1'),
+          location: Coordinates(latitude: 33.3, longitude: 44.3),
+        ),
+      ),
       expect: () => [
         isA<EmergencySending>(),
         isA<EmergencyFailed>(),
@@ -124,12 +132,14 @@ void main() {
     blocTest<EmergencyBloc, EmergencyState>(
       'trigger then cancel returns to Idle',
       build: () {
-        when(() => mockRepo.triggerEmergency(
-              tripId: any(named: 'tripId'),
-              routeId: any(named: 'routeId'),
-              location: any(named: 'location'),
-              message: any(named: 'message'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.triggerEmergency(
+            tripId: any(named: 'tripId'),
+            routeId: any(named: 'routeId'),
+            location: any(named: 'location'),
+            message: any(named: 'message'),
+          ),
+        ).thenAnswer(
           (_) async => Right<Failure, EmergencyReport>(testReport),
         );
         when(() => mockRepo.resolveReport(any())).thenAnswer(
@@ -138,11 +148,13 @@ void main() {
         return EmergencyBloc(emergencyRepository: mockRepo);
       },
       act: (bloc) async {
-        bloc.add(EmergencyTriggered(
-          tripId: const TripId('trip-1'),
-          routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33.3, longitude: 44.3),
-        ));
+        bloc.add(
+          const EmergencyTriggered(
+            tripId: TripId('trip-1'),
+            routeId: RouteId('route-1'),
+            location: Coordinates(latitude: 33.3, longitude: 44.3),
+          ),
+        );
         await Future<void>.delayed(Duration.zero);
         bloc.add(const EmergencyCancelled());
       },

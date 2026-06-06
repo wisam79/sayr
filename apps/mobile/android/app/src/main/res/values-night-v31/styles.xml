@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ (API 31+) Splash Screen API overrides — Dark Mode variant.
+         These attributes are ONLY supported on API 31+ and must live here. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <!-- Solid dark background matching the Flutter splash screen. -->
+        <item name="android:windowSplashScreenBackground">#111827</item>
+        <!-- Transparent icon: no image shown during native splash. -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/transparent_icon</item>
+        <!-- Remove the default white circular background behind the icon. -->
+        <item name="android:windowSplashScreenIconBackgroundColor">#111827</item>
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+</resources>

@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/subscriptions_bloc.dart';
-import '../bloc/subscriptions_event.dart';
-import '../bloc/subscriptions_state.dart';
-
+/// Page for activating student subscription via pre-paid license code.
 class ActivateLicensePage extends StatefulWidget {
+  /// Creates an [ActivateLicensePage].
   const ActivateLicensePage({super.key});
 
   @override
@@ -97,7 +98,7 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
                       maxLength: 8,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
-                          RegExp(r'[A-Za-z0-9]'),
+                          RegExp('[A-Za-z0-9]'),
                         ),
                         TextInputFormatter.withFunction(
                           (oldValue, newValue) {

@@ -2,22 +2,17 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import '../datasources/remote_datasource.dart';
-import '../datasources/local_datasource.dart';
-import '../models/message_model.dart';
-import '../models/conversation_model.dart';
+import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/conversation_model.dart';
+import 'package:sayr_data/src/models/message_model.dart';
 
-/// Concrete implementation of ChatRepository using Remote and Local data sources.
+/// Concrete implementation of ChatRepository using Remote data source.
 @LazySingleton(as: ChatRepository)
 class ChatRepositoryImpl implements ChatRepository {
-  final RemoteDatasource _remoteDatasource;
-  final LocalDatasource _localDatasource;
-
   ChatRepositoryImpl({
     required RemoteDatasource remoteDatasource,
-    required LocalDatasource localDatasource,
-  })  : _remoteDatasource = remoteDatasource,
-        _localDatasource = localDatasource;
+  }) : _remoteDatasource = remoteDatasource;
+  final RemoteDatasource _remoteDatasource;
 
   @override
   Future<Either<Failure, List<Conversation>>> getMyConversations() async {
@@ -132,7 +127,8 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, List<Message>>> getMessages(
-      ConversationId conversationId) async {
+    ConversationId conversationId,
+  ) async {
     try {
       final response =
           await _remoteDatasource.getMessages(conversationId.value);
@@ -179,7 +175,8 @@ class ChatRepositoryImpl implements ChatRepository {
         updatedAt: DateTime.now().toUtc().toIso8601String(),
       );
       return Right<Failure, Message>(
-          MessageModel.fromJson(response).toEntity());
+        MessageModel.fromJson(response).toEntity(),
+      );
     } catch (e) {
       return Left<Failure, Message>(ServerFailure(message: e.toString()));
     }
@@ -216,7 +213,7 @@ class ChatRepositoryImpl implements ChatRepository {
     final dynamic student = json['student'];
     final dynamic driver = json['driver'];
 
-    final bool isStudent = json['student_id'] == currentUserId;
+    final isStudent = json['student_id'] == currentUserId;
     final dynamic other = isStudent ? driver : student;
     if (other is Map<String, dynamic>) {
       return other['full_name'] as String?;

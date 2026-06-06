@@ -16,17 +16,21 @@ void main() {
 
   group('SecureStorageService', () {
     test('setAuthToken writes token to storage', () async {
-      when(() => mockStorage.write(
-            key: 'auth_token',
-            value: 'test-token',
-          )).thenAnswer((_) async {});
+      when(
+        () => mockStorage.write(
+          key: 'auth_token',
+          value: 'test-token',
+        ),
+      ).thenAnswer((_) async {});
 
       await storage.setAuthToken('test-token');
 
-      verify(() => mockStorage.write(
-            key: 'auth_token',
-            value: 'test-token',
-          )).called(1);
+      verify(
+        () => mockStorage.write(
+          key: 'auth_token',
+          value: 'test-token',
+        ),
+      ).called(1);
     });
 
     test('getAuthToken reads token from storage', () async {
@@ -49,17 +53,21 @@ void main() {
     });
 
     test('setRefreshToken writes token to storage', () async {
-      when(() => mockStorage.write(
-            key: 'refresh_token',
-            value: 'refresh-123',
-          )).thenAnswer((_) async {});
+      when(
+        () => mockStorage.write(
+          key: 'refresh_token',
+          value: 'refresh-123',
+        ),
+      ).thenAnswer((_) async {});
 
       await storage.setRefreshToken('refresh-123');
 
-      verify(() => mockStorage.write(
-            key: 'refresh_token',
-            value: 'refresh-123',
-          )).called(1);
+      verify(
+        () => mockStorage.write(
+          key: 'refresh_token',
+          value: 'refresh-123',
+        ),
+      ).called(1);
     });
 
     test('getRefreshToken reads token from storage', () async {
@@ -72,17 +80,21 @@ void main() {
     });
 
     test('setUserId writes userId to storage', () async {
-      when(() => mockStorage.write(
-            key: 'user_id',
-            value: 'user-123',
-          )).thenAnswer((_) async {});
+      when(
+        () => mockStorage.write(
+          key: 'user_id',
+          value: 'user-123',
+        ),
+      ).thenAnswer((_) async {});
 
       await storage.setUserId('user-123');
 
-      verify(() => mockStorage.write(
-            key: 'user_id',
-            value: 'user-123',
-          )).called(1);
+      verify(
+        () => mockStorage.write(
+          key: 'user_id',
+          value: 'user-123',
+        ),
+      ).called(1);
     });
 
     test('getUserId reads userId from storage', () async {

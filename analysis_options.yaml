@@ -16,7 +16,6 @@ analyzer:
     missing_required_param: error
     missing_return: error
     todo: ignore
-  public_member_api_docs: true
 
 linter:
   rules:
@@ -29,7 +28,6 @@ linter:
     prefer_final_in_for_each: true
 
     # Imports
-    prefer_relative_imports: true
     directives_ordering: true
     avoid_relative_lib_imports: true
     implementation_imports: true
@@ -74,7 +72,6 @@ linter:
     unawaited_futures: true
     unnecessary_await_in_return: true
     unnecessary_null_aware_assignments: true
-    unnecessary_nullable_getter: true
     unnecessary_overrides: true
     unnecessary_parenthesis: true
     unnecessary_statements: true

@@ -1,12 +1,14 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart'
+    show ChatBloc;
 
 part 'chat_state.freezed.dart';
 
 /// State for [ChatBloc].
 ///
 /// - [ChatInitial] / [ChatLoading] — initial load
-/// - [ChatLoaded] — messages list is available; [isSending] indicates an
+/// - [ChatLoaded] — messages list is available; `isSending` indicates an
 ///   outgoing message is being persisted
 /// - [ChatError] — terminal error
 @freezed

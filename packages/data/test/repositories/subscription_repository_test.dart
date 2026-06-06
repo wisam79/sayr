@@ -1,25 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
-class MockLocalDatasource extends Mock implements LocalDatasource {}
-
 class MockUser extends Mock implements supabase.User {}
 
 void main() {
   late SubscriptionRepositoryImpl repository;
   late MockRemoteDatasource mockRemote;
-  late MockLocalDatasource mockLocal;
   late MockUser mockUser;
 
   setUp(() {
     mockRemote = MockRemoteDatasource();
-    mockLocal = MockLocalDatasource();
     mockUser = MockUser();
 
     when(() => mockUser.id).thenReturn('student-123');
@@ -27,7 +22,6 @@ void main() {
 
     repository = SubscriptionRepositoryImpl(
       remoteDatasource: mockRemote,
-      localDatasource: mockLocal,
     );
   });
 
@@ -184,8 +178,10 @@ void main() {
         result.fold(
           (failure) {
             expect(failure, isA<BusinessRuleFailure>());
-            expect((failure as BusinessRuleFailure).message,
-                contains('لديك اشتراك نشط'));
+            expect(
+              (failure as BusinessRuleFailure).message,
+              contains('لديك اشتراك نشط'),
+            );
           },
           (_) => fail('should fail'),
         );
@@ -202,8 +198,10 @@ void main() {
         result.fold(
           (failure) {
             expect(failure, isA<BusinessRuleFailure>());
-            expect((failure as BusinessRuleFailure).message,
-                contains('الترخيص غير مفعّل'));
+            expect(
+              (failure as BusinessRuleFailure).message,
+              contains('الترخيص غير مفعّل'),
+            );
           },
           (_) => fail('should fail'),
         );

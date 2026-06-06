@@ -35,14 +35,11 @@
 }
 
 .logo-icon {
-  background-color: var(--primary);
-  color: white;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
 }

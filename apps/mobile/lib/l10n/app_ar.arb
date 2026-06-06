@@ -42,7 +42,7 @@
   "signin": "تسجيل الدخول",
 
   "homeTitle": "الرئيسية",
-  "routesTitle": "الخطوط المتاحة",
+  "routesTitle": "الخطوط",
   "mySubscriptions": "اشتراكاتي",
   "searchRoutes": "البحث عن خط...",
 
@@ -58,7 +58,7 @@
   "expiresOn": "ينتهي في",
   "daysRemaining": "متبقي {days} يوم",
 
-  "profile": "الملف الشخصي",
+  "profile": "حسابي",
   "settings": "الإعدادات",
   "language": "اللغة",
   "chooseLanguage": "اختر اللغة",
@@ -98,9 +98,217 @@
   "help": "المساعدة",
   "privacyPolicy": "سياسة الخصوصية",
 
-  "activeTrips": "الرحلات النشطة",
+  "activeTrips": "الرحلات",
   "noActiveTrips": "لا توجد رحلات نشطة حالياً",
   "activeTripsAvailable": "يوجد رحلات نشطة، اضغط للمتابعة",
   "noRoutesAvailable": "لا توجد خطوط متاحة",
-  "tryAgainLater": "حاول مرة أخرى لاحقاً"
+  "tryAgainLater": "حاول مرة أخرى لاحقاً",
+
+  "helloUser": "مرحباً، {name}",
+  "@helloUser": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "browseRoutes": "تصفح الخطوط",
+  "browseRoutesDesc": "اعثر على خط يناسبك",
+  "createNewTrip": "إنشاء رحلة جديدة",
+  "createNewTripDesc": "ابدأ رحلة على خط مسجل لديك",
+  "myActiveTrips": "رحلاتي النشطة",
+  "myActiveTripsDesc": "عرض وإدارة رحلاتك الجارية",
+  "activeSubscriptionCount": "{count, plural, one{اشتراك واحد} other{{count} اشتراكات}} نشطة",
+  "@activeSubscriptionCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "subscription": "اشتراك",
+  "failedToLoadRoutes": "فشل تحميل الخطوط",
+  "createTrip": "إنشاء رحلة جديدة",
+
+  "validationEmailRequired": "البريد مطلوب",
+  "validationEmailInvalid": "بريد غير صحيح",
+  "validationPasswordRequired": "كلمة المرور مطلوبة",
+  "validationPasswordTooShort": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+  "validationFullNameRequired": "الاسم الكامل مطلوب",
+  "validationPhoneInvalid": "رقم هاتف غير صحيح",
+  "validationPasswordsDoNotMatch": "كلمتا المرور غير متطابقتين",
+
+  "unknownError": "خطأ غير معروف",
+  "passwordResetLinkSent": "تم إرسال رابط استعادة كلمة المرور إلى {email}",
+
+  "skip": "تخطي",
+  "getStarted": "ابدأ",
+  "onboardingTitle1": "تنقل بسهولة",
+  "onboardingDesc1": "احجز اشتراكك على خطوط النقل الجامعي بضغطة زر وتابع رحلتك لحظة بلحظة.",
+  "onboardingTitle2": "تتبع مباشر",
+  "onboardingDesc2": "اعرف موقع الباص في الوقت الحقيقي واحصل على إشعارات عند اقترابه.",
+  "onboardingTitle3": "آمن وموثوق",
+  "onboardingDesc3": "نظام تراخيص مسبق الدفع يضمن لك مقعدك ويحمي حقوقك.",
+
+  "tripTracking": "تتبع الرحلة",
+  "waitingForDriver": "في انتظار السائق...",
+  "start": "البداية",
+  "destination": "الوجهة",
+
+  "routeTitle": "الخط",
+  "tripTime": "وقت الرحلة",
+  "cancel": "إلغاء",
+  "create": "إنشاء",
+  "tripTimeMustBeFuture": "وقت الرحلة يجب أن يكون في المستقبل",
+  "failedToCreateTrip": "فشل إنشاء الرحلة",
+  "noDriverRoutes": "لا توجد خطوط مرتبطة بحسابك",
+  "activeRouteRequired": "يجب توفر خط نشط قبل إنشاء رحلة.",
+  "noTripsYet": "لم تقم بإنشاء أي رحلة بعد",
+  "tripLoadFailed": "فشل تحميل تفاصيل الرحلة",
+  "routeNotFound": "الخط غير موجود",
+  "routeLoadFailed": "فشل تحميل تفاصيل الخط",
+
+  "noSubscriptionsTitle": "لا يوجد اشتراكات",
+  "noSubscriptionsSubtitle": "فعّل ترخيصك الأول للبدء",
+  "subscriptionType": "اشتراك",
+  "subscriptionStatusActive": "نشط",
+  "subscriptionStatusExpired": "منتهي",
+  "subscriptionEndsOn": "ينتهي: {date}",
+  "@subscriptionEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "subscriptionDaysLeft": "متبقي {days} يوم",
+  "@subscriptionDaysLeft": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "cancelSubscription": "إلغاء الاشتراك",
+  "errorOccurred": "حدث خطأ",
+  "pageNotFound": "الصفحة غير موجودة",
+  "version": "الإصدار",
+
+  "payment": "الدفع",
+  "choosePaymentMethod": "اختر طريقة الدفع",
+  "voucher": "بطاقة شحن",
+  "enterVoucherCode": "أدخل كود البطاقة",
+  "processing": "جاري المعالجة...",
+  "paymentSuccess": "تم الدفع بنجاح",
+  "paymentSuccessSubscription": "تم الدفع بنجاح! تم تفعيل اشتراكك",
+  "paymentFailed": "فشل الدفع",
+  "paymentViaZainCash": "الدفع عبر زين كاش",
+  "openZainCash": "افتح زين كاش",
+  "amount": "المبلغ: {amount} {currency}",
+  "@amount": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "currency": {"type": "String"}
+    }
+  },
+  "awaitingPaymentConfirmation": "في انتظار تأكيد الدفع...",
+  "completePaymentInZainCash": "أكمل الدفع في تطبيق زين كاش ثم عد هنا",
+  "unexpectedError": "حدث خطأ غير متوقع",
+  "invalidVoucher": "بطاقة غير صالحة",
+
+  "notifications": "الإشعارات",
+  "noNotifications": "لا توجد إشعارات",
+  "markAllAsRead": "تحديد الكل كمقروء",
+  "loadFailed": "فشل التحميل",
+  "allMarkedAsRead": "تم وضع علامة قراءة على الكل",
+
+  "messageHint": "اكتب رسالة...",
+  "send": "إرسال",
+  "noChats": "لا توجد محادثات بعد",
+  "offline": "غير متصل",
+  "delete": "حذف",
+  "unread": "غير مقروء",
+  "lastMessage": "آخر رسالة",
+  "failedToLoadMessages": "فشل تحميل الرسائل",
+
+  "pullToRefresh": "اسحب للأسفل للتحديث",
+
+  "sendEmergency": "إرسال استغاثة",
+  "emergencyConfirm": "هل أنت في خطر؟",
+  "emergencyConfirmMessage": "هل تريد فعلاً إرسال تنبيه طوارئ؟ سيتم إخطار المسؤولين بموقعك الحالي.",
+  "sending": "جاري الإرسال...",
+  "emergencySent": "تم إرسال الاستغاثة",
+  "emergencySentMessage": "تم إرسال تنبيه الطوارئ. سيتم التواصل معك قريباً.",
+  "emergencyFailed": "فشل الإرسال",
+  "locationUnavailable": "تعذر تحديد موقعك. حاول مجدداً.",
+  "sos": "طوارئ",
+  "sent": "تم الإرسال",
+  "seconds": "{seconds} ثانية",
+  "@seconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "minutes": "{minutes} دقيقة",
+  "@minutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "hours": "{hours} ساعة",
+  "@hours": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+
+  "driverControls": "أدوات السائق",
+  "startTrip": "بدء الرحلة",
+  "endTrip": "إنهاء الرحلة",
+  "confirmStart": "تأكيد البدء",
+  "tripScheduled": "مجدول",
+  "tripInProgress": "قيد التنفيذ",
+  "tripCompleted": "مكتمل",
+  "tripCancelled": "ملغي",
+  "tripControl": "تحكم بالرحلة",
+  "locationPermissionRequired": "يجب السماح بالوصول للموقع",
+  "duration": "المدة: {duration}",
+  "@duration": {
+    "placeholders": {
+      "duration": {"type": "String"}
+    }
+  },
+  "arrive": "وصلت",
+  "begin": "ابدأ",
+  "complete": "أكمل",
+
+  "tripStatusScheduled": "مجدولة",
+  "tripStatusDriverWaiting": "السائق في الانتظار",
+  "tripStatusInTransit": "قيد السير",
+  "tripStatusCompleted": "مكتملة",
+  "tripStatusAbsent": "غياب",
+  "tripStatusCancelled": "ملغاة",
+
+  "completeProfileTitle": "أكمل ملفك الشخصي",
+  "completeProfileSubtitle": "نحتاج بعض المعلومات الإضافية لإكمال تسجيلك",
+  "completeProfile": "إكمال التسجيل",
+  "phoneNumber": "رقم الهاتف",
+  "university": "الجامعة",
+  "noInstitutionsFound": "لا توجد مؤسسات متاحة",
+  "rateTrip": "تقييم الرحلة",
+  "howWasYourTrip": "كيف كانت رحلتك مع السائق؟",
+  "ratingCommentHint": "اكتب ملاحظاتك هنا (اختياري)...",
+  "submitRating": "إرسال التقييم",
+  "ratingSuccess": "شكراً لتقييمك!",
+  "driverDetails": "تفاصيل السائق",
+  "callDriver": "اتصال",
+  "chatDriver": "مراسلة",
+  "etaDistance": "المسافة: {distance} كم • الوصول: {eta} دقيقة",
+  "@etaDistance": {
+    "placeholders": {
+      "distance": {"type": "String"},
+      "eta": {"type": "String"}
+    }
+  },
+  "driverRating": "تقييم السائق: {rating}",
+  "@driverRating": {
+    "placeholders": {
+      "rating": {"type": "String"}
+    }
+  },
+  "ratingFailed": "فشل حفظ التقييم. حاول مجدداً.",
+  "ratingRequired": "يرجى تحديد التقييم بالنجوم"
 }
+

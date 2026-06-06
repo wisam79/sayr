@@ -9,12 +9,6 @@ class SupabaseConfig {
   })  : assert(url != '', 'url cannot be empty'),
         assert(anonKey != '', 'anonKey cannot be empty');
 
-  /// The Supabase project URL.
-  final String url;
-
-  /// The anon (public) API key.
-  final String anonKey;
-
   /// Build from environment variables.
   factory SupabaseConfig.fromEnv() {
     const url = String.fromEnvironment('SUPABASE_URL');
@@ -30,4 +24,10 @@ class SupabaseConfig {
 
     return SupabaseConfig(url: url, anonKey: anonKey);
   }
+
+  /// The Supabase project URL.
+  final String url;
+
+  /// The anon (public) API key.
+  final String anonKey;
 }

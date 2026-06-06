@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
-import '../../../../core/map_config.dart';
+import 'package:sayr_mobile/core/map_config.dart';
 
 /// OpenFreeMap-backed map widget with RTL support.
 class SayrMap extends StatefulWidget {
+  /// Creates a [SayrMap].
   const SayrMap({
     super.key,
     this.initialCameraPosition,
@@ -16,10 +18,19 @@ class SayrMap extends StatefulWidget {
     this.myLocationEnabled = false,
   });
 
+  /// The initial camera position.
   final CameraPosition? initialCameraPosition;
+
+  /// Callback when the map controller is created.
   final void Function(MapLibreMapController)? onMapCreated;
+
+  /// Callback when map is long clicked.
   final void Function(Point<double>, LatLng)? onMapLongClick;
+
+  /// List of markers to place on the map.
   final List<SayrMarker> markers;
+
+  /// Whether current user location is displayed.
   final bool myLocationEnabled;
 
   /// Default center: Baghdad.
@@ -37,7 +48,7 @@ class _SayrMapState extends State<SayrMap> {
     super.initState();
     // Sync markers when controller is ready.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _syncMarkers();
+      unawaited(_syncMarkers());
     });
   }
 
@@ -45,23 +56,31 @@ class _SayrMapState extends State<SayrMap> {
   void didUpdateWidget(SayrMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.markers != widget.markers) {
-      _syncMarkers();
+      unawaited(_syncMarkers());
     }
   }
 
-  void _syncMarkers() {
+  Future<void> _syncMarkers() async {
     final controller = _controller;
     if (controller == null) return;
 
-    controller.clearSymbols();
-    for (final marker in widget.markers) {
-      controller.addSymbol(
-        SymbolOptions(
-          geometry: marker.position,
-          iconImage: marker.iconImage ?? 'bus-icon',
-          iconSize: marker.iconSize ?? 0.08,
-        ),
-      );
+    try {
+      await controller.clearSymbols();
+      for (final marker in widget.markers) {
+        await controller.addSymbol(
+          SymbolOptions(
+            geometry: marker.position,
+            iconImage: marker.iconImage ?? 'bus-icon',
+            iconSize: marker.iconSize ?? 0.08,
+          ),
+        );
+      }
+    } catch (e) {
+      // The symbol manager or channel may not be initialized yet.
+      // Retry in the next frame to prevent runtime crashes.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        unawaited(_syncMarkers());
+      });
     }
   }
 
@@ -78,7 +97,7 @@ class _SayrMapState extends State<SayrMap> {
       onMapCreated: (controller) {
         _controller = controller;
         widget.onMapCreated?.call(controller);
-        _syncMarkers();
+        unawaited(_syncMarkers());
       },
       onMapLongClick: widget.onMapLongClick,
     );
@@ -87,6 +106,7 @@ class _SayrMapState extends State<SayrMap> {
 
 /// A simple marker to display on the map.
 class SayrMarker {
+  /// Creates a [SayrMarker].
   const SayrMarker({
     required this.position,
     this.iconImage,
@@ -94,8 +114,15 @@ class SayrMarker {
     this.data,
   });
 
+  /// Coordinates of the marker.
   final LatLng position;
+
+  /// Optional icon asset name.
   final String? iconImage;
+
+  /// Scale of the icon on map.
   final double? iconSize;
+
+  /// User data payload.
   final Object? data;
 }

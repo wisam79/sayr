@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 

@@ -1,3 +1,7 @@
+import 'package:sayr_core/sayr_core.dart' show TripStateMachine;
+import 'package:sayr_core/src/fsm/trip_state_machine.dart'
+    show TripStateMachine;
+
 /// Trip state machine events.
 ///
 /// Events trigger state transitions. The transition rules

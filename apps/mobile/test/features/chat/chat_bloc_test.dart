@@ -89,10 +89,12 @@ void main() {
         when(() => mockRepo.getMessages(any())).thenAnswer(
           (_) async => Right<Failure, List<Message>>(testMessages),
         );
-        when(() => mockRepo.sendMessage(
-              conversationId: any(named: 'conversationId'),
-              body: any(named: 'body'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.sendMessage(
+            conversationId: any(named: 'conversationId'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
           (_) async => Right<Failure, Message>(
             Message(
               id: const MessageId('msg-2'),
@@ -123,10 +125,12 @@ void main() {
         when(() => mockRepo.getMessages(any())).thenAnswer(
           (_) async => Right<Failure, List<Message>>(testMessages),
         );
-        when(() => mockRepo.sendMessage(
-              conversationId: any(named: 'conversationId'),
-              body: any(named: 'body'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.sendMessage(
+            conversationId: any(named: 'conversationId'),
+            body: any(named: 'body'),
+          ),
+        ).thenAnswer(
           (_) async => const Left<Failure, Message>(
             ServerFailure(message: 'Send failed'),
           ),
@@ -158,10 +162,12 @@ void main() {
         messages: [],
       ),
       act: (bloc) => bloc.add(const ChatMessageSent('   ')),
-      verify: (_) => verifyNever(() => mockRepo.sendMessage(
-            conversationId: any(named: 'conversationId'),
-            body: any(named: 'body'),
-          )),
+      verify: (_) => verifyNever(
+        () => mockRepo.sendMessage(
+          conversationId: any(named: 'conversationId'),
+          body: any(named: 'body'),
+        ),
+      ),
     );
 
     blocTest<ChatBloc, ChatState>(
@@ -188,7 +194,7 @@ void main() {
       'realtime stream updates messages in Loaded state',
       build: () {
         when(() => mockRepo.getMessages(any())).thenAnswer(
-          (_) async => Right<Failure, List<Message>>([]),
+          (_) async => const Right<Failure, List<Message>>([]),
         );
         return ChatBloc(chatRepository: mockRepo);
       },

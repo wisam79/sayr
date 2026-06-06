@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Color Palette - HSL Tokens (Green Emerald & Slate Base) */
-  --primary-h: 161;
-  --primary-s: 84%;
-  --primary-l: 39%; /* #10B981 equivalents */
+  /* Color Palette - HSL Tokens (Green Brand Base) */
+  --primary-h: 127;
+  --primary-s: 63%;
+  --primary-l: 49%; /* #2ECC40 equivalents */
   
   --primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
   --primary-hover: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - 8%));
@@ -45,8 +45,15 @@
   --danger-glow: rgba(239, 68, 68, 0.15);
   
   --warning: #f59e0b;
+  --warning-glow: rgba(245, 158, 11, 0.15);
   --success: #10b981;
+  --success-glow: rgba(16, 185, 129, 0.15);
   --info: #3b82f6;
+  --info-glow: rgba(59, 130, 246, 0.15);
+  --purple: #8b5cf6;
+  --purple-glow: rgba(139, 92, 246, 0.15);
+  --pink: #ec4899;
+  --pink-glow: rgba(236, 72, 153, 0.15);
 
   --sidebar-width: 260px;
   --topbar-height: 70px;
@@ -122,9 +129,9 @@ a:hover {
 }
 
 @keyframes pulseGlow {
-  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(0, 189, 163, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 189, 163, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 189, 163, 0); }
 }
 
 @keyframes shimmer {

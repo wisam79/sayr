@@ -305,13 +305,13 @@ abstract class AppLocalizations {
   /// No description provided for @routesTitle.
   ///
   /// In en, this message translates to:
-  /// **'Available routes'**
+  /// **'Routes'**
   String get routesTitle;
 
   /// No description provided for @mySubscriptions.
   ///
   /// In en, this message translates to:
-  /// **'My subscriptions'**
+  /// **'Subscriptions'**
   String get mySubscriptions;
 
   /// No description provided for @searchRoutes.
@@ -593,7 +593,7 @@ abstract class AppLocalizations {
   /// No description provided for @activeTrips.
   ///
   /// In en, this message translates to:
-  /// **'Active Trips'**
+  /// **'Trips'**
   String get activeTrips;
 
   /// No description provided for @noActiveTrips.
@@ -619,6 +619,810 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again later'**
   String get tryAgainLater;
+
+  /// No description provided for @helloUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String helloUser(String name);
+
+  /// No description provided for @browseRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse routes'**
+  String get browseRoutes;
+
+  /// No description provided for @browseRoutesDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a route that suits you'**
+  String get browseRoutesDesc;
+
+  /// No description provided for @createNewTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new trip'**
+  String get createNewTrip;
+
+  /// No description provided for @createNewTripDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a trip on a registered route'**
+  String get createNewTripDesc;
+
+  /// No description provided for @myActiveTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'My active trips'**
+  String get myActiveTrips;
+
+  /// No description provided for @myActiveTripsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'View and manage your active trips'**
+  String get myActiveTripsDesc;
+
+  /// No description provided for @activeSubscriptionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} subscription active} other{{count} subscriptions active}}'**
+  String activeSubscriptionCount(int count);
+
+  /// No description provided for @subscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscription;
+
+  /// No description provided for @failedToLoadRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load routes'**
+  String get failedToLoadRoutes;
+
+  /// No description provided for @createTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new trip'**
+  String get createTrip;
+
+  /// No description provided for @validationEmailRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Email is required'**
+  String get validationEmailRequired;
+
+  /// No description provided for @validationEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email'**
+  String get validationEmailInvalid;
+
+  /// No description provided for @validationPasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get validationPasswordRequired;
+
+  /// No description provided for @validationPasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get validationPasswordTooShort;
+
+  /// No description provided for @validationFullNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name is required'**
+  String get validationFullNameRequired;
+
+  /// No description provided for @validationPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid phone number'**
+  String get validationPhoneInvalid;
+
+  /// No description provided for @validationPasswordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get validationPasswordsDoNotMatch;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get unknownError;
+
+  /// No description provided for @passwordResetLinkSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset link sent to {email}'**
+  String passwordResetLinkSent(String email);
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get getStarted;
+
+  /// No description provided for @onboardingTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel with ease'**
+  String get onboardingTitle1;
+
+  /// No description provided for @onboardingDesc1.
+  ///
+  /// In en, this message translates to:
+  /// **'Book your university transit subscription with one tap and track your trip live.'**
+  String get onboardingDesc1;
+
+  /// No description provided for @onboardingTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Live tracking'**
+  String get onboardingTitle2;
+
+  /// No description provided for @onboardingDesc2.
+  ///
+  /// In en, this message translates to:
+  /// **'See the bus location in real time and get notified when it approaches.'**
+  String get onboardingDesc2;
+
+  /// No description provided for @onboardingTitle3.
+  ///
+  /// In en, this message translates to:
+  /// **'Safe and reliable'**
+  String get onboardingTitle3;
+
+  /// No description provided for @onboardingDesc3.
+  ///
+  /// In en, this message translates to:
+  /// **'A pre-paid license system secures your seat and protects your rights.'**
+  String get onboardingDesc3;
+
+  /// No description provided for @tripTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip tracking'**
+  String get tripTracking;
+
+  /// No description provided for @waitingForDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the driver...'**
+  String get waitingForDriver;
+
+  /// No description provided for @start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get start;
+
+  /// No description provided for @destination.
+  ///
+  /// In en, this message translates to:
+  /// **'Destination'**
+  String get destination;
+
+  /// No description provided for @routeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get routeTitle;
+
+  /// No description provided for @tripTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip time'**
+  String get tripTime;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @tripTimeMustBeFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip time must be in the future'**
+  String get tripTimeMustBeFuture;
+
+  /// No description provided for @failedToCreateTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create trip'**
+  String get failedToCreateTrip;
+
+  /// No description provided for @noDriverRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'No routes assigned to your account'**
+  String get noDriverRoutes;
+
+  /// No description provided for @activeRouteRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You need an active route before creating a trip.'**
+  String get activeRouteRequired;
+
+  /// No description provided for @noTripsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t created any trips yet'**
+  String get noTripsYet;
+
+  /// No description provided for @tripLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load trip details'**
+  String get tripLoadFailed;
+
+  /// No description provided for @routeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Route not found'**
+  String get routeNotFound;
+
+  /// No description provided for @routeLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load route details'**
+  String get routeLoadFailed;
+
+  /// No description provided for @noSubscriptionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscriptions yet'**
+  String get noSubscriptionsTitle;
+
+  /// No description provided for @noSubscriptionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate your first license to get started'**
+  String get noSubscriptionsSubtitle;
+
+  /// No description provided for @subscriptionType.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get subscriptionType;
+
+  /// No description provided for @subscriptionStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get subscriptionStatusActive;
+
+  /// No description provided for @subscriptionStatusExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Expired'**
+  String get subscriptionStatusExpired;
+
+  /// No description provided for @subscriptionEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends on: {date}'**
+  String subscriptionEndsOn(String date);
+
+  /// No description provided for @subscriptionDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left'**
+  String subscriptionDaysLeft(int days);
+
+  /// No description provided for @cancelSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel subscription'**
+  String get cancelSubscription;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred'**
+  String get errorOccurred;
+
+  /// No description provided for @pageNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Page not found'**
+  String get pageNotFound;
+
+  /// No description provided for @version.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get version;
+
+  /// No description provided for @payment.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get payment;
+
+  /// No description provided for @choosePaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose payment method'**
+  String get choosePaymentMethod;
+
+  /// No description provided for @voucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher'**
+  String get voucher;
+
+  /// No description provided for @enterVoucherCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter voucher code'**
+  String get enterVoucherCode;
+
+  /// No description provided for @processing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing...'**
+  String get processing;
+
+  /// No description provided for @paymentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment successful'**
+  String get paymentSuccess;
+
+  /// No description provided for @paymentSuccessSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment successful! Your subscription is now active'**
+  String get paymentSuccessSubscription;
+
+  /// No description provided for @paymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed'**
+  String get paymentFailed;
+
+  /// No description provided for @paymentViaZainCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay via Zain Cash'**
+  String get paymentViaZainCash;
+
+  /// No description provided for @openZainCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Zain Cash'**
+  String get openZainCash;
+
+  /// No description provided for @amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount: {amount} {currency}'**
+  String amount(String amount, String currency);
+
+  /// No description provided for @awaitingPaymentConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Awaiting payment confirmation...'**
+  String get awaitingPaymentConfirmation;
+
+  /// No description provided for @completePaymentInZainCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the payment in Zain Cash app then return here'**
+  String get completePaymentInZainCash;
+
+  /// No description provided for @unexpectedError.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred'**
+  String get unexpectedError;
+
+  /// No description provided for @invalidVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid voucher'**
+  String get invalidVoucher;
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get noNotifications;
+
+  /// No description provided for @markAllAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get markAllAsRead;
+
+  /// No description provided for @loadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load'**
+  String get loadFailed;
+
+  /// No description provided for @allMarkedAsRead.
+  ///
+  /// In en, this message translates to:
+  /// **'All notifications marked as read'**
+  String get allMarkedAsRead;
+
+  /// No description provided for @messageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get messageHint;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @noChats.
+  ///
+  /// In en, this message translates to:
+  /// **'No chats yet'**
+  String get noChats;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @unread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get unread;
+
+  /// No description provided for @lastMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Last message'**
+  String get lastMessage;
+
+  /// No description provided for @failedToLoadMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load messages'**
+  String get failedToLoadMessages;
+
+  /// No description provided for @pullToRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to refresh'**
+  String get pullToRefresh;
+
+  /// No description provided for @sendEmergency.
+  ///
+  /// In en, this message translates to:
+  /// **'Send emergency'**
+  String get sendEmergency;
+
+  /// No description provided for @emergencyConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you in danger?'**
+  String get emergencyConfirm;
+
+  /// No description provided for @emergencyConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you really want to send an emergency alert? Officials will be notified of your current location.'**
+  String get emergencyConfirmMessage;
+
+  /// No description provided for @sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get sending;
+
+  /// No description provided for @emergencySent.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency sent'**
+  String get emergencySent;
+
+  /// No description provided for @emergencySentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your emergency alert has been sent. We will contact you soon.'**
+  String get emergencySentMessage;
+
+  /// No description provided for @emergencyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send'**
+  String get emergencyFailed;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to determine your location. Please try again.'**
+  String get locationUnavailable;
+
+  /// No description provided for @sos.
+  ///
+  /// In en, this message translates to:
+  /// **'SOS'**
+  String get sos;
+
+  /// No description provided for @sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get sent;
+
+  /// No description provided for @seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} seconds'**
+  String seconds(int seconds);
+
+  /// No description provided for @minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes'**
+  String minutes(int minutes);
+
+  /// No description provided for @hours.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours'**
+  String hours(int hours);
+
+  /// No description provided for @driverControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver controls'**
+  String get driverControls;
+
+  /// No description provided for @startTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Start trip'**
+  String get startTrip;
+
+  /// No description provided for @endTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'End trip'**
+  String get endTrip;
+
+  /// No description provided for @confirmStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm start'**
+  String get confirmStart;
+
+  /// No description provided for @tripScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get tripScheduled;
+
+  /// No description provided for @tripInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get tripInProgress;
+
+  /// No description provided for @tripCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tripCompleted;
+
+  /// No description provided for @tripCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get tripCancelled;
+
+  /// No description provided for @tripControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip control'**
+  String get tripControl;
+
+  /// No description provided for @locationPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is required'**
+  String get locationPermissionRequired;
+
+  /// No description provided for @duration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration: {duration}'**
+  String duration(String duration);
+
+  /// No description provided for @arrive.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived'**
+  String get arrive;
+
+  /// No description provided for @begin.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin'**
+  String get begin;
+
+  /// No description provided for @complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get complete;
+
+  /// No description provided for @tripStatusScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get tripStatusScheduled;
+
+  /// No description provided for @tripStatusDriverWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver waiting'**
+  String get tripStatusDriverWaiting;
+
+  /// No description provided for @tripStatusInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'In transit'**
+  String get tripStatusInTransit;
+
+  /// No description provided for @tripStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tripStatusCompleted;
+
+  /// No description provided for @tripStatusAbsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Absent'**
+  String get tripStatusAbsent;
+
+  /// No description provided for @tripStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get tripStatusCancelled;
+
+  /// No description provided for @completeProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Your Profile'**
+  String get completeProfileTitle;
+
+  /// No description provided for @completeProfileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We need a few more details to finish setting up your account'**
+  String get completeProfileSubtitle;
+
+  /// No description provided for @completeProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete Registration'**
+  String get completeProfile;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @university.
+  ///
+  /// In en, this message translates to:
+  /// **'University'**
+  String get university;
+
+  /// No description provided for @noInstitutionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No institutions available'**
+  String get noInstitutionsFound;
+
+  /// No description provided for @rateTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Trip'**
+  String get rateTrip;
+
+  /// No description provided for @howWasYourTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'How was your trip with the driver?'**
+  String get howWasYourTrip;
+
+  /// No description provided for @ratingCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your comments here (optional)...'**
+  String get ratingCommentHint;
+
+  /// No description provided for @submitRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Rating'**
+  String get submitRating;
+
+  /// No description provided for @ratingSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for your rating!'**
+  String get ratingSuccess;
+
+  /// No description provided for @driverDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Details'**
+  String get driverDetails;
+
+  /// No description provided for @callDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get callDriver;
+
+  /// No description provided for @chatDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get chatDriver;
+
+  /// No description provided for @etaDistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance: {distance} km • Arrival: {eta} min'**
+  String etaDistance(String distance, String eta);
+
+  /// No description provided for @driverRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Rating: {rating}'**
+  String driverRating(String rating);
+
+  /// No description provided for @ratingFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save rating. Try again.'**
+  String get ratingFailed;
+
+  /// No description provided for @ratingRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a star rating'**
+  String get ratingRequired;
 }
 
 class _AppLocalizationsDelegate

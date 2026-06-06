@@ -1,88 +1,101 @@
 import 'package:flutter/material.dart' hide Route;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/di/di.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/route_details_cubit.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../di/di.dart';
-import '../../../../l10n/app_localizations.dart';
-
 /// Page showing detailed information about a single route.
-class RouteDetailsPage extends StatefulWidget {
+class RouteDetailsPage extends StatelessWidget {
+  /// Creates a [RouteDetailsPage].
   const RouteDetailsPage({this.route, this.routeId, super.key});
 
+  /// The route object if passed directly.
   final Route? route;
+
+  /// The route ID to load dynamically.
   final RouteId? routeId;
 
   @override
-  State<RouteDetailsPage> createState() => _RouteDetailsPageState();
+  Widget build(BuildContext context) {
+    if (route != null) {
+      return _RouteDetailsContent(initialRoute: route);
+    }
+    if (routeId != null) {
+      return BlocProvider(
+        create: (_) => RouteDetailsCubit(
+          routeRepository: sl<RouteRepository>(),
+        )..loadRoute(routeId!),
+        child: _RouteDetailsContent(routeId: routeId),
+      );
+    }
+    return const _RouteNotFound();
+  }
 }
 
-class _RouteDetailsPageState extends State<RouteDetailsPage> {
-  Route? _route;
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.route != null) {
-      _route = widget.route;
-    } else if (widget.routeId != null) {
-      _loadRoute();
-    }
-  }
-
-  Future<void> _loadRoute() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final result = await sl<RouteRepository>().getById(widget.routeId!);
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-        result.fold(
-          (failure) =>
-              _errorMessage = failure.message ?? 'فشل تحميل تفاصيل الخط',
-          (r) => _route = r,
+class _RouteDetailsContent extends StatelessWidget {
+  const _RouteDetailsContent({this.initialRoute, this.routeId})
+      : assert(
+          initialRoute != null || routeId != null,
+          'Either initialRoute or routeId must be provided',
         );
-      });
-    }
-  }
+
+  final Route? initialRoute;
+  final RouteId? routeId;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    return BlocBuilder<RouteDetailsCubit, RouteDetailsState>(
+      builder: (context, state) {
+        if (state is RouteDetailsLoaded) {
+          return _RouteDetailsBody(route: state.route);
+        }
+        if (state is RouteDetailsLoading) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.routeDetails)),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (state is RouteDetailsError) {
+          return Scaffold(
+            appBar: AppBar(title: Text(l10n.routeDetails)),
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(state.message),
+                  const SizedBox(height: AppSpacing.md),
+                  if (routeId != null)
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<RouteDetailsCubit>().loadRoute(routeId!),
+                      child: Text(l10n.retry),
+                    ),
+                ],
+              ),
+            ),
+          );
+        }
+        if (initialRoute != null) {
+          return _RouteDetailsBody(route: initialRoute!);
+        }
+        return const _RouteNotFound();
+      },
+    );
+  }
+}
 
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('تفاصيل الخط')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+class _RouteDetailsBody extends StatelessWidget {
+  const _RouteDetailsBody({required this.route});
 
-    if (_errorMessage != null || _route == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('تفاصيل الخط')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(_errorMessage ?? 'الخط غير موجود'),
-              const SizedBox(height: AppSpacing.md),
-              if (widget.routeId != null)
-                ElevatedButton(
-                  onPressed: _loadRoute,
-                  child: const Text('إعادة المحاولة'),
-                ),
-            ],
-          ),
-        ),
-      );
-    }
+  final Route route;
 
-    final route = _route!;
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -101,43 +114,34 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
                   children: [
                     Row(
                       children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: const BoxDecoration(
-                            color: AppColors.success,
-                            shape: BoxShape.circle,
-                          ),
+                        const Icon(
+                          Icons.directions_bus,
+                          color: AppColors.primary,
+                          size: 32,
                         ),
-                        const SizedBox(width: AppSpacing.sm),
+                        const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: Text(
-                            route.title,
-                            style: Theme.of(context).textTheme.headlineSmall,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                route.title,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                '${route.startLocation} → ${route.endLocation}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    _LocationInfo(
-                      icon: Icons.radio_button_checked,
-                      color: AppColors.primary,
-                      label: l10n.startLocation,
-                      value: route.startLocation,
-                    ),
-                    const Padding(
-                      padding: EdgeInsetsDirectional.only(start: 5),
-                      child: VerticalDivider(
-                        width: 24,
-                        thickness: 2,
-                        color: AppColors.border,
-                      ),
-                    ),
-                    _LocationInfo(
-                      icon: Icons.flag,
-                      color: AppColors.secondary,
-                      label: l10n.endLocation,
-                      value: route.endLocation,
                     ),
                   ],
                 ),
@@ -145,80 +149,57 @@ class _RouteDetailsPageState extends State<RouteDetailsPage> {
             ),
             const SizedBox(height: AppSpacing.lg),
             Card(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.routeDetails,
-                      style: Theme.of(context).textTheme.titleMedium,
+              child: Column(
+                children: [
+                  _InfoTile(
+                    icon: Icons.attach_money,
+                    color: AppColors.success,
+                    label: l10n.price,
+                    value: route.price.format(),
+                  ),
+                  const Divider(height: 1, indent: 56),
+                  _InfoTile(
+                    icon: Icons.event_seat,
+                    color: AppColors.primary,
+                    label: l10n.availableSeats,
+                    value: '${route.availableSeats} / ${route.capacity}',
+                  ),
+                  if (route.departureTime != null) ...[
+                    const Divider(height: 1, indent: 56),
+                    _InfoTile(
+                      icon: Icons.schedule,
+                      color: AppColors.primary,
+                      label: l10n.departureTime,
+                      value: route.departureTime!,
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _DetailRow(
-                      icon: Icons.attach_money,
-                      label: l10n.price,
-                      value: route.price.format(),
-                    ),
-                    _DetailRow(
-                      icon: Icons.event_seat,
-                      label: l10n.availableSeats,
-                      value: '${route.availableSeats} / ${route.capacity}',
-                    ),
-                    if (route.departureTime != null)
-                      _DetailRow(
-                        icon: Icons.schedule,
-                        label: l10n.departureTime,
-                        value: route.departureTime!,
-                      ),
-                    if (route.returnTime != null)
-                      _DetailRow(
-                        icon: Icons.schedule_send,
-                        label: l10n.returnTime,
-                        value: route.returnTime!,
-                      ),
-                    if (route.daysOfWeek.isNotEmpty)
-                      _DetailRow(
-                        icon: Icons.calendar_today,
-                        label: l10n.operatingDays,
-                        value: _formatDays(route.daysOfWeek),
-                      ),
                   ],
-                ),
+                  if (route.returnTime != null) ...[
+                    const Divider(height: 1, indent: 56),
+                    _InfoTile(
+                      icon: Icons.access_time,
+                      color: AppColors.primary,
+                      label: l10n.returnTime,
+                      value: route.returnTime!,
+                    ),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
               label: l10n.subscribe,
+              onPressed: () => context.push('/activate-license', extra: route),
               icon: Icons.confirmation_number,
-              onPressed: route.hasSeats
-                  ? () => context.push(
-                        '/payment/${route.id.value}/${route.price.inIQD}',
-                      )
-                  : null,
             ),
           ],
         ),
       ),
     );
   }
-
-  String _formatDays(List<String> days) {
-    const dayMap = {
-      'sun': 'الأحد',
-      'mon': 'الإثنين',
-      'tue': 'الثلاثاء',
-      'wed': 'الأربعاء',
-      'thu': 'الخميس',
-      'fri': 'الجمعة',
-      'sat': 'السبت',
-    };
-    return days.map((d) => dayMap[d] ?? d).join('، ');
-  }
 }
 
-class _LocationInfo extends StatelessWidget {
-  const _LocationInfo({
+class _InfoTile extends StatelessWidget {
+  const _InfoTile({
     required this.icon,
     required this.color,
     required this.label,
@@ -232,65 +213,23 @@ class _LocationInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
-        ),
-      ],
+    return ListTile(
+      leading: Icon(icon, color: color),
+      title: Text(label),
+      trailing: Text(value),
     );
   }
 }
 
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
+class _RouteNotFound extends StatelessWidget {
+  const _RouteNotFound();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.textSecondary),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-          ),
-        ],
-      ),
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.routeDetails)),
+      body: Center(child: Text(l10n.routeNotFound)),
     );
   }
 }

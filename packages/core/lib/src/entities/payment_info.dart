@@ -9,8 +9,8 @@ abstract class PaymentInfo with _$PaymentInfo {
   const factory PaymentInfo({
     required String id,
     required String status,
-    @Default('') @JsonKey(name: 'payment_url') String paymentUrl,
     required int amount,
+    @Default('') @JsonKey(name: 'payment_url') String paymentUrl,
     @Default('IQD') String currency,
     @Default('') @JsonKey(name: 'subscription_id') String subscriptionId,
   }) = _PaymentInfo;

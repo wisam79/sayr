@@ -2,21 +2,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import '../datasources/remote_datasource.dart';
-import '../datasources/local_datasource.dart';
-import '../models/subscription_model.dart';
+import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/subscription_model.dart';
 
-/// Concrete implementation of SubscriptionRepository using Remote and Local data sources.
+/// Concrete implementation of SubscriptionRepository using Remote data source.
 @LazySingleton(as: SubscriptionRepository)
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
-  final RemoteDatasource _remoteDatasource;
-  final LocalDatasource _localDatasource;
-
   SubscriptionRepositoryImpl({
     required RemoteDatasource remoteDatasource,
-    required LocalDatasource localDatasource,
-  })  : _remoteDatasource = remoteDatasource,
-        _localDatasource = localDatasource;
+  }) : _remoteDatasource = remoteDatasource;
+  final RemoteDatasource _remoteDatasource;
 
   @override
   Future<Either<Failure, List<Subscription>>> getMySubscriptions() async {
@@ -60,7 +55,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
 
   @override
   Future<Either<Failure, SubscriptionId>> activateLicense(
-      LicenseCode code) async {
+    LicenseCode code,
+  ) async {
     try {
       final response = await _remoteDatasource.activateLicense(code.value);
       return Right<Failure, SubscriptionId>(SubscriptionId(response));
@@ -70,9 +66,11 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
         return const Left(RateLimitFailure());
       }
       if (message.contains('already have an active subscription')) {
-        return const Left(BusinessRuleFailure(
-          message: 'لديك اشتراك نشط بالفعل على هذا الخط',
-        ));
+        return const Left(
+          BusinessRuleFailure(
+            message: 'لديك اشتراك نشط بالفعل على هذا الخط',
+          ),
+        );
       }
       if (message.contains('not active')) {
         return const Left(BusinessRuleFailure(message: 'الترخيص غير مفعّل'));

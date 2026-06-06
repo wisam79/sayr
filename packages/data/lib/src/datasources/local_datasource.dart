@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-import '../local/app_database.dart';
-import '../local/location_queue_dao.dart';
-import '../storage/secure_storage.dart';
+import 'package:sayr_data/src/local/app_database.dart';
+import 'package:sayr_data/src/local/location_queue_dao.dart';
+import 'package:sayr_data/src/storage/secure_storage.dart';
 
 abstract class LocalDatasource {
   // Secure Storage
@@ -16,10 +16,11 @@ abstract class LocalDatasource {
   Future<void> clearSecureStorage();
 
   // Location Queue
-  Future<void> enqueueLocation(
-      {required String tripId,
-      required double latitude,
-      required double longitude});
+  Future<void> enqueueLocation({
+    required String tripId,
+    required double latitude,
+    required double longitude,
+  });
   Future<List<PendingLocationUpdateData>> getPendingLocations();
   Future<void> markLocationsSynced(List<int> ids);
   Future<void> cleanupOldLocations({int daysOld = 7});
@@ -29,21 +30,28 @@ abstract class LocalDatasource {
   Future<void> cacheTrips(List<Trip> trips);
   Future<List<Trip>> getCachedTrips();
   Future<void> clearCachedTrips();
+
+  // Route Cache
+  Future<void> cacheRoutes(List<Route> routes);
+  Future<List<Route>> getCachedRoutes();
+  Future<void> clearCachedRoutes();
 }
 
 @LazySingleton(as: LocalDatasource)
 class LocalDatasourceImpl implements LocalDatasource {
-  final SecureStorageService _secureStorage;
-  final LocationQueueDao _locationQueueDao;
-  final TripCacheDao _tripCacheDao;
-
   LocalDatasourceImpl({
     SecureStorageService? secureStorage,
     LocationQueueDao? locationQueueDao,
     TripCacheDao? tripCacheDao,
+    RouteCacheDao? routeCacheDao,
   })  : _secureStorage = secureStorage ?? SecureStorageService(),
         _locationQueueDao = locationQueueDao ?? LocationQueueDao(),
-        _tripCacheDao = tripCacheDao ?? TripCacheDao();
+        _tripCacheDao = tripCacheDao ?? TripCacheDao(),
+        _routeCacheDao = routeCacheDao ?? RouteCacheDao();
+  final SecureStorageService _secureStorage;
+  final LocationQueueDao _locationQueueDao;
+  final TripCacheDao _tripCacheDao;
+  final RouteCacheDao _routeCacheDao;
 
   // Secure Storage
   @override
@@ -70,12 +78,16 @@ class LocalDatasourceImpl implements LocalDatasource {
 
   // Location Queue
   @override
-  Future<void> enqueueLocation(
-      {required String tripId,
-      required double latitude,
-      required double longitude}) {
+  Future<void> enqueueLocation({
+    required String tripId,
+    required double latitude,
+    required double longitude,
+  }) {
     return _locationQueueDao.enqueue(
-        tripId: tripId, latitude: latitude, longitude: longitude);
+      tripId: tripId,
+      latitude: latitude,
+      longitude: longitude,
+    );
   }
 
   @override
@@ -102,4 +114,15 @@ class LocalDatasourceImpl implements LocalDatasource {
 
   @override
   Future<void> clearCachedTrips() => _tripCacheDao.clear();
+
+  // Route Cache
+  @override
+  Future<void> cacheRoutes(List<Route> routes) =>
+      _routeCacheDao.cacheRoutes(routes);
+
+  @override
+  Future<List<Route>> getCachedRoutes() => _routeCacheDao.getCachedRoutes();
+
+  @override
+  Future<void> clearCachedRoutes() => _routeCacheDao.clear();
 }

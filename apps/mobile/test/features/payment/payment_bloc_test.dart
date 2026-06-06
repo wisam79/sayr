@@ -12,8 +12,8 @@ class MockTripRepository extends Mock implements TripRepository {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(RouteId('fallback'));
-    registerFallbackValue(TripId('fallback'));
+    registerFallbackValue(const RouteId('fallback'));
+    registerFallbackValue(const TripId('fallback'));
   });
 
   late MockTripRepository mockRepo;
@@ -28,40 +28,33 @@ void main() {
     bloc.close();
   });
 
-  final testPayment = PaymentInfo(
+  const testPayment = PaymentInfo(
     id: 'pay-1',
     status: 'pending',
     paymentUrl: 'https://zaincash.example.com/pay/123',
     amount: 50000,
-    currency: 'IQD',
-    subscriptionId: '',
   );
 
-  final completedPayment = PaymentInfo(
+  const completedPayment = PaymentInfo(
     id: 'pay-1',
     status: 'completed',
     paymentUrl: 'https://zaincash.example.com/pay/123',
     amount: 50000,
-    currency: 'IQD',
     subscriptionId: 'sub-1',
   );
 
-  final failedPayment = PaymentInfo(
+  const failedPayment = PaymentInfo(
     id: 'pay-1',
     status: 'failed',
     paymentUrl: 'https://zaincash.example.com/pay/123',
     amount: 50000,
-    currency: 'IQD',
-    subscriptionId: '',
   );
 
-  final expiredPayment = PaymentInfo(
+  const expiredPayment = PaymentInfo(
     id: 'pay-1',
     status: 'expired',
     paymentUrl: 'https://zaincash.example.com/pay/123',
     amount: 50000,
-    currency: 'IQD',
-    subscriptionId: '',
   );
 
   group('PaymentBloc', () {
@@ -70,26 +63,31 @@ void main() {
     });
 
     blocTest<PaymentBloc, PaymentState>(
-      'emits [Loading, UrlReady, AwaitingCompletion] when payment creation succeeds',
+      'emits [Loading, UrlReady, AwaitingCompletion] '
+      'when payment creation succeeds',
       build: () {
-        when(() => mockRepo.createPayment(
-              routeId: any(named: 'routeId'),
-              amount: any(named: 'amount'),
-              currency: any(named: 'currency'),
-              method: any(named: 'method'),
-            )).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(testPayment),
+        when(
+          () => mockRepo.createPayment(
+            routeId: any(named: 'routeId'),
+            amount: any(named: 'amount'),
+            currency: any(named: 'currency'),
+            method: any(named: 'method'),
+          ),
+        ).thenAnswer(
+          (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
         when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(testPayment),
+          (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },
-      act: (bloc) => bloc.add(const PaymentStartZainCash(
-        routeId: RouteId('route-1'),
-        amount: 50000,
-        currency: 'IQD',
-      )),
+      act: (bloc) => bloc.add(
+        const PaymentStartZainCash(
+          routeId: RouteId('route-1'),
+          amount: 50000,
+          currency: 'IQD',
+        ),
+      ),
       expect: () => [
         isA<PaymentLoading>(),
         isA<PaymentUrlReady>().having(
@@ -104,23 +102,27 @@ void main() {
     blocTest<PaymentBloc, PaymentState>(
       'emits [Loading, Failed] when payment creation fails',
       build: () {
-        when(() => mockRepo.createPayment(
-              routeId: any(named: 'routeId'),
-              amount: any(named: 'amount'),
-              currency: any(named: 'currency'),
-              method: any(named: 'method'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.createPayment(
+            routeId: any(named: 'routeId'),
+            amount: any(named: 'amount'),
+            currency: any(named: 'currency'),
+            method: any(named: 'method'),
+          ),
+        ).thenAnswer(
           (_) async => const Left<Failure, PaymentInfo>(
             ServerFailure(message: 'Payment gateway error'),
           ),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },
-      act: (bloc) => bloc.add(const PaymentStartZainCash(
-        routeId: RouteId('route-1'),
-        amount: 50000,
-        currency: 'IQD',
-      )),
+      act: (bloc) => bloc.add(
+        const PaymentStartZainCash(
+          routeId: RouteId('route-1'),
+          amount: 50000,
+          currency: 'IQD',
+        ),
+      ),
       expect: () => [
         isA<PaymentLoading>(),
         isA<PaymentFailed>(),
@@ -138,7 +140,7 @@ void main() {
       'polling: payment status "completed" emits Success with SubscriptionId',
       build: () {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(completedPayment),
+          (_) async => const Right<Failure, PaymentInfo>(completedPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },
@@ -157,7 +159,7 @@ void main() {
       'polling: payment status "failed" emits Failed',
       build: () {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(failedPayment),
+          (_) async => const Right<Failure, PaymentInfo>(failedPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },
@@ -172,7 +174,7 @@ void main() {
       'polling: payment status "expired" emits Failed',
       build: () {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(expiredPayment),
+          (_) async => const Right<Failure, PaymentInfo>(expiredPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },
@@ -202,7 +204,7 @@ void main() {
       'close() cancels the poll timer',
       build: () {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(testPayment),
+          (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },
@@ -221,7 +223,7 @@ void main() {
       'reset cancels active timer',
       build: () {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
-          (_) async => Right<Failure, PaymentInfo>(testPayment),
+          (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
         return PaymentBloc(tripRepository: mockRepo);
       },

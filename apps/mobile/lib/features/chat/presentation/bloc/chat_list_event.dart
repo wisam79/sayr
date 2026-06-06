@@ -2,6 +2,7 @@ part of 'chat_list_bloc.dart';
 
 /// Public events for [ChatListBloc].
 sealed class ChatListEvent extends Equatable {
+  /// Constructor for [ChatListEvent].
   const ChatListEvent();
 
   @override
@@ -10,16 +11,19 @@ sealed class ChatListEvent extends Equatable {
 
 /// Initial load + start realtime subscription.
 class ChatListLoadRequested extends ChatListEvent {
+  /// Creates a [ChatListLoadRequested] event.
   const ChatListLoadRequested();
 }
 
 /// Manual refresh (pull-to-refresh / retry).
 class ChatListRefreshRequested extends ChatListEvent {
+  /// Creates a [ChatListRefreshRequested] event.
   const ChatListRefreshRequested();
 }
 
 /// Stop the realtime subscription and reset state.
 class ChatListClosed extends ChatListEvent {
+  /// Creates a [ChatListClosed] event.
   const ChatListClosed();
 }
 

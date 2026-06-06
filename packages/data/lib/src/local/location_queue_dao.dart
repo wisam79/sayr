@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'app_database.dart';
-import 'tables.dart';
+import 'package:sayr_data/src/local/app_database.dart';
 
 /// DAO for offline location queue operations.
 class LocationQueueDao {
+  /// Creates a [LocationQueueDao].
   LocationQueueDao({AppDatabase? db}) : _db = db ?? AppDatabase();
 
   final AppDatabase _db;
@@ -43,8 +43,10 @@ class LocationQueueDao {
   Future<void> cleanupOld({int daysOld = 7}) async {
     final cutoff = DateTime.now().subtract(Duration(days: daysOld));
     await (_db.delete(_db.pendingLocationUpdate)
-          ..where((t) =>
-              t.synced.equals(true) & t.createdAt.isSmallerThanValue(cutoff)))
+          ..where(
+            (t) =>
+                t.synced.equals(true) & t.createdAt.isSmallerThanValue(cutoff),
+          ))
         .go();
   }
 
@@ -61,6 +63,7 @@ class LocationQueueDao {
 
 /// DAO for cached trip data.
 class TripCacheDao {
+  /// Creates a [TripCacheDao].
   TripCacheDao({AppDatabase? db}) : _db = db ?? AppDatabase();
 
   final AppDatabase _db;
@@ -116,6 +119,79 @@ class TripCacheDao {
               longitude: row.lastLng!,
             )
           : null,
+    );
+  }
+}
+
+/// DAO for cached route data.
+class RouteCacheDao {
+  /// Creates a [RouteCacheDao].
+  RouteCacheDao({AppDatabase? db}) : _db = db ?? AppDatabase();
+
+  final AppDatabase _db;
+
+  /// Cache a list of routes.
+  Future<void> cacheRoutes(List<Route> routes) async {
+    await _db.batch((batch) {
+      batch.insertAll(
+        _db.cachedRoute,
+        routes.map(_routeToCompanion),
+        mode: InsertMode.insertOrReplace,
+      );
+    });
+  }
+
+  /// Get all cached routes.
+  Future<List<Route>> getCachedRoutes() async {
+    final rows = await _db.select(_db.cachedRoute).get();
+    return rows.map(_rowToRoute).toList();
+  }
+
+  /// Clear all cached routes.
+  Future<void> clear() async {
+    await _db.delete(_db.cachedRoute).go();
+  }
+
+  CachedRouteCompanion _routeToCompanion(Route route) {
+    return CachedRouteCompanion.insert(
+      id: route.id.value,
+      driverId: route.driverId.value,
+      title: route.title,
+      startLocation: route.startLocation,
+      endLocation: route.endLocation,
+      priceAmount: route.price.inIQD,
+      priceCurrency: const Value('IQD'),
+      capacity: route.capacity,
+      availableSeats: route.availableSeats,
+      isActive: route.isActive,
+      startLat: Value(route.startCoordinates?.latitude),
+      startLng: Value(route.startCoordinates?.longitude),
+      endLat: Value(route.endCoordinates?.latitude),
+      endLng: Value(route.endCoordinates?.longitude),
+      departureTime: Value(route.departureTime),
+      returnTime: Value(route.returnTime),
+    );
+  }
+
+  Route _rowToRoute(CachedRouteData row) {
+    return Route(
+      id: RouteId(row.id),
+      driverId: DriverId(row.driverId),
+      title: row.title,
+      startLocation: row.startLocation,
+      endLocation: row.endLocation,
+      price: Money(row.priceAmount),
+      capacity: row.capacity,
+      availableSeats: row.availableSeats,
+      isActive: row.isActive,
+      startCoordinates: (row.startLat != null && row.startLng != null)
+          ? Coordinates(latitude: row.startLat!, longitude: row.startLng!)
+          : null,
+      endCoordinates: (row.endLat != null && row.endLng != null)
+          ? Coordinates(latitude: row.endLat!, longitude: row.endLng!)
+          : null,
+      departureTime: row.departureTime,
+      returnTime: row.returnTime,
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../value_objects/ids.dart';
-import '../utils/json_converters.dart';
+import 'package:sayr_core/src/utils/json_converters.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'notification.freezed.dart';
 part 'notification.g.dart';

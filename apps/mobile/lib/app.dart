@@ -1,34 +1,40 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_mobile/core/app_bloc_observer.dart';
+import 'package:sayr_mobile/core/fcm_service.dart';
+import 'package:sayr_mobile/core/locale_cubit.dart';
+import 'package:sayr_mobile/core/offline_sync_service.dart';
+import 'package:sayr_mobile/di/di.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart';
+import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'package:sayr_mobile/features/payment/presentation/bloc/payment_bloc.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:sayr_mobile/routing/app_router.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-import 'core/app_bloc_observer.dart';
-import 'core/fcm_service.dart';
-import 'core/locale_cubit.dart';
-import 'di/di.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/auth/presentation/bloc/auth_event.dart';
-import 'features/auth/presentation/bloc/auth_state.dart';
-import 'features/chat/presentation/bloc/chat_bloc.dart';
-import 'features/chat/presentation/bloc/chat_list_bloc.dart';
-import 'features/emergency/presentation/bloc/emergency_bloc.dart';
-import 'features/notifications/presentation/bloc/notifications_bloc.dart';
-import 'features/payment/presentation/bloc/payment_bloc.dart';
-import 'features/routes/presentation/bloc/routes_bloc.dart';
-import 'features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
-import 'features/tracking/presentation/bloc/tracking_bloc.dart';
-import 'l10n/app_localizations.dart';
-import 'routing/app_router.dart';
-
 /// Root widget of the Sayr application.
 class SayrApp extends StatelessWidget {
-  const SayrApp({super.key, required this.router});
+  /// Creates a [SayrApp].
+  const SayrApp({required this.router, super.key});
 
+  /// The router configurations.
   final AppRouter router;
 
   @override
@@ -103,6 +109,8 @@ class SayrApp extends StatelessWidget {
             router.config.go('/');
           } else if (state is AuthUnauthenticated && !isPublic) {
             router.config.go('/login');
+          } else if (state is AuthProfileIncomplete) {
+            router.config.go('/complete-profile');
           }
         },
         child: BlocBuilder<LocaleCubit, Locale>(
@@ -128,7 +136,9 @@ class SayrApp extends StatelessWidget {
               builder: (context, child) {
                 return Directionality(
                   textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-                  child: child ?? const SizedBox.shrink(),
+                  child: OfflineBannerWrapper(
+                    child: child ?? const SizedBox.shrink(),
+                  ),
                 );
               },
               routerConfig: router.config,
@@ -144,18 +154,22 @@ class SayrApp extends StatelessWidget {
 Future<void> runSayrApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Firebase
+  await Firebase.initializeApp();
+
   // Initialize Sentry (if DSN is set)
   const sentryDsn = String.fromEnvironment('SENTRY_DSN');
   if (sentryDsn.isNotEmpty) {
     await SentryFlutter.init(
       (options) {
-        options.dsn = sentryDsn;
-        options.sendDefaultPii = false;
-        options.environment = const String.fromEnvironment(
-          'SENTRY_ENVIRONMENT',
-          defaultValue: 'development',
-        );
-        options.tracesSampleRate = 0.2;
+        options
+          ..dsn = sentryDsn
+          ..sendDefaultPii = false
+          ..environment = const String.fromEnvironment(
+            'SENTRY_ENVIRONMENT',
+            defaultValue: 'development',
+          )
+          ..tracesSampleRate = 0.2;
       },
     );
   }
@@ -166,8 +180,14 @@ Future<void> runSayrApp() async {
   // Initialize GetIt service locator
   await initDependencies();
 
-  // Initialize FCM service
-  await FcmService.init();
+  // Initialize FCM service (non-blocking)
+  unawaited(FcmService.init());
+
+  // Initialize Offline Sync Service
+  OfflineSyncService(
+    localDatasource: sl<LocalDatasource>(),
+    tripRepository: sl<TripRepository>(),
+  ).start();
 
   // Set up bloc observer
   Bloc.observer = AppBlocObserver();
@@ -176,25 +196,125 @@ Future<void> runSayrApp() async {
   final router = AppRouter();
 
   // Wire FCM notification taps to in-app navigation.
-  FcmService.setNavigationHandler((data) {
-    final String? tripId = data['trip_id'] as String?;
+  FcmService.navigationHandler = (data) {
+    final tripId = data['trip_id'] as String?;
     if (tripId != null) {
       router.config.go('/trip/$tripId');
       return;
     }
-    final String? conversationId = data['conversation_id'] as String?;
+    final conversationId = data['conversation_id'] as String?;
     if (conversationId != null) {
       router.config.go('/chat/$conversationId');
       return;
     }
-    final String? routeId = data['route_id'] as String?;
+    final routeId = data['route_id'] as String?;
     if (routeId != null) {
       router.config.go('/routes');
       return;
     }
     // Default destination for taps without a deep-link target.
     router.config.go('/notifications');
-  });
+  };
 
   runApp(SayrApp(router: router));
+}
+
+/// A wrapper widget that listens to network connectivity changes and displays
+/// an elegant banner at the top of the viewport when offline.
+class OfflineBannerWrapper extends StatefulWidget {
+  /// Creates an [OfflineBannerWrapper].
+  const OfflineBannerWrapper({required this.child, super.key});
+
+  /// The child widget to display.
+  final Widget child;
+
+  @override
+  State<OfflineBannerWrapper> createState() => _OfflineBannerWrapperState();
+}
+
+class _OfflineBannerWrapperState extends State<OfflineBannerWrapper> {
+  late StreamSubscription<List<ConnectivityResult>> _subscription;
+  bool _isOffline = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = Connectivity().onConnectivityChanged.listen((results) {
+      final isNowOffline =
+          results.isEmpty || results.every((r) => r == ConnectivityResult.none);
+      if (_isOffline != isNowOffline) {
+        setState(() {
+          _isOffline = isNowOffline;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isOffline) {
+      return widget.child;
+    }
+
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return Stack(
+      children: [
+        widget.child,
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Material(
+            color: Colors.transparent,
+            child: SafeArea(
+              bottom: false,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 16,
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withValues(alpha: 0.95),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.wifi_off, color: Colors.white),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        isRtl
+                            ? 'أنت تتصفح حالياً بدون اتصال بالإنترنت'
+                            : 'You are currently browsing offline',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

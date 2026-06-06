@@ -1,9 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../enums/payout_status.dart';
-import '../value_objects/ids.dart';
-import '../value_objects/money.dart';
-import '../utils/json_converters.dart';
+import 'package:sayr_core/src/enums/payout_status.dart';
+import 'package:sayr_core/src/utils/json_converters.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
+import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'payout.freezed.dart';
 part 'payout.g.dart';

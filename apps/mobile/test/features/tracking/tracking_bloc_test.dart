@@ -12,10 +12,10 @@ class MockTripRepository extends Mock implements TripRepository {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(RouteId('fallback'));
-    registerFallbackValue(TripId('fallback'));
-    registerFallbackValue(DriverId('fallback'));
-    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(const RouteId('fallback'));
+    registerFallbackValue(const TripId('fallback'));
+    registerFallbackValue(const DriverId('fallback'));
+    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
     registerFallbackValue(TripEvent.start);
   });
 
@@ -89,11 +89,13 @@ void main() {
         when(() => mockRepo.getById(any())).thenAnswer(
           (_) async => Right<Failure, Trip>(testTrip),
         );
-        when(() => mockRepo.updateStatus(
-              tripId: any(named: 'tripId'),
-              event: any(named: 'event'),
-              location: any(named: 'location'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.updateStatus(
+            tripId: any(named: 'tripId'),
+            event: any(named: 'event'),
+            location: any(named: 'location'),
+          ),
+        ).thenAnswer(
           (_) async => Right<Failure, Trip>(
             Trip(
               id: const TripId('trip-1'),
@@ -109,10 +111,12 @@ void main() {
         );
         return TrackingBloc(tripRepository: mockRepo);
       },
-      act: (bloc) => bloc.add(const TrackingDriverArrive(
-        tripId: TripId('trip-1'),
-        location: Coordinates(latitude: 33.3, longitude: 44.3),
-      )),
+      act: (bloc) => bloc.add(
+        const TrackingDriverArrive(
+          tripId: TripId('trip-1'),
+          location: Coordinates(latitude: 33.3, longitude: 44.3),
+        ),
+      ),
       expect: () => [
         isA<TrackingDriverActive>().having(
           (s) => s.trip.status,
@@ -125,10 +129,12 @@ void main() {
     blocTest<TrackingBloc, TrackingState>(
       'emits [Loading, DriverActive] after creating a trip',
       build: () {
-        when(() => mockRepo.createTrip(
-              routeId: any(named: 'routeId'),
-              scheduledAt: any(named: 'scheduledAt'),
-            )).thenAnswer(
+        when(
+          () => mockRepo.createTrip(
+            routeId: any(named: 'routeId'),
+            scheduledAt: any(named: 'scheduledAt'),
+          ),
+        ).thenAnswer(
           (_) async => Right<Failure, Trip>(testTrip),
         );
         when(() => mockRepo.watchTrip(any())).thenAnswer(

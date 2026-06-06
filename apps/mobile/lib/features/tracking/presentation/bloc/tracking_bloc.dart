@@ -1,17 +1,18 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'tracking_event.dart';
-import 'tracking_state.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 
 /// BLoC for trip tracking — student view and driver controls.
 ///
 /// Student: loads active trips on map, watches a specific trip.
 /// Driver: manages trip lifecycle (arrive/start/complete/cancel) and streams location.
 class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
+  /// Creates a [TrackingBloc] with the given [tripRepository].
   TrackingBloc({
     required TripRepository tripRepository,
   })  : _tripRepository = tripRepository,
@@ -34,8 +35,8 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   StreamSubscription<Trip>? _tripSubscription;
 
   @override
-  Future<void> close() {
-    _tripSubscription?.cancel();
+  Future<void> close() async {
+    await _tripSubscription?.cancel();
     return super.close();
   }
 
@@ -64,11 +65,13 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       (failure) => emit(TrackingState.error(failure: failure)),
       (trip) {
         final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(TrackingState.driverActive(
-          trip: trip,
-          validActions: actions,
-          lastUpdated: DateTime.now(),
-        ));
+        emit(
+          TrackingState.driverActive(
+            trip: trip,
+            validActions: actions,
+            lastUpdated: DateTime.now(),
+          ),
+        );
         add(TrackingWatchTrip(tripId: trip.id));
       },
     );
@@ -87,10 +90,12 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
             orElse: () => null,
           );
       if (trip != null) {
-        emit(TrackingState.tripWatching(
-          trip: trip,
-          driverLocation: trip.lastLocation,
-        ));
+        emit(
+          TrackingState.tripWatching(
+            trip: trip,
+            driverLocation: trip.lastLocation,
+          ),
+        );
       }
     }
 
@@ -112,28 +117,32 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     TrackingStopWatching event,
     Emitter<TrackingState> emit,
   ) {
-    _tripSubscription?.cancel();
+    unawaited(_tripSubscription?.cancel());
     _tripSubscription = null;
   }
 
   void _onTripUpdated(_TripUpdated event, Emitter<TrackingState> emit) {
     final current = state;
     if (current is TrackingTripWatching && event.trip.id == current.trip.id) {
-      emit(TrackingState.tripWatching(
-        trip: event.trip,
-        driverLocation: event.trip.lastLocation,
-        lastUpdated: DateTime.now(),
-      ));
+      emit(
+        TrackingState.tripWatching(
+          trip: event.trip,
+          driverLocation: event.trip.lastLocation,
+          lastUpdated: DateTime.now(),
+        ),
+      );
     } else if (current is TrackingDriverActive &&
         event.trip.id == current.trip.id) {
       final actions = TripStateMachine.validEventsFrom(event.trip.status);
-      emit(TrackingState.driverActive(
-        trip: event.trip,
-        validActions: actions,
-        currentLocation: current.currentLocation,
-        isTrackingLocation: current.isTrackingLocation,
-        lastUpdated: DateTime.now(),
-      ));
+      emit(
+        TrackingState.driverActive(
+          trip: event.trip,
+          validActions: actions,
+          currentLocation: current.currentLocation,
+          isTrackingLocation: current.isTrackingLocation,
+          lastUpdated: DateTime.now(),
+        ),
+      );
     }
   }
 
@@ -141,10 +150,12 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     _TripUpdateError event,
     Emitter<TrackingState> emit,
   ) {
-    emit(TrackingState.error(
-      failure: UnknownFailure(message: event.error.toString()),
-      previousState: state,
-    ));
+    emit(
+      TrackingState.error(
+        failure: UnknownFailure(message: event.error.toString()),
+        previousState: state,
+      ),
+    );
   }
 
   Future<void> _onDriverArrive(
@@ -157,18 +168,22 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       location: event.location,
     );
     result.fold(
-      (failure) => emit(TrackingState.error(
-        failure: failure,
-        previousState: state,
-      )),
+      (failure) => emit(
+        TrackingState.error(
+          failure: failure,
+          previousState: state,
+        ),
+      ),
       (trip) {
         final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(TrackingState.driverActive(
-          trip: trip,
-          validActions: actions,
-          currentLocation: event.location,
-          lastUpdated: DateTime.now(),
-        ));
+        emit(
+          TrackingState.driverActive(
+            trip: trip,
+            validActions: actions,
+            currentLocation: event.location,
+            lastUpdated: DateTime.now(),
+          ),
+        );
       },
     );
   }
@@ -183,19 +198,23 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       location: event.location,
     );
     result.fold(
-      (failure) => emit(TrackingState.error(
-        failure: failure,
-        previousState: state,
-      )),
+      (failure) => emit(
+        TrackingState.error(
+          failure: failure,
+          previousState: state,
+        ),
+      ),
       (trip) {
         final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(TrackingState.driverActive(
-          trip: trip,
-          validActions: actions,
-          currentLocation: event.location,
-          isTrackingLocation: true,
-          lastUpdated: DateTime.now(),
-        ));
+        emit(
+          TrackingState.driverActive(
+            trip: trip,
+            validActions: actions,
+            currentLocation: event.location,
+            isTrackingLocation: true,
+            lastUpdated: DateTime.now(),
+          ),
+        );
       },
     );
   }
@@ -210,18 +229,22 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       location: event.location,
     );
     result.fold(
-      (failure) => emit(TrackingState.error(
-        failure: failure,
-        previousState: state,
-      )),
-      (trip) {
-        _tripSubscription?.cancel();
+      (failure) => emit(
+        TrackingState.error(
+          failure: failure,
+          previousState: state,
+        ),
+      ),
+      (trip) async {
+        await _tripSubscription?.cancel();
         final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(TrackingState.driverActive(
-          trip: trip,
-          validActions: actions,
-          lastUpdated: DateTime.now(),
-        ));
+        emit(
+          TrackingState.driverActive(
+            trip: trip,
+            validActions: actions,
+            lastUpdated: DateTime.now(),
+          ),
+        );
       },
     );
   }
@@ -235,18 +258,22 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       event: TripEvent.markAbsent,
     );
     result.fold(
-      (failure) => emit(TrackingState.error(
-        failure: failure,
-        previousState: state,
-      )),
-      (trip) {
-        _tripSubscription?.cancel();
+      (failure) => emit(
+        TrackingState.error(
+          failure: failure,
+          previousState: state,
+        ),
+      ),
+      (trip) async {
+        await _tripSubscription?.cancel();
         final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(TrackingState.driverActive(
-          trip: trip,
-          validActions: actions,
-          lastUpdated: DateTime.now(),
-        ));
+        emit(
+          TrackingState.driverActive(
+            trip: trip,
+            validActions: actions,
+            lastUpdated: DateTime.now(),
+          ),
+        );
       },
     );
   }
@@ -260,18 +287,22 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       event: TripEvent.cancel,
     );
     result.fold(
-      (failure) => emit(TrackingState.error(
-        failure: failure,
-        previousState: state,
-      )),
-      (trip) {
-        _tripSubscription?.cancel();
+      (failure) => emit(
+        TrackingState.error(
+          failure: failure,
+          previousState: state,
+        ),
+      ),
+      (trip) async {
+        await _tripSubscription?.cancel();
         final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(TrackingState.driverActive(
-          trip: trip,
-          validActions: actions,
-          lastUpdated: DateTime.now(),
-        ));
+        emit(
+          TrackingState.driverActive(
+            trip: trip,
+            validActions: actions,
+            lastUpdated: DateTime.now(),
+          ),
+        );
       },
     );
   }
@@ -287,21 +318,24 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     );
 
     result.fold(
-      (failure) => debugPrint(
-          'TrackingBloc: Failed to update location remotely: ${failure.message}'),
+      (failure) => Logger().w(
+        'TrackingBloc: Failed to update location remotely: ${failure.message}',
+      ),
       (_) => null,
     );
 
     final current = state;
     if (current is TrackingDriverActive) {
       // copyWith is auto-generated by freezed.
-      emit(current.copyWith(
-        currentLocation: Coordinates(
-          latitude: event.latitude,
-          longitude: event.longitude,
+      emit(
+        current.copyWith(
+          currentLocation: Coordinates(
+            latitude: event.latitude,
+            longitude: event.longitude,
+          ),
+          lastUpdated: DateTime.now(),
         ),
-        lastUpdated: DateTime.now(),
-      ));
+      );
     }
   }
 }

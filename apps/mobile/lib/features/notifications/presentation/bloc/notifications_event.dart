@@ -1,6 +1,8 @@
 part of 'notifications_bloc.dart';
 
+/// Base class for all notification events.
 sealed class NotificationsEvent extends Equatable {
+  /// Constructor for [NotificationsEvent].
   const NotificationsEvent();
 
   @override
@@ -9,17 +11,22 @@ sealed class NotificationsEvent extends Equatable {
 
 /// Load the user's notifications and start listening for realtime updates.
 class NotificationsLoadRequested extends NotificationsEvent {
+  /// Creates a [NotificationsLoadRequested] event.
   const NotificationsLoadRequested();
 }
 
 /// Re-fetch the list (pull-to-refresh / manual).
 class NotificationsRefreshRequested extends NotificationsEvent {
+  /// Creates a [NotificationsRefreshRequested] event.
   const NotificationsRefreshRequested();
 }
 
 /// Mark a single notification as read.
 class NotificationMarkedRead extends NotificationsEvent {
+  /// Creates a [NotificationMarkedRead] event.
   const NotificationMarkedRead(this.id);
+
+  /// The ID of the notification to mark as read.
   final NotificationId id;
 
   @override
@@ -28,6 +35,7 @@ class NotificationMarkedRead extends NotificationsEvent {
 
 /// Mark every notification for the current user as read.
 class NotificationsMarkAllRead extends NotificationsEvent {
+  /// Creates a [NotificationsMarkAllRead] event.
   const NotificationsMarkAllRead();
 }
 

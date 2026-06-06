@@ -4,16 +4,6 @@ import 'package:equatable/equatable.dart';
 ///
 /// Format: 8 uppercase alphanumeric characters (e.g., "A1B2C3D4").
 class LicenseCode extends Equatable {
-  const LicenseCode._(this.value);
-
-  /// Create a [LicenseCode] from a raw string. Returns null if invalid.
-  static LicenseCode? tryParse(String input) {
-    final cleaned = input.trim().toUpperCase();
-    if (cleaned.length != 8) return null;
-    if (!RegExp(r'^[A-Z0-9]{8}$').hasMatch(cleaned)) return null;
-    return LicenseCode._(cleaned);
-  }
-
   /// Create a [LicenseCode] from a raw string. Throws if invalid.
   factory LicenseCode(String input) {
     final code = tryParse(input);
@@ -25,6 +15,15 @@ class LicenseCode extends Equatable {
       );
     }
     return code;
+  }
+  const LicenseCode._(this.value);
+
+  /// Create a [LicenseCode] from a raw string. Returns null if invalid.
+  static LicenseCode? tryParse(String input) {
+    final cleaned = input.trim().toUpperCase();
+    if (cleaned.length != 8) return null;
+    if (!RegExp(r'^[A-Z0-9]{8}$').hasMatch(cleaned)) return null;
+    return LicenseCode._(cleaned);
   }
 
   /// The license code value (8 chars, uppercase).

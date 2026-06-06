@@ -1,5 +1,5 @@
-import '../enums/trip_status.dart';
-import 'trip_event.dart';
+import 'package:sayr_core/src/enums/trip_status.dart';
+import 'package:sayr_core/src/fsm/trip_event.dart';
 
 /// Finite State Machine for Trip status transitions.
 ///

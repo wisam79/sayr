@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sayr — معاينة الأيقونة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0C0C0C;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 60px;
+      padding: 64px 24px;
+    }
+
+    /* ── Header ── */
+    .header { text-align: center; }
+    .header h1 {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #2ECC40 0%, #27AE60 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .header p { color: #3A3A3A; font-size: 14px; font-weight: 500; }
+
+    /* ── Section wrapper ── */
+    .section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      width: 100%;
+      max-width: 960px;
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #2A2A2A;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    /* ── Size grid ── */
+    .sizes-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .size-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Rounded icon frame */
+    .icon-shell {
+      border-radius: 22.5%;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 4px 20px rgba(0,0,0,0.5),
+        0 12px 48px rgba(0,0,0,0.4);
+    }
+    .icon-shell img {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .size-tag {
+      font-size: 11px;
+      color: #2E2E2E;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Background test panel ── */
+    .bg-panel {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      background: #111;
+      border: 1px solid #1C1C1C;
+      border-radius: 18px;
+      padding: 26px 36px;
+    }
+
+    .bg-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .bg-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #2C2C2C;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .sep { width: 1px; height: 64px; background: #1E1E1E; border-radius: 1px; }
+
+    /* White/gray bg shells */
+    .shell-white { background: #FFFFFF !important; }
+    .shell-gray  { background: #E8E8E8 !important; }
+
+    /* ── Comparison row (original vs SVG side by side) ── */
+    .compare-row {
+      display: flex;
+      gap: 48px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .compare-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .compare-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+    }
+    .badge-original { background: #1E1E1E; color: #555; }
+    .badge-svg      { background: rgba(46,204,64,0.12); color: #2ECC40; border: 1px solid rgba(46,204,64,0.2); }
+
+    /* ── Footer ── */
+    footer {
+      font-size: 11px;
+      color: #1E1E1E;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    /* ── Slider comparison ── */
+    .slider-section { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 280px;
+      height: 3px;
+      background: #222;
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2ECC40;
+      cursor: pointer;
+      border: 3px solid #0C0C0C;
+      box-shadow: 0 0 0 1px #2ECC40;
+    }
+    .slider-hint { font-size: 11px; color: #2A2A2A; }
+
+    /* Inline SVG icon wrapper for size demos */
+    .svg-wrap { display: block; line-height: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <h1>سير — Sayr App Icon</h1>
+    <p>SVG Vector · معاينة مباشرة · مقارنة بالتصميم الأصلي</p>
+  </header>
+
+  <!-- ── Size previews ── -->
+  <section class="section">
+    <span class="section-label">Android / Play Store Sizes</span>
+    <div class="sizes-row">
+
+      <!-- 512px (Play Store) -->
+      <div class="size-item">
+        <div class="icon-shell" style="width:240px;height:240px">
+          <img src="sayr_icon.svg" width="240" height="240" alt="Sayr Icon 512">
+        </div>
+        <span class="size-tag">512 × 512</span>
+      </div>
+
+      <!-- 192px (XXXHDPI) -->
+      <div class="size-item">
+        <div class="icon-shell" style="width:144px;height:144px">
+          <img src="sayr_icon.svg" width="144" height="144" alt="Sayr Icon 192">
+        </div>
+        <span class="size-tag">192 × 192</span>
+      </div>
+
+      <!-- 96px (XHDPI) -->
+      <div class="size-item">
+        <div class="icon-shell" style="width:96px;height:96px">
+          <img src="sayr_icon.svg" width="96" height="96" alt="Sayr Icon 96">
+        </div>
+        <span class="size-tag">96 × 96</span>
+      </div>
+
+      <!-- 48px (MDPI) -->
+      <div class="size-item">
+        <div class="icon-shell" style="width:48px;height:48px">
+          <img src="sayr_icon.svg" width="48" height="48" alt="Sayr Icon 48">
+        </div>
+        <span class="size-tag">48 × 48</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Background tests ── -->
+  <section class="section">
+    <span class="section-label">على خلفيات مختلفة</span>
+    <div class="bg-panel">
+
+      <div class="bg-item">
+        <div class="icon-shell" style="width:72px;height:72px">
+          <img src="sayr_icon.svg" width="72" height="72" alt="">
+        </div>
+        <span class="bg-label">Dark</span>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="bg-item">
+        <div class="icon-shell shell-white" style="width:72px;height:72px">
+          <img src="sayr_icon.svg" width="72" height="72" alt="">
+        </div>
+        <span class="bg-label">White</span>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="bg-item">
+        <div class="icon-shell shell-gray" style="width:72px;height:72px">
+          <img src="sayr_icon.svg" width="72" height="72" alt="">
+        </div>
+        <span class="bg-label">Gray</span>
+      </div>
+
+      <div class="sep"></div>
+
+      <!-- Green background (app brand color) -->
+      <div class="bg-item">
+        <div class="icon-shell" style="width:72px;height:72px;background:#2ECC40">
+          <img src="sayr_icon.svg" width="72" height="72" alt="">
+        </div>
+        <span class="bg-label">Green</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Icon scale demo ── -->
+  <section class="section slider-section">
+    <span class="section-label">اختبر الحجم</span>
+    <div id="scale-preview" class="icon-shell" style="width:180px;height:180px;transition:width .15s,height .15s">
+      <img src="sayr_icon.svg" id="scale-img" width="180" height="180" alt="">
+    </div>
+    <input type="range" id="sizeSlider" min="32" max="400" value="180">
+    <span class="slider-hint" id="sliderLabel">180 × 180 px</span>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>SAYR v3 · ICON PREVIEW · SVG EXPORT READY</footer>
+
+  <script>
+    const slider = document.getElementById('sizeSlider');
+    const preview = document.getElementById('scale-preview');
+    const img = document.getElementById('scale-img');
+    const label = document.getElementById('sliderLabel');
+
+    slider.addEventListener('input', () => {
+      const v = slider.value;
+      preview.style.width  = v + 'px';
+      preview.style.height = v + 'px';
+      img.width  = v;
+      img.height = v;
+      label.textContent = `${v} × ${v} px`;
+    });
+  </script>
+
+</body>
+</html>

@@ -1,6 +1,8 @@
 part of 'emergency_bloc.dart';
 
+/// Base class for all emergency events.
 sealed class EmergencyEvent extends Equatable {
+  /// Constructor for [EmergencyEvent].
   const EmergencyEvent();
 
   @override
@@ -9,6 +11,7 @@ sealed class EmergencyEvent extends Equatable {
 
 /// User pressed the SOS button.
 class EmergencyTriggered extends EmergencyEvent {
+  /// Creates an [EmergencyTriggered] event.
   const EmergencyTriggered({
     required this.tripId,
     required this.routeId,
@@ -16,9 +19,16 @@ class EmergencyTriggered extends EmergencyEvent {
     this.message,
   });
 
+  /// The active trip ID.
   final TripId tripId;
+
+  /// The active route ID.
   final RouteId routeId;
+
+  /// Current GPS coordinates.
   final Coordinates location;
+
+  /// Optional detail message.
   final String? message;
 
   @override
@@ -27,10 +37,12 @@ class EmergencyTriggered extends EmergencyEvent {
 
 /// User wants to cancel/resolve an active report.
 class EmergencyCancelled extends EmergencyEvent {
+  /// Creates an [EmergencyCancelled] event.
   const EmergencyCancelled();
 }
 
 /// Reset to idle (e.g. when leaving the trip page).
 class EmergencyReset extends EmergencyEvent {
+  /// Creates an [EmergencyReset] event.
   const EmergencyReset();
 }

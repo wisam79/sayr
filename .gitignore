@@ -58,3 +58,11 @@ supabase/.temp
 .flutter-plugins-dependencies
 .packages
 .metadata
+
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Temp / Test Files
+apps/mobile/test_icon.html
+

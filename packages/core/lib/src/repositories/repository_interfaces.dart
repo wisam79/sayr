@@ -1,18 +1,20 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../entities/emergency_report.dart';
-import '../entities/message.dart';
-import '../entities/notification.dart';
-import '../entities/payment_info.dart';
-import '../entities/route.dart';
-import '../entities/subscription.dart';
-import '../entities/trip.dart';
-import '../entities/user.dart';
-import '../failures/failure.dart';
-import '../fsm/trip_event.dart';
-import '../value_objects/coordinates.dart';
-import '../value_objects/ids.dart';
-import '../value_objects/license_code.dart';
+import 'package:sayr_core/src/entities/driver.dart';
+import 'package:sayr_core/src/entities/emergency_report.dart';
+import 'package:sayr_core/src/entities/message.dart';
+import 'package:sayr_core/src/entities/notification.dart';
+import 'package:sayr_core/src/entities/payment_info.dart';
+import 'package:sayr_core/src/entities/rating.dart';
+import 'package:sayr_core/src/entities/route.dart';
+import 'package:sayr_core/src/entities/subscription.dart';
+import 'package:sayr_core/src/entities/trip.dart';
+import 'package:sayr_core/src/entities/user.dart';
+import 'package:sayr_core/src/failures/failure.dart';
+import 'package:sayr_core/src/fsm/trip_event.dart';
+import 'package:sayr_core/src/value_objects/coordinates.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
+import 'package:sayr_core/src/value_objects/license_code.dart';
 
 /// Interface for authentication and user management repository.
 abstract class AuthRepository {
@@ -41,6 +43,16 @@ abstract class AuthRepository {
 
   /// Update the current user's password after a password recovery link.
   Future<Either<Failure, Unit>> updatePassword(String password);
+
+  /// Update the current user's phone and institution.
+  Future<Either<Failure, Unit>> updateProfile({
+    required String phone,
+    required String institutionId,
+  });
+
+  /// Fetch all active institutions.
+  Future<Either<Failure, List<({String id, String name, String city})>>>
+      getInstitutions();
 
   /// Sign out.
   Future<void> signOut();
@@ -118,6 +130,23 @@ abstract class TripRepository {
   Future<Either<Failure, PaymentInfo>> getPaymentStatus(
     String paymentId,
   );
+
+  /// Fetch driver details.
+  Future<Either<Failure, Driver>> getDriverById(DriverId id);
+
+  /// Fetch user profile (to load name/avatar/phone for contact).
+  Future<Either<Failure, User>> getDriverProfile(UserId userId);
+
+  /// Submit a student rating for a trip.
+  Future<Either<Failure, Rating>> submitRating({
+    required TripId tripId,
+    required DriverId driverId,
+    required int rating,
+    String? comment,
+  });
+
+  /// Get an existing rating for a trip.
+  Future<Either<Failure, Rating?>> getTripRating(TripId tripId);
 }
 
 /// Interface for subscription operations repository.
@@ -151,7 +180,8 @@ abstract class ChatRepository {
 
   /// Get messages for a specific conversation.
   Future<Either<Failure, List<Message>>> getMessages(
-      ConversationId conversationId);
+    ConversationId conversationId,
+  );
 
   /// Subscribe to messages via Realtime.
   Stream<List<Message>> watchMessages(ConversationId conversationId);
@@ -172,8 +202,9 @@ abstract class ChatRepository {
 /// Interface for in-app notifications repository.
 abstract class NotificationsRepository {
   /// Fetch the latest notifications for the current user.
-  Future<Either<Failure, List<AppNotification>>> getMyNotifications(
-      {int limit = 50});
+  Future<Either<Failure, List<AppNotification>>> getMyNotifications({
+    int limit = 50,
+  });
 
   /// Get the count of unread notifications.
   Future<Either<Failure, int>> getUnreadCount();

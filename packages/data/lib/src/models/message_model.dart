@@ -11,8 +11,8 @@ abstract class MessageModel with _$MessageModel {
     @JsonKey(name: 'conversation_id') required String conversationId,
     @JsonKey(name: 'sender_id') required String senderId,
     required String body,
-    @JsonKey(name: 'is_read') @Default(false) bool isRead,
     @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'is_read') @Default(false) bool isRead,
   }) = _MessageModel;
 
   const MessageModel._();

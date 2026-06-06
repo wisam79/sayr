@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_state.dart';
+import 'package:sayr_mobile/features/notifications/presentation/widgets/notification_card.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../core/sayr_flash.dart';
-import '../bloc/notifications_bloc.dart';
-import '../bloc/notifications_state.dart';
-import '../widgets/notification_card.dart';
-
-/// Page displaying the user's notification inbox.
+/// Page responsible for showing user notification inbox.
 class NotificationsPage extends StatefulWidget {
+  /// Creates a [NotificationsPage].
   const NotificationsPage({super.key});
 
   @override
@@ -26,16 +27,17 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الإشعارات'),
+        title: Text(l10n.notifications),
         actions: [
           BlocBuilder<NotificationsBloc, NotificationsState>(
             buildWhen: (prev, curr) =>
                 prev.maybeWhen(loaded: (a, b) => b, orElse: () => 0) !=
                 curr.maybeWhen(loaded: (a, b) => b, orElse: () => 0),
             builder: (context, state) {
-              final int unread = state.maybeWhen(
+              final unread = state.maybeWhen(
                 loaded: (_, count) => count,
                 orElse: () => 0,
               );
@@ -45,9 +47,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   context
                       .read<NotificationsBloc>()
                       .add(const NotificationsMarkAllRead());
-                  SayrFlash.info(context, 'تم وضع علامة قراءة على الكل');
+                  SayrFlash.info(context, l10n.allMarkedAsRead);
                 },
-                child: const Text('تمييز الكل'),
+                child: Text(l10n.markAllAsRead),
               );
             },
           ),
@@ -58,7 +60,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (state is NotificationsError) {
             SayrFlash.error(
               context,
-              state.failure.message ?? 'حدث خطأ في تحميل الإشعارات',
+              state.failure.message ?? l10n.loadFailed,
             );
           }
         },
@@ -89,6 +91,7 @@ class _NotificationsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (notifications.isEmpty) {
       return Center(
         child: Padding(
@@ -103,7 +106,7 @@ class _NotificationsBody extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                'لا توجد إشعارات',
+                l10n.noNotifications,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
@@ -125,7 +128,7 @@ class _NotificationsBody extends StatelessWidget {
         itemCount: notifications.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
-          final AppNotification n = notifications[index];
+          final n = notifications[index];
           return NotificationCard(
             notification: n,
             onTap: () {
@@ -141,12 +144,12 @@ class _NotificationsBody extends StatelessWidget {
   }
 
   void _onNotificationTap(BuildContext context, AppNotification n) {
-    final String? tripId = n.data['trip_id'] as String?;
+    final tripId = n.data['trip_id'] as String?;
     if (tripId != null) {
       context.push('/trip/$tripId');
       return;
     }
-    final String? conversationId = n.data['conversation_id'] as String?;
+    final conversationId = n.data['conversation_id'] as String?;
     if (conversationId != null) {
       context.push('/chat/$conversationId');
     }
@@ -161,6 +164,7 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -174,13 +178,13 @@ class _ErrorBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              failure.message ?? 'حدث خطأ',
+              failure.message ?? l10n.errorOccurred,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('إعادة المحاولة'),
+              child: Text(l10n.retry),
             ),
           ],
         ),

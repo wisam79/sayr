@@ -4,11 +4,11 @@ import 'package:equatable/equatable.dart';
 ///
 /// Stored as integer (no floating point arithmetic).
 class Money extends Equatable {
-  /// Amount in fils (1 IQD = 1000 fils conceptually, but we store as whole IQD)
-  final int amountInFils;
-
   /// Create a Money from integer IQD.
   const Money(this.amountInFils);
+
+  /// Amount in fils (1 IQD = 1000 fils conceptually, but we store as whole IQD)
+  final int amountInFils;
 
   /// Zero money.
   static const Money zero = Money(0);

@@ -219,9 +219,11 @@ void main() {
       final events = TripStateMachine.validEventsFrom(TripStatus.scheduled);
       expect(events, hasLength(3));
       expect(
-          events,
-          containsAll(
-              [TripEvent.arrive, TripEvent.markAbsent, TripEvent.cancel]));
+        events,
+        containsAll(
+          [TripEvent.arrive, TripEvent.markAbsent, TripEvent.cancel],
+        ),
+      );
     });
 
     test('completed has no valid events', () {

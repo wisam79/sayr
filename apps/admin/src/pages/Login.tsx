@@ -64,7 +64,22 @@ export const Login: React.FC = () => {
     <div className="login-container">
       <div className="login-card card animate-fade-in">
         <div className="login-header">
-          <div className="logo-icon-large">S</div>
+          <div className="logo-icon-large">
+            <svg viewBox="0 0 1024 1024" style={{ width: '100%', height: '100%', borderRadius: '12px' }}>
+              <rect width="1024" height="1024" fill="#1A1A1A"/>
+              <g transform="translate(512,512) rotate(45)">
+                <path d="M -220,-310 C -220,-115 220,-115 220,0 C 220,115 110,225 0,225 C -60,225 -110,175 -110,115 C -110,85 -85,60 -55,60" fill="none" stroke="#1A1A1A" strokeWidth="160" strokeLinecap="round" />
+                <path d="M 220,310 C 220,115 -220,115 -220,0 C -220,-115 -110,-225 0,-225 C 60,-225 110,-175 110,-115 C 110,-85 85,-60 55,-60" fill="none" stroke="#1A1A1A" strokeWidth="160" strokeLinecap="round" />
+                <path d="M -220,-310 C -220,-115 220,-115 220,0 C 220,115 110,225 0,225 C -60,225 -110,175 -110,115 C -110,85 -85,60 -55,60" fill="none" stroke="var(--primary)" strokeWidth="100" strokeLinecap="round" />
+                <path d="M 220,310 C 220,115 -220,115 -220,0 C -220,-115 -110,-225 0,-225 C 60,-225 110,-175 110,-115 C 110,-85 85,-60 55,-60" fill="none" stroke="#FFFFFF" strokeWidth="100" strokeLinecap="round" />
+                <g transform="translate(-220,-310)">
+                  <path d="M 0,65 C -40,42 -63,14 -63,-18 A 63,63 0 0 1 63,-18 C 63,14 40,42 0,65 Z" fill="var(--primary)" />
+                  <circle cx="0" cy="-18" r="24" fill="#1A1A1A" />
+                </g>
+                <circle cx="220" cy="310" r="50" fill="#FFFFFF" />
+              </g>
+            </svg>
+          </div>
           <h2>سير - لوحة التحكم</h2>
           <p>يرجى تسجيل الدخول للوصول إلى لوحة إدارة عمليات النقل</p>
         </div>

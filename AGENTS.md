@@ -588,44 +588,9 @@ EdgeInsets.only(left: 16, right: 8)
 
 ---
 
-## 8. تشغيل محلي للوكلاء (Local Agent Execution) ⚠️
+## 8. Git Workflow
 
-### 8.1 مسارات Windows القصيرة
-
-> **مهم جداً**: جهاز التطوير يحتوي على مسار مستخدم فيه فراغ:
-> `C:\Users\Laptop Shop`
-
-عند تشغيل أوامر Flutter/Dart/Tests على Windows، يجب استخدام المسار القصير الموجود
-فعلاً:
-
-```powershell
-C:\Users\LAPTOP~1\flutter\bin\flutter.bat
-C:\Users\LAPTOP~1\flutter\bin\cache\dart-sdk\bin\dart.exe
-```
-
-وإذا احتجت ضبط Pub cache:
-
-```powershell
-$env:PUB_CACHE='C:\Users\LAPTOP~1\AppData\Local\Pub\Cache'
-```
-
-**ممنوع** على الوكلاء:
-
-- ❌ إنشاء junction/symlink جديد مثل `C:\flutter_sayr`
-- ❌ نقل Flutter أو Pub cache
-- ❌ استهلاك الوقت في حلول بديلة لمشكلة الفراغ في المسار
-
-**الصحيح**:
-
-- ✅ استخدم `LAPTOP~1` مباشرة عند تشغيل Flutter/Dart
-- ✅ احذف build artifacts فقط عند الحاجة، مثل `.dart_tool/hooks_runner`
-- ✅ لا تشغّل اختبارات كاملة بشكل متكرر إلا عند وجود تعديل يستحق ذلك
-
----
-
-## 9. Git Workflow
-
-### 9.1 Conventional Commits
+### 8.1 Conventional Commits
 
 ```bash
 feat: add login page
@@ -636,7 +601,7 @@ docs: update AGENTS.md
 chore: upgrade bloc dependency
 ```
 
-### 9.2 Branch Strategy
+### 8.2 Branch Strategy
 
 - `main` - production-ready
 - `develop` - integration branch
@@ -644,7 +609,7 @@ chore: upgrade bloc dependency
 - `fix/<bug-name>` - bug fix branches
 - `release/<version>` - release preparation
 
-### 9.3 Pre-commit Checks (lefthook)
+### 8.3 Pre-commit Checks (lefthook)
 
 - `dart format` تلقائي
 - `flutter analyze` بدون warnings
@@ -653,9 +618,9 @@ chore: upgrade bloc dependency
 
 ---
 
-## 10. CI/CD (GitHub Actions)
+## 9. CI/CD (GitHub Actions)
 
-### 10.1 Workflows
+### 9.1 Workflows
 
 - `ci.yml` - analyze + format + test (كل push)
 - `test-coverage.yml` - coverage report
@@ -663,7 +628,7 @@ chore: upgrade bloc dependency
 - `db-consistency.yml` - اختبار RLS + RPCs
 - `release.yml` - Play Store (عند tag)
 
-### 10.2 Pipeline Requirements
+### 9.2 Pipeline Requirements
 
 - ✅ `flutter analyze` صفر warnings
 - ✅ `flutter test` جميع يجتاز
@@ -672,7 +637,7 @@ chore: upgrade bloc dependency
 
 ---
 
-## 11. المكتبات المعتمدة (Approved Libraries)
+## 10. المكتبات المعتمدة (Approved Libraries)
 
 | المجال | المكتبة | ملاحظات |
 |------|---------|---------|
@@ -693,7 +658,7 @@ chore: upgrade bloc dependency
 
 ---
 
-## 12. الـ Cost (التكلفة)
+## 11. الـ Cost (التكلفة)
 
 **التكلفة الشهرية: $0** 🎉
 
@@ -706,7 +671,7 @@ chore: upgrade bloc dependency
 
 ---
 
-## 13. References
+## 12. References
 
 - [Flutter Best Practices](https://docs.flutter.dev/development/data-and-backend/state-mgmt/options)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)

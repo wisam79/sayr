@@ -1,5 +1,5 @@
-import 'package:test/test.dart';
 import 'package:sayr_core/src/utils/string_utils.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('StringUtils.toCamelCase', () {

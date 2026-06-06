@@ -1,4 +1,9 @@
-import '../utils/string_utils.dart';
+import 'package:sayr_core/sayr_core.dart' show TripStateMachine;
+
+import 'package:sayr_core/src/fsm/trip_state_machine.dart'
+    show TripStateMachine;
+
+import 'package:sayr_core/src/utils/string_utils.dart';
 
 /// Trip status - states in the trip state machine.
 ///

@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
-import 'tables.dart';
+import 'package:sayr_data/src/local/tables.dart';
 
 part 'app_database.g.dart';
 

@@ -1,25 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
-class MockLocalDatasource extends Mock implements LocalDatasource {}
-
 class MockUser extends Mock implements supabase.User {}
 
 void main() {
   late EmergencyRepositoryImpl repository;
   late MockRemoteDatasource mockRemote;
-  late MockLocalDatasource mockLocal;
   late MockUser mockUser;
 
   setUp(() {
     mockRemote = MockRemoteDatasource();
-    mockLocal = MockLocalDatasource();
     mockUser = MockUser();
 
     when(() => mockUser.id).thenReturn('student-123');
@@ -27,26 +22,27 @@ void main() {
 
     repository = EmergencyRepositoryImpl(
       remoteDatasource: mockRemote,
-      localDatasource: mockLocal,
     );
   });
 
   group('EmergencyRepositoryImpl', () {
     group('triggerEmergency', () {
       test('returns EmergencyReport on success', () async {
-        when(() => mockRemote.triggerEmergency(
-              tripId: 'trip-1',
-              routeId: 'route-1',
-              studentId: 'student-123',
-              lat: 33.0,
-              lng: 44.0,
-              description: 'SOS Help',
-            )).thenAnswer((_) async => 'report-999');
+        when(
+          () => mockRemote.triggerEmergency(
+            tripId: 'trip-1',
+            routeId: 'route-1',
+            studentId: 'student-123',
+            lat: 33,
+            lng: 44,
+            description: 'SOS Help',
+          ),
+        ).thenAnswer((_) async => 'report-999');
 
         final result = await repository.triggerEmergency(
           tripId: const TripId('trip-1'),
           routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33.0, longitude: 44.0),
+          location: const Coordinates(latitude: 33, longitude: 44),
           message: 'SOS Help',
         );
 
@@ -57,8 +53,8 @@ void main() {
             expect(report.id, const EmergencyReportId('report-999'));
             expect(report.userId, const UserId('student-123'));
             expect(report.tripId, const TripId('trip-1'));
-            expect(report.location.latitude, 33.0);
-            expect(report.location.longitude, 44.0);
+            expect(report.location.latitude, 33);
+            expect(report.location.longitude, 44);
           },
         );
       });
@@ -69,7 +65,7 @@ void main() {
         final result = await repository.triggerEmergency(
           tripId: const TripId('trip-1'),
           routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33.0, longitude: 44.0),
+          location: const Coordinates(latitude: 33, longitude: 44),
           message: 'SOS Help',
         );
 
@@ -82,19 +78,21 @@ void main() {
 
       test('returns ServerFailure when remote datasource throws error',
           () async {
-        when(() => mockRemote.triggerEmergency(
-              tripId: 'trip-1',
-              routeId: 'route-1',
-              studentId: 'student-123',
-              lat: 33.0,
-              lng: 44.0,
-              description: 'SOS Help',
-            )).thenThrow(Exception('Invoke Failed'));
+        when(
+          () => mockRemote.triggerEmergency(
+            tripId: 'trip-1',
+            routeId: 'route-1',
+            studentId: 'student-123',
+            lat: 33,
+            lng: 44,
+            description: 'SOS Help',
+          ),
+        ).thenThrow(Exception('Invoke Failed'));
 
         final result = await repository.triggerEmergency(
           tripId: const TripId('trip-1'),
           routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33.0, longitude: 44.0),
+          location: const Coordinates(latitude: 33, longitude: 44),
           message: 'SOS Help',
         );
 
@@ -103,7 +101,9 @@ void main() {
           (failure) {
             expect(failure, isA<ServerFailure>());
             expect(
-                (failure as ServerFailure).message, contains('Invoke Failed'));
+              (failure as ServerFailure).message,
+              contains('Invoke Failed'),
+            );
           },
           (_) => fail('should fail'),
         );
@@ -179,28 +179,34 @@ void main() {
 
     group('resolveReport', () {
       test('returns Right(unit) on success', () async {
-        when(() => mockRemote.resolveEmergencyReport(
-              id: 'report-123',
-              resolvedAt: any(named: 'resolvedAt'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.resolveEmergencyReport(
+            id: 'report-123',
+            resolvedAt: any(named: 'resolvedAt'),
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository
             .resolveReport(const EmergencyReportId('report-123'));
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.resolveEmergencyReport(
-              id: 'report-123',
-              resolvedAt: any(named: 'resolvedAt'),
-            )).called(1);
+        verify(
+          () => mockRemote.resolveEmergencyReport(
+            id: 'report-123',
+            resolvedAt: any(named: 'resolvedAt'),
+          ),
+        ).called(1);
       });
 
       test(
           'returns ServerFailure when remote resolveEmergencyReport throws exception',
           () async {
-        when(() => mockRemote.resolveEmergencyReport(
-              id: 'report-123',
-              resolvedAt: any(named: 'resolvedAt'),
-            )).thenThrow(Exception('Resolve report failed'));
+        when(
+          () => mockRemote.resolveEmergencyReport(
+            id: 'report-123',
+            resolvedAt: any(named: 'resolvedAt'),
+          ),
+        ).thenThrow(Exception('Resolve report failed'));
 
         final result = await repository
             .resolveReport(const EmergencyReportId('report-123'));

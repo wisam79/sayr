@@ -11,8 +11,8 @@ abstract class NotificationModel with _$NotificationModel {
     @JsonKey(name: 'user_id') required String userId,
     required String title,
     required String body,
-    @JsonKey(name: 'is_read') @Default(false) bool isRead,
     @JsonKey(name: 'created_at') required DateTime createdAt,
+    @JsonKey(name: 'is_read') @Default(false) bool isRead,
     @Default(<String, dynamic>{}) Map<String, dynamic> data,
   }) = _NotificationModel;
 

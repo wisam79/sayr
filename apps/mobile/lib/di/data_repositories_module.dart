@@ -9,12 +9,15 @@ import 'package:sayr_data/sayr_data.dart';
 /// via this module.
 @module
 abstract class DataRepositoriesModule {
+  /// Provides the singleton instance of [RemoteDatasource].
   @lazySingleton
   RemoteDatasource get remoteDatasource => RemoteDatasourceImpl();
 
+  /// Provides the singleton instance of [LocalDatasource].
   @lazySingleton
   LocalDatasource get localDatasource => LocalDatasourceImpl();
 
+  /// Provides the singleton instance of [AuthRepository].
   @lazySingleton
   AuthRepository authRepository(
     RemoteDatasource remote,
@@ -25,6 +28,7 @@ abstract class DataRepositoriesModule {
         localDatasource: local,
       );
 
+  /// Provides the singleton instance of [RouteRepository].
   @lazySingleton
   RouteRepository routeRepository(
     RemoteDatasource remote,
@@ -35,6 +39,7 @@ abstract class DataRepositoriesModule {
         localDatasource: local,
       );
 
+  /// Provides the singleton instance of [TripRepository].
   @lazySingleton
   TripRepository tripRepository(
     RemoteDatasource remote,
@@ -45,46 +50,43 @@ abstract class DataRepositoriesModule {
         localDatasource: local,
       );
 
+  /// Provides the singleton instance of [SubscriptionRepository].
   @lazySingleton
   SubscriptionRepository subscriptionRepository(
     RemoteDatasource remote,
-    LocalDatasource local,
   ) =>
       SubscriptionRepositoryImpl(
         remoteDatasource: remote,
-        localDatasource: local,
       );
 
+  /// Provides the singleton instance of [ChatRepository].
   @lazySingleton
   ChatRepository chatRepository(
     RemoteDatasource remote,
-    LocalDatasource local,
   ) =>
       ChatRepositoryImpl(
         remoteDatasource: remote,
-        localDatasource: local,
       );
 
+  /// Provides the singleton instance of [NotificationsRepository].
   @lazySingleton
   NotificationsRepository notificationsRepository(
     RemoteDatasource remote,
-    LocalDatasource local,
   ) =>
       NotificationsRepositoryImpl(
         remoteDatasource: remote,
-        localDatasource: local,
       );
 
+  /// Provides the singleton instance of [EmergencyRepository].
   @lazySingleton
   EmergencyRepository emergencyRepository(
     RemoteDatasource remote,
-    LocalDatasource local,
   ) =>
       EmergencyRepositoryImpl(
         remoteDatasource: remote,
-        localDatasource: local,
       );
 
+  /// Provides the singleton instance of [SecureStorageService].
   @lazySingleton
   SecureStorageService get secureStorageService => SecureStorageService();
 }

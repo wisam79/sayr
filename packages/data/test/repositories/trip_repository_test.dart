@@ -4,9 +4,13 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
 class MockLocalDatasource extends Mock implements LocalDatasource {}
+
+class MockUser extends Mock implements supabase.User {}
 
 void main() {
   late TripRepositoryImpl repository;
@@ -76,7 +80,7 @@ void main() {
           emitsInOrder([
             isA<Trip>()
                 .having((t) => t.id, 'id', const TripId('trip-123'))
-                .having((t) => t.status, 'status', TripStatus.scheduled)
+                .having((t) => t.status, 'status', TripStatus.scheduled),
           ]),
         );
 
@@ -102,10 +106,12 @@ void main() {
 
     group('createTrip', () {
       test('returns created Trip after RPC succeeds', () async {
-        when(() => mockRemote.createTrip(
-              routeId: 'route-456',
-              scheduledAt: any(named: 'scheduledAt'),
-            )).thenAnswer((_) async => 'trip-123');
+        when(
+          () => mockRemote.createTrip(
+            routeId: 'route-456',
+            scheduledAt: any(named: 'scheduledAt'),
+          ),
+        ).thenAnswer((_) async => 'trip-123');
         when(() => mockRemote.getTripById('trip-123'))
             .thenAnswer((_) async => mockTripJson);
 
@@ -123,10 +129,12 @@ void main() {
 
       test('returns NotFoundFailure when created trip cannot be loaded',
           () async {
-        when(() => mockRemote.createTrip(
-              routeId: 'route-456',
-              scheduledAt: any(named: 'scheduledAt'),
-            )).thenAnswer((_) async => 'trip-123');
+        when(
+          () => mockRemote.createTrip(
+            routeId: 'route-456',
+            scheduledAt: any(named: 'scheduledAt'),
+          ),
+        ).thenAnswer((_) async => 'trip-123');
         when(() => mockRemote.getTripById('trip-123'))
             .thenAnswer((_) async => null);
 
@@ -197,12 +205,14 @@ void main() {
           'status': 'driver_waiting',
         };
 
-        when(() => mockRemote.updateTripStatus(
-              tripId: 'trip-123',
-              newStatus: 'driver_waiting',
-              lat: any(named: 'lat'),
-              lng: any(named: 'lng'),
-            )).thenAnswer((_) async => updatedTripJson);
+        when(
+          () => mockRemote.updateTripStatus(
+            tripId: 'trip-123',
+            newStatus: 'driver_waiting',
+            lat: any(named: 'lat'),
+            lng: any(named: 'lng'),
+          ),
+        ).thenAnswer((_) async => updatedTripJson);
 
         final result = await repository.updateStatus(
           tripId: const TripId('trip-123'),
@@ -216,12 +226,14 @@ void main() {
           (trip) => expect(trip.status, TripStatus.driverWaiting),
         );
 
-        verify(() => mockRemote.updateTripStatus(
-              tripId: 'trip-123',
-              newStatus: 'driver_waiting',
-              lat: 33.123,
-              lng: 44.456,
-            )).called(1);
+        verify(
+          () => mockRemote.updateTripStatus(
+            tripId: 'trip-123',
+            newStatus: 'driver_waiting',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).called(1);
       });
 
       test('returns InvalidStateTransitionFailure on invalid transition',
@@ -264,12 +276,14 @@ void main() {
         when(() => mockRemote.getTripById('trip-123'))
             .thenAnswer((_) async => mockTripJson);
 
-        when(() => mockRemote.updateTripStatus(
-              tripId: 'trip-123',
-              newStatus: 'driver_waiting',
-              lat: any(named: 'lat'),
-              lng: any(named: 'lng'),
-            )).thenThrow(Exception('Status update RPC failed'));
+        when(
+          () => mockRemote.updateTripStatus(
+            tripId: 'trip-123',
+            newStatus: 'driver_waiting',
+            lat: any(named: 'lat'),
+            lng: any(named: 'lng'),
+          ),
+        ).thenThrow(Exception('Status update RPC failed'));
 
         final result = await repository.updateStatus(
           tripId: const TripId('trip-123'),
@@ -286,11 +300,13 @@ void main() {
 
     group('updateLocation', () {
       test('calls updateTripLocation on remote datasource', () async {
-        when(() => mockRemote.updateTripLocation(
-              tripId: 'trip-123',
-              lat: 33.123,
-              lng: 44.456,
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.updateTripLocation(
+            tripId: 'trip-123',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository.updateLocation(
           tripId: const TripId('trip-123'),
@@ -299,19 +315,23 @@ void main() {
         );
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.updateTripLocation(
-              tripId: 'trip-123',
-              lat: 33.123,
-              lng: 44.456,
-            )).called(1);
+        verify(
+          () => mockRemote.updateTripLocation(
+            tripId: 'trip-123',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).called(1);
       });
 
       test('returns ServerFailure when remote throws exception', () async {
-        when(() => mockRemote.updateTripLocation(
-              tripId: 'trip-123',
-              lat: 33.123,
-              lng: 44.456,
-            )).thenThrow(Exception('Update location failed'));
+        when(
+          () => mockRemote.updateTripLocation(
+            tripId: 'trip-123',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).thenThrow(Exception('Update location failed'));
 
         final result = await repository.updateLocation(
           tripId: const TripId('trip-123'),
@@ -339,10 +359,12 @@ void main() {
         ]);
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.bulkUpdateTripLocations([
-              {'trip_id': 'trip-1', 'lat': 33.0, 'lng': 44.0},
-              {'trip_id': 'trip-2', 'lat': 33.1, 'lng': 44.1},
-            ])).called(1);
+        verify(
+          () => mockRemote.bulkUpdateTripLocations([
+            {'trip_id': 'trip-1', 'lat': 33.0, 'lng': 44.0},
+            {'trip_id': 'trip-2', 'lat': 33.1, 'lng': 44.1},
+          ]),
+        ).called(1);
       });
 
       test('returns ServerFailure when remote throws exception', () async {
@@ -372,12 +394,14 @@ void main() {
           'payment_url': 'https://pay.zaincash.iq/transaction?id=123',
         };
 
-        when(() => mockRemote.createPayment(
-              routeId: 'route-1',
-              amount: 5000,
-              currency: 'IQD',
-              method: 'zain_cash',
-            )).thenAnswer((_) async => mockPaymentJson);
+        when(
+          () => mockRemote.createPayment(
+            routeId: 'route-1',
+            amount: 5000,
+            currency: 'IQD',
+            method: 'zain_cash',
+          ),
+        ).thenAnswer((_) async => mockPaymentJson);
 
         final result = await repository.createPayment(
           routeId: const RouteId('route-1'),
@@ -392,19 +416,23 @@ void main() {
           (payInfo) {
             expect(payInfo.id, 'pay-123');
             expect(payInfo.amount, 5000);
-            expect(payInfo.paymentUrl,
-                'https://pay.zaincash.iq/transaction?id=123');
+            expect(
+              payInfo.paymentUrl,
+              'https://pay.zaincash.iq/transaction?id=123',
+            );
           },
         );
       });
 
       test('returns ServerFailure when remote throws exception', () async {
-        when(() => mockRemote.createPayment(
-              routeId: 'route-1',
-              amount: 5000,
-              currency: 'IQD',
-              method: 'zain_cash',
-            )).thenThrow(Exception('Payment service offline'));
+        when(
+          () => mockRemote.createPayment(
+            routeId: 'route-1',
+            amount: 5000,
+            currency: 'IQD',
+            method: 'zain_cash',
+          ),
+        ).thenThrow(Exception('Payment service offline'));
 
         final result = await repository.createPayment(
           routeId: const RouteId('route-1'),
@@ -470,6 +498,186 @@ void main() {
         result.fold(
           (failure) => expect(failure, isA<ServerFailure>()),
           (_) => fail('should fail'),
+        );
+      });
+    });
+
+    group('getDriverById', () {
+      final mockDriverJson = {
+        'id': 'driver-123',
+        'user_id': 'user-123',
+        'vehicle_model': 'KIA Besta',
+        'vehicle_plate': 'A123',
+        'capacity': 10,
+        'is_verified': true,
+        'rating': 4.5,
+      };
+
+      test('returns Driver on success', () async {
+        when(() => mockRemote.getDriverById('driver-123'))
+            .thenAnswer((_) async => mockDriverJson);
+
+        final result = await repository.getDriverById(const DriverId('driver-123'));
+
+        expect(result.isRight(), true);
+        result.fold(
+          (failure) => fail('should succeed'),
+          (driver) {
+            expect(driver.id, const DriverId('driver-123'));
+            expect(driver.vehicleModel, 'KIA Besta');
+            expect(driver.rating, 4.5);
+          },
+        );
+      });
+
+      test('returns Left(NotFoundFailure) when not found', () async {
+        when(() => mockRemote.getDriverById('driver-123'))
+            .thenAnswer((_) async => null);
+
+        final result = await repository.getDriverById(const DriverId('driver-123'));
+
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => expect(failure, isA<NotFoundFailure>()),
+          (_) => fail('should fail'),
+        );
+      });
+    });
+
+    group('getDriverProfile', () {
+      final mockProfileJson = {
+        'id': 'user-123',
+        'email': 'driver@sayr.app',
+        'role': 'driver',
+        'full_name': 'Driver Name',
+        'phone': '07901234567',
+        'is_verified': true,
+        'avatar_url': 'https://avatar',
+      };
+
+      test('returns User profile on success', () async {
+        when(() => mockRemote.fetchCurrentProfile('user-123'))
+            .thenAnswer((_) async => mockProfileJson);
+
+        final result = await repository.getDriverProfile(const UserId('user-123'));
+
+        expect(result.isRight(), true);
+        result.fold(
+          (failure) => fail('should succeed'),
+          (user) {
+            expect(user.id, const UserId('user-123'));
+            expect(user.fullName, 'Driver Name');
+            expect(user.avatarUrl, 'https://avatar');
+          },
+        );
+      });
+    });
+
+    group('submitRating', () {
+      final mockRatingJson = {
+        'id': 'rate-123',
+        'trip_id': 'trip-123',
+        'student_id': 'student-123',
+        'driver_id': 'driver-123',
+        'rating': 5,
+        'created_at': '2026-06-04T08:00:00Z',
+        'comment': 'Great driver',
+      };
+
+      test('returns Rating on success when authenticated', () async {
+        final mockUser = MockUser();
+        when(() => mockUser.id).thenReturn('student-123');
+        when(() => mockRemote.currentUser).thenReturn(mockUser);
+        when(() => mockRemote.submitRating(
+              tripId: 'trip-123',
+              driverId: 'driver-123',
+              studentId: 'student-123',
+              rating: 5,
+              comment: 'Great driver',
+            )).thenAnswer((_) async => mockRatingJson);
+
+        final result = await repository.submitRating(
+          tripId: const TripId('trip-123'),
+          driverId: const DriverId('driver-123'),
+          rating: 5,
+          comment: 'Great driver',
+        );
+
+        expect(result.isRight(), true);
+        result.fold(
+          (failure) => fail('should succeed'),
+          (rating) {
+            expect(rating.id, const RatingId('rate-123'));
+            expect(rating.rating, 5);
+            expect(rating.comment, 'Great driver');
+          },
+        );
+      });
+
+      test('returns Left(UnauthorizedFailure) when not authenticated', () async {
+        when(() => mockRemote.currentUser).thenReturn(null);
+
+        final result = await repository.submitRating(
+          tripId: const TripId('trip-123'),
+          driverId: const DriverId('driver-123'),
+          rating: 5,
+        );
+
+        expect(result.isLeft(), true);
+        result.fold(
+          (failure) => expect(failure, isA<UnauthorizedFailure>()),
+          (_) => fail('should fail'),
+        );
+      });
+    });
+
+    group('getTripRating', () {
+      final mockRatingJson = {
+        'id': 'rate-123',
+        'trip_id': 'trip-123',
+        'student_id': 'student-123',
+        'driver_id': 'driver-123',
+        'rating': 5,
+        'created_at': '2026-06-04T08:00:00Z',
+        'comment': 'Great driver',
+      };
+
+      test('returns Rating when exists', () async {
+        final mockUser = MockUser();
+        when(() => mockUser.id).thenReturn('student-123');
+        when(() => mockRemote.currentUser).thenReturn(mockUser);
+        when(() => mockRemote.getTripRating(
+              tripId: 'trip-123',
+              studentId: 'student-123',
+            )).thenAnswer((_) async => mockRatingJson);
+
+        final result = await repository.getTripRating(const TripId('trip-123'));
+
+        expect(result.isRight(), true);
+        result.fold(
+          (failure) => fail('should succeed'),
+          (rating) {
+            expect(rating, isNotNull);
+            expect(rating!.id, const RatingId('rate-123'));
+          },
+        );
+      });
+
+      test('returns null when rating does not exist', () async {
+        final mockUser = MockUser();
+        when(() => mockUser.id).thenReturn('student-123');
+        when(() => mockRemote.currentUser).thenReturn(mockUser);
+        when(() => mockRemote.getTripRating(
+              tripId: 'trip-123',
+              studentId: 'student-123',
+            )).thenAnswer((_) async => null);
+
+        final result = await repository.getTripRating(const TripId('trip-123'));
+
+        expect(result.isRight(), true);
+        result.fold(
+          (failure) => fail('should succeed'),
+          (rating) => expect(rating, isNull),
         );
       });
     });

@@ -1,26 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/reset_password_form_cubit.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
-
-class ResetPasswordPage extends StatefulWidget {
+/// Page that allows users to reset/update their password.
+class ResetPasswordPage extends StatelessWidget {
+  /// Creates a [ResetPasswordPage].
   const ResetPasswordPage({super.key});
 
   @override
-  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => ResetPasswordFormCubit(),
+      child: const _ResetPasswordView(),
+    );
+  }
 }
 
-class _ResetPasswordPageState extends State<ResetPasswordPage> {
+class _ResetPasswordView extends StatefulWidget {
+  const _ResetPasswordView();
+
+  @override
+  State<_ResetPasswordView> createState() => _ResetPasswordViewState();
+}
+
+class _ResetPasswordViewState extends State<_ResetPasswordView> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirm = true;
 
   @override
   void dispose() {
@@ -84,62 +96,70 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.xxxl),
-                    AppTextField(
-                      label: l10n.newPassword,
-                      hint: l10n.passwordHint,
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      prefixIcon: Icons.lock_outline,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () => setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        }),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return l10n.passwordRequired;
-                        }
-                        if (value.length < 6) {
-                          return l10n.passwordTooShort;
-                        }
-                        return null;
+                    BlocBuilder<ResetPasswordFormCubit,
+                        ({bool obscurePassword, bool obscureConfirm})>(
+                      builder: (context, visibility) {
+                        return Column(
+                          children: [
+                            AppTextField(
+                              label: l10n.newPassword,
+                              hint: l10n.passwordHint,
+                              controller: _passwordController,
+                              obscureText: visibility.obscurePassword,
+                              prefixIcon: Icons.lock_outline,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  visibility.obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                                onPressed: () => context
+                                    .read<ResetPasswordFormCubit>()
+                                    .togglePasswordVisibility(),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return l10n.validationPasswordRequired;
+                                }
+                                if (value.length < 6) {
+                                  return l10n.validationPasswordTooShort;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            AppTextField(
+                              label: l10n.confirmPassword,
+                              hint: l10n.passwordHint,
+                              controller: _confirmController,
+                              obscureText: visibility.obscureConfirm,
+                              prefixIcon: Icons.lock_outline,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  visibility.obscureConfirm
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                                onPressed: () => context
+                                    .read<ResetPasswordFormCubit>()
+                                    .toggleConfirmVisibility(),
+                              ),
+                              validator: (value) {
+                                if (value != _passwordController.text) {
+                                  return l10n.validationPasswordsDoNotMatch;
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        );
                       },
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    AppTextField(
-                      label: l10n.confirmPassword,
-                      hint: l10n.confirmPasswordHint,
-                      controller: _confirmController,
-                      obscureText: _obscureConfirm,
-                      prefixIcon: Icons.lock_reset_outlined,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirm
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () => setState(() {
-                          _obscureConfirm = !_obscureConfirm;
-                        }),
-                      ),
-                      validator: (value) {
-                        if (value != _passwordController.text) {
-                          return l10n.passwordsDoNotMatch;
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
                     PrimaryButton(
                       label: l10n.updatePassword,
-                      icon: Icons.check,
-                      isLoading: isLoading,
                       onPressed: isLoading ? null : _submit,
+                      isLoading: isLoading,
                     ),
                   ],
                 ),

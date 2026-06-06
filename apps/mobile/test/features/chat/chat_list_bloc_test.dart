@@ -128,7 +128,7 @@ void main() {
       'realtime stream updates conversations',
       build: () {
         when(() => mockRepo.getMyConversations()).thenAnswer(
-          (_) async => Right<Failure, List<Conversation>>([]),
+          (_) async => const Right<Failure, List<Conversation>>([]),
         );
         return ChatListBloc(chatRepository: mockRepo);
       },

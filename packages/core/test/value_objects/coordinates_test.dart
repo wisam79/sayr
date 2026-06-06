@@ -59,22 +59,22 @@ void main() {
 
   group('Coordinates - bearing', () {
     test('bearing north returns ~0 degrees', () {
-      const a = Coordinates(latitude: 33.0, longitude: 44.0);
-      const b = Coordinates(latitude: 34.0, longitude: 44.0);
+      const a = Coordinates(latitude: 33, longitude: 44);
+      const b = Coordinates(latitude: 34, longitude: 44);
       expect(a.bearingTo(b), closeTo(0, 1));
     });
 
     test('bearing east returns ~90 degrees', () {
-      const a = Coordinates(latitude: 33.0, longitude: 44.0);
-      const b = Coordinates(latitude: 33.0, longitude: 45.0);
+      const a = Coordinates(latitude: 33, longitude: 44);
+      const b = Coordinates(latitude: 33, longitude: 45);
       expect(a.bearingTo(b), closeTo(90, 1));
     });
   });
 
   group('Coordinates - midpoint', () {
     test('midpoint of two coordinates is between them', () {
-      const a = Coordinates(latitude: 33.0, longitude: 44.0);
-      const b = Coordinates(latitude: 34.0, longitude: 45.0);
+      const a = Coordinates(latitude: 33, longitude: 44);
+      const b = Coordinates(latitude: 34, longitude: 45);
       final mid = a.midpoint(b);
       expect(mid.latitude, closeTo(33.5, 0.1));
       expect(mid.longitude, closeTo(44.5, 0.1));

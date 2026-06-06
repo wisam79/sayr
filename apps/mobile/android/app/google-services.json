@@ -1,0 +1,76 @@
+{
+  "project_info": {
+    "project_number": "1018318788548",
+    "project_id": "gen-lang-client-0483389937",
+    "storage_bucket": "gen-lang-client-0483389937.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018318788548:android:42965b3dbd846e69e13691",
+        "android_client_info": {
+          "package_name": "com.sayr.sayr_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1018318788548-idbv8r142c656grivv7btuqc3r352kt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDqvJc6lMRMPj0lX4_VrUFyXeWtjFsHJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1018318788548-idbv8r142c656grivv7btuqc3r352kt1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1018318788548:android:2e620b253d6b8b90e13691",
+        "android_client_info": {
+          "package_name": "com.wisam99sr.sair"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1018318788548-fit0mir0iq8unlicqo74d44jamr22lbr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wisam99sr.sair",
+            "certificate_hash": "6b19fe2edf07c334b4a842de9bd98ad7c09c1f0f"
+          }
+        },
+        {
+          "client_id": "1018318788548-idbv8r142c656grivv7btuqc3r352kt1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDqvJc6lMRMPj0lX4_VrUFyXeWtjFsHJM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1018318788548-idbv8r142c656grivv7btuqc3r352kt1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

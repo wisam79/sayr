@@ -24,17 +24,12 @@
 }
 
 .logo-icon-large {
-  background-color: var(--primary);
-  color: white;
   width: 64px;
   height: 64px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  font-weight: 700;
   border-radius: var(--radius-md);
-  margin-bottom: 20px;
   box-shadow: var(--shadow-glow);
   animation: pulseGlow 2.5s infinite;
 }

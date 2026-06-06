@@ -3,12 +3,13 @@ import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'emergency_state.dart';
+import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_state.dart';
 
 part 'emergency_event.dart';
 
 /// BLoC for the SOS / emergency flow.
 class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
+  /// Creates an [EmergencyBloc] with the given [emergencyRepository].
   EmergencyBloc({required EmergencyRepository emergencyRepository})
       : _repository = emergencyRepository,
         super(const EmergencyState.idle()) {
@@ -25,8 +26,7 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
   ) async {
     emit(const EmergencyState.sending());
 
-    final Either<Failure, EmergencyReport> result =
-        await _repository.triggerEmergency(
+    final result = await _repository.triggerEmergency(
       tripId: event.tripId,
       routeId: event.routeId,
       location: event.location,
@@ -43,12 +43,11 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     EmergencyCancelled event,
     Emitter<EmergencyState> emit,
   ) async {
-    final EmergencyState stateSnapshot = state;
+    final stateSnapshot = state;
     if (stateSnapshot is! EmergencyActive) return;
 
     emit(const EmergencyState.sending());
-    final Either<Failure, Unit> result =
-        await _repository.resolveReport(stateSnapshot.report.id);
+    final result = await _repository.resolveReport(stateSnapshot.report.id);
 
     result.fold(
       (Failure failure) => emit(EmergencyState.failed(failure: failure)),

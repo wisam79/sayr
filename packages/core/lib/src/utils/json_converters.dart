@@ -1,13 +1,13 @@
-import '../value_objects/ids.dart';
-import '../value_objects/coordinates.dart';
-import '../value_objects/money.dart';
-import '../value_objects/license_code.dart';
-import '../enums/license_status.dart';
-import '../enums/payout_status.dart';
-import '../enums/subscription_status.dart';
-import '../enums/support_status.dart';
-import '../enums/trip_status.dart';
-import '../enums/user_role.dart';
+import 'package:sayr_core/src/enums/license_status.dart';
+import 'package:sayr_core/src/enums/payout_status.dart';
+import 'package:sayr_core/src/enums/subscription_status.dart';
+import 'package:sayr_core/src/enums/support_status.dart';
+import 'package:sayr_core/src/enums/trip_status.dart';
+import 'package:sayr_core/src/enums/user_role.dart';
+import 'package:sayr_core/src/value_objects/coordinates.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
+import 'package:sayr_core/src/value_objects/license_code.dart';
+import 'package:sayr_core/src/value_objects/money.dart';
 
 // UserId
 UserId userIdFromJson(String json) => UserId(json);

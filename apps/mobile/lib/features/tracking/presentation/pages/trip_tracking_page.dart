@@ -1,32 +1,55 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/formatting.dart';
+import 'package:sayr_mobile/di/di.dart';
+import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/trip_details_cubit.dart';
+import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
+import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
-
-import '../../../../core/formatting.dart';
-import '../../../../di/di.dart';
-import '../../../emergency/presentation/widgets/emergency_sos_button.dart';
-import '../bloc/tracking_bloc.dart';
-import '../bloc/tracking_event.dart';
-import '../bloc/tracking_state.dart';
-import '../widgets/map_widget.dart';
-import '../widgets/trip_status_chip.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Student view: live tracking of a single trip on a map.
-class TripTrackingPage extends StatefulWidget {
+class TripTrackingPage extends StatelessWidget {
+  /// Creates a [TripTrackingPage].
   const TripTrackingPage({required this.tripId, super.key});
+
+  /// The ID of the trip being tracked.
+  final TripId tripId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => TripDetailsCubit(
+        routeRepository: sl<RouteRepository>(),
+        tripRepository: sl<TripRepository>(),
+      ),
+      child: _TripTrackingView(tripId: tripId),
+    );
+  }
+}
+
+class _TripTrackingView extends StatefulWidget {
+  const _TripTrackingView({required this.tripId});
 
   final TripId tripId;
 
   @override
-  State<TripTrackingPage> createState() => _TripTrackingPageState();
+  State<_TripTrackingView> createState() => _TripTrackingViewState();
 }
 
-class _TripTrackingPageState extends State<TripTrackingPage> {
+class _TripTrackingViewState extends State<_TripTrackingView> {
   late final TrackingBloc _trackingBloc;
-  Route? _route;
-  bool _isLoadingRoute = false;
+  bool _ratingShown = false;
 
   @override
   void initState() {
@@ -41,66 +64,119 @@ class _TripTrackingPageState extends State<TripTrackingPage> {
     super.dispose();
   }
 
-  Future<void> _loadRouteDetails(RouteId routeId) async {
-    if (_isLoadingRoute || _route != null) return;
-    _isLoadingRoute = true;
-    final result = await sl<RouteRepository>().getById(routeId);
-    if (mounted) {
-      setState(() {
-        _isLoadingRoute = false;
-        result.fold(
-          (failure) => null,
-          (route) => _route = route,
+  void _loadRouteDetails(RouteId routeId, DriverId driverId) {
+    context.read<TripDetailsCubit>().loadTripDetails(
+          routeId: routeId,
+          driverId: driverId,
+          tripId: widget.tripId,
         );
-      });
+  }
+
+  void _checkAndShowRating(BuildContext context, Trip trip) {
+    if (_ratingShown) return;
+    final detailsState = context.read<TripDetailsCubit>().state;
+    if (detailsState is TripDetailsLoaded && detailsState.tripRating == null) {
+      _ratingShown = true;
+      _showRatingBottomSheet(
+        context,
+        trip,
+        detailsState.driverProfile?.fullName ?? '',
+      );
     }
+  }
+
+  void _showRatingBottomSheet(
+    BuildContext context,
+    Trip trip,
+    String driverName,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return BlocProvider.value(
+          value: context.read<TripDetailsCubit>(),
+          child: _RatingSheet(trip: trip, driverName: driverName),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('تتبع الرحلة')),
-      body: BlocConsumer<TrackingBloc, TrackingState>(
-        listener: (context, state) {
-          if (state is TrackingTripWatching) {
-            _loadRouteDetails(state.trip.routeId);
-          } else if (state is TrackingError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message ?? 'حدث خطأ'),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-        },
-        builder: (context, state) {
-          if (state is TrackingTripWatching) {
-            return _buildTrackingView(state);
-          }
-
-          if (state is TrackingError) {
-            final previous = state.previousState;
-            if (previous is TrackingTripWatching) {
-              return _buildTrackingView(previous);
-            }
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline,
-                      size: 48, color: AppColors.error),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    state.failure.message ?? 'حدث خطأ',
-                    style: Theme.of(context).textTheme.bodyLarge,
+      appBar: AppBar(
+        title: Text(l10n.tripTracking),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+      ),
+      extendBodyBehindAppBar: true,
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<TrackingBloc, TrackingState>(
+            listener: (context, state) {
+              if (state is TrackingTripWatching) {
+                _loadRouteDetails(state.trip.routeId, state.trip.driverId);
+                if (state.trip.status == TripStatus.completed) {
+                  _checkAndShowRating(context, state.trip);
+                }
+              } else if (state is TrackingError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.failure.message ?? l10n.error),
+                    backgroundColor: AppColors.error,
                   ),
-                ],
-              ),
-            );
-          }
+                );
+              }
+            },
+          ),
+          BlocListener<TripDetailsCubit, TripDetailsState>(
+            listener: (context, state) {
+              final trackingState = context.read<TrackingBloc>().state;
+              if (state is TripDetailsLoaded &&
+                  trackingState is TrackingTripWatching) {
+                if (trackingState.trip.status == TripStatus.completed) {
+                  _checkAndShowRating(context, trackingState.trip);
+                }
+              }
+            },
+          ),
+        ],
+        child: BlocBuilder<TrackingBloc, TrackingState>(
+          builder: (context, state) {
+            if (state is TrackingTripWatching) {
+              return _buildTrackingView(context, state);
+            }
 
-          return const Center(child: CircularProgressIndicator());
-        },
+            if (state is TrackingError) {
+              final previous = state.previousState;
+              if (previous is TrackingTripWatching) {
+                return _buildTrackingView(context, previous);
+              }
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: AppColors.error,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      state.failure.message ?? l10n.error,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
       floatingActionButton: BlocBuilder<TrackingBloc, TrackingState>(
         buildWhen: (prev, curr) {
@@ -126,13 +202,17 @@ class _TripTrackingPageState extends State<TripTrackingPage> {
           if (tripId == null || routeId == null) {
             return const SizedBox.shrink();
           }
-          return EmergencySosButton(tripId: tripId, routeId: routeId);
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: EmergencySosButton(tripId: tripId, routeId: routeId),
+          );
         },
       ),
     );
   }
 
-  Widget _buildTrackingView(TrackingTripWatching state) {
+  Widget _buildTrackingView(BuildContext context, TrackingTripWatching state) {
+    final l10n = AppLocalizations.of(context);
     final trip = state.trip;
     final hasLocation = state.driverLocation != null;
 
@@ -156,65 +236,335 @@ class _TripTrackingPageState extends State<TripTrackingPage> {
         ),
     ];
 
-    return Column(
+    String? etaText;
+    if (hasLocation && trip.routeStartLocation != null) {
+      final startLoc = trip.routeStartLocation!;
+      final driverLoc = state.driverLocation!;
+
+      final distance = const geo.Distance().as(
+        geo.LengthUnit.Meter,
+        geo.LatLng(startLoc.latitude, startLoc.longitude),
+        geo.LatLng(driverLoc.latitude, driverLoc.longitude),
+      );
+
+      final distanceKm = (distance / 1000).toStringAsFixed(1);
+      final minutes = (distance / 500).round(); // 30 km/h average
+
+      etaText = l10n.etaDistance(distanceKm, '$minutes');
+    }
+
+    return Stack(
       children: [
-        Expanded(
-          flex: 3,
+        Positioned.fill(
           child: SayrMap(
             initialCameraPosition: cameraPosition,
             markers: markers,
           ),
         ),
-        Expanded(
-          flex: 2,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(15),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2),
+        Positioned(
+          left: AppSpacing.md,
+          right: AppSpacing.md,
+          bottom: AppSpacing.md,
+          child: SafeArea(
+            top: false,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    TripStatusChip(status: trip.status),
-                    const Spacer(),
-                    if (trip.duration != null)
-                      Text(
-                        _formatDuration(trip.duration!),
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                _LocationTile(
-                  icon: Icons.circle,
-                  color: AppColors.primary,
-                  label: _route?.startLocation ?? 'البداية',
-                ),
-                _LocationTile(
-                  icon: Icons.location_on,
-                  color: AppColors.error,
-                  label: _route?.endLocation ?? 'الوجهة',
-                ),
-                if (!hasLocation && trip.status == TripStatus.scheduled)
-                  const Padding(
-                    padding: EdgeInsets.only(top: AppSpacing.lg),
-                    child: Text(
-                      'في انتظار السائق...',
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
                   ),
-              ],
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: BlocBuilder<TripDetailsCubit, TripDetailsState>(
+                    builder: (context, detailsState) {
+                      final route = detailsState is TripDetailsLoaded
+                          ? detailsState.route
+                          : null;
+                      final driver = detailsState is TripDetailsLoaded
+                          ? detailsState.driver
+                          : null;
+                      final profile = detailsState is TripDetailsLoaded
+                          ? detailsState.driverProfile
+                          : null;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              TripStatusChip(status: trip.status),
+                              const Spacer(),
+                              if (trip.duration != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.sm,
+                                    vertical: AppSpacing.xs,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    _formatDuration(trip.duration!),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          if (etaText != null) ...[
+                            Container(
+                              padding: const EdgeInsets.all(AppSpacing.md),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    AppColors.primary.withValues(alpha: 0.15),
+                                    AppColors.primary.withValues(alpha: 0.05),
+                                  ],
+                                  begin: Alignment.topRight,
+                                  end: Alignment.bottomLeft,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.timer_outlined,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(
+                                    child: Text(
+                                      etaText,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: AppColors.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
+                          _LocationTile(
+                            icon: Icons.circle,
+                            color: AppColors.primary,
+                            label: route?.startLocation ?? l10n.start,
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: SizedBox(
+                              height: 12,
+                              child: VerticalDivider(
+                                width: 1,
+                                thickness: 1.5,
+                              ),
+                            ),
+                          ),
+                          _LocationTile(
+                            icon: Icons.location_on,
+                            color: AppColors.error,
+                            label: route?.endLocation ?? l10n.destination,
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Divider(
+                            color: Theme.of(context)
+                                .dividerColor
+                                .withValues(alpha: 0.08),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          if (profile != null && driver != null) ...[
+                            Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 24,
+                                  backgroundColor:
+                                      AppColors.primary.withValues(alpha: 0.1),
+                                  backgroundImage: profile.avatarUrl != null
+                                      ? CachedNetworkImageProvider(
+                                          profile.avatarUrl!,
+                                        )
+                                      : null,
+                                  child: profile.avatarUrl == null
+                                      ? const Icon(
+                                          Icons.person,
+                                          color: AppColors.primary,
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            profile.fullName ?? '',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                          ),
+                                          if (driver.isVerified) ...[
+                                            const SizedBox(width: 4),
+                                            const Icon(
+                                              Icons.verified,
+                                              color: AppColors.primary,
+                                              size: 16,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${driver.vehicleModel} • '
+                                        '${driver.vehiclePlate}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: AppColors.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: AppSpacing.sm,
+                                    vertical: AppSpacing.xs,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        color: Colors.amber,
+                                        size: 14,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        driver.rating.toStringAsFixed(1),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: Colors.amber[800],
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: PrimaryButton(
+                                    label: l10n.callDriver,
+                                    icon: Icons.phone,
+                                    onPressed: () async {
+                                      final phone = profile.phone;
+                                      if (phone != null && phone.isNotEmpty) {
+                                        final uri = Uri.parse('tel:$phone');
+                                        if (await canLaunchUrl(uri)) {
+                                          await launchUrl(uri);
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: SecondaryButton(
+                                    label: l10n.chatDriver,
+                                    icon: Icons.chat_bubble_outline,
+                                    onPressed: () async {
+                                      final chatRepo = sl<ChatRepository>();
+                                      final messenger =
+                                          ScaffoldMessenger.of(context);
+                                      final router = GoRouter.of(context);
+
+                                      final conversationResult = await chatRepo
+                                          .getOrCreateConversation(
+                                        routeId: route!.id,
+                                        driverUserId: driver.userId,
+                                      );
+                                      conversationResult.fold(
+                                        (failure) {
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                failure.message ??
+                                                    'فشل بدء المحادثة',
+                                              ),
+                                              backgroundColor: AppColors.error,
+                                            ),
+                                          );
+                                        },
+                                        (conversation) {
+                                          router.push(
+                                            '/chat/${conversation.id.value}',
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            if (!hasLocation &&
+                                trip.status == TripStatus.scheduled)
+                              Text(
+                                l10n.waitingForDriver,
+                                style: const TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -245,13 +595,194 @@ class _LocationTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: color, size: 20),
-      title: Text(
-        label,
-        style: Theme.of(context).textTheme.bodyMedium,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 18),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RatingSheet extends StatefulWidget {
+  const _RatingSheet({required this.trip, required this.driverName});
+  final Trip trip;
+  final String driverName;
+
+  @override
+  State<_RatingSheet> createState() => _RatingSheetState();
+}
+
+class _RatingSheetState extends State<_RatingSheet> {
+  int _selectedRating = 0;
+  final _commentController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 48,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(2.5),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              l10n.rateTrip,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              l10n.howWasYourTrip,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            if (widget.driverName.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                widget.driverName,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            const SizedBox(height: AppSpacing.xl),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final starValue = index + 1;
+                final isSelected = starValue <= _selectedRating;
+                return IconButton(
+                  icon: Icon(
+                    isSelected ? Icons.star : Icons.star_border,
+                    color: isSelected ? Colors.amber : AppColors.textMuted,
+                    size: 44,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _selectedRating = starValue;
+                    });
+                  },
+                );
+              }),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            TextField(
+              controller: _commentController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                hintText: l10n.ratingCommentHint,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.12),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(
+                    color: AppColors.primary,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.all(AppSpacing.md),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            PrimaryButton(
+              label: l10n.submitRating,
+              isLoading: _isSubmitting,
+              onPressed: _selectedRating == 0
+                  ? null
+                  : () async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final navigator = Navigator.of(context);
+                      final cubit = context.read<TripDetailsCubit>();
+
+                      setState(() => _isSubmitting = true);
+                      final success = await cubit.submitTripRating(
+                        tripId: widget.trip.id,
+                        driverId: widget.trip.driverId,
+                        rating: _selectedRating,
+                        comment: _commentController.text.trim().isEmpty
+                            ? null
+                            : _commentController.text.trim(),
+                      );
+                      if (mounted) {
+                        setState(() => _isSubmitting = false);
+                        if (success) {
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.ratingSuccess),
+                              backgroundColor: AppColors.success,
+                            ),
+                          );
+                          navigator.pop();
+                        } else {
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text(l10n.ratingFailed),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                        }
+                      }
+                    },
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
       ),
     );
   }

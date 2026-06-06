@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'chat_state.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_state.dart';
 
 part 'chat_event.dart';
 
@@ -15,15 +14,18 @@ part 'chat_event.dart';
 ///   subscribes to realtime updates via [ChatRepository.watchMessages].
 /// - On [ChatMessageSent] it persists the new message; the realtime
 ///   stream then propagates the row back into the UI automatically.
-/// - On [ChatClosed] / [close] the subscription is cancelled.
+/// - On [ChatClosed] / `close` the subscription is cancelled.
 sealed class ChatEvent extends Equatable {
+  /// Constructor for [ChatEvent].
   const ChatEvent();
 
   @override
   List<Object?> get props => [];
 }
 
+/// BLoC for a single conversation view.
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
+  /// Creates an instance of [ChatBloc] with the given [chatRepository].
   ChatBloc({required ChatRepository chatRepository})
       : _chatRepository = chatRepository,
         super(const ChatState.initial()) {
@@ -41,6 +43,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   StreamSubscription<List<Message>>? _messagesSubscription;
   ConversationId? _conversationId;
 
+  /// Returns the current active [ConversationId].
   ConversationId? get conversationId =>
       _conversationId ??
       state.maybeWhen(
@@ -69,8 +72,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _conversationId = event.conversationId;
     emit(const ChatState.loading());
 
-    final Either<Failure, List<Message>> initial =
-        await _chatRepository.getMessages(event.conversationId);
+    final initial = await _chatRepository.getMessages(event.conversationId);
     initial.fold(
       (Failure failure) => emit(ChatState.error(failure: failure)),
       (List<Message> messages) => emit(
@@ -94,7 +96,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatMessagesUpdated event,
     Emitter<ChatState> emit,
   ) {
-    final ConversationId? id = conversationId;
+    final id = conversationId;
     if (id == null) return;
     emit(ChatState.loaded(conversationId: id, messages: event.messages));
   }
@@ -103,7 +105,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatStreamErrored event,
     Emitter<ChatState> emit,
   ) {
-    final ConversationId? id = conversationId;
+    final id = conversationId;
     if (id == null) return;
     emit(
       ChatState.loaded(
@@ -117,13 +119,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     ChatMessageSent event,
     Emitter<ChatState> emit,
   ) async {
-    final ConversationId? id = conversationId;
+    final id = conversationId;
     if (id == null) return;
 
-    final String trimmed = event.body.trim();
+    final trimmed = event.body.trim();
     if (trimmed.isEmpty) return;
 
-    final List<Message> current = _currentMessages();
+    final current = _currentMessages();
 
     emit(
       ChatState.loaded(
@@ -133,7 +135,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ),
     );
 
-    final Either<Failure, Message> result =
+    final result =
         await _chatRepository.sendMessage(conversationId: id, body: trimmed);
 
     result.fold(
@@ -149,7 +151,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _ChatSendCompleted event,
     Emitter<ChatState> emit,
   ) {
-    final ConversationId? id = conversationId;
+    final id = conversationId;
     if (id == null) return;
 
     emit(ChatState.loaded(conversationId: id, messages: _currentMessages()));
@@ -189,7 +191,7 @@ class _ChatStreamErrored extends ChatEvent {
 }
 
 /// Internal event: send completed; the realtime stream will deliver the
-/// new message, so we just clear the [isSending] flag.
+/// new message, so we just clear the `isSending` flag.
 class _ChatSendCompleted extends ChatEvent {
   const _ChatSendCompleted();
 }

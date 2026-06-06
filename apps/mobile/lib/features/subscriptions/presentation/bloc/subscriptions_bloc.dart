@@ -1,11 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'subscriptions_event.dart';
-import 'subscriptions_state.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
 
 /// Bloc for managing subscriptions.
 class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
+  /// Creates a [SubscriptionsBloc] with the given [subscriptionRepository].
   SubscriptionsBloc({
     required SubscriptionRepository subscriptionRepository,
   })  : _subscriptionRepository = subscriptionRepository,
@@ -49,9 +50,11 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   ) async {
     final code = LicenseCode.tryParse(event.code);
     if (code == null) {
-      emit(const SubscriptionsError(
-        ValidationFailure(message: 'كود الترخيص غير صحيح'),
-      ));
+      emit(
+        const SubscriptionsError(
+          ValidationFailure(message: 'كود الترخيص غير صحيح'),
+        ),
+      );
       return;
     }
 

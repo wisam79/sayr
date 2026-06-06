@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/subscriptions_bloc.dart';
-import '../bloc/subscriptions_event.dart';
-import '../bloc/subscriptions_state.dart';
-
+/// Page displaying subscriptions purchased by the user.
 class MySubscriptionsPage extends StatefulWidget {
+  /// Creates a [MySubscriptionsPage].
   const MySubscriptionsPage({super.key, this.showAppBar = true});
+
+  /// Whether to show the app bar on this page.
   final bool showAppBar;
 
   @override
@@ -43,7 +46,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
           return FloatingActionButton.extended(
             onPressed: () => context.push('/activate-license'),
             icon: const Icon(Icons.add),
-            label: const Text('تفعيل ترخيص'),
+            label: Text(l10n.activateLicense),
           );
         },
       ),
@@ -55,7 +58,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             LicenseActivating() => const LoadingWidget(),
             LicenseActivated() => const LoadingWidget(),
             SubscriptionsError(:final failure) => AppErrorWidget(
-                message: failure.message ?? 'حدث خطأ',
+                message: failure.message ?? l10n.errorOccurred,
                 onRetry: () {
                   context
                       .read<SubscriptionsBloc>()
@@ -66,10 +69,10 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                 when subscriptions.isEmpty =>
               EmptyState(
                 icon: Icons.confirmation_number_outlined,
-                title: 'لا يوجد اشتراكات',
-                subtitle: 'فعّل ترخيصك الأول للبدء',
+                title: l10n.noSubscriptionsTitle,
+                subtitle: l10n.noSubscriptionsSubtitle,
                 action: PrimaryButton(
-                  label: 'تفعيل ترخيص',
+                  label: l10n.activateLicense,
                   icon: Icons.add,
                   isExpanded: false,
                   onPressed: () => context.push('/activate-license'),
@@ -98,7 +101,10 @@ class _SubscriptionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isActive = subscription.isActive && !subscription.isExpired;
+    final endDateStr =
+        subscription.endDate!.toLocal().toString().split(' ').first;
 
     return Card(
       child: Padding(
@@ -110,7 +116,7 @@ class _SubscriptionCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'اشتراك',
+                  l10n.subscriptionType,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Container(
@@ -125,7 +131,9 @@ class _SubscriptionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
                   ),
                   child: Text(
-                    isActive ? 'نشط' : 'منتهي',
+                    isActive
+                        ? l10n.subscriptionStatusActive
+                        : l10n.subscriptionStatusExpired,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: isActive ? AppColors.success : AppColors.error,
                         ),
@@ -144,7 +152,7 @@ class _SubscriptionCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'ينتهي: ${subscription.endDate!.toLocal().toString().split(' ').first}',
+                    l10n.subscriptionEndsOn(endDateStr),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],
@@ -152,7 +160,7 @@ class _SubscriptionCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               if (subscription.daysRemaining != null)
                 Text(
-                  'متبقي ${subscription.daysRemaining} يوم',
+                  l10n.subscriptionDaysLeft(subscription.daysRemaining!),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -170,7 +178,7 @@ class _SubscriptionCard extends StatelessWidget {
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error),
                 ),
-                child: const Text('إلغاء الاشتراك'),
+                child: Text(l10n.cancelSubscription),
               ),
             ],
           ],

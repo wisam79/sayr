@@ -1,27 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/signup_form_cubit.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
-
-class SignupPage extends StatefulWidget {
+/// Page containing the registration form for new users.
+class SignupPage extends StatelessWidget {
+  /// Creates a [SignupPage].
   const SignupPage({super.key});
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => SignupFormCubit(),
+      child: const _SignupView(),
+    );
+  }
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _SignupView extends StatefulWidget {
+  const _SignupView();
+
+  @override
+  State<_SignupView> createState() => _SignupViewState();
+}
+
+class _SignupViewState extends State<_SignupView> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -63,7 +76,7 @@ class _SignupPageState extends State<SignupPage> {
             if (state is AuthError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.failure.message ?? 'خطأ'),
+                  content: Text(state.failure.message ?? l10n.error),
                   backgroundColor: AppColors.error,
                 ),
               );
@@ -98,13 +111,13 @@ class _SignupPageState extends State<SignupPage> {
                       controller: _fullNameController,
                       prefixIcon: Icons.person_outline,
                       validator: (value) {
-                        if (value == null || value.trim().length < 3) {
-                          return 'الاسم يجب أن يكون 3 أحرف على الأقل';
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n.validationFullNameRequired;
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
                     AppTextField(
                       label: l10n.email,
                       hint: l10n.emailHint,
@@ -112,62 +125,68 @@ class _SignupPageState extends State<SignupPage> {
                       keyboardType: TextInputType.emailAddress,
                       prefixIcon: Icons.email_outlined,
                       validator: (value) {
-                        if (value == null || !value.contains('@')) {
-                          return 'بريد غير صحيح';
+                        if (value == null || value.trim().isEmpty) {
+                          return l10n.validationEmailRequired;
+                        }
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value.trim())) {
+                          return l10n.validationEmailInvalid;
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
                     AppTextField(
                       label: l10n.phone,
                       hint: l10n.phoneHint,
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
                       prefixIcon: Icons.phone_outlined,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    AppTextField(
-                      label: l10n.password,
-                      hint: l10n.passwordHint,
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      prefixIcon: Icons.lock_outline,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
                       validator: (value) {
-                        if (value == null || value.length < 6) {
-                          return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+                        if (value != null &&
+                            value.trim().isNotEmpty &&
+                            value.trim().length < 10) {
+                          return l10n.validationPhoneInvalid;
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.md),
+                    BlocBuilder<SignupFormCubit, bool>(
+                      builder: (context, obscurePassword) {
+                        return AppTextField(
+                          label: l10n.password,
+                          hint: l10n.passwordHint,
+                          controller: _passwordController,
+                          obscureText: obscurePassword,
+                          prefixIcon: Icons.lock_outline,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () => context
+                                .read<SignupFormCubit>()
+                                .toggleVisibility(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.validationPasswordRequired;
+                            }
+                            if (value.length < 6) {
+                              return l10n.validationPasswordTooShort;
+                            }
+                            return null;
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     PrimaryButton(
                       label: l10n.signupButton,
                       onPressed: isLoading ? null : _submit,
                       isLoading: isLoading,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(l10n.haveAccount),
-                        TextButton(
-                          onPressed: () => context.pop(),
-                          child: Text(l10n.signin),
-                        ),
-                      ],
                     ),
                   ],
                 ),

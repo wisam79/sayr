@@ -2,36 +2,49 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
+import 'package:sayr_mobile/core/locale_cubit.dart';
+import 'package:sayr_mobile/di/di.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:sayr_mobile/features/home/presentation/bloc/create_trip_dialog_cubit.dart';
+import 'package:sayr_mobile/features/home/presentation/bloc/home_nav_cubit.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_state.dart';
+import 'package:sayr_mobile/features/routes/presentation/pages/routes_list_page.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/pages/my_subscriptions_page.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
+import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../di/di.dart';
-import '../../../../l10n/app_localizations.dart';
-import '../../../../core/locale_cubit.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_event.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../../notifications/presentation/bloc/notifications_bloc.dart';
-import '../../../notifications/presentation/bloc/notifications_state.dart';
-import '../../../routes/presentation/pages/routes_list_page.dart';
-import '../../../subscriptions/presentation/bloc/subscriptions_bloc.dart';
-import '../../../subscriptions/presentation/bloc/subscriptions_event.dart';
-import '../../../subscriptions/presentation/bloc/subscriptions_state.dart';
-import '../../../subscriptions/presentation/pages/my_subscriptions_page.dart';
-import '../../../tracking/presentation/bloc/tracking_bloc.dart';
-import '../../../tracking/presentation/bloc/tracking_event.dart';
-import '../../../tracking/presentation/bloc/tracking_state.dart';
-import '../../../tracking/presentation/pages/active_trips_page.dart';
-
-class HomePage extends StatefulWidget {
+/// Home page of the application, displaying different tabs based on role.
+class HomePage extends StatelessWidget {
+  /// Creates a [HomePage].
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => HomeNavCubit(),
+      child: const _HomeView(),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
+class _HomeView extends StatefulWidget {
+  const _HomeView();
 
+  @override
+  State<_HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<_HomeView> {
   @override
   void initState() {
     super.initState();
@@ -50,144 +63,171 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          isDriver
-              ? (switch (_currentIndex) {
-                  0 => l10n.appTitle,
-                  1 => l10n.activeTrips,
-                  2 => l10n.profile,
-                  _ => l10n.appTitle,
-                })
-              : (switch (_currentIndex) {
-                  0 => l10n.appTitle,
-                  1 => l10n.routesTitle,
-                  2 => l10n.activeTrips,
-                  3 => l10n.mySubscriptions,
-                  4 => l10n.profile,
-                  _ => l10n.appTitle,
-                }),
+        title: BlocBuilder<HomeNavCubit, int>(
+          builder: (context, index) {
+            return Text(
+              isDriver
+                  ? (switch (index) {
+                      0 => l10n.appTitle,
+                      1 => l10n.activeTrips,
+                      2 => l10n.profile,
+                      _ => l10n.appTitle,
+                    })
+                  : (switch (index) {
+                      0 => l10n.appTitle,
+                      1 => l10n.routesTitle,
+                      2 => l10n.activeTrips,
+                      3 => l10n.mySubscriptions,
+                      4 => l10n.profile,
+                      _ => l10n.appTitle,
+                    }),
+            );
+          },
         ),
         actions: [
-          if (!isDriver && _currentIndex == 0) ...[
-            IconButton(
-              icon: const Icon(Icons.chat_outlined),
-              tooltip: l10n.chats,
-              onPressed: () => context.push('/chats'),
-            ),
-            BlocBuilder<NotificationsBloc, NotificationsState>(
-              buildWhen: (prev, curr) =>
-                  prev.maybeWhen(loaded: (a, b) => b, orElse: () => 0) !=
-                  curr.maybeWhen(loaded: (a, b) => b, orElse: () => 0),
-              builder: (context, state) {
-                final int unread = state.maybeWhen(
-                  loaded: (_, count) => count,
-                  orElse: () => 0,
-                );
-                return IconButton(
-                  icon: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      const Icon(Icons.notifications_outlined),
-                      if (unread > 0)
-                        PositionedDirectional(
-                          top: -2,
-                          end: -2,
-                          child: Container(
-                            padding: const EdgeInsetsDirectional.all(4),
-                            constraints: const BoxConstraints(
-                              minWidth: 16,
-                              minHeight: 16,
-                            ),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              unread > 9 ? '9+' : '$unread',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
+          if (!isDriver)
+            BlocBuilder<HomeNavCubit, int>(
+              builder: (context, index) {
+                if (index != 0) return const SizedBox.shrink();
+                return Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chat_outlined),
+                      tooltip: l10n.chats,
+                      onPressed: () => context.push('/chats'),
+                    ),
+                    BlocBuilder<NotificationsBloc, NotificationsState>(
+                      buildWhen: (prev, curr) =>
+                          prev.maybeWhen(
+                            loaded: (a, b) => b,
+                            orElse: () => 0,
+                          ) !=
+                          curr.maybeWhen(
+                            loaded: (a, b) => b,
+                            orElse: () => 0,
                           ),
-                        ),
-                    ],
-                  ),
-                  onPressed: () => context.push('/notifications'),
+                      builder: (context, state) {
+                        final unread = state.maybeWhen(
+                          loaded: (_, count) => count,
+                          orElse: () => 0,
+                        );
+                        return IconButton(
+                          icon: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              const Icon(Icons.notifications_outlined),
+                              if (unread > 0)
+                                PositionedDirectional(
+                                  top: -2,
+                                  end: -2,
+                                  child: Container(
+                                    padding: const EdgeInsetsDirectional.all(4),
+                                    constraints: const BoxConstraints(
+                                      minWidth: 16,
+                                      minHeight: 16,
+                                    ),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      unread > 9 ? '9+' : '$unread',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          onPressed: () => context.push('/notifications'),
+                        );
+                      },
+                    ),
+                  ],
                 );
               },
             ),
-          ],
         ],
       ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: isDriver
-            ? [
-                _DriverHomeTab(
-                  onOpenTrips: () => setState(() => _currentIndex = 1),
-                ),
-                const _DriverTripsTab(),
-                const _ProfileTab(),
-              ]
-            : [
-                const _HomeTab(),
-                const RoutesListPage(showAppBar: false),
-                const ActiveTripsPage(showAppBar: false),
-                const MySubscriptionsPage(showAppBar: false),
-                const _ProfileTab(),
-              ],
+      body: BlocBuilder<HomeNavCubit, int>(
+        builder: (context, index) {
+          return IndexedStack(
+            index: index,
+            children: isDriver
+                ? [
+                    _DriverHomeTab(
+                      onOpenTrips: () =>
+                          context.read<HomeNavCubit>().selectTab(1),
+                    ),
+                    const _DriverTripsTab(),
+                    const _ProfileTab(),
+                  ]
+                : [
+                    const _HomeTab(),
+                    const RoutesListPage(showAppBar: false),
+                    const ActiveTripsPage(showAppBar: false),
+                    const MySubscriptionsPage(showAppBar: false),
+                    const _ProfileTab(),
+                  ],
+          );
+        },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: isDriver
-            ? [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.home_outlined),
-                  activeIcon: const Icon(Icons.home),
-                  label: l10n.homeTitle,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.directions_bus_outlined),
-                  activeIcon: const Icon(Icons.directions_bus),
-                  label: l10n.activeTrips,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.person_outline),
-                  activeIcon: const Icon(Icons.person),
-                  label: l10n.profile,
-                ),
-              ]
-            : [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.home_outlined),
-                  activeIcon: const Icon(Icons.home),
-                  label: l10n.homeTitle,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.directions_bus_outlined),
-                  activeIcon: const Icon(Icons.directions_bus),
-                  label: l10n.routesTitle,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.map_outlined),
-                  activeIcon: const Icon(Icons.map),
-                  label: l10n.activeTrips,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.confirmation_number_outlined),
-                  activeIcon: const Icon(Icons.confirmation_number),
-                  label: l10n.mySubscriptions,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.person_outline),
-                  activeIcon: const Icon(Icons.person),
-                  label: l10n.profile,
-                ),
-              ],
+      bottomNavigationBar: BlocBuilder<HomeNavCubit, int>(
+        builder: (context, index) {
+          return BottomNavigationBar(
+            currentIndex: index,
+            onTap: (i) => context.read<HomeNavCubit>().selectTab(i),
+            items: isDriver
+                ? [
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.home_outlined),
+                      activeIcon: const Icon(Icons.home),
+                      label: l10n.homeTitle,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.directions_bus_outlined),
+                      activeIcon: const Icon(Icons.directions_bus),
+                      label: l10n.activeTrips,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.person_outline),
+                      activeIcon: const Icon(Icons.person),
+                      label: l10n.profile,
+                    ),
+                  ]
+                : [
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.home_outlined),
+                      activeIcon: const Icon(Icons.home),
+                      label: l10n.homeTitle,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.directions_bus_outlined),
+                      activeIcon: const Icon(Icons.directions_bus),
+                      label: l10n.routesTitle,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.map_outlined),
+                      activeIcon: const Icon(Icons.map),
+                      label: l10n.activeTrips,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.confirmation_number_outlined),
+                      activeIcon: const Icon(Icons.confirmation_number),
+                      label: l10n.mySubscriptions,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: const Icon(Icons.person_outline),
+                      activeIcon: const Icon(Icons.person),
+                      label: l10n.profile,
+                    ),
+                  ],
+          );
+        },
       ),
     );
   }
@@ -210,7 +250,7 @@ class _HomeTab extends StatelessWidget {
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 return Text(
-                  'مرحباً، ${state.user.displayName}',
+                  l10n.helloUser(state.user.displayName),
                   style: Theme.of(context).textTheme.headlineSmall,
                 );
               }
@@ -270,7 +310,7 @@ class _HomeTab extends StatelessWidget {
                     ),
                     title: Text(l10n.activeSubscription),
                     subtitle: Text(
-                      '${active.length} ${active.length == 1 ? 'اشتراك' : 'اشتراكات'} نشطة',
+                      l10n.activeSubscriptionCount(active.length),
                     ),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => context.push('/subscriptions'),
@@ -285,8 +325,8 @@ class _HomeTab extends StatelessWidget {
             child: ListTile(
               leading:
                   const Icon(Icons.directions_bus, color: AppColors.primary),
-              title: const Text('تصفح الخطوط'),
-              subtitle: const Text('اعثر على خط يناسبك'),
+              title: Text(l10n.browseRoutes),
+              subtitle: Text(l10n.browseRoutesDesc),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () => context.push('/routes'),
             ),
@@ -306,6 +346,7 @@ class _DriverHomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
       child: Column(
@@ -315,7 +356,7 @@ class _DriverHomeTab extends StatelessWidget {
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 return Text(
-                  'مرحباً، ${state.user.displayName}',
+                  l10n.helloUser(state.user.displayName),
                   style: Theme.of(context).textTheme.headlineSmall,
                 );
               }
@@ -326,8 +367,8 @@ class _DriverHomeTab extends StatelessWidget {
           Card(
             child: ListTile(
               leading: const Icon(Icons.add_circle, color: AppColors.primary),
-              title: const Text('إنشاء رحلة جديدة'),
-              subtitle: const Text('ابدأ رحلة على خط مسجل لديك'),
+              title: Text(l10n.createNewTrip),
+              subtitle: Text(l10n.createNewTripDesc),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () => _showCreateTripDialog(context),
             ),
@@ -337,8 +378,8 @@ class _DriverHomeTab extends StatelessWidget {
             child: ListTile(
               leading:
                   const Icon(Icons.directions_bus, color: AppColors.success),
-              title: const Text('رحلاتي النشطة'),
-              subtitle: const Text('عرض وإدارة رحلاتك الجارية'),
+              title: Text(l10n.myActiveTrips),
+              subtitle: Text(l10n.myActiveTripsDesc),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
                 context.read<TrackingBloc>().add(
@@ -356,7 +397,12 @@ class _DriverHomeTab extends StatelessWidget {
   Future<void> _showCreateTripDialog(BuildContext context) async {
     final trip = await showDialog<core.Trip>(
       context: context,
-      builder: (_) => const _CreateTripDialog(),
+      builder: (_) => BlocProvider(
+        create: (_) => CreateTripDialogCubit(
+          routeRepository: sl<core.RouteRepository>(),
+        )..loadRoutes(),
+        child: const _CreateTripDialog(),
+      ),
     );
     if (trip != null && context.mounted) {
       context.go('/driver-trip/${trip.id.value}');
@@ -364,184 +410,166 @@ class _DriverHomeTab extends StatelessWidget {
   }
 }
 
-class _CreateTripDialog extends StatefulWidget {
+class _CreateTripDialog extends StatelessWidget {
   const _CreateTripDialog();
 
   @override
-  State<_CreateTripDialog> createState() => _CreateTripDialogState();
-}
-
-class _CreateTripDialogState extends State<_CreateTripDialog> {
-  late final Future<List<core.Route>> _routesFuture;
-  core.Route? _selectedRoute;
-  DateTime _scheduledAt = DateTime.now().add(const Duration(minutes: 10));
-  bool _isSubmitting = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _routesFuture = _loadRoutes();
-  }
-
-  Future<List<core.Route>> _loadRoutes() async {
-    final result = await sl<core.RouteRepository>().getMyDriverRoutes();
-    return result.fold(
-      (failure) => throw Exception(failure.message ?? 'فشل تحميل الخطوط'),
-      (routes) => routes,
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return BlocBuilder<CreateTripDialogCubit, CreateTripDialogState>(
+      builder: (context, state) {
+        return AlertDialog(
+          title: Text(l10n.createTrip),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: _buildContent(context, state),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: state.selectedRoute == null || state.isSubmitting
+                  ? null
+                  : () => _createTrip(context, state),
+              child: state.isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(l10n.create),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('إنشاء رحلة جديدة'),
-      content: SizedBox(
-        width: double.maxFinite,
-        child: FutureBuilder<List<core.Route>>(
-          future: _routesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const SizedBox(
-                height: 96,
-                child: LoadingWidget(),
-              );
-            }
-            if (snapshot.hasError) {
-              return Text(
-                snapshot.error.toString(),
-                style: const TextStyle(color: AppColors.error),
-              );
-            }
-
-            final routes = snapshot.data ?? const <core.Route>[];
-            if (routes.isEmpty) {
-              return const EmptyState(
-                icon: Icons.route_outlined,
-                title: 'لا توجد خطوط مرتبطة بحسابك',
-                subtitle: 'يجب توفر خط نشط قبل إنشاء رحلة.',
-              );
-            }
-
-            _selectedRoute ??= routes.first;
-
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                DropdownButtonFormField<core.Route>(
-                  value: _selectedRoute,
-                  decoration: const InputDecoration(
-                    labelText: 'الخط',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    for (final route in routes)
-                      DropdownMenuItem(
-                        value: route,
-                        child: Text(route.title),
-                      ),
-                  ],
-                  onChanged: (route) => setState(() {
-                    _selectedRoute = route;
-                  }),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.event),
-                  title: const Text('وقت الرحلة'),
-                  subtitle: Text(_formatScheduledAt(_scheduledAt)),
-                  trailing: const Icon(Icons.edit_calendar),
-                  onTap: _pickScheduledAt,
-                ),
-                if (_errorMessage != null) ...[
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: AppColors.error),
-                  ),
-                ],
-              ],
-            );
-          },
+  Widget _buildContent(BuildContext context, CreateTripDialogState state) {
+    final l10n = AppLocalizations.of(context);
+    if (state.loadingRoutes) {
+      return const SizedBox(
+        height: 96,
+        child: LoadingWidget(),
+      );
+    }
+    if (state.routes.isEmpty) {
+      return EmptyState(
+        icon: Icons.route_outlined,
+        title: state.errorMessage ?? l10n.noDriverRoutes,
+        subtitle: l10n.activeRouteRequired,
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        DropdownButtonFormField<core.Route>(
+          initialValue: state.selectedRoute,
+          decoration: InputDecoration(
+            labelText: l10n.routeTitle,
+            border: const OutlineInputBorder(),
+          ),
+          items: [
+            for (final route in state.routes)
+              DropdownMenuItem(
+                value: route,
+                child: Text(route.title),
+              ),
+          ],
+          onChanged: (route) =>
+              context.read<CreateTripDialogCubit>().selectRoute(route),
         ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: const Text('إلغاء'),
+        const SizedBox(height: AppSpacing.md),
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          leading: const Icon(Icons.event),
+          title: Text(l10n.tripTime),
+          subtitle: Text(
+            _formatScheduledAt(
+              state.scheduledAt ??
+                  DateTime.now().add(const Duration(minutes: 10)),
+            ),
+          ),
+          trailing: const Icon(Icons.edit_calendar),
+          onTap: () => _pickScheduledAt(context, state),
         ),
-        FilledButton(
-          onPressed:
-              _selectedRoute == null || _isSubmitting ? null : _createTrip,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('إنشاء'),
-        ),
+        if (state.errorMessage != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            state.errorMessage!,
+            style: const TextStyle(color: AppColors.error),
+          ),
+        ],
       ],
     );
   }
 
-  Future<void> _createTrip() async {
-    final route = _selectedRoute;
+  Future<void> _createTrip(
+    BuildContext context,
+    CreateTripDialogState state,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final route = state.selectedRoute;
     if (route == null) return;
 
-    if (!_scheduledAt.isAfter(DateTime.now())) {
-      setState(() {
-        _errorMessage = 'وقت الرحلة يجب أن يكون في المستقبل';
-      });
+    final scheduledAt =
+        state.scheduledAt ?? DateTime.now().add(const Duration(minutes: 10));
+
+    if (!scheduledAt.isAfter(DateTime.now())) {
+      context.read<CreateTripDialogCubit>().setError(
+            context.read<CreateTripDialogCubit>().state.errorMessage ??
+                l10n.tripTimeMustBeFuture,
+          );
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
+    context.read<CreateTripDialogCubit>().setSubmitting(isSubmitting: true);
 
     final result = await sl<core.TripRepository>().createTrip(
       routeId: route.id,
-      scheduledAt: _scheduledAt,
+      scheduledAt: scheduledAt,
     );
 
-    if (!mounted) return;
+    if (!context.mounted) return;
     result.fold(
-      (failure) => setState(() {
-        _isSubmitting = false;
-        _errorMessage = failure.message ?? 'فشل إنشاء الرحلة';
-      }),
+      (failure) => context
+          .read<CreateTripDialogCubit>()
+          .setError(failure.message ?? l10n.failedToCreateTrip),
       (trip) => Navigator.of(context).pop(trip),
     );
   }
 
-  Future<void> _pickScheduledAt() async {
+  Future<void> _pickScheduledAt(
+    BuildContext context,
+    CreateTripDialogState state,
+  ) async {
+    final initial =
+        state.scheduledAt ?? DateTime.now().add(const Duration(minutes: 10));
     final date = await showDatePicker(
       context: context,
-      initialDate: _scheduledAt,
+      initialDate: initial,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 30)),
     );
-    if (date == null || !mounted) return;
+    if (date == null || !context.mounted) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_scheduledAt),
+      initialTime: TimeOfDay.fromDateTime(initial),
     );
-    if (time == null || !mounted) return;
+    if (time == null || !context.mounted) return;
 
-    setState(() {
-      _scheduledAt = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute,
-      );
-      _errorMessage = null;
-    });
+    context.read<CreateTripDialogCubit>().updateScheduledAt(
+          DateTime(
+            date.year,
+            date.month,
+            date.day,
+            time.hour,
+            time.minute,
+          ),
+        );
   }
 
   String _formatScheduledAt(DateTime value) {
@@ -568,6 +596,7 @@ class _DriverTripsTabState extends State<_DriverTripsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return BlocBuilder<TrackingBloc, TrackingState>(
       builder: (context, state) {
         if (state is TrackingLoading) {
@@ -586,11 +615,11 @@ class _DriverTripsTabState extends State<_DriverTripsTab> {
                 children: [
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.6,
-                    child: const Center(
+                    child: Center(
                       child: EmptyState(
                         icon: Icons.directions_bus_outlined,
-                        title: 'لا توجد رحلات نشطة',
-                        subtitle: 'لم تقم بإنشاء أي رحلة بعد',
+                        title: l10n.noActiveTrips,
+                        subtitle: l10n.noTripsYet,
                       ),
                     ),
                   ),
@@ -598,191 +627,132 @@ class _DriverTripsTabState extends State<_DriverTripsTab> {
               ),
             );
           }
-          return RefreshIndicator(
-            onRefresh: () async {
-              context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
-            },
-            child: ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
-              itemCount: state.trips.length,
-              separatorBuilder: (_, __) =>
-                  const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) {
-                final trip = state.trips[index];
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      child: const Icon(Icons.directions_bus,
-                          color: AppColors.primary, size: 20),
-                    ),
-                    title: Text(trip.status.displayNameAr),
-                    subtitle: Text(
-                      '${trip.scheduledAt.hour.toString().padLeft(2, '0')}:'
-                      '${trip.scheduledAt.minute.toString().padLeft(2, '0')}',
-                    ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => context.push('/driver-trip/${trip.id.value}'),
-                  ),
-                );
-              },
-            ),
-          );
         }
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('اضغط للتحديث'),
-              const SizedBox(height: AppSpacing.md),
-              ElevatedButton(
-                onPressed: () {
-                  context
-                      .read<TrackingBloc>()
-                      .add(const TrackingLoadActiveTrips());
-                },
-                child: const Text('تحديث'),
-              ),
-            ],
-          ),
-        );
+        return const SizedBox.shrink();
       },
     );
   }
 }
 
-// ─── Shared Profile Tab ──────────────────────────────────────────────────────
+// ─── Profile Tab ─────────────────────────────────────────────────────────────
 
 class _ProfileTab extends StatelessWidget {
   const _ProfileTab();
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is! AuthAuthenticated) {
           return const SizedBox.shrink();
         }
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        return _ProfileView(user: state.user);
+      },
+    );
+  }
+}
+
+class _ProfileView extends StatelessWidget {
+  const _ProfileView({required this.user});
+
+  final core.User user;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.pagePadding),
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 40,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  child: Text(
+                    user.displayName.isNotEmpty
+                        ? user.displayName[0].toUpperCase()
+                        : '?',
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  user.displayName,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  user.email,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Card(
           child: Column(
             children: [
-              const SizedBox(height: AppSpacing.lg),
-              CircleAvatar(
-                radius: 50,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                child: const Icon(
-                  Icons.person,
-                  size: 50,
-                  color: AppColors.primary,
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(l10n.language),
+                subtitle: Text(
+                  context.watch<LocaleCubit>().state.languageCode == 'ar'
+                      ? l10n.arabic
+                      : l10n.english,
                 ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  final current = context.read<LocaleCubit>().state;
+                  context.read<LocaleCubit>().setLocale(
+                        current.languageCode == 'ar'
+                            ? const Locale('en')
+                            : const Locale('ar'),
+                      );
+                },
               ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                state.user.displayName,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                state.user.email,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.logout, color: AppColors.error),
+                title: Text(
+                  l10n.logout,
+                  style: const TextStyle(color: AppColors.error),
                 ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-                ),
-                child: Text(
-                  state.user.role.isDriver ? 'سائق' : 'طالب',
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.primary,
-                      ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              Card(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.language),
-                      title: Text(l10n.language),
-                      subtitle: Text(
-                        Localizations.localeOf(context).languageCode == 'ar'
-                            ? l10n.arabic
-                            : l10n.english,
-                      ),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => _showLanguageDialog(context),
-                    ),
-                    const Divider(height: 1),
-                    ListTile(
-                      leading: const Icon(
-                        Icons.logout,
-                        color: AppColors.error,
-                      ),
-                      title: Text(
-                        l10n.logout,
-                        style: const TextStyle(color: AppColors.error),
-                      ),
-                      onTap: () {
-                        context
-                            .read<AuthBloc>()
-                            .add(const AuthLogoutRequested());
-                        context.go('/login');
-                      },
-                    ),
-                  ],
-                ),
+                onTap: () => _confirmLogout(context),
               ),
             ],
           ),
-        );
-      },
+        ),
+      ],
     );
   }
 
-  Future<void> _showLanguageDialog(BuildContext context) {
+  Future<void> _confirmLogout(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    final current = Localizations.localeOf(context).languageCode;
-
-    return showDialog<void>(
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.chooseLanguage),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile<String>(
-                value: 'ar',
-                groupValue: current,
-                title: Text(l10n.arabic),
-                onChanged: (value) => _setLanguage(context, value),
-              ),
-              RadioListTile<String>(
-                value: 'en',
-                groupValue: current,
-                title: Text(l10n.english),
-                onChanged: (value) => _setLanguage(context, value),
-              ),
-            ],
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.logout),
+        content: Text(l10n.logoutConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
           ),
-        );
-      },
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.logout),
+          ),
+        ],
+      ),
     );
-  }
-
-  void _setLanguage(BuildContext context, String? languageCode) {
-    if (languageCode == null) return;
-    context.read<LocaleCubit>().setLocale(Locale(languageCode));
-    Navigator.of(context).pop();
+    if ((confirmed ?? false) && context.mounted) {
+      context.read<AuthBloc>().add(const AuthLogoutRequested());
+    }
   }
 }

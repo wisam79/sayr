@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="#1A1A1A"/>
+
+  <!-- S-shaped route tube, rotated 45° clockwise to match original design -->
+  <g transform="translate(512,512) rotate(45)">
+
+    <!-- Layer 1: Outer green stroke (the green tube wall) -->
+    <path
+      d="M -220,-310 C -220,-115 220,-115 220,0 C 220,115 -220,115 -220,310"
+      fill="none"
+      stroke="#2ECC40"
+      stroke-width="158"
+      stroke-linecap="round"
+    />
+
+    <!-- Layer 2: Dark separator (background punches through — creates 3D tube depth) -->
+    <path
+      d="M -220,-310 C -220,-115 220,-115 220,0 C 220,115 -220,115 -220,310"
+      fill="none"
+      stroke="#1A1A1A"
+      stroke-width="104"
+      stroke-linecap="round"
+    />
+
+    <!-- Layer 3: White inner stroke (inner tube surface) -->
+    <path
+      d="M -220,-310 C -220,-115 220,-115 220,0 C 220,115 -220,115 -220,310"
+      fill="none"
+      stroke="#FFFFFF"
+      stroke-width="70"
+      stroke-linecap="round"
+    />
+
+    <!-- GPS Location Pin at S start (top end of S) -->
+    <!-- In local coords the start is at (-220,-310). Pin spike points "down" in local = lower-left in screen -->
+    <g transform="translate(-220,-310)">
+      <!-- Teardrop body: spike at (0,65), circle center at (0,-18), radius 63 -->
+      <path
+        d="M 0,65 C -40,42 -63,14 -63,-18 A 63,63 0 0 0 63,-18 C 63,14 40,42 0,65 Z"
+        fill="#2ECC40"
+      />
+      <!-- Dark pin hole -->
+      <circle cx="0" cy="-18" r="24" fill="#1A1A1A"/>
+    </g>
+
+    <!-- White origin dot at S end (bottom end of S) -->
+    <circle cx="-220" cy="310" r="54" fill="#FFFFFF"/>
+
+  </g>
+
+</svg>

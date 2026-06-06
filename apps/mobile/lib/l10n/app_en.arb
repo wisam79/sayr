@@ -43,8 +43,8 @@
   "signin": "Sign in",
 
   "homeTitle": "Home",
-  "routesTitle": "Available routes",
-  "mySubscriptions": "My subscriptions",
+  "routesTitle": "Routes",
+  "mySubscriptions": "Subscriptions",
   "searchRoutes": "Search routes...",
 
   "activateLicense": "Activate license",
@@ -104,9 +104,222 @@
   "help": "Help",
   "privacyPolicy": "Privacy policy",
 
-  "activeTrips": "Active Trips",
+  "activeTrips": "Trips",
   "noActiveTrips": "No active trips right now",
   "activeTripsAvailable": "Active trips available, tap to follow",
   "noRoutesAvailable": "No routes available",
-  "tryAgainLater": "Try again later"
+  "tryAgainLater": "Try again later",
+
+  "helloUser": "Hello, {name}",
+  "@helloUser": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "browseRoutes": "Browse routes",
+  "browseRoutesDesc": "Find a route that suits you",
+  "createNewTrip": "Create new trip",
+  "createNewTripDesc": "Start a trip on a registered route",
+  "myActiveTrips": "My active trips",
+  "myActiveTripsDesc": "View and manage your active trips",
+  "activeSubscriptionCount": "{count, plural, one{{count} subscription active} other{{count} subscriptions active}}",
+  "@activeSubscriptionCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "subscription": "Subscription",
+  "failedToLoadRoutes": "Failed to load routes",
+  "createTrip": "Create new trip",
+
+  "validationEmailRequired": "Email is required",
+  "validationEmailInvalid": "Invalid email",
+  "validationPasswordRequired": "Password is required",
+  "validationPasswordTooShort": "Password must be at least 6 characters",
+  "validationFullNameRequired": "Full name is required",
+  "validationPhoneInvalid": "Invalid phone number",
+  "validationPasswordsDoNotMatch": "Passwords do not match",
+
+  "unknownError": "Unknown error",
+  "passwordResetLinkSent": "Password reset link sent to {email}",
+  "@passwordResetLinkSent": {
+    "placeholders": {
+      "email": {"type": "String"}
+    }
+  },
+
+  "skip": "Skip",
+  "getStarted": "Get started",
+  "onboardingTitle1": "Travel with ease",
+  "onboardingDesc1": "Book your university transit subscription with one tap and track your trip live.",
+  "onboardingTitle2": "Live tracking",
+  "onboardingDesc2": "See the bus location in real time and get notified when it approaches.",
+  "onboardingTitle3": "Safe and reliable",
+  "onboardingDesc3": "A pre-paid license system secures your seat and protects your rights.",
+
+  "tripTracking": "Trip tracking",
+  "waitingForDriver": "Waiting for the driver...",
+  "start": "Start",
+  "destination": "Destination",
+
+  "routeTitle": "Route",
+  "tripTime": "Trip time",
+  "cancel": "Cancel",
+  "create": "Create",
+  "tripTimeMustBeFuture": "Trip time must be in the future",
+  "failedToCreateTrip": "Failed to create trip",
+  "noDriverRoutes": "No routes assigned to your account",
+  "activeRouteRequired": "You need an active route before creating a trip.",
+  "noTripsYet": "You haven't created any trips yet",
+  "tripLoadFailed": "Failed to load trip details",
+  "routeNotFound": "Route not found",
+  "routeLoadFailed": "Failed to load route details",
+
+  "noSubscriptionsTitle": "No subscriptions yet",
+  "noSubscriptionsSubtitle": "Activate your first license to get started",
+  "subscriptionType": "Subscription",
+  "subscriptionStatusActive": "Active",
+  "subscriptionStatusExpired": "Expired",
+  "subscriptionEndsOn": "Ends on: {date}",
+  "@subscriptionEndsOn": {
+    "placeholders": {
+      "date": {"type": "String"}
+    }
+  },
+  "subscriptionDaysLeft": "{days} days left",
+  "@subscriptionDaysLeft": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "cancelSubscription": "Cancel subscription",
+  "errorOccurred": "An error occurred",
+  "pageNotFound": "Page not found",
+  "version": "Version",
+
+  "payment": "Payment",
+  "choosePaymentMethod": "Choose payment method",
+  "voucher": "Voucher",
+  "enterVoucherCode": "Enter voucher code",
+  "processing": "Processing...",
+  "paymentSuccess": "Payment successful",
+  "paymentSuccessSubscription": "Payment successful! Your subscription is now active",
+  "paymentFailed": "Payment failed",
+  "paymentViaZainCash": "Pay via Zain Cash",
+  "openZainCash": "Open Zain Cash",
+  "amount": "Amount: {amount} {currency}",
+  "@amount": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "currency": {"type": "String"}
+    }
+  },
+  "awaitingPaymentConfirmation": "Awaiting payment confirmation...",
+  "completePaymentInZainCash": "Complete the payment in Zain Cash app then return here",
+  "unexpectedError": "An unexpected error occurred",
+  "invalidVoucher": "Invalid voucher",
+
+  "notifications": "Notifications",
+  "noNotifications": "No notifications",
+  "markAllAsRead": "Mark all as read",
+  "loadFailed": "Failed to load",
+  "allMarkedAsRead": "All notifications marked as read",
+
+  "messageHint": "Type a message...",
+  "send": "Send",
+  "noChats": "No chats yet",
+  "offline": "Offline",
+  "delete": "Delete",
+  "unread": "Unread",
+  "lastMessage": "Last message",
+  "failedToLoadMessages": "Failed to load messages",
+
+  "pullToRefresh": "Pull down to refresh",
+
+  "sendEmergency": "Send emergency",
+  "emergencyConfirm": "Are you in danger?",
+  "emergencyConfirmMessage": "Do you really want to send an emergency alert? Officials will be notified of your current location.",
+  "sending": "Sending...",
+  "emergencySent": "Emergency sent",
+  "emergencySentMessage": "Your emergency alert has been sent. We will contact you soon.",
+  "emergencyFailed": "Failed to send",
+  "locationUnavailable": "Unable to determine your location. Please try again.",
+  "sos": "SOS",
+  "sent": "Sent",
+  "seconds": "{seconds} seconds",
+  "@seconds": {
+    "placeholders": {
+      "seconds": {"type": "int"}
+    }
+  },
+  "minutes": "{minutes} minutes",
+  "@minutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "hours": "{hours} hours",
+  "@hours": {
+    "placeholders": {
+      "hours": {"type": "int"}
+    }
+  },
+
+  "driverControls": "Driver controls",
+  "startTrip": "Start trip",
+  "endTrip": "End trip",
+  "confirmStart": "Confirm start",
+  "tripScheduled": "Scheduled",
+  "tripInProgress": "In progress",
+  "tripCompleted": "Completed",
+  "tripCancelled": "Cancelled",
+  "tripControl": "Trip control",
+  "locationPermissionRequired": "Location permission is required",
+  "duration": "Duration: {duration}",
+  "@duration": {
+    "placeholders": {
+      "duration": {"type": "String"}
+    }
+  },
+  "arrive": "Arrived",
+  "begin": "Begin",
+  "complete": "Complete",
+
+  "tripStatusScheduled": "Scheduled",
+  "tripStatusDriverWaiting": "Driver waiting",
+  "tripStatusInTransit": "In transit",
+  "tripStatusCompleted": "Completed",
+  "tripStatusAbsent": "Absent",
+  "tripStatusCancelled": "Cancelled",
+
+  "completeProfileTitle": "Complete Your Profile",
+  "completeProfileSubtitle": "We need a few more details to finish setting up your account",
+  "completeProfile": "Complete Registration",
+  "phoneNumber": "Phone Number",
+  "university": "University",
+  "noInstitutionsFound": "No institutions available",
+  "rateTrip": "Rate Trip",
+  "howWasYourTrip": "How was your trip with the driver?",
+  "ratingCommentHint": "Write your comments here (optional)...",
+  "submitRating": "Submit Rating",
+  "ratingSuccess": "Thank you for your rating!",
+  "driverDetails": "Driver Details",
+  "callDriver": "Call",
+  "chatDriver": "Message",
+  "etaDistance": "Distance: {distance} km • Arrival: {eta} min",
+  "@etaDistance": {
+    "placeholders": {
+      "distance": {"type": "String"},
+      "eta": {"type": "String"}
+    }
+  },
+  "driverRating": "Driver Rating: {rating}",
+  "@driverRating": {
+    "placeholders": {
+      "rating": {"type": "String"}
+    }
+  },
+  "ratingFailed": "Failed to save rating. Try again.",
+  "ratingRequired": "Please select a star rating"
 }
+

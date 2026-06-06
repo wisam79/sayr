@@ -1,9 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../enums/trip_status.dart';
-import '../value_objects/coordinates.dart';
-import '../value_objects/ids.dart';
-import '../utils/json_converters.dart';
+import 'package:sayr_core/src/enums/trip_status.dart';
+import 'package:sayr_core/src/utils/json_converters.dart';
+import 'package:sayr_core/src/value_objects/coordinates.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'trip.freezed.dart';
 part 'trip.g.dart';
@@ -23,16 +22,19 @@ abstract class Trip with _$Trip {
     DateTime? startedAt,
     DateTime? endedAt,
     @JsonKey(
-        fromJson: nullableCoordinatesFromJson,
-        toJson: nullableCoordinatesToJson)
+      fromJson: nullableCoordinatesFromJson,
+      toJson: nullableCoordinatesToJson,
+    )
     Coordinates? lastLocation,
     @JsonKey(
-        fromJson: nullableCoordinatesFromJson,
-        toJson: nullableCoordinatesToJson)
+      fromJson: nullableCoordinatesFromJson,
+      toJson: nullableCoordinatesToJson,
+    )
     Coordinates? routeStartLocation,
     @JsonKey(
-        fromJson: nullableCoordinatesFromJson,
-        toJson: nullableCoordinatesToJson)
+      fromJson: nullableCoordinatesFromJson,
+      toJson: nullableCoordinatesToJson,
+    )
     Coordinates? routeEndLocation,
   }) = _Trip;
 

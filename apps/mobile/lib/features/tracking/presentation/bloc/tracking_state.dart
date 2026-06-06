@@ -12,7 +12,6 @@ sealed class TrackingState with _$TrackingState {
 
   const factory TrackingState.activeTripsLoaded({
     required List<Trip> trips,
-    TripId? selectedTripId,
     DateTime? lastUpdated,
   }) = TrackingActiveTripsLoaded;
 

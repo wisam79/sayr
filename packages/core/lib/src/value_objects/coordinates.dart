@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:equatable/equatable.dart';
 import 'package:latlong2/latlong.dart' as ll;
 
@@ -8,7 +6,7 @@ import 'package:latlong2/latlong.dart' as ll;
 /// Valid range: lat ∈ [-90, 90], lng ∈ [-180, 180].
 ///
 /// This is a thin wrapper over [ll.LatLng] that adds type-safety and validation.
-/// All distance/bearing calculations use the [Distance] utility from `latlong2`.
+/// All distance/bearing calculations use the [ll.Distance] utility from `latlong2`.
 class Coordinates extends Equatable {
   const Coordinates({
     required this.latitude,
@@ -63,27 +61,12 @@ class Coordinates extends Equatable {
 
   /// Midpoint between this and another coordinate.
   Coordinates midpoint(Coordinates other) {
-    final lat1 = _deg2rad(latitude);
-    final lat2 = _deg2rad(other.latitude);
-    final lng1 = _deg2rad(longitude);
-    final dLng = _deg2rad(other.longitude - longitude);
-
-    final bx = math.cos(lat2) * math.cos(dLng);
-    final by = math.cos(lat2) * math.sin(dLng);
-    final lat3 = math.atan2(
-      math.sin(lat1) + math.sin(lat2),
-      math.sqrt((math.cos(lat1) + bx) * (math.cos(lat1) + bx) + by * by),
+    final mid = ll.LatLng(
+      (latitude + other.latitude) / 2,
+      (longitude + other.longitude) / 2,
     );
-    final lng3 = lng1 + math.atan2(by, math.cos(lat1) + bx);
-
-    return Coordinates(
-      latitude: _rad2deg(lat3),
-      longitude: _rad2deg(lng3),
-    );
+    return Coordinates(latitude: mid.latitude, longitude: mid.longitude);
   }
-
-  static double _deg2rad(double d) => d * math.pi / 180.0;
-  static double _rad2deg(double r) => r * 180.0 / math.pi;
 
   @override
   List<Object?> get props => [latitude, longitude];

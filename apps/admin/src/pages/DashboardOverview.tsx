@@ -72,7 +72,7 @@ export const DashboardOverview: React.FC = () => {
 
       if (routesError) throw routesError;
 
-      const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444', '#06B6D4'];
+      const colors = ['var(--primary)', 'var(--info)', 'var(--warning)', 'var(--pink)', 'var(--purple)', 'var(--danger)'];
       const formattedRoutes = (routesData || []).map((r: any, idx: number) => ({
         name: r.title,
         count: Array.isArray(r.trips) ? r.trips.length : (r.trips ? 1 : 0),
@@ -165,7 +165,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'إجمالي الطلاب المسجلين',
       value: stats?.total_users || 0,
       icon: Users,
-      color: '#10B981',
+      color: 'var(--primary)',
+      bg: 'var(--primary-glow)',
       trend: '+12% هذا الأسبوع',
       isTrendUp: true
     },
@@ -173,7 +174,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'السائقين المعتمدين',
       value: stats?.total_drivers || 0,
       icon: Bus,
-      color: '#3B82F6',
+      color: 'var(--info)',
+      bg: 'var(--info-glow)',
       trend: '+2 شركاء جدد',
       isTrendUp: true
     },
@@ -181,7 +183,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'الخطوط النشطة',
       value: stats?.total_routes || 0,
       icon: Navigation,
-      color: '#8B5CF6',
+      color: 'var(--purple)',
+      bg: 'var(--purple-glow)',
       trend: 'تغطي 4 جامعات',
       isTrendUp: true
     },
@@ -189,7 +192,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'الاشتراكات الفعالة',
       value: stats?.active_subscriptions || 0,
       icon: CreditCard,
-      color: '#EC4899',
+      color: 'var(--pink)',
+      bg: 'var(--pink-glow)',
       trend: '+8% مقارنة بالشهر الماضي',
       isTrendUp: true
     },
@@ -197,7 +201,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'رحلات اليوم المقررة',
       value: stats?.total_trips_today || 0,
       icon: Sparkles,
-      color: '#F59E0B',
+      color: 'var(--warning)',
+      bg: 'var(--warning-glow)',
       trend: 'جاري تتبعها الآن',
       isTrendUp: true
     },
@@ -205,7 +210,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'إجمالي الإيرادات',
       value: formatCurrency(stats?.total_revenue || 0),
       icon: DollarSign,
-      color: '#10B981',
+      color: 'var(--primary)',
+      bg: 'var(--primary-glow)',
       trend: 'تراكمي مبيعات Zain Cash واليدوي',
       isTrendUp: true
     },
@@ -213,7 +219,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'طلبات سحب معلقة',
       value: stats?.pending_payouts || 0,
       icon: Clock,
-      color: '#EF4444',
+      color: 'var(--danger)',
+      bg: 'var(--danger-glow)',
       trend: 'بانتظار موافقتك اليدوية',
       isTrendUp: false
     },
@@ -221,7 +228,8 @@ export const DashboardOverview: React.FC = () => {
       title: 'مبالغ سحب معلقة',
       value: formatCurrency(stats?.pending_payouts_amount || 0),
       icon: DollarSign,
-      color: '#EF4444',
+      color: 'var(--danger)',
+      bg: 'var(--danger-glow)',
       trend: 'مستحقات شركاء النقل (السائقين)',
       isTrendUp: false
     }
@@ -235,7 +243,7 @@ export const DashboardOverview: React.FC = () => {
           const Icon = card.icon;
           return (
             <div key={index} className="card metric-card">
-              <div className="metric-icon-box" style={{ backgroundColor: `${card.color}15`, color: card.color }}>
+              <div className="metric-icon-box" style={{ backgroundColor: card.bg, color: card.color }}>
                 <Icon size={24} />
               </div>
               <div className="metric-details" style={{ flex: 1 }}>
@@ -266,8 +274,8 @@ export const DashboardOverview: React.FC = () => {
               <AreaChart data={revenueHistory} margin={{ top: 10, right: 0, left: 10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#2ECC40" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#2ECC40" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
@@ -277,7 +285,7 @@ export const DashboardOverview: React.FC = () => {
                   formatter={(value: any) => [formatCurrency(Number(value)), 'الإيرادات']} 
                   contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-color)', color: 'var(--text-primary)', textAlign: 'right' }}
                 />
-                <Area type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
+                <Area type="monotone" dataKey="revenue" stroke="#2ECC40" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

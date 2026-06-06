@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-
-import 'chat_list_state.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart'
+    show ChatBloc;
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_state.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart'
+    show NotificationsBloc;
 
 part 'chat_list_event.dart';
 
@@ -14,6 +16,7 @@ part 'chat_list_event.dart';
 /// Mirrors the [ChatBloc] / [NotificationsBloc] pattern: an initial
 /// load followed by a realtime subscription that pushes updates.
 class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
+  /// Creates a [ChatListBloc] with the given [chatRepository].
   ChatListBloc({required ChatRepository chatRepository})
       : _chatRepository = chatRepository,
         super(const ChatListState.initial()) {
@@ -41,8 +44,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     await _subscription?.cancel();
     emit(const ChatListState.loading());
 
-    final Either<Failure, List<Conversation>> initial =
-        await _chatRepository.getMyConversations();
+    final initial = await _chatRepository.getMyConversations();
     initial.fold(
       (Failure failure) => emit(ChatListState.error(failure: failure)),
       (List<Conversation> list) =>
@@ -61,8 +63,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     ChatListRefreshRequested event,
     Emitter<ChatListState> emit,
   ) async {
-    final Either<Failure, List<Conversation>> result =
-        await _chatRepository.getMyConversations();
+    final result = await _chatRepository.getMyConversations();
     result.fold(
       (Failure failure) => emit(ChatListState.error(failure: failure)),
       (List<Conversation> list) =>
@@ -99,7 +100,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     _ChatListStreamErrored event,
     Emitter<ChatListState> emit,
   ) {
-    final List<Conversation> current = state.maybeWhen(
+    final current = state.maybeWhen(
       loaded: (list) => list,
       orElse: () => const <Conversation>[],
     );

@@ -1,48 +1,63 @@
 import 'dart:async';
 
 import 'package:injectable/injectable.dart';
+import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
-
-import '../supabase/supabase_client.dart';
 
 abstract class RemoteDatasource {
   supabase.User? get currentUser;
   Stream<supabase.AuthState> get authStateChanges;
-  Future<supabase.AuthResponse> signInWithPassword(
-      {required String email, required String password});
-  Future<supabase.AuthResponse> signUp(
-      {required String email,
-      required String password,
-      required String fullName,
-      String? phone});
+  Future<supabase.AuthResponse> signInWithPassword({
+    required String email,
+    required String password,
+  });
+  Future<supabase.AuthResponse> signUp({
+    required String email,
+    required String password,
+    required String fullName,
+    String? phone,
+  });
   Future<bool> signInWithGoogle();
   Future<void> sendPasswordResetEmail(String email);
   Future<void> updatePassword(String password);
   Future<void> signOut();
   Future<Map<String, dynamic>?> fetchCurrentProfile(String userId);
+  Future<void> updateProfile({
+    required String userId,
+    required String phone,
+    required String institutionId,
+  });
+  Future<List<Map<String, dynamic>>> getInstitutions();
 
   // Chat
   Future<List<Map<String, dynamic>>> getMyConversations(String currentUserId);
   Stream<List<Map<String, dynamic>>> watchMyConversations(String currentUserId);
-  Future<Map<String, dynamic>?> getConversation(
-      {required String routeId, required String studentId});
-  Future<Map<String, dynamic>> createConversation(
-      {required String routeId,
-      required String studentId,
-      required String driverUserId});
+  Future<Map<String, dynamic>?> getConversation({
+    required String routeId,
+    required String studentId,
+  });
+  Future<Map<String, dynamic>> createConversation({
+    required String routeId,
+    required String studentId,
+    required String driverUserId,
+  });
   Future<List<Map<String, dynamic>>> getMessages(String conversationId);
   Stream<List<Map<String, dynamic>>> watchMessages(String conversationId);
-  Future<Map<String, dynamic>> sendMessage(
-      {required String conversationId,
-      required String senderId,
-      required String body});
-  Future<void> markMessageAsRead(
-      {required String messageId, required String readAt});
+  Future<Map<String, dynamic>> sendMessage({
+    required String conversationId,
+    required String senderId,
+    required String body,
+  });
+  Future<void> markMessageAsRead({
+    required String messageId,
+    required String readAt,
+  });
   Future<int> getUnreadChatCount();
-  Future<void> updateConversationPreview(
-      {required String conversationId,
-      required String body,
-      required String updatedAt});
+  Future<void> updateConversationPreview({
+    required String conversationId,
+    required String body,
+    required String updatedAt,
+  });
 
   // Emergency
   Future<String> triggerEmergency({
@@ -54,20 +69,31 @@ abstract class RemoteDatasource {
     required String description,
   });
   Future<Map<String, dynamic>?> getActiveEmergencyReport(String userId);
-  Future<void> resolveEmergencyReport(
-      {required String id, required String resolvedAt});
+  Future<void> resolveEmergencyReport({
+    required String id,
+    required String resolvedAt,
+  });
 
   // Notifications
-  Future<List<Map<String, dynamic>>> getMyNotifications(
-      {required String userId, int limit = 50});
+  Future<List<Map<String, dynamic>>> getMyNotifications({
+    required String userId,
+    int limit = 50,
+  });
   Future<int> getUnreadNotificationCount(String userId);
-  Future<void> markNotificationAsRead(
-      {required String id, required String readAt});
-  Future<void> markAllNotificationsAsRead(
-      {required String userId, required String readAt});
+  Future<void> markNotificationAsRead({
+    required String id,
+    required String readAt,
+  });
+  Future<void> markAllNotificationsAsRead({
+    required String userId,
+    required String readAt,
+  });
   Stream<List<Map<String, dynamic>>> watchMyNotifications(String userId);
-  Future<void> registerPushToken(
-      {required String fcmToken, required String platform, String? deviceId});
+  Future<void> registerPushToken({
+    required String fcmToken,
+    required String platform,
+    String? deviceId,
+  });
 
   // Routes
   Future<List<Map<String, dynamic>>> getActiveRoutes();
@@ -94,8 +120,11 @@ abstract class RemoteDatasource {
     double? lat,
     double? lng,
   });
-  Future<void> updateTripLocation(
-      {required String tripId, required double lat, required double lng});
+  Future<void> updateTripLocation({
+    required String tripId,
+    required double lat,
+    required double lng,
+  });
   Future<void> bulkUpdateTripLocations(List<Map<String, dynamic>> locations);
   Future<Map<String, dynamic>> createPayment({
     required String routeId,
@@ -104,14 +133,25 @@ abstract class RemoteDatasource {
     required String method,
   });
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId);
+  Future<Map<String, dynamic>?> getDriverById(String driverId);
+  Future<Map<String, dynamic>> submitRating({
+    required String tripId,
+    required String driverId,
+    required String studentId,
+    required int rating,
+    String? comment,
+  });
+  Future<Map<String, dynamic>?> getTripRating({
+    required String tripId,
+    required String studentId,
+  });
 }
 
 @LazySingleton(as: RemoteDatasource)
 class RemoteDatasourceImpl implements RemoteDatasource {
-  final SayrSupabase _supabase;
-
   RemoteDatasourceImpl({SayrSupabase? supabase})
       : _supabase = supabase ?? SayrSupabase.instance;
+  final SayrSupabase _supabase;
 
   supabase.SupabaseClient get _client => _supabase.client;
 
@@ -122,8 +162,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   Stream<supabase.AuthState> get authStateChanges => _supabase.authStateChanges;
 
   @override
-  Future<supabase.AuthResponse> signInWithPassword(
-      {required String email, required String password}) {
+  Future<supabase.AuthResponse> signInWithPassword({
+    required String email,
+    required String password,
+  }) {
     return _supabase.signInWithPassword(email: email, password: password);
   }
 
@@ -135,7 +177,11 @@ class RemoteDatasourceImpl implements RemoteDatasource {
     String? phone,
   }) {
     return _supabase.signUp(
-        email: email, password: password, fullName: fullName, phone: phone);
+      email: email,
+      password: password,
+      fullName: fullName,
+      phone: phone,
+    );
   }
 
   @override
@@ -164,8 +210,31 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
+  Future<void> updateProfile({
+    required String userId,
+    required String phone,
+    required String institutionId,
+  }) async {
+    await _client.from('profiles').update({
+      'phone': phone,
+      'institution_id': institutionId,
+    }).eq('id', userId);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getInstitutions() async {
+    final response = await _client
+        .from('institutions')
+        .select('id, name, city')
+        .eq('is_active', true)
+        .order('name');
+    return (response as List).cast<Map<String, dynamic>>();
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> getMyConversations(
-      String currentUserId) async {
+    String currentUserId,
+  ) async {
     final response = await _client
         .from('conversations')
         .select('''
@@ -189,17 +258,20 @@ class RemoteDatasourceImpl implements RemoteDatasource {
 
   @override
   Stream<List<Map<String, dynamic>>> watchMyConversations(
-      String currentUserId) {
+    String currentUserId,
+  ) {
     return _client
         .from('conversations')
         .stream(primaryKey: ['id'])
-        .order('updated_at', ascending: false)
+        .order('updated_at')
         .map((rows) => rows.cast<Map<String, dynamic>>());
   }
 
   @override
-  Future<Map<String, dynamic>?> getConversation(
-      {required String routeId, required String studentId}) async {
+  Future<Map<String, dynamic>?> getConversation({
+    required String routeId,
+    required String studentId,
+  }) async {
     final result = await _client
         .from('conversations')
         .select()
@@ -266,8 +338,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<void> markMessageAsRead(
-      {required String messageId, required String readAt}) async {
+  Future<void> markMessageAsRead({
+    required String messageId,
+    required String readAt,
+  }) async {
     await _client.from('messages').update({
       'is_read': true,
       'read_at': readAt,
@@ -333,8 +407,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<void> resolveEmergencyReport(
-      {required String id, required String resolvedAt}) async {
+  Future<void> resolveEmergencyReport({
+    required String id,
+    required String resolvedAt,
+  }) async {
     await _client.from('emergency_reports').update({
       'status': 'resolved',
       'resolved_at': resolvedAt,
@@ -342,8 +418,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getMyNotifications(
-      {required String userId, int limit = 50}) async {
+  Future<List<Map<String, dynamic>>> getMyNotifications({
+    required String userId,
+    int limit = 50,
+  }) async {
     final response = await _client
         .from('notification_log')
         .select()
@@ -364,8 +442,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<void> markNotificationAsRead(
-      {required String id, required String readAt}) async {
+  Future<void> markNotificationAsRead({
+    required String id,
+    required String readAt,
+  }) async {
     await _client.from('notification_log').update({
       'is_read': true,
       'read_at': readAt,
@@ -373,8 +453,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<void> markAllNotificationsAsRead(
-      {required String userId, required String readAt}) async {
+  Future<void> markAllNotificationsAsRead({
+    required String userId,
+    required String readAt,
+  }) async {
     await _client
         .from('notification_log')
         .update({
@@ -395,10 +477,11 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<void> registerPushToken(
-      {required String fcmToken,
-      required String platform,
-      String? deviceId}) async {
+  Future<void> registerPushToken({
+    required String fcmToken,
+    required String platform,
+    String? deviceId,
+  }) async {
     await _client.rpc<void>(
       'register_push_token',
       params: {
@@ -463,7 +546,8 @@ class RemoteDatasourceImpl implements RemoteDatasource {
 
   @override
   Future<List<Map<String, dynamic>>> getMySubscriptions(
-      String studentId) async {
+    String studentId,
+  ) async {
     final response = await _client
         .from('subscriptions')
         .select()
@@ -493,7 +577,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
     final response = await _client.from('trips').select().inFilter('status', [
       'scheduled',
       'driver_waiting',
-      'in_transit'
+      'in_transit',
     ]).order('scheduled_at', ascending: true);
     return (response as List).cast<Map<String, dynamic>>();
   }
@@ -546,10 +630,11 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   }
 
   @override
-  Future<void> updateTripLocation(
-      {required String tripId,
-      required double lat,
-      required double lng}) async {
+  Future<void> updateTripLocation({
+    required String tripId,
+    required double lat,
+    required double lng,
+  }) async {
     await _client.rpc<void>(
       'update_trip_location',
       params: {
@@ -562,7 +647,8 @@ class RemoteDatasourceImpl implements RemoteDatasource {
 
   @override
   Future<void> bulkUpdateTripLocations(
-      List<Map<String, dynamic>> locations) async {
+    List<Map<String, dynamic>> locations,
+  ) async {
     await _client.rpc<void>(
       'bulk_update_trip_locations',
       params: {'p_locations': locations},
@@ -591,5 +677,45 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   @override
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId) async {
     return _client.from('payments').select().eq('id', paymentId).maybeSingle();
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getDriverById(String driverId) async {
+    return _client.from('drivers').select().eq('id', driverId).maybeSingle();
+  }
+
+  @override
+  Future<Map<String, dynamic>> submitRating({
+    required String tripId,
+    required String driverId,
+    required String studentId,
+    required int rating,
+    String? comment,
+  }) async {
+    final response = await _client
+        .from('ratings')
+        .insert({
+          'trip_id': tripId,
+          'driver_id': driverId,
+          'student_id': studentId,
+          'rating': rating,
+          if (comment != null) 'comment': comment,
+        })
+        .select()
+        .single();
+    return response;
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getTripRating({
+    required String tripId,
+    required String studentId,
+  }) async {
+    return _client
+        .from('ratings')
+        .select()
+        .eq('trip_id', tripId)
+        .eq('student_id', studentId)
+        .maybeSingle();
   }
 }

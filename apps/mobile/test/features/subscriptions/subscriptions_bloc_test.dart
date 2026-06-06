@@ -13,7 +13,7 @@ class MockSubscriptionRepository extends Mock
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(SubscriptionId('fallback'));
+    registerFallbackValue(const SubscriptionId('fallback'));
     registerFallbackValue(LicenseCode('A1B2C3D4'));
   });
 

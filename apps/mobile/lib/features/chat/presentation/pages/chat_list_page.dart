@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_state.dart';
+import 'package:sayr_mobile/features/chat/presentation/widgets/conversation_card.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-import '../../../../core/sayr_flash.dart';
-import '../bloc/chat_list_bloc.dart';
-import '../bloc/chat_list_state.dart';
-import '../widgets/conversation_card.dart';
-
 /// Page listing all conversations the current user participates in.
 class ChatListPage extends StatefulWidget {
+  /// Creates a [ChatListPage].
   const ChatListPage({super.key});
 
   @override
@@ -33,16 +34,17 @@ class _ChatListPageState extends State<ChatListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('المحادثات'),
+        title: Text(l10n.chats),
       ),
       body: BlocConsumer<ChatListBloc, ChatListState>(
         listener: (context, state) {
           if (state is ChatListError) {
             SayrFlash.error(
               context,
-              state.failure.message ?? 'حدث خطأ في تحميل المحادثات',
+              state.failure.message ?? l10n.errorOccurred,
             );
           }
         },
@@ -72,7 +74,6 @@ class _LoadingBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Skeletonizer(
-      enabled: true,
       child: ListView.builder(
         padding: const EdgeInsetsDirectional.symmetric(
           vertical: AppSpacing.sm,
@@ -102,12 +103,13 @@ class _ChatListBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (conversations.isEmpty) {
-      return const Center(
+      return Center(
         child: EmptyState(
           icon: Icons.chat_bubble_outline,
-          title: 'لا توجد محادثات',
-          subtitle: 'ابدأ محادثة مع سائق من صفحة تفاصيل الخط',
+          title: l10n.noChats,
+          subtitle: l10n.pullToRefresh,
         ),
       );
     }
@@ -123,7 +125,7 @@ class _ChatListBody extends StatelessWidget {
         itemCount: conversations.length,
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, index) {
-          final Conversation c = conversations[index];
+          final c = conversations[index];
           return ConversationCard(
             conversation: c,
             onTap: () => onTapConversation(c),
@@ -142,6 +144,7 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -155,13 +158,13 @@ class _ErrorBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              failure.message ?? 'حدث خطأ',
+              failure.message ?? l10n.errorOccurred,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
               onPressed: onRetry,
-              child: const Text('إعادة المحاولة'),
+              child: Text(l10n.retry),
             ),
           ],
         ),

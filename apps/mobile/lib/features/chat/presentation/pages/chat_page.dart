@@ -3,17 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_state.dart';
+import 'package:sayr_mobile/features/chat/presentation/widgets/chat_input.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
-
-import '../../../../core/sayr_flash.dart';
-import '../bloc/chat_bloc.dart';
-import '../bloc/chat_state.dart';
-import '../widgets/chat_input.dart';
 
 /// Page showing a single conversation with realtime updates.
 class ChatPage extends StatefulWidget {
+  /// Creates a [ChatPage] with the given [conversationId].
   const ChatPage({required this.conversationId, super.key});
 
+  /// The active [ConversationId] of the chat.
   final ConversationId conversationId;
 
   @override
@@ -28,7 +30,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-    final AuthRepository authRepo = context.read<AuthRepository>();
+    final authRepo = context.read<AuthRepository>();
     _currentUserId = authRepo.currentUser?.id.value;
     context.read<ChatBloc>().add(ChatStarted(widget.conversationId));
   }
@@ -54,16 +56,17 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('المحادثة'),
+        title: Text(l10n.chats),
       ),
       body: BlocConsumer<ChatBloc, ChatState>(
         listener: (BuildContext context, ChatState state) {
           if (state is ChatError) {
             SayrFlash.error(
               context,
-              state.failure.message ?? 'حدث خطأ في المحادثة',
+              state.failure.message ?? l10n.failedToLoadMessages,
             );
           }
           if (state is ChatLoaded) {
@@ -104,12 +107,13 @@ class _ChatBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         Expanded(
           child: state.messages.isEmpty
-              ? const Center(
-                  child: Text('لا توجد رسائل بعد. ابدأ المحادثة!'),
+              ? Center(
+                  child: Text(l10n.noChats),
                 )
               : ListView.builder(
                   controller: scrollController,
@@ -119,8 +123,8 @@ class _ChatBody extends StatelessWidget {
                   ),
                   itemCount: state.messages.length,
                   itemBuilder: (BuildContext context, int index) {
-                    final Message message = state.messages[index];
-                    final bool isMe = message.senderId.value == currentUserId;
+                    final message = state.messages[index];
+                    final isMe = message.senderId.value == currentUserId;
                     return _MessageBubble(
                       message: message,
                       isMe: isMe,
@@ -159,7 +163,7 @@ class _MessageBubble extends StatelessWidget {
             isSender: isMe,
             color: isMe
                 ? Theme.of(context).colorScheme.primaryContainer
-                : Theme.of(context).colorScheme.surfaceVariant,
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
             textStyle:
                 (Theme.of(context).textTheme.bodyMedium ?? const TextStyle())
                     .copyWith(
@@ -168,7 +172,6 @@ class _MessageBubble extends StatelessWidget {
                   : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             seen: message.isRead,
-            tail: true,
           ),
           Padding(
             padding: const EdgeInsetsDirectional.symmetric(horizontal: 12),
@@ -192,6 +195,7 @@ class _ChatErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -205,7 +209,7 @@ class _ChatErrorBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              failure.message ?? 'حدث خطأ',
+              failure.message ?? l10n.errorOccurred,
               textAlign: TextAlign.center,
             ),
           ],

@@ -2,38 +2,43 @@ import 'package:flutter/material.dart' hide Route;
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-
-import '../features/auth/presentation/pages/login_page.dart';
-import '../features/auth/presentation/pages/onboarding_page.dart';
-import '../features/auth/presentation/pages/reset_password_page.dart';
-import '../features/auth/presentation/pages/signup_page.dart';
-import '../features/chat/presentation/pages/chat_list_page.dart';
-import '../features/chat/presentation/pages/chat_page.dart';
-import '../features/home/presentation/pages/home_page.dart';
-import '../features/notifications/presentation/pages/notifications_page.dart';
-import '../features/routes/presentation/pages/route_details_page.dart';
-import '../features/routes/presentation/pages/routes_list_page.dart';
-import '../features/subscriptions/presentation/pages/my_subscriptions_page.dart';
-import '../features/subscriptions/presentation/pages/activate_license_page.dart';
-import '../features/tracking/presentation/pages/active_trips_page.dart';
-import '../features/tracking/presentation/pages/trip_tracking_page.dart';
-import '../features/tracking/presentation/pages/driver_trip_controls_page.dart';
-import '../features/payment/presentation/pages/payment_page.dart';
+import 'package:sayr_mobile/features/auth/presentation/pages/complete_profile_page.dart';
+import 'package:sayr_mobile/features/auth/presentation/pages/login_page.dart';
+import 'package:sayr_mobile/features/auth/presentation/pages/onboarding_page.dart';
+import 'package:sayr_mobile/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:sayr_mobile/features/auth/presentation/pages/signup_page.dart';
+import 'package:sayr_mobile/features/auth/presentation/pages/splash_page.dart';
+import 'package:sayr_mobile/features/chat/presentation/pages/chat_list_page.dart';
+import 'package:sayr_mobile/features/chat/presentation/pages/chat_page.dart';
+import 'package:sayr_mobile/features/home/presentation/pages/home_page.dart';
+import 'package:sayr_mobile/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:sayr_mobile/features/payment/presentation/pages/payment_page.dart';
+import 'package:sayr_mobile/features/routes/presentation/pages/route_details_page.dart';
+import 'package:sayr_mobile/features/routes/presentation/pages/routes_list_page.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/pages/activate_license_page.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/pages/my_subscriptions_page.dart';
+import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
+import 'package:sayr_mobile/features/tracking/presentation/pages/driver_trip_controls_page.dart';
+import 'package:sayr_mobile/features/tracking/presentation/pages/trip_tracking_page.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 
 /// Centralized router configuration for the app.
 ///
 /// Auth-aware navigation is handled in `SayrApp` via a `BlocListener<AuthBloc>`
-/// that calls [config.go] on state changes.
+/// that calls `config.go` on state changes.
 @lazySingleton
 class AppRouter {
+  /// Creates an [AppRouter].
   AppRouter();
 
   /// Routes accessible without authentication.
   static const publicPaths = <String>{
+    '/splash',
     '/onboarding',
     '/login',
     '/signup',
     '/reset-password',
+    '/complete-profile',
   };
 
   /// Public entry screens that should redirect home after authentication.
@@ -43,9 +48,15 @@ class AppRouter {
     '/signup',
   };
 
+  /// The main [GoRouter] configuration instance.
   late final GoRouter config = GoRouter(
-    initialLocation: '/onboarding',
+    initialLocation: '/splash',
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
@@ -65,6 +76,11 @@ class AppRouter {
         path: '/reset-password',
         name: 'reset-password',
         builder: (context, state) => const ResetPasswordPage(),
+      ),
+      GoRoute(
+        path: '/complete-profile',
+        name: 'complete-profile',
+        builder: (context, state) => const CompleteProfilePage(),
       ),
       GoRoute(
         path: '/',
@@ -160,7 +176,7 @@ class _ErrorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Text(error ?? 'Page not found'),
+        child: Text(error ?? AppLocalizations.of(context).pageNotFound),
       ),
     );
   }

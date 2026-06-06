@@ -56,7 +56,7 @@ void main() {
         final user = repository.currentUser;
 
         expect(user, isNotNull);
-        expect(user!.id, UserId('user-123'));
+        expect(user!.id, const UserId('user-123'));
         expect(user.email, 'test@example.com');
         expect(user.role, UserRole.student);
         expect(user.fullName, 'Test User');
@@ -91,10 +91,12 @@ void main() {
         final mockResponse = MockAuthResponse();
         when(() => mockResponse.user).thenReturn(mockUser);
 
-        when(() => mockRemote.signInWithPassword(
-              email: 'test@example.com',
-              password: 'password123',
-            )).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockRemote.signInWithPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.signInWithPassword(
           email: 'test@example.com',
@@ -105,7 +107,7 @@ void main() {
         result.fold(
           (failure) => fail('should succeed'),
           (user) {
-            expect(user.id, UserId('user-123'));
+            expect(user.id, const UserId('user-123'));
             expect(user.role, UserRole.driver);
             expect(user.fullName, 'Driver User');
           },
@@ -118,10 +120,12 @@ void main() {
         final mockResponse = MockAuthResponse();
         when(() => mockResponse.user).thenReturn(null);
 
-        when(() => mockRemote.signInWithPassword(
-              email: 'test@example.com',
-              password: 'password123',
-            )).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockRemote.signInWithPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.signInWithPassword(
           email: 'test@example.com',
@@ -139,10 +143,12 @@ void main() {
       });
 
       test('returns UnauthorizedFailure on AuthException', () async {
-        when(() => mockRemote.signInWithPassword(
-              email: 'test@example.com',
-              password: 'password123',
-            )).thenThrow(const supabase.AuthException('invalid credentials'));
+        when(
+          () => mockRemote.signInWithPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenThrow(const supabase.AuthException('invalid credentials'));
 
         final result = await repository.signInWithPassword(
           email: 'test@example.com',
@@ -153,8 +159,10 @@ void main() {
         result.fold(
           (failure) {
             expect(failure, isA<UnauthorizedFailure>());
-            expect((failure as UnauthorizedFailure).message,
-                'invalid credentials');
+            expect(
+              (failure as UnauthorizedFailure).message,
+              'invalid credentials',
+            );
           },
           (user) => fail('should fail'),
         );
@@ -162,10 +170,12 @@ void main() {
       });
 
       test('returns UnknownFailure on general exception', () async {
-        when(() => mockRemote.signInWithPassword(
-              email: 'test@example.com',
-              password: 'password123',
-            )).thenThrow(Exception('Network Error'));
+        when(
+          () => mockRemote.signInWithPassword(
+            email: 'test@example.com',
+            password: 'password123',
+          ),
+        ).thenThrow(Exception('Network Error'));
 
         final result = await repository.signInWithPassword(
           email: 'test@example.com',
@@ -177,7 +187,9 @@ void main() {
           (failure) {
             expect(failure, isA<UnknownFailure>());
             expect(
-                (failure as UnknownFailure).message, contains('Network Error'));
+              (failure as UnknownFailure).message,
+              contains('Network Error'),
+            );
           },
           (_) => fail('should fail'),
         );
@@ -197,12 +209,14 @@ void main() {
         final mockResponse = MockAuthResponse();
         when(() => mockResponse.user).thenReturn(mockUser);
 
-        when(() => mockRemote.signUp(
-              email: 'new@example.com',
-              password: 'password123',
-              fullName: 'New Student',
-              phone: '07712345678',
-            )).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockRemote.signUp(
+            email: 'new@example.com',
+            password: 'password123',
+            fullName: 'New Student',
+            phone: '07712345678',
+          ),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.signUp(
           email: 'new@example.com',
@@ -215,7 +229,7 @@ void main() {
         result.fold(
           (failure) => fail('should succeed'),
           (user) {
-            expect(user.id, UserId('user-123'));
+            expect(user.id, const UserId('user-123'));
             expect(user.email, 'new@example.com');
           },
         );
@@ -226,11 +240,13 @@ void main() {
         final mockResponse = MockAuthResponse();
         when(() => mockResponse.user).thenReturn(null);
 
-        when(() => mockRemote.signUp(
-              email: 'new@example.com',
-              password: 'password123',
-              fullName: 'New Student',
-            )).thenAnswer((_) async => mockResponse);
+        when(
+          () => mockRemote.signUp(
+            email: 'new@example.com',
+            password: 'password123',
+            fullName: 'New Student',
+          ),
+        ).thenAnswer((_) async => mockResponse);
 
         final result = await repository.signUp(
           email: 'new@example.com',
@@ -247,11 +263,13 @@ void main() {
       });
 
       test('returns ValidationFailure on AuthException', () async {
-        when(() => mockRemote.signUp(
-              email: 'new@example.com',
-              password: 'password123',
-              fullName: 'New Student',
-            )).thenThrow(const supabase.AuthException('weak password'));
+        when(
+          () => mockRemote.signUp(
+            email: 'new@example.com',
+            password: 'password123',
+            fullName: 'New Student',
+          ),
+        ).thenThrow(const supabase.AuthException('weak password'));
 
         final result = await repository.signUp(
           email: 'new@example.com',
@@ -271,11 +289,13 @@ void main() {
       });
 
       test('returns UnknownFailure on general exception', () async {
-        when(() => mockRemote.signUp(
-              email: 'new@example.com',
-              password: 'password123',
-              fullName: 'New Student',
-            )).thenThrow(Exception('Server crash'));
+        when(
+          () => mockRemote.signUp(
+            email: 'new@example.com',
+            password: 'password123',
+            fullName: 'New Student',
+          ),
+        ).thenThrow(Exception('Server crash'));
 
         final result = await repository.signUp(
           email: 'new@example.com',
@@ -288,7 +308,9 @@ void main() {
           (failure) {
             expect(failure, isA<UnknownFailure>());
             expect(
-                (failure as UnknownFailure).message, contains('Server crash'));
+              (failure as UnknownFailure).message,
+              contains('Server crash'),
+            );
           },
           (_) => fail('should fail'),
         );
@@ -340,7 +362,8 @@ void main() {
 
       test('returns Left(UnauthorizedFailure) on AuthException', () async {
         when(() => mockRemote.signInWithGoogle()).thenThrow(
-            const supabase.AuthException('Google sign in cancelled'));
+          const supabase.AuthException('Google sign in cancelled'),
+        );
 
         final result = await repository.signInWithGoogle();
 
@@ -348,8 +371,10 @@ void main() {
         result.fold(
           (failure) {
             expect(failure, isA<UnauthorizedFailure>());
-            expect((failure as UnauthorizedFailure).message,
-                'Google sign in cancelled');
+            expect(
+              (failure as UnauthorizedFailure).message,
+              'Google sign in cancelled',
+            );
           },
           (_) => fail('should fail'),
         );
@@ -367,7 +392,9 @@ void main() {
           (failure) {
             expect(failure, isA<UnknownFailure>());
             expect(
-                (failure as UnknownFailure).message, contains('Fatal error'));
+              (failure as UnknownFailure).message,
+              contains('Fatal error'),
+            );
           },
           (_) => fail('should fail'),
         );

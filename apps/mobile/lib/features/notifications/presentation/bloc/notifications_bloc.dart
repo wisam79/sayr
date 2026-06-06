@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'notifications_state.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_state.dart';
 
 part 'notifications_event.dart';
 
@@ -15,6 +14,7 @@ part 'notifications_event.dart';
 /// realtime updates via [_NotificationsUpdated] dispatched by the stream
 /// subscription.
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
+  /// Creates a [NotificationsBloc] with the given [notificationsRepository].
   NotificationsBloc({required NotificationsRepository notificationsRepository})
       : _repository = notificationsRepository,
         super(const NotificationsState.initial()) {
@@ -54,8 +54,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     await _subscription?.cancel();
     emit(const NotificationsState.loading());
 
-    final Either<Failure, List<AppNotification>> initial =
-        await _repository.getMyNotifications();
+    final initial = await _repository.getMyNotifications();
     initial.fold(
       (Failure failure) => emit(NotificationsState.error(failure: failure)),
       (List<AppNotification> list) => emit(
@@ -78,8 +77,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     NotificationsRefreshRequested event,
     Emitter<NotificationsState> emit,
   ) async {
-    final Either<Failure, List<AppNotification>> result =
-        await _repository.getMyNotifications();
+    final result = await _repository.getMyNotifications();
     result.fold(
       (Failure failure) => emit(NotificationsState.error(failure: failure)),
       (List<AppNotification> list) => emit(
@@ -119,8 +117,8 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     NotificationMarkedRead event,
     Emitter<NotificationsState> emit,
   ) async {
-    final List<AppNotification> current = _currentList();
-    final List<AppNotification> updated = current
+    final current = _currentList();
+    final updated = current
         .map(
           (n) => n.id == event.id ? n.copyWith(isRead: true) : n,
         )
@@ -140,8 +138,8 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     NotificationsMarkAllRead event,
     Emitter<NotificationsState> emit,
   ) async {
-    final List<AppNotification> current = _currentList();
-    final List<AppNotification> updated = current
+    final current = _currentList();
+    final updated = current
         .map(
           (n) => AppNotification(
             id: n.id,
@@ -158,7 +156,6 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     emit(
       NotificationsState.loaded(
         notifications: updated,
-        unreadCount: 0,
       ),
     );
 

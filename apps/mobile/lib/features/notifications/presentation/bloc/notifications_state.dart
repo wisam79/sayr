@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart'
+    show NotificationsBloc;
 
 part 'notifications_state.freezed.dart';
 

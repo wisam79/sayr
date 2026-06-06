@@ -71,7 +71,7 @@ void main() {
     });
 
     test('toEntity converts to domain Route', () {
-      final model = RouteModel(
+      const model = RouteModel(
         id: 'route-3',
         driverId: 'driver-3',
         title: 'خط التحويل',
@@ -80,9 +80,8 @@ void main() {
         price: 25000,
         capacity: 30,
         availableSeats: 10,
-        isActive: true,
-        startLat: 33.0,
-        startLng: 44.0,
+        startLat: 33,
+        startLng: 44,
         endLat: 33.1,
         endLng: 44.1,
         departureTime: '09:00',
@@ -92,8 +91,8 @@ void main() {
 
       final entity = model.toEntity();
 
-      expect(entity.id, RouteId('route-3'));
-      expect(entity.driverId, DriverId('driver-3'));
+      expect(entity.id, const RouteId('route-3'));
+      expect(entity.driverId, const DriverId('driver-3'));
       expect(entity.title, 'خط التحويل');
       expect(entity.startLocation, 'A');
       expect(entity.endLocation, 'B');
@@ -101,17 +100,21 @@ void main() {
       expect(entity.capacity, 30);
       expect(entity.availableSeats, 10);
       expect(entity.isActive, true);
-      expect(entity.startCoordinates,
-          Coordinates(latitude: 33.0, longitude: 44.0));
       expect(
-          entity.endCoordinates, Coordinates(latitude: 33.1, longitude: 44.1));
+        entity.startCoordinates,
+        const Coordinates(latitude: 33, longitude: 44),
+      );
+      expect(
+        entity.endCoordinates,
+        const Coordinates(latitude: 33.1, longitude: 44.1),
+      );
       expect(entity.departureTime, '09:00');
       expect(entity.returnTime, '17:00');
       expect(entity.daysOfWeek, ['sun', 'wed']);
     });
 
     test('toEntity with no coordinates returns null coordinates', () {
-      final model = RouteModel(
+      const model = RouteModel(
         id: 'route-4',
         driverId: 'driver-4',
         title: 'بدون إحداثيات',

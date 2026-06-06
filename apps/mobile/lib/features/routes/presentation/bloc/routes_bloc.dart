@@ -1,11 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import 'routes_event.dart';
-import 'routes_state.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
 
 /// Bloc for fetching and managing routes.
 class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
+  /// Creates a [RoutesBloc] with the given [routeRepository].
   RoutesBloc({required RouteRepository routeRepository})
       : _routeRepository = routeRepository,
         super(const RoutesInitial()) {

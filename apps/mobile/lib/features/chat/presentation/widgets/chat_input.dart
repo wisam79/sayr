@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 /// Bottom input bar for the chat page.
 ///
 /// Stateless — parent owns the text controller and dispatches send events.
 class ChatInput extends StatelessWidget {
+  /// Creates a [ChatInput] input bar.
   const ChatInput({
     required this.controller,
     required this.onSend,
@@ -12,12 +14,18 @@ class ChatInput extends StatelessWidget {
     super.key,
   });
 
+  /// Controller for the text field input.
   final TextEditingController controller;
+
+  /// Callback when a message is sent.
   final ValueChanged<String> onSend;
+
+  /// Indicates whether a message is currently being sent.
   final bool isSending;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       top: false,
       child: Padding(
@@ -37,7 +45,7 @@ class ChatInput extends StatelessWidget {
                 maxLines: 4,
                 textInputAction: TextInputAction.send,
                 decoration: InputDecoration(
-                  hintText: 'اكتب رسالة...',
+                  hintText: l10n.messageHint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),
@@ -47,7 +55,7 @@ class ChatInput extends StatelessWidget {
                   ),
                 ),
                 onSubmitted: (String text) {
-                  final String trimmed = text.trim();
+                  final trimmed = text.trim();
                   if (trimmed.isNotEmpty) {
                     onSend(trimmed);
                     controller.clear();
@@ -64,7 +72,7 @@ class ChatInput extends StatelessWidget {
                 onTap: isSending
                     ? null
                     : () {
-                        final String trimmed = controller.text.trim();
+                        final trimmed = controller.text.trim();
                         if (trimmed.isNotEmpty) {
                           onSend(trimmed);
                           controller.clear();

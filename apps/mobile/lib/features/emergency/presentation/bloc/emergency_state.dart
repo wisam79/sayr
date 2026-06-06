@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart'
+    show EmergencyBloc;
 
 part 'emergency_state.freezed.dart';
 

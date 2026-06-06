@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show Color;
 
-import 'firebase_config.dart';
+import 'package:sayr_mobile/core/firebase_config.dart';
 
 /// Firebase Cloud Messaging service using `awesome_notifications` for
 /// cross-platform local notifications (channels, actions, scheduling built-in).
@@ -14,18 +13,10 @@ class FcmService {
 
   static bool _initialized = false;
 
-  /// Optional navigation callback. Set via [setNavigationHandler] from the
-  /// app shell. The callback receives the FCM `data` payload (e.g. a
-  /// `trip_id`, `conversation_id`, or `route_id`).
-  static void Function(Map<String, dynamic> data)? _onNavigate;
-
-  /// Set the navigation handler. Called from the app shell after the
-  /// router is ready.
-  static void setNavigationHandler(
-    void Function(Map<String, dynamic> data) handler,
-  ) {
-    _onNavigate = handler;
-  }
+  /// Optional navigation callback. The callback receives the FCM `data`
+  /// payload (e.g. a `trip_id`, `conversation_id`, or `route_id`). Called
+  /// from the app shell after the router is ready.
+  static void Function(Map<String, dynamic> data)? navigationHandler;
 
   /// Initialize FCM + awesome_notifications.
   static Future<void> init() async {
@@ -60,15 +51,9 @@ class FcmService {
     }
 
     // FCM permission.
-    final settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+    await FirebaseMessaging.instance.requestPermission();
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      debugPrint('FCM: Permission granted');
-    }
+    // FCM permission granted — proceed.
 
     // Handle foreground messages.
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
@@ -79,10 +64,7 @@ class FcmService {
     // Handle notification tap.
     FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
 
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      debugPrint('FCM: token obtained');
-    }
+    await FirebaseMessaging.instance.getToken();
   }
 
   /// Subscribe to all-students topic.
@@ -150,9 +132,8 @@ class FcmService {
   }
 
   static void _handleNotificationTap(RemoteMessage message) {
-    final handler = _onNavigate;
+    final handler = navigationHandler;
     if (handler == null) {
-      debugPrint('FCM: No navigation handler set; data=${message.data}');
       return;
     }
     handler(Map<String, dynamic>.from(message.data));
@@ -161,5 +142,5 @@ class FcmService {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  debugPrint('Background message: ${message.messageId}');
+  // background message received
 }

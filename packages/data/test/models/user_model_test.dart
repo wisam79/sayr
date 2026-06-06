@@ -70,7 +70,7 @@ void main() {
     });
 
     test('toEntity converts to domain User', () {
-      final model = UserModel(
+      const model = UserModel(
         id: 'user-789',
         email: 'entity@example.com',
         role: UserRole.student,
@@ -81,7 +81,7 @@ void main() {
 
       final entity = model.toEntity();
 
-      expect(entity.id, UserId('user-789'));
+      expect(entity.id, const UserId('user-789'));
       expect(entity.email, 'entity@example.com');
       expect(entity.role, UserRole.student);
       expect(entity.fullName, 'Test User');

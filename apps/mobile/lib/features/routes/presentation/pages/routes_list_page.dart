@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/routes_bloc.dart';
-import '../bloc/routes_event.dart';
-import '../bloc/routes_state.dart';
-
+/// Page responsible for displaying the list of active routes.
 class RoutesListPage extends StatefulWidget {
+  /// Creates a [RoutesListPage].
   const RoutesListPage({super.key, this.showAppBar = true});
+
+  /// Whether to show the app bar on this page.
   final bool showAppBar;
 
   @override

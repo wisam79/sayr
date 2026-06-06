@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart'
+    show ChatListBloc;
 
 part 'chat_list_state.freezed.dart';
 

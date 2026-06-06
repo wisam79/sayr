@@ -1,26 +1,22 @@
 import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
-class MockLocalDatasource extends Mock implements LocalDatasource {}
-
 class MockUser extends Mock implements supabase.User {}
 
 void main() {
   late ChatRepositoryImpl repository;
   late MockRemoteDatasource mockRemote;
-  late MockLocalDatasource mockLocal;
   late MockUser mockUser;
 
   setUp(() {
     mockRemote = MockRemoteDatasource();
-    mockLocal = MockLocalDatasource();
     mockUser = MockUser();
 
     when(() => mockUser.id).thenReturn('user-123');
@@ -28,7 +24,6 @@ void main() {
 
     repository = ChatRepositoryImpl(
       remoteDatasource: mockRemote,
-      localDatasource: mockLocal,
     );
   });
 
@@ -61,7 +56,7 @@ void main() {
           (failure) => fail('should succeed'),
           (conversations) {
             expect(conversations.length, 1);
-            expect(conversations.first.id, ConversationId('conv-1'));
+            expect(conversations.first.id, const ConversationId('conv-1'));
             expect(conversations.first.routeName, 'Baghdad Route');
             expect(conversations.first.otherUserName, 'Driver Name');
           },
@@ -110,9 +105,12 @@ void main() {
           emitsInOrder([
             [
               isA<Conversation>()
-                  .having((c) => c.id, 'id', ConversationId('conv-1'))
+                  .having((c) => c.id, 'id', const ConversationId('conv-1'))
                   .having(
-                      (c) => c.otherUserName, 'otherUserName', 'Driver Name')
+                    (c) => c.otherUserName,
+                    'otherUserName',
+                    'Driver Name',
+                  ),
             ]
           ]),
         );
@@ -161,10 +159,12 @@ void main() {
           'driver': {'full_name': 'Driver Name'},
         };
 
-        when(() => mockRemote.getConversation(
-              routeId: 'route-1',
-              studentId: 'user-123',
-            )).thenAnswer((_) async => mockExistingJson);
+        when(
+          () => mockRemote.getConversation(
+            routeId: 'route-1',
+            studentId: 'user-123',
+          ),
+        ).thenAnswer((_) async => mockExistingJson);
 
         final result = await repository.getOrCreateConversation(
           routeId: const RouteId('route-1'),
@@ -175,22 +175,26 @@ void main() {
         result.fold(
           (failure) => fail('should succeed'),
           (conv) {
-            expect(conv.id, ConversationId('conv-1'));
+            expect(conv.id, const ConversationId('conv-1'));
             expect(conv.otherUserName, 'Driver Name');
           },
         );
-        verifyNever(() => mockRemote.createConversation(
-              routeId: any(named: 'routeId'),
-              studentId: any(named: 'studentId'),
-              driverUserId: any(named: 'driverUserId'),
-            ));
+        verifyNever(
+          () => mockRemote.createConversation(
+            routeId: any(named: 'routeId'),
+            studentId: any(named: 'studentId'),
+            driverUserId: any(named: 'driverUserId'),
+          ),
+        );
       });
 
       test('creates a new conversation if not found', () async {
-        when(() => mockRemote.getConversation(
-              routeId: 'route-1',
-              studentId: 'user-123',
-            )).thenAnswer((_) async => null);
+        when(
+          () => mockRemote.getConversation(
+            routeId: 'route-1',
+            studentId: 'user-123',
+          ),
+        ).thenAnswer((_) async => null);
 
         final mockCreatedJson = {
           'id': 'conv-2',
@@ -201,11 +205,13 @@ void main() {
           'updated_at': '2026-06-04T12:00:00Z',
         };
 
-        when(() => mockRemote.createConversation(
-              routeId: 'route-1',
-              studentId: 'user-123',
-              driverUserId: 'driver-456',
-            )).thenAnswer((_) async => mockCreatedJson);
+        when(
+          () => mockRemote.createConversation(
+            routeId: 'route-1',
+            studentId: 'user-123',
+            driverUserId: 'driver-456',
+          ),
+        ).thenAnswer((_) async => mockCreatedJson);
 
         final result = await repository.getOrCreateConversation(
           routeId: const RouteId('route-1'),
@@ -216,7 +222,7 @@ void main() {
         result.fold(
           (failure) => fail('should succeed'),
           (conv) {
-            expect(conv.id, ConversationId('conv-2'));
+            expect(conv.id, const ConversationId('conv-2'));
             expect(conv.otherUserName, isNull);
           },
         );
@@ -239,10 +245,12 @@ void main() {
 
       test('returns ServerFailure when remote getConversation throws exception',
           () async {
-        when(() => mockRemote.getConversation(
-              routeId: 'route-1',
-              studentId: 'user-123',
-            )).thenThrow(Exception('Server unreachable'));
+        when(
+          () => mockRemote.getConversation(
+            routeId: 'route-1',
+            studentId: 'user-123',
+          ),
+        ).thenThrow(Exception('Server unreachable'));
 
         final result = await repository.getOrCreateConversation(
           routeId: const RouteId('route-1'),
@@ -253,8 +261,10 @@ void main() {
         result.fold(
           (failure) {
             expect(failure, isA<ServerFailure>());
-            expect((failure as ServerFailure).message,
-                contains('Server unreachable'));
+            expect(
+              (failure as ServerFailure).message,
+              contains('Server unreachable'),
+            );
           },
           (_) => fail('should fail'),
         );
@@ -285,7 +295,7 @@ void main() {
           (failure) => fail('should succeed'),
           (messages) {
             expect(messages.length, 1);
-            expect(messages.first.id, MessageId('msg-1'));
+            expect(messages.first.id, const MessageId('msg-1'));
             expect(messages.first.body, 'Test body');
           },
         );
@@ -303,8 +313,10 @@ void main() {
         result.fold(
           (failure) {
             expect(failure, isA<ServerFailure>());
-            expect((failure as ServerFailure).message,
-                contains('Load messages failed'));
+            expect(
+              (failure as ServerFailure).message,
+              contains('Load messages failed'),
+            );
           },
           (_) => fail('should fail'),
         );
@@ -322,17 +334,21 @@ void main() {
           'is_read': false,
         };
 
-        when(() => mockRemote.sendMessage(
-              conversationId: 'conv-1',
-              senderId: 'user-123',
-              body: 'Hello world',
-            )).thenAnswer((_) async => mockResponseJson);
+        when(
+          () => mockRemote.sendMessage(
+            conversationId: 'conv-1',
+            senderId: 'user-123',
+            body: 'Hello world',
+          ),
+        ).thenAnswer((_) async => mockResponseJson);
 
-        when(() => mockRemote.updateConversationPreview(
-              conversationId: 'conv-1',
-              body: 'Hello world',
-              updatedAt: any(named: 'updatedAt'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.updateConversationPreview(
+            conversationId: 'conv-1',
+            body: 'Hello world',
+            updatedAt: any(named: 'updatedAt'),
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository.sendMessage(
           conversationId: const ConversationId('conv-1'),
@@ -340,16 +356,20 @@ void main() {
         );
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.sendMessage(
-              conversationId: 'conv-1',
-              senderId: 'user-123',
-              body: 'Hello world',
-            )).called(1);
-        verify(() => mockRemote.updateConversationPreview(
-              conversationId: 'conv-1',
-              body: 'Hello world',
-              updatedAt: any(named: 'updatedAt'),
-            )).called(1);
+        verify(
+          () => mockRemote.sendMessage(
+            conversationId: 'conv-1',
+            senderId: 'user-123',
+            body: 'Hello world',
+          ),
+        ).called(1);
+        verify(
+          () => mockRemote.updateConversationPreview(
+            conversationId: 'conv-1',
+            body: 'Hello world',
+            updatedAt: any(named: 'updatedAt'),
+          ),
+        ).called(1);
       });
 
       test('returns UnauthorizedFailure when not logged in', () async {
@@ -369,11 +389,13 @@ void main() {
 
       test('returns ServerFailure when remote sendMessage throws exception',
           () async {
-        when(() => mockRemote.sendMessage(
-              conversationId: 'conv-1',
-              senderId: 'user-123',
-              body: 'Hello',
-            )).thenThrow(Exception('Send failed'));
+        when(
+          () => mockRemote.sendMessage(
+            conversationId: 'conv-1',
+            senderId: 'user-123',
+            body: 'Hello',
+          ),
+        ).thenThrow(Exception('Send failed'));
 
         final result = await repository.sendMessage(
           conversationId: const ConversationId('conv-1'),
@@ -393,27 +415,33 @@ void main() {
 
     group('markAsRead', () {
       test('marks message as read successfully', () async {
-        when(() => mockRemote.markMessageAsRead(
-              messageId: 'msg-1',
-              readAt: any(named: 'readAt'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.markMessageAsRead(
+            messageId: 'msg-1',
+            readAt: any(named: 'readAt'),
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository.markAsRead(const MessageId('msg-1'));
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.markMessageAsRead(
-              messageId: 'msg-1',
-              readAt: any(named: 'readAt'),
-            )).called(1);
+        verify(
+          () => mockRemote.markMessageAsRead(
+            messageId: 'msg-1',
+            readAt: any(named: 'readAt'),
+          ),
+        ).called(1);
       });
 
       test(
           'returns ServerFailure when remote markMessageAsRead throws exception',
           () async {
-        when(() => mockRemote.markMessageAsRead(
-              messageId: 'msg-1',
-              readAt: any(named: 'readAt'),
-            )).thenThrow(Exception('Database update failed'));
+        when(
+          () => mockRemote.markMessageAsRead(
+            messageId: 'msg-1',
+            readAt: any(named: 'readAt'),
+          ),
+        ).thenThrow(Exception('Database update failed'));
 
         final result = await repository.markAsRead(const MessageId('msg-1'));
 

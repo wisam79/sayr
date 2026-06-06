@@ -2,21 +2,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import '../datasources/remote_datasource.dart';
-import '../datasources/local_datasource.dart';
-import '../models/emergency_report_model.dart';
+import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/emergency_report_model.dart';
 
-/// Concrete implementation of EmergencyRepository using Remote and Local data sources.
+/// Concrete implementation of EmergencyRepository using Remote data source.
 @LazySingleton(as: EmergencyRepository)
 class EmergencyRepositoryImpl implements EmergencyRepository {
-  final RemoteDatasource _remoteDatasource;
-  final LocalDatasource _localDatasource;
-
   EmergencyRepositoryImpl({
     required RemoteDatasource remoteDatasource,
-    required LocalDatasource localDatasource,
-  })  : _remoteDatasource = remoteDatasource,
-        _localDatasource = localDatasource;
+  }) : _remoteDatasource = remoteDatasource;
+  final RemoteDatasource _remoteDatasource;
 
   @override
   Future<Either<Failure, EmergencyReport>> triggerEmergency({
@@ -79,7 +74,8 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
       };
 
       return Right<Failure, EmergencyReport?>(
-          EmergencyReportModel.fromJson(map).toEntity());
+        EmergencyReportModel.fromJson(map).toEntity(),
+      );
     } catch (e) {
       return Left<Failure, EmergencyReport?>(
         ServerFailure(message: e.toString()),

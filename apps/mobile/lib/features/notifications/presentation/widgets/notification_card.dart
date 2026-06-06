@@ -5,13 +5,17 @@ import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 /// A single notification card in the inbox list.
 class NotificationCard extends StatelessWidget {
+  /// Creates a [NotificationCard] to show single notification item.
   const NotificationCard({
     required this.notification,
     required this.onTap,
     super.key,
   });
 
+  /// The notification details to display.
   final AppNotification notification;
+
+  /// Callback when the notification card is tapped.
   final VoidCallback onTap;
 
   @override
@@ -87,13 +91,15 @@ class NotificationCard extends StatelessWidget {
   }
 
   String _formatRelative(DateTime dt) {
-    final DateTime now = DateTime.now();
-    final Duration diff = now.difference(dt.toLocal());
+    final now = DateTime.now();
+    final diff = now.difference(dt.toLocal());
 
-    if (diff.inMinutes < 1) return 'الآن';
-    if (diff.inMinutes < 60) return 'قبل ${diff.inMinutes} د';
-    if (diff.inHours < 24) return 'قبل ${diff.inHours} س';
-    if (diff.inDays < 7) return 'قبل ${diff.inDays} يوم';
+    if (diff.inMinutes < 1) {
+      return DateFormat.Hm().format(dt.toLocal());
+    }
+    if (diff.inDays < 7) {
+      return DateFormat('E HH:mm').format(dt.toLocal());
+    }
     return DateFormat('yyyy-MM-dd').format(dt.toLocal());
   }
 }

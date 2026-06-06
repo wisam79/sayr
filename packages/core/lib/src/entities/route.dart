@@ -1,9 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../value_objects/coordinates.dart';
-import '../value_objects/ids.dart';
-import '../value_objects/money.dart';
-import '../utils/json_converters.dart';
+import 'package:sayr_core/src/utils/json_converters.dart';
+import 'package:sayr_core/src/value_objects/coordinates.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
+import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'route.freezed.dart';
 part 'route.g.dart';
@@ -24,16 +23,19 @@ abstract class Route with _$Route {
     required int availableSeats,
     required bool isActive,
     @JsonKey(
-        fromJson: nullableInstitutionIdFromJson,
-        toJson: nullableInstitutionIdToJson)
+      fromJson: nullableInstitutionIdFromJson,
+      toJson: nullableInstitutionIdToJson,
+    )
     InstitutionId? institutionId,
     @JsonKey(
-        fromJson: nullableCoordinatesFromJson,
-        toJson: nullableCoordinatesToJson)
+      fromJson: nullableCoordinatesFromJson,
+      toJson: nullableCoordinatesToJson,
+    )
     Coordinates? startCoordinates,
     @JsonKey(
-        fromJson: nullableCoordinatesFromJson,
-        toJson: nullableCoordinatesToJson)
+      fromJson: nullableCoordinatesFromJson,
+      toJson: nullableCoordinatesToJson,
+    )
     Coordinates? endCoordinates,
     String? departureTime,
     String? returnTime,

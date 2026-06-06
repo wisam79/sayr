@@ -1,6 +1,6 @@
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sayr_data/src/supabase/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
-
-import 'supabase_config.dart';
 
 /// Wraps the Supabase client with Sayr-specific configuration.
 ///
@@ -38,9 +38,6 @@ class SayrSupabase {
     await supabase.Supabase.initialize(
       url: cfg.url,
       anonKey: cfg.anonKey,
-      authOptions: const supabase.FlutterAuthClientOptions(
-        authFlowType: supabase.AuthFlowType.pkce,
-      ),
     );
 
     _client = supabase.Supabase.instance.client;
@@ -72,16 +69,65 @@ class SayrSupabase {
     );
   }
 
-  /// Sign in with Google via OAuth.
+  /// Sign in with Google using native Google Sign-In or OAuth fallback.
   ///
-  /// Returns true on success. The user becomes available via
-  /// [currentUser] or the [authStateChanges] stream once the OAuth
-  /// flow completes and Supabase processes the callback.
-  Future<bool> signInWithGoogle() {
-    return _client.auth.signInWithOAuth(
-      supabase.OAuthProvider.google,
-      redirectTo: 'com.sayr.app://login-callback',
+  /// Returns true on success.
+  Future<bool> signInWithGoogle() async {
+    const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+    const androidClientId = String.fromEnvironment('GOOGLE_ANDROID_CLIENT_ID');
+    final clientId = webClientId.isNotEmpty
+        ? webClientId
+        : (androidClientId.isNotEmpty ? androidClientId : null);
+
+    final googleSignIn = GoogleSignIn(
+      serverClientId: clientId,
+      scopes: ['email', 'profile'],
     );
+
+    try {
+      // Force account chooser dialog by signing out from Google client first
+      try {
+        await googleSignIn.signOut();
+      } catch (_) {
+        // Ignore errors if sign out fails
+      }
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // User cancelled the native sign-in dialog
+        return false;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
+
+      if (idToken == null) {
+        throw const supabase.AuthException(
+          'لم يتم استرداد معرف الهوية (ID Token) من Google.',
+        );
+      }
+
+      final response = await _client.auth.signInWithIdToken(
+        provider: supabase.OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      return response.user != null;
+    } catch (e) {
+      // Fallback to OAuth if native sign-in fails or is not supported
+      if (e.toString().contains('sign_in_canceled') ||
+          e.toString().contains('canceled')) {
+        return false;
+      }
+
+      // Attempt OAuth fallback
+      return _client.auth.signInWithOAuth(
+        supabase.OAuthProvider.google,
+        redirectTo: 'com.sayr.app://login-callback',
+      );
+    }
   }
 
   /// Send a password reset email.
@@ -102,6 +148,11 @@ class SayrSupabase {
   /// Sign out the current user.
   Future<void> signOut() async {
     await _client.auth.signOut();
+    try {
+      await GoogleSignIn().signOut();
+    } catch (_) {
+      // Ignore errors if Google Sign-In was not initialized or fails
+    }
   }
 
   /// Listen to auth state changes.

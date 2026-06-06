@@ -1,8 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
-import '../enums/subscription_status.dart';
-import '../value_objects/ids.dart';
-import '../utils/json_converters.dart';
+import 'package:sayr_core/src/enums/subscription_status.dart';
+import 'package:sayr_core/src/utils/json_converters.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'subscription.freezed.dart';
 part 'subscription.g.dart';
@@ -18,7 +17,9 @@ abstract class Subscription with _$Subscription {
     @JsonKey(fromJson: routeIdFromJson, toJson: routeIdToJson)
     required RouteId routeId,
     @JsonKey(
-        fromJson: subscriptionStatusFromJson, toJson: subscriptionStatusToJson)
+      fromJson: subscriptionStatusFromJson,
+      toJson: subscriptionStatusToJson,
+    )
     required SubscriptionStatus status,
     required DateTime startDate,
     DateTime? endDate,

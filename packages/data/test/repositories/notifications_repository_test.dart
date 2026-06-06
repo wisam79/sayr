@@ -1,26 +1,22 @@
 import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
-class MockLocalDatasource extends Mock implements LocalDatasource {}
-
 class MockUser extends Mock implements supabase.User {}
 
 void main() {
   late NotificationsRepositoryImpl repository;
   late MockRemoteDatasource mockRemote;
-  late MockLocalDatasource mockLocal;
   late MockUser mockUser;
 
   setUp(() {
     mockRemote = MockRemoteDatasource();
-    mockLocal = MockLocalDatasource();
     mockUser = MockUser();
 
     when(() => mockUser.id).thenReturn('user-123');
@@ -28,7 +24,6 @@ void main() {
 
     repository = NotificationsRepositoryImpl(
       remoteDatasource: mockRemote,
-      localDatasource: mockLocal,
     );
   });
 
@@ -75,9 +70,12 @@ void main() {
       });
 
       test('returns ServerFailure when remote throws exception', () async {
-        when(() => mockRemote.getMyNotifications(
+        when(
+          () => mockRemote.getMyNotifications(
             userId: 'user-123',
-            limit: any(named: 'limit'))).thenThrow(Exception('Fetch failed'));
+            limit: any(named: 'limit'),
+          ),
+        ).thenThrow(Exception('Fetch failed'));
 
         final result = await repository.getMyNotifications();
 
@@ -131,26 +129,32 @@ void main() {
 
     group('markAsRead', () {
       test('calls markNotificationAsRead on remote datasource', () async {
-        when(() => mockRemote.markNotificationAsRead(
-              id: 'notif-1',
-              readAt: any(named: 'readAt'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.markNotificationAsRead(
+            id: 'notif-1',
+            readAt: any(named: 'readAt'),
+          ),
+        ).thenAnswer((_) async {});
 
         final result =
             await repository.markAsRead(const NotificationId('notif-1'));
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.markNotificationAsRead(
-              id: 'notif-1',
-              readAt: any(named: 'readAt'),
-            )).called(1);
+        verify(
+          () => mockRemote.markNotificationAsRead(
+            id: 'notif-1',
+            readAt: any(named: 'readAt'),
+          ),
+        ).called(1);
       });
 
       test('returns ServerFailure when remote throws exception', () async {
-        when(() => mockRemote.markNotificationAsRead(
-              id: 'notif-1',
-              readAt: any(named: 'readAt'),
-            )).thenThrow(Exception('Mark read failed'));
+        when(
+          () => mockRemote.markNotificationAsRead(
+            id: 'notif-1',
+            readAt: any(named: 'readAt'),
+          ),
+        ).thenThrow(Exception('Mark read failed'));
 
         final result =
             await repository.markAsRead(const NotificationId('notif-1'));
@@ -165,18 +169,22 @@ void main() {
 
     group('markAllAsRead', () {
       test('calls markAllNotificationsAsRead on remote datasource', () async {
-        when(() => mockRemote.markAllNotificationsAsRead(
-              userId: 'user-123',
-              readAt: any(named: 'readAt'),
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.markAllNotificationsAsRead(
+            userId: 'user-123',
+            readAt: any(named: 'readAt'),
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository.markAllAsRead();
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.markAllNotificationsAsRead(
-              userId: 'user-123',
-              readAt: any(named: 'readAt'),
-            )).called(1);
+        verify(
+          () => mockRemote.markAllNotificationsAsRead(
+            userId: 'user-123',
+            readAt: any(named: 'readAt'),
+          ),
+        ).called(1);
       });
 
       test('returns UnauthorizedFailure when user is null', () async {
@@ -192,10 +200,12 @@ void main() {
       });
 
       test('returns ServerFailure when remote throws exception', () async {
-        when(() => mockRemote.markAllNotificationsAsRead(
-              userId: 'user-123',
-              readAt: any(named: 'readAt'),
-            )).thenThrow(Exception('DB error'));
+        when(
+          () => mockRemote.markAllNotificationsAsRead(
+            userId: 'user-123',
+            readAt: any(named: 'readAt'),
+          ),
+        ).thenThrow(Exception('DB error'));
 
         final result = await repository.markAllAsRead();
 
@@ -220,7 +230,7 @@ void main() {
           emitsInOrder([
             [
               isA<AppNotification>()
-                  .having((n) => n.id, 'id', const NotificationId('notif-1'))
+                  .having((n) => n.id, 'id', const NotificationId('notif-1')),
             ]
           ]),
         );
@@ -250,11 +260,13 @@ void main() {
 
     group('registerPushToken', () {
       test('calls registerPushToken on remote datasource', () async {
-        when(() => mockRemote.registerPushToken(
-              fcmToken: 'token123',
-              platform: 'android',
-              deviceId: 'device123',
-            )).thenAnswer((_) async {});
+        when(
+          () => mockRemote.registerPushToken(
+            fcmToken: 'token123',
+            platform: 'android',
+            deviceId: 'device123',
+          ),
+        ).thenAnswer((_) async {});
 
         final result = await repository.registerPushToken(
           fcmToken: 'token123',
@@ -263,21 +275,25 @@ void main() {
         );
 
         expect(result.isRight(), true);
-        verify(() => mockRemote.registerPushToken(
-              fcmToken: 'token123',
-              platform: 'android',
-              deviceId: 'device123',
-            )).called(1);
+        verify(
+          () => mockRemote.registerPushToken(
+            fcmToken: 'token123',
+            platform: 'android',
+            deviceId: 'device123',
+          ),
+        ).called(1);
       });
 
       test(
           'returns ServerFailure when remote registerPushToken throws exception',
           () async {
-        when(() => mockRemote.registerPushToken(
-              fcmToken: 'token123',
-              platform: 'android',
-              deviceId: any(named: 'deviceId'),
-            )).thenThrow(Exception('Token registry failed'));
+        when(
+          () => mockRemote.registerPushToken(
+            fcmToken: 'token123',
+            platform: 'android',
+            deviceId: any(named: 'deviceId'),
+          ),
+        ).thenThrow(Exception('Token registry failed'));
 
         final result = await repository.registerPushToken(
           fcmToken: 'token123',

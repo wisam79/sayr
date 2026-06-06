@@ -113,7 +113,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTitle => 'الرئيسية';
 
   @override
-  String get routesTitle => 'الخطوط المتاحة';
+  String get routesTitle => 'الخطوط';
 
   @override
   String get mySubscriptions => 'اشتراكاتي';
@@ -154,7 +154,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get profile => 'الملف الشخصي';
+  String get profile => 'حسابي';
 
   @override
   String get settings => 'الإعدادات';
@@ -259,7 +259,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get privacyPolicy => 'سياسة الخصوصية';
 
   @override
-  String get activeTrips => 'الرحلات النشطة';
+  String get activeTrips => 'الرحلات';
 
   @override
   String get noActiveTrips => 'لا توجد رحلات نشطة حالياً';
@@ -272,4 +272,444 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get tryAgainLater => 'حاول مرة أخرى لاحقاً';
+
+  @override
+  String helloUser(String name) {
+    return 'مرحباً، $name';
+  }
+
+  @override
+  String get browseRoutes => 'تصفح الخطوط';
+
+  @override
+  String get browseRoutesDesc => 'اعثر على خط يناسبك';
+
+  @override
+  String get createNewTrip => 'إنشاء رحلة جديدة';
+
+  @override
+  String get createNewTripDesc => 'ابدأ رحلة على خط مسجل لديك';
+
+  @override
+  String get myActiveTrips => 'رحلاتي النشطة';
+
+  @override
+  String get myActiveTripsDesc => 'عرض وإدارة رحلاتك الجارية';
+
+  @override
+  String activeSubscriptionCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count اشتراكات',
+      one: 'اشتراك واحد',
+    );
+    return '$_temp0 نشطة';
+  }
+
+  @override
+  String get subscription => 'اشتراك';
+
+  @override
+  String get failedToLoadRoutes => 'فشل تحميل الخطوط';
+
+  @override
+  String get createTrip => 'إنشاء رحلة جديدة';
+
+  @override
+  String get validationEmailRequired => 'البريد مطلوب';
+
+  @override
+  String get validationEmailInvalid => 'بريد غير صحيح';
+
+  @override
+  String get validationPasswordRequired => 'كلمة المرور مطلوبة';
+
+  @override
+  String get validationPasswordTooShort =>
+      'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+
+  @override
+  String get validationFullNameRequired => 'الاسم الكامل مطلوب';
+
+  @override
+  String get validationPhoneInvalid => 'رقم هاتف غير صحيح';
+
+  @override
+  String get validationPasswordsDoNotMatch => 'كلمتا المرور غير متطابقتين';
+
+  @override
+  String get unknownError => 'خطأ غير معروف';
+
+  @override
+  String passwordResetLinkSent(String email) {
+    return 'تم إرسال رابط استعادة كلمة المرور إلى $email';
+  }
+
+  @override
+  String get skip => 'تخطي';
+
+  @override
+  String get getStarted => 'ابدأ';
+
+  @override
+  String get onboardingTitle1 => 'تنقل بسهولة';
+
+  @override
+  String get onboardingDesc1 =>
+      'احجز اشتراكك على خطوط النقل الجامعي بضغطة زر وتابع رحلتك لحظة بلحظة.';
+
+  @override
+  String get onboardingTitle2 => 'تتبع مباشر';
+
+  @override
+  String get onboardingDesc2 =>
+      'اعرف موقع الباص في الوقت الحقيقي واحصل على إشعارات عند اقترابه.';
+
+  @override
+  String get onboardingTitle3 => 'آمن وموثوق';
+
+  @override
+  String get onboardingDesc3 =>
+      'نظام تراخيص مسبق الدفع يضمن لك مقعدك ويحمي حقوقك.';
+
+  @override
+  String get tripTracking => 'تتبع الرحلة';
+
+  @override
+  String get waitingForDriver => 'في انتظار السائق...';
+
+  @override
+  String get start => 'البداية';
+
+  @override
+  String get destination => 'الوجهة';
+
+  @override
+  String get routeTitle => 'الخط';
+
+  @override
+  String get tripTime => 'وقت الرحلة';
+
+  @override
+  String get create => 'إنشاء';
+
+  @override
+  String get tripTimeMustBeFuture => 'وقت الرحلة يجب أن يكون في المستقبل';
+
+  @override
+  String get failedToCreateTrip => 'فشل إنشاء الرحلة';
+
+  @override
+  String get noDriverRoutes => 'لا توجد خطوط مرتبطة بحسابك';
+
+  @override
+  String get activeRouteRequired => 'يجب توفر خط نشط قبل إنشاء رحلة.';
+
+  @override
+  String get noTripsYet => 'لم تقم بإنشاء أي رحلة بعد';
+
+  @override
+  String get tripLoadFailed => 'فشل تحميل تفاصيل الرحلة';
+
+  @override
+  String get routeNotFound => 'الخط غير موجود';
+
+  @override
+  String get routeLoadFailed => 'فشل تحميل تفاصيل الخط';
+
+  @override
+  String get noSubscriptionsTitle => 'لا يوجد اشتراكات';
+
+  @override
+  String get noSubscriptionsSubtitle => 'فعّل ترخيصك الأول للبدء';
+
+  @override
+  String get subscriptionType => 'اشتراك';
+
+  @override
+  String get subscriptionStatusActive => 'نشط';
+
+  @override
+  String get subscriptionStatusExpired => 'منتهي';
+
+  @override
+  String subscriptionEndsOn(String date) {
+    return 'ينتهي: $date';
+  }
+
+  @override
+  String subscriptionDaysLeft(int days) {
+    return 'متبقي $days يوم';
+  }
+
+  @override
+  String get cancelSubscription => 'إلغاء الاشتراك';
+
+  @override
+  String get errorOccurred => 'حدث خطأ';
+
+  @override
+  String get pageNotFound => 'الصفحة غير موجودة';
+
+  @override
+  String get version => 'الإصدار';
+
+  @override
+  String get payment => 'الدفع';
+
+  @override
+  String get choosePaymentMethod => 'اختر طريقة الدفع';
+
+  @override
+  String get voucher => 'بطاقة شحن';
+
+  @override
+  String get enterVoucherCode => 'أدخل كود البطاقة';
+
+  @override
+  String get processing => 'جاري المعالجة...';
+
+  @override
+  String get paymentSuccess => 'تم الدفع بنجاح';
+
+  @override
+  String get paymentSuccessSubscription => 'تم الدفع بنجاح! تم تفعيل اشتراكك';
+
+  @override
+  String get paymentFailed => 'فشل الدفع';
+
+  @override
+  String get paymentViaZainCash => 'الدفع عبر زين كاش';
+
+  @override
+  String get openZainCash => 'افتح زين كاش';
+
+  @override
+  String amount(String amount, String currency) {
+    return 'المبلغ: $amount $currency';
+  }
+
+  @override
+  String get awaitingPaymentConfirmation => 'في انتظار تأكيد الدفع...';
+
+  @override
+  String get completePaymentInZainCash =>
+      'أكمل الدفع في تطبيق زين كاش ثم عد هنا';
+
+  @override
+  String get unexpectedError => 'حدث خطأ غير متوقع';
+
+  @override
+  String get invalidVoucher => 'بطاقة غير صالحة';
+
+  @override
+  String get notifications => 'الإشعارات';
+
+  @override
+  String get noNotifications => 'لا توجد إشعارات';
+
+  @override
+  String get markAllAsRead => 'تحديد الكل كمقروء';
+
+  @override
+  String get loadFailed => 'فشل التحميل';
+
+  @override
+  String get allMarkedAsRead => 'تم وضع علامة قراءة على الكل';
+
+  @override
+  String get messageHint => 'اكتب رسالة...';
+
+  @override
+  String get send => 'إرسال';
+
+  @override
+  String get noChats => 'لا توجد محادثات بعد';
+
+  @override
+  String get offline => 'غير متصل';
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get unread => 'غير مقروء';
+
+  @override
+  String get lastMessage => 'آخر رسالة';
+
+  @override
+  String get failedToLoadMessages => 'فشل تحميل الرسائل';
+
+  @override
+  String get pullToRefresh => 'اسحب للأسفل للتحديث';
+
+  @override
+  String get sendEmergency => 'إرسال استغاثة';
+
+  @override
+  String get emergencyConfirm => 'هل أنت في خطر؟';
+
+  @override
+  String get emergencyConfirmMessage =>
+      'هل تريد فعلاً إرسال تنبيه طوارئ؟ سيتم إخطار المسؤولين بموقعك الحالي.';
+
+  @override
+  String get sending => 'جاري الإرسال...';
+
+  @override
+  String get emergencySent => 'تم إرسال الاستغاثة';
+
+  @override
+  String get emergencySentMessage =>
+      'تم إرسال تنبيه الطوارئ. سيتم التواصل معك قريباً.';
+
+  @override
+  String get emergencyFailed => 'فشل الإرسال';
+
+  @override
+  String get locationUnavailable => 'تعذر تحديد موقعك. حاول مجدداً.';
+
+  @override
+  String get sos => 'طوارئ';
+
+  @override
+  String get sent => 'تم الإرسال';
+
+  @override
+  String seconds(int seconds) {
+    return '$seconds ثانية';
+  }
+
+  @override
+  String minutes(int minutes) {
+    return '$minutes دقيقة';
+  }
+
+  @override
+  String hours(int hours) {
+    return '$hours ساعة';
+  }
+
+  @override
+  String get driverControls => 'أدوات السائق';
+
+  @override
+  String get startTrip => 'بدء الرحلة';
+
+  @override
+  String get endTrip => 'إنهاء الرحلة';
+
+  @override
+  String get confirmStart => 'تأكيد البدء';
+
+  @override
+  String get tripScheduled => 'مجدول';
+
+  @override
+  String get tripInProgress => 'قيد التنفيذ';
+
+  @override
+  String get tripCompleted => 'مكتمل';
+
+  @override
+  String get tripCancelled => 'ملغي';
+
+  @override
+  String get tripControl => 'تحكم بالرحلة';
+
+  @override
+  String get locationPermissionRequired => 'يجب السماح بالوصول للموقع';
+
+  @override
+  String duration(String duration) {
+    return 'المدة: $duration';
+  }
+
+  @override
+  String get arrive => 'وصلت';
+
+  @override
+  String get begin => 'ابدأ';
+
+  @override
+  String get complete => 'أكمل';
+
+  @override
+  String get tripStatusScheduled => 'مجدولة';
+
+  @override
+  String get tripStatusDriverWaiting => 'السائق في الانتظار';
+
+  @override
+  String get tripStatusInTransit => 'قيد السير';
+
+  @override
+  String get tripStatusCompleted => 'مكتملة';
+
+  @override
+  String get tripStatusAbsent => 'غياب';
+
+  @override
+  String get tripStatusCancelled => 'ملغاة';
+
+  @override
+  String get completeProfileTitle => 'أكمل ملفك الشخصي';
+
+  @override
+  String get completeProfileSubtitle =>
+      'نحتاج بعض المعلومات الإضافية لإكمال تسجيلك';
+
+  @override
+  String get completeProfile => 'إكمال التسجيل';
+
+  @override
+  String get phoneNumber => 'رقم الهاتف';
+
+  @override
+  String get university => 'الجامعة';
+
+  @override
+  String get noInstitutionsFound => 'لا توجد مؤسسات متاحة';
+
+  @override
+  String get rateTrip => 'تقييم الرحلة';
+
+  @override
+  String get howWasYourTrip => 'كيف كانت رحلتك مع السائق؟';
+
+  @override
+  String get ratingCommentHint => 'اكتب ملاحظاتك هنا (اختياري)...';
+
+  @override
+  String get submitRating => 'إرسال التقييم';
+
+  @override
+  String get ratingSuccess => 'شكراً لتقييمك!';
+
+  @override
+  String get driverDetails => 'تفاصيل السائق';
+
+  @override
+  String get callDriver => 'اتصال';
+
+  @override
+  String get chatDriver => 'مراسلة';
+
+  @override
+  String etaDistance(String distance, String eta) {
+    return 'المسافة: $distance كم • الوصول: $eta دقيقة';
+  }
+
+  @override
+  String driverRating(String rating) {
+    return 'تقييم السائق: $rating';
+  }
+
+  @override
+  String get ratingFailed => 'فشل حفظ التقييم. حاول مجدداً.';
+
+  @override
+  String get ratingRequired => 'يرجى تحديد التقييم بالنجوم';
 }

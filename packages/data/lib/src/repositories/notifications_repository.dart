@@ -2,21 +2,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
-import '../datasources/remote_datasource.dart';
-import '../datasources/local_datasource.dart';
-import '../models/notification_model.dart';
+import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/notification_model.dart';
 
-/// Concrete implementation of NotificationsRepository using Remote and Local data sources.
+/// Concrete implementation of NotificationsRepository using Remote data source.
 @LazySingleton(as: NotificationsRepository)
 class NotificationsRepositoryImpl implements NotificationsRepository {
-  final RemoteDatasource _remoteDatasource;
-  final LocalDatasource _localDatasource;
-
   NotificationsRepositoryImpl({
     required RemoteDatasource remoteDatasource,
-    required LocalDatasource localDatasource,
-  })  : _remoteDatasource = remoteDatasource,
-        _localDatasource = localDatasource;
+  }) : _remoteDatasource = remoteDatasource;
+  final RemoteDatasource _remoteDatasource;
 
   @override
   Future<Either<Failure, List<AppNotification>>> getMyNotifications({

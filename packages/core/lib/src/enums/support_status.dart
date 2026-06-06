@@ -1,4 +1,4 @@
-import '../utils/string_utils.dart';
+import 'package:sayr_core/src/utils/string_utils.dart';
 
 /// Support request status.
 enum SupportStatus {

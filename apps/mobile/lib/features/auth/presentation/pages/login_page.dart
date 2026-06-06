@@ -1,25 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/login_form_cubit.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-import '../../../../l10n/app_localizations.dart';
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
-import '../bloc/auth_state.dart';
-
-class LoginPage extends StatefulWidget {
+/// Page containing the login form for user authentication.
+class LoginPage extends StatelessWidget {
+  /// Creates a [LoginPage].
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => LoginFormCubit(),
+      child: const _LoginView(),
+    );
+  }
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginView extends StatefulWidget {
+  const _LoginView();
+
+  @override
+  State<_LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<_LoginView> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -49,16 +62,14 @@ class _LoginPageState extends State<LoginPage> {
             if (state is AuthError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.failure.message ?? 'خطأ غير معروف'),
+                  content: Text(state.failure.message ?? l10n.unknownError),
                   backgroundColor: AppColors.error,
                 ),
               );
             } else if (state is AuthPasswordResetEmailSent) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(
-                    'تم إرسال رابط استعادة كلمة المرور إلى ${state.email}',
-                  ),
+                  content: Text(l10n.passwordResetLinkSent(state.email)),
                 ),
               );
             } else if (state is AuthAuthenticated) {
@@ -97,48 +108,49 @@ class _LoginPageState extends State<LoginPage> {
                       prefixIcon: Icons.email_outlined,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'البريد مطلوب';
+                          return l10n.validationEmailRequired;
                         }
-                        if (!value.contains('@')) {
-                          return 'بريد غير صحيح';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    AppTextField(
-                      label: l10n.password,
-                      hint: l10n.passwordHint,
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      prefixIcon: Icons.lock_outline,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'كلمة المرور مطلوبة';
-                        }
-                        if (value.length < 6) {
-                          return 'كلمة المرور قصيرة جداً';
+                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                            .hasMatch(value.trim())) {
+                          return l10n.validationEmailInvalid;
                         }
                         return null;
                       },
                     ),
-                    const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(height: AppSpacing.md),
+                    BlocBuilder<LoginFormCubit, bool>(
+                      builder: (context, obscurePassword) {
+                        return AppTextField(
+                          label: l10n.password,
+                          hint: l10n.passwordHint,
+                          controller: _passwordController,
+                          obscureText: obscurePassword,
+                          prefixIcon: Icons.lock_outline,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscurePassword
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                            ),
+                            onPressed: () => context
+                                .read<LoginFormCubit>()
+                                .toggleVisibility(),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return l10n.validationPasswordRequired;
+                            }
+                            return null;
+                          },
+                        );
+                      },
+                    ),
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: TextButton(
-                        onPressed: isLoading ? null : _showPasswordResetDialog,
+                        onPressed: isLoading
+                            ? null
+                            : () => context.push('/reset-password'),
                         child: Text(l10n.forgotPassword),
                       ),
                     ),
@@ -148,33 +160,15 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: isLoading ? null : _submit,
                       isLoading: isLoading,
                     ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Row(
-                      children: [
-                        const Expanded(child: Divider()),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                          ),
-                          child: Text(
-                            l10n.orContinueWith,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ),
-                        const Expanded(child: Divider()),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    SecondaryButton(
-                      label: l10n.loginWithGoogle,
-                      icon: Icons.g_mobiledata,
+                    const SizedBox(height: AppSpacing.md),
+                    OutlinedButton.icon(
                       onPressed: isLoading
                           ? null
-                          : () {
-                              context
-                                  .read<AuthBloc>()
-                                  .add(const AuthGoogleSignInRequested());
-                            },
+                          : () => context
+                              .read<AuthBloc>()
+                              .add(const AuthGoogleSignInRequested()),
+                      icon: const Icon(Icons.g_mobiledata, size: 32),
+                      label: Text(l10n.loginWithGoogle),
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     Row(
@@ -195,57 +189,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _showPasswordResetDialog() async {
-    final controller = TextEditingController(
-      text: _emailController.text.trim(),
-    );
-    final formKey = GlobalKey<FormState>();
-
-    final email = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('استعادة كلمة المرور'),
-          content: Form(
-            key: formKey,
-            child: AppTextField(
-              label: 'البريد الإلكتروني',
-              hint: 'example@sayr.app',
-              controller: controller,
-              keyboardType: TextInputType.emailAddress,
-              prefixIcon: Icons.email_outlined,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'البريد مطلوب';
-                }
-                if (!value.contains('@')) {
-                  return 'بريد غير صحيح';
-                }
-                return null;
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () {
-                if (!formKey.currentState!.validate()) return;
-                Navigator.of(context).pop(controller.text.trim());
-              },
-              child: const Text('إرسال'),
-            ),
-          ],
-        );
-      },
-    );
-
-    controller.dispose();
-    if (email == null || !mounted) return;
-    context.read<AuthBloc>().add(AuthPasswordResetRequested(email));
   }
 }
