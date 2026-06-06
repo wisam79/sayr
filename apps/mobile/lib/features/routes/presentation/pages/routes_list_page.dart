@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
@@ -39,8 +40,28 @@ class _RoutesListPageState extends State<RoutesListPage> {
       body: BlocBuilder<RoutesBloc, RoutesState>(
         builder: (context, state) {
           return switch (state) {
-            RoutesInitial() || RoutesLoading() => LoadingWidget(
-                message: l10n.loading,
+            RoutesInitial() || RoutesLoading() => Skeletonizer(
+                enabled: true,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                  itemCount: 3,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, index) {
+                    return RouteCard(
+                      title: 'Baghdad University Campus Route',
+                      startLocation: 'Karrada District Baghdad',
+                      endLocation: 'Al-Jadriya Campus University',
+                      availableSeats: 10,
+                      capacity: 25,
+                      formattedPrice: '5,000 IQD',
+                      hasSeats: true,
+                      availableLabel: l10n.available,
+                      completedLabel: l10n.full,
+                      onTap: () {},
+                    );
+                  },
+                ),
               ),
             RoutesError(:final failure) => AppErrorWidget(
                 message: failure.message ?? l10n.error,

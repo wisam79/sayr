@@ -23,6 +23,7 @@ dependencies:
   flutter_bloc: ^8.1.6
   flutter_localizations:
     sdk: flutter
+  flutter_slidable: ^3.1.1
   flutter_svg: ^2.0.10
   fpdart: ^1.1.0
   freezed_annotation: ^3.0.0
@@ -35,6 +36,7 @@ dependencies:
   intl: ^0.20.2
   latlong2: ^0.9.1
   logger: ^2.4.0
+  lottie: ^3.1.2
   maplibre_gl: ^0.22.0
   package_info_plus: ^8.0.2
   permission_handler: ^11.3.1
