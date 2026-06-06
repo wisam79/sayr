@@ -14,9 +14,10 @@ interface EmergencyPayload {
 /**
  * Triggered when a student submits an emergency report.
  * 1) Verifies student's authentication JWT
- * 2) Creates the report row
- * 3) Notifies all admins via push notification (FCM)
- * 4) Returns the report ID + notified admin count
+ * 2) Validates the trip belongs to the student and is active
+ * 3) Validates coordinate range and rate-limits
+ * 4) Creates the report row
+ * 5) Notifies all admins via push notification (FCM)
  */
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -74,8 +75,61 @@ Deno.serve(async (req) => {
       });
     }
 
+    // NEW: Validate coordinate range
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      return new Response(JSON.stringify({ error: 'invalid coordinates' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabase = createAdminClient();
 
+    // NEW: Verify trip exists and matches routeId
+    const { data: trip } = await supabase
+      .from('trips')
+      .select('id, route_id, status')
+      .eq('id', tripId)
+      .single();
+
+    if (!trip || trip.route_id !== routeId) {
+      return new Response(
+        JSON.stringify({ error: 'forbidden: trip not found or route mismatch' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // NEW: Verify the student has an active subscription for this route
+    const { data: sub } = await supabase
+      .from('subscriptions')
+      .select('id')
+      .eq('student_id', studentId)
+      .eq('route_id', routeId)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!sub) {
+      return new Response(
+        JSON.stringify({ error: 'forbidden: no active subscription for this route' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // NEW: Rate limit: max 1 emergency report per 5 minutes per user
+    const { count } = await supabase
+      .from('emergency_reports')
+      .select('id', { count: 'exact' })
+      .eq('user_id', studentId)
+      .gte('created_at', new Date(Date.now() - 5 * 60 * 1000).toISOString());
+
+    if (count && count >= 1) {
+      return new Response(
+        JSON.stringify({ error: 'rate limited: one emergency report per 5 minutes allowed' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create emergency report
     const { data: report, error: insertError } = await supabase
       .from('emergency_reports')
       .insert({
@@ -92,7 +146,7 @@ Deno.serve(async (req) => {
 
     // Notify admins
     const adminQuery = await supabase.from('profiles').select('id').eq('role', 'admin');
-    const admins = adminQuery.data ?? [];
+    const admins = (adminQuery.data ?? []).filter((a: { id: string }) => a.id);
 
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -111,9 +165,9 @@ Deno.serve(async (req) => {
               title: 'Emergency Alert!',
               body: description || 'A student has reported an emergency.',
               data: {
-                studentId,
-                routeId,
-                tripId,
+                studentId: studentId,
+                routeId: routeId,
+                tripId: tripId,
                 lat: String(lat),
                 lng: String(lng),
               },
@@ -141,3 +195,4 @@ Deno.serve(async (req) => {
     });
   }
 });
+

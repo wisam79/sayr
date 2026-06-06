@@ -1,5 +1,6 @@
 import { createAdminClient } from '../_shared/supabase.ts';
 import { corsHeaders } from '../_shared/cors.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 interface ReportParams {
   driverId: string;
@@ -8,8 +9,8 @@ interface ReportParams {
 }
 
 /**
- * Admin-only cron function (or callable) to generate a driver's
- * trip + earnings + payout summary.
+ * Admin-only function to generate a driver's trip + earnings + payout summary.
+ * Requires a valid admin JWT token.
  */
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -17,6 +18,39 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'unauthorized: missing header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify JWT and extract admin role from the token
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const { data: { user }, error: authError } = await userClient.auth.getUser();
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'unauthorized: invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Verify admin role from app_metadata (server-controlled)
+    const role = user.app_metadata?.role;
+    if (role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'forbidden: admin only' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { driverId, startDate, endDate }: ReportParams = await req.json();
 
     if (!driverId) {
@@ -28,7 +62,6 @@ Deno.serve(async (req) => {
 
     const supabase = createAdminClient();
 
-    // Rely on the SQL view/function for aggregation (does not exist yet in schema)
     const { data, error } = await supabase.rpc('get_driver_stats', {
       p_driver_id: driverId,
       p_start_date: startDate ?? null,

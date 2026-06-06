@@ -1,4 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { createAdminClient } from '../_shared/supabase.ts';
 import { corsHeaders } from '../_shared/cors.ts';
 
@@ -56,25 +55,8 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createAdminClient();
-
-    // Get user's FCM token from profiles (not a separate devices table)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('fcm_token')
-      .eq('id', userId)
-      .not('fcm_token', 'is', null)
-      .single();
-
-    if (!profile?.fcm_token) {
-      return new Response(
-        JSON.stringify({ skipped: true, reason: 'no fcm token' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    // Send via Firebase Admin SDK (HTTP v1 API)
     const firebaseProjectId = Deno.env.get('FIREBASE_PROJECT_ID');
     const firebaseServiceAccount = Deno.env.get('FIREBASE_SERVICE_ACCOUNT');
-    const supabase = createAdminClient();
 
     // Get user's FCM tokens from push_tokens table (supports multiple active devices)
     const { data: tokens, error: tokensError } = await supabase

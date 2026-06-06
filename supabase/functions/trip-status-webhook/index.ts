@@ -6,13 +6,13 @@ interface TripWebhookPayload {
   status: 'arrive' | 'start' | 'complete' | 'cancel' | 'mark_absent';
   lat?: number;
   lng?: number;
-  driverToken: string; // simple shared secret
+  driverId: string; // UUID of the driver assigned to this trip (REQUIRED)
 }
 
 /**
  * External webhook for driver app / third-party tracking.
- * Validates a shared secret, then calls the SQL RPC which enforces
- * FSM transitions (trip_state_machine) via the `update_trip_status` function.
+ * Validates a shared secret AND verifies the driver actually owns this trip,
+ * then calls the SQL RPC which enforces FSM transitions.
  */
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
 
   try {
     const payload: TripWebhookPayload = await req.json();
-    const { tripId, status, lat, lng } = payload;
+    const { tripId, status, lat, lng, driverId } = payload;
 
     const expected = Deno.env.get('DRIVER_WEBHOOK_SECRET');
     const clientSecret = req.headers.get('x-driver-secret');
@@ -33,14 +33,36 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!tripId || !status) {
-      return new Response(JSON.stringify({ error: 'tripId, status required' }), {
+    if (!tripId || !status || !driverId) {
+      return new Response(JSON.stringify({ error: 'tripId, status, driverId required' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const supabase = createAdminClient();
+
+    // CRITICAL: Verify the driver actually owns this trip before touching it.
+    // Prevents a single leaked webhook secret from controlling ALL trips.
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('id, driver_id')
+      .eq('id', tripId)
+      .single();
+
+    if (tripError || !trip) {
+      return new Response(JSON.stringify({ error: 'trip not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (trip.driver_id !== driverId) {
+      return new Response(JSON.stringify({ error: 'forbidden: driver mismatch' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const statusMap: Record<string, string> = {
       'arrive': 'driver_waiting',
