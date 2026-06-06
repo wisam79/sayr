@@ -36,4 +36,4 @@ jobs:
 
       # Verify database status and that all migrations applied successfully
       - name: Verify Database Status
-        run: supabase db status
+        run: supabase status
