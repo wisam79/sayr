@@ -14,7 +14,8 @@ import {
   Moon,
   Menu,
   X,
-  Wallet
+  Wallet,
+  Radio
 } from 'lucide-react';
 import './AdminLayout.css';
 
@@ -50,6 +51,7 @@ export const AdminLayout: React.FC = () => {
     { path: '/', label: 'لوحة الإحصائيات', icon: LayoutDashboard },
     { path: '/users', label: 'الطلاب والسائقين', icon: Users },
     { path: '/routes', label: 'إدارة الخطوط', icon: Map },
+    { path: '/trips', label: 'تتبع الرحلات النشطة', icon: Radio },
     { path: '/licenses', label: 'حزم تراخيص الاشتراك', icon: QrCode },
     { path: '/payments', label: 'تأكيد المدفوعات اليدوية', icon: CheckSquare },
     { path: '/payouts', label: 'مستحقات ومحافظ السائقين', icon: Wallet },

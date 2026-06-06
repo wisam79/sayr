@@ -12,6 +12,7 @@ import { PaymentsList } from './pages/PaymentsList';
 import { PayoutsManager } from './pages/PayoutsManager';
 import { EmergencyAlerts } from './pages/EmergencyAlerts';
 import { AppConfig } from './pages/AppConfig';
+import { ActiveTripsTracker } from './pages/ActiveTripsTracker';
 
 // Route guard checking authentication and admin permissions
 const PrivateRoute: React.FC<{ children: React.ReactElement }> = ({ children }) => {
@@ -61,6 +62,7 @@ export const App: React.FC = () => {
               <Route index element={<DashboardOverview />} />
               <Route path="users" element={<UsersList />} />
               <Route path="routes" element={<RoutesOverview />} />
+              <Route path="trips" element={<ActiveTripsTracker />} />
               <Route path="licenses" element={<LicenseBatches />} />
               <Route path="payments" element={<PaymentsList />} />
               <Route path="payouts" element={<PayoutsManager />} />
