@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sayr_mobile/core/services/osrm_service.dart';
 
 class MockDio extends Mock implements Dio {}
+
 class MockResponse extends Mock implements Response<Map<String, dynamic>> {}
 
 void main() {
@@ -37,7 +38,8 @@ void main() {
         ],
       });
 
-      when(() => mockDio.get<Map<String, dynamic>>(any())).thenAnswer((_) async => response);
+      when(() => mockDio.get<Map<String, dynamic>>(any()))
+          .thenAnswer((_) async => response);
 
       final route = await osrmService.getRoute(start, end);
 
@@ -49,7 +51,8 @@ void main() {
       expect(route.last.longitude, 44.0);
     });
 
-    test('getRoute returns straight line fallback on API failure or timeout', () async {
+    test('getRoute returns straight line fallback on API failure or timeout',
+        () async {
       const start = LatLng(33.5, 44.5);
       const end = LatLng(33.0, 44.0);
 

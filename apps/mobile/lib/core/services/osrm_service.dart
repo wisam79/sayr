@@ -19,14 +19,16 @@ class OsrmService {
   @visibleForTesting
   set dioInstance(Dio value) => _dio = value;
 
-  static const String _baseUrl = 'https://router.project-osrm.org/route/v1/driving';
+  static const String _baseUrl =
+      'https://router.project-osrm.org/route/v1/driving';
 
   /// Queries the OSRM driving route API and returns the geometry as a list of [LatLng].
   ///
   /// Falls back to a straight line [start, end] on failure or timeout.
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     try {
-      final url = '$_baseUrl/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson';
+      final url =
+          '$_baseUrl/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson';
       final response = await _dio.get<Map<String, dynamic>>(url);
 
       if (response.statusCode == 200 && response.data != null) {
