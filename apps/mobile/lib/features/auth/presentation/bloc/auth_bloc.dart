@@ -101,8 +101,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(const AuthUnauthenticated());
           return;
         }
-        final isComplete =
-            user.phone != null && user.institutionId != null;
+        final isComplete = user.phone != null && user.institutionId != null;
         if (isComplete) {
           emit(AuthAuthenticated(user));
         } else {

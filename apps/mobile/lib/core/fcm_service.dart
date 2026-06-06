@@ -147,7 +147,8 @@ class FcmService {
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
-        final platform = Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
+        final platform =
+            Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
         bloc.add(NotificationRegisterTokenRequested(
           fcmToken: token,
           platform: platform,
@@ -156,7 +157,8 @@ class FcmService {
 
       // Also listen to token refresh events.
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-        final platform = Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
+        final platform =
+            Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
         bloc.add(NotificationRegisterTokenRequested(
           fcmToken: newToken,
           platform: platform,

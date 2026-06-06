@@ -39,29 +39,27 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
     // Pre-compute the S-road paths and cache their metrics to avoid
     // expensive repeated calls to computeMetrics() inside paint().
-    _pathMetricsLeft =
-        (Path()
-              ..moveTo(256, 256)
-              ..lineTo(208, 220)
-              ..arcToPoint(
-                const Offset(256, 76),
-                radius: const Radius.circular(80),
-              )
-              ..lineTo(512, 76))
-            .computeMetrics()
-            .toList();
+    _pathMetricsLeft = (Path()
+          ..moveTo(256, 256)
+          ..lineTo(208, 220)
+          ..arcToPoint(
+            const Offset(256, 76),
+            radius: const Radius.circular(80),
+          )
+          ..lineTo(512, 76))
+        .computeMetrics()
+        .toList();
 
-    _pathMetricsRight =
-        (Path()
-              ..moveTo(256, 256)
-              ..lineTo(304, 292)
-              ..arcToPoint(
-                const Offset(256, 436),
-                radius: const Radius.circular(80),
-              )
-              ..lineTo(0, 436))
-            .computeMetrics()
-            .toList();
+    _pathMetricsRight = (Path()
+          ..moveTo(256, 256)
+          ..lineTo(304, 292)
+          ..arcToPoint(
+            const Offset(256, 436),
+            radius: const Radius.circular(80),
+          )
+          ..lineTo(0, 436))
+        .computeMetrics()
+        .toList();
 
     // Entry animation — 1.2s: fast enough to feel snappy,
     // long enough for the S-road to draw impressively.
@@ -203,7 +201,6 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
               );
             },
           ),
-
         ],
       ),
     );

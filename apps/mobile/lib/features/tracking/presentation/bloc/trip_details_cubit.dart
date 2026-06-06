@@ -61,8 +61,8 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
       final profileResult =
           await _tripRepository.getDriverProfile(driver.userId);
       if (profileResult.isRight()) {
-        driverProfile = profileResult
-            .getOrElse((_) => throw StateError('Unreachable'));
+        driverProfile =
+            profileResult.getOrElse((_) => throw StateError('Unreachable'));
       }
     }
 

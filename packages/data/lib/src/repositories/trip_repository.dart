@@ -234,7 +234,8 @@ class TripRepositoryImpl implements TripRepository {
   @override
   Future<Either<Failure, User>> getDriverProfile(UserId userId) async {
     try {
-      final response = await _remoteDatasource.fetchCurrentProfile(userId.value);
+      final response =
+          await _remoteDatasource.fetchCurrentProfile(userId.value);
       if (response == null) {
         return const Left<Failure, User>(NotFoundFailure(resource: 'profile'));
       }

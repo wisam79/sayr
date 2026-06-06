@@ -517,7 +517,8 @@ void main() {
         when(() => mockRemote.getDriverById('driver-123'))
             .thenAnswer((_) async => mockDriverJson);
 
-        final result = await repository.getDriverById(const DriverId('driver-123'));
+        final result =
+            await repository.getDriverById(const DriverId('driver-123'));
 
         expect(result.isRight(), true);
         result.fold(
@@ -534,7 +535,8 @@ void main() {
         when(() => mockRemote.getDriverById('driver-123'))
             .thenAnswer((_) async => null);
 
-        final result = await repository.getDriverById(const DriverId('driver-123'));
+        final result =
+            await repository.getDriverById(const DriverId('driver-123'));
 
         expect(result.isLeft(), true);
         result.fold(
@@ -559,7 +561,8 @@ void main() {
         when(() => mockRemote.fetchCurrentProfile('user-123'))
             .thenAnswer((_) async => mockProfileJson);
 
-        final result = await repository.getDriverProfile(const UserId('user-123'));
+        final result =
+            await repository.getDriverProfile(const UserId('user-123'));
 
         expect(result.isRight(), true);
         result.fold(
@@ -614,7 +617,8 @@ void main() {
         );
       });
 
-      test('returns Left(UnauthorizedFailure) when not authenticated', () async {
+      test('returns Left(UnauthorizedFailure) when not authenticated',
+          () async {
         when(() => mockRemote.currentUser).thenReturn(null);
 
         final result = await repository.submitRating(

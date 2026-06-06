@@ -48,8 +48,7 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (_, curr) =>
-          curr is AuthAuthenticated || curr is AuthError,
+      listenWhen: (_, curr) => curr is AuthAuthenticated || curr is AuthError,
       listener: (context, state) {
         if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +82,9 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
                       const SizedBox(height: 20),
                       Text(
                         l10n.completeProfileTitle,
-                        style: Theme.of(context).textTheme.headlineSmall
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                         textAlign: TextAlign.center,
                       ),

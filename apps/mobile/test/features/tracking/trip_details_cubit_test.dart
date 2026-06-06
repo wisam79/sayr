@@ -6,6 +6,7 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/trip_details_cubit.dart';
 
 class MockRouteRepository extends Mock implements RouteRepository {}
+
 class MockTripRepository extends Mock implements TripRepository {}
 
 void main() {

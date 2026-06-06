@@ -26,13 +26,13 @@ jobs:
         with:
           version: latest
 
-      # Verify migration files structure and syntax (Lint)
-      - name: Verify Migration Files
-        run: supabase db lint
-
       # Start local Supabase using Docker (pre-installed on runner)
       - name: Start Supabase Local Stack
         run: supabase start
+
+      # Verify migration files structure and syntax (Lint)
+      - name: Verify Migration Files
+        run: supabase db lint
 
       # Verify database status and that all migrations applied successfully
       - name: Verify Database Status

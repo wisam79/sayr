@@ -75,7 +75,8 @@ class _SayrMapState extends State<SayrMap> {
         final existingSymbol = _symbols[id];
         if (existingSymbol != null) {
           if (existingSymbol.options.geometry != marker.position ||
-              existingSymbol.options.iconImage != (marker.iconImage ?? 'bus-icon') ||
+              existingSymbol.options.iconImage !=
+                  (marker.iconImage ?? 'bus-icon') ||
               existingSymbol.options.iconSize != (marker.iconSize ?? 0.08)) {
             await controller.updateSymbol(
               existingSymbol,
@@ -98,7 +99,8 @@ class _SayrMapState extends State<SayrMap> {
         }
       }
 
-      final idsToRemove = _symbols.keys.where((id) => !activeIds.contains(id)).toList();
+      final idsToRemove =
+          _symbols.keys.where((id) => !activeIds.contains(id)).toList();
       for (final id in idsToRemove) {
         final symbol = _symbols.remove(id);
         if (symbol != null) {
