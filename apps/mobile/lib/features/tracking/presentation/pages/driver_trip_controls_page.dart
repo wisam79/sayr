@@ -36,6 +36,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   StreamSubscription<geo.Position>? _positionSubscription;
   Timer? _bleOtpTimer;
   String? _currentOtp;
+  geo.Position? _lastSentPosition;
+  DateTime? _lastSentTime;
 
   @override
   void initState() {
@@ -119,7 +121,48 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
         geo.Geolocator.getPositionStream(locationSettings: _locationSettings)
             .listen(
       (position) {
-        if (mounted) {
+        if (!mounted) return;
+
+        final now = DateTime.now();
+        bool shouldUpdate = false;
+
+        if (_lastSentPosition == null || _lastSentTime == null) {
+          shouldUpdate = true;
+        } else {
+          final distance = geo.Geolocator.distanceBetween(
+            _lastSentPosition!.latitude,
+            _lastSentPosition!.longitude,
+            position.latitude,
+            position.longitude,
+          );
+
+          // Update if moved more than 20 meters
+          if (distance >= 20) {
+            shouldUpdate = true;
+          }
+
+          // Update if heading changes by more than 15 degrees
+          // Only evaluate when moving (>1 m/s) to prevent static GPS jitter from triggering updates
+          if (position.heading != 0 &&
+              _lastSentPosition!.heading != 0 &&
+              position.speed > 1) {
+            final hDiff =
+                (position.heading - _lastSentPosition!.heading).abs() % 360;
+            final actualDiff = hDiff > 180 ? 360 - hDiff : hDiff;
+            if (actualDiff >= 15) {
+              shouldUpdate = true;
+            }
+          }
+
+          // Fallback: Send a heartbeat update every 3 minutes if stationary
+          if (now.difference(_lastSentTime!) >= const Duration(minutes: 3)) {
+            shouldUpdate = true;
+          }
+        }
+
+        if (shouldUpdate) {
+          _lastSentPosition = position;
+          _lastSentTime = now;
           context.read<TrackingBloc>().add(
                 TrackingUpdateLocation(
                   tripId: tripId,
@@ -136,6 +179,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
     _positionSubscription?.cancel();
     _positionSubscription = null;
     _locationSettings = null;
+    _lastSentPosition = null;
+    _lastSentTime = null;
   }
 
   @override
@@ -226,7 +271,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
             return const SizedBox.shrink();
           }
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsetsDirectional.only(bottom: 12),
             child: EmergencySosButton(tripId: tripId, routeId: routeId),
           );
         },

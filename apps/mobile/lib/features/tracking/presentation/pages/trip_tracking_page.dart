@@ -228,7 +228,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
             return const SizedBox.shrink();
           }
           return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsetsDirectional.only(bottom: 12),
             child: EmergencySosButton(tripId: tripId, routeId: routeId),
           );
         },
@@ -324,8 +324,7 @@ class _TrackingView extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     child: Padding(
                       padding: const EdgeInsets.all(AppSpacing.lg),
-                      child:
-                          BlocBuilder<TripDetailsCubit, TripDetailsState>(
+                      child: BlocBuilder<TripDetailsCubit, TripDetailsState>(
                         builder: (context, detailsState) {
                           final route = detailsState is TripDetailsLoaded
                               ? detailsState.route
@@ -354,8 +353,7 @@ class _TrackingView extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         color: AppColors.primary
                                             .withValues(alpha: 0.08),
-                                        borderRadius:
-                                            BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
                                         formatDurationAr(trip.duration!),
@@ -381,8 +379,7 @@ class _TrackingView extends StatelessWidget {
                                 label: route?.startLocation ?? l10n.start,
                               ),
                               const Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 10),
+                                padding: EdgeInsets.symmetric(horizontal: 10),
                                 child: SizedBox(
                                   height: 12,
                                   child: VerticalDivider(
@@ -394,8 +391,7 @@ class _TrackingView extends StatelessWidget {
                               LocationTile(
                                 icon: Icons.location_on,
                                 color: AppColors.error,
-                                label:
-                                    route?.endLocation ?? l10n.destination,
+                                label: route?.endLocation ?? l10n.destination,
                               ),
                               const SizedBox(height: AppSpacing.lg),
                               Divider(
