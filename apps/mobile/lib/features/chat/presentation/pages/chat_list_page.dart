@@ -20,15 +20,18 @@ class ChatListPage extends StatefulWidget {
 }
 
 class _ChatListPageState extends State<ChatListPage> {
+  late final ChatListBloc _bloc;
+
   @override
   void initState() {
     super.initState();
-    context.read<ChatListBloc>().add(const ChatListLoadRequested());
+    _bloc = context.read<ChatListBloc>();
+    _bloc.add(const ChatListLoadRequested());
   }
 
   @override
   void dispose() {
-    context.read<ChatListBloc>().add(const ChatListClosed());
+    _bloc.add(const ChatListClosed());
     super.dispose();
   }
 

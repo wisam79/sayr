@@ -76,7 +76,6 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                 subtitle: l10n.noSubscriptionsSubtitle,
                 action: PrimaryButton(
                   label: l10n.activateLicense,
-                  icon: Icons.add,
                   isExpanded: false,
                   onPressed: () => context.push('/activate-license'),
                 ),

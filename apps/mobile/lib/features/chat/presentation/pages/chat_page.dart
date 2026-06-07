@@ -25,6 +25,7 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  late final ChatBloc _chatBloc;
   String? _currentUserId;
 
   @override
@@ -32,12 +33,13 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     final authRepo = context.read<AuthRepository>();
     _currentUserId = authRepo.currentUser?.id.value;
-    context.read<ChatBloc>().add(ChatStarted(widget.conversationId));
+    _chatBloc = context.read<ChatBloc>();
+    _chatBloc.add(ChatStarted(widget.conversationId));
   }
 
   @override
   void dispose() {
-    context.read<ChatBloc>().add(const ChatClosed());
+    _chatBloc.add(const ChatClosed());
     _textController.dispose();
     _scrollController.dispose();
     super.dispose();
