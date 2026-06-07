@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
@@ -30,16 +31,33 @@ class EmergencySosButton extends StatelessWidget {
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
         title: Text(l10n.sendEmergency),
-        content: Text(l10n.emergencyConfirmMessage),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(l10n.emergencyConfirmMessage),
+            const SizedBox(height: AppSpacing.lg),
+            SwipeButton.expand(
+              thumb: const Icon(
+                Icons.double_arrow_rounded,
+                color: Colors.white,
+              ),
+              activeThumbColor: AppColors.error,
+              activeTrackColor: AppColors.error.withValues(alpha: 0.1),
+              child: Text(
+                l10n.sendEmergency,
+                style: const TextStyle(
+                  color: AppColors.error,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onSwipe: () => Navigator.of(ctx).pop(true),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.sendEmergency),
           ),
         ],
       ),

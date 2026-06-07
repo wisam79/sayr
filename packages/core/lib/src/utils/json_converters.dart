@@ -122,6 +122,22 @@ EmergencyReportId? nullableEmergencyReportIdFromJson(String? json) =>
     json != null ? EmergencyReportId(json) : null;
 String? nullableEmergencyReportIdToJson(EmergencyReportId? id) => id?.value;
 
+// BoardingId
+BoardingId boardingIdFromJson(String json) => BoardingId(json);
+String boardingIdToJson(BoardingId id) => id.value;
+
+BoardingId? nullableBoardingIdFromJson(String? json) =>
+    json != null ? BoardingId(json) : null;
+String? nullableBoardingIdToJson(BoardingId? id) => id?.value;
+
+// BoardingTokenId
+BoardingTokenId boardingTokenIdFromJson(String json) => BoardingTokenId(json);
+String boardingTokenIdToJson(BoardingTokenId id) => id.value;
+
+BoardingTokenId? nullableBoardingTokenIdFromJson(String? json) =>
+    json != null ? BoardingTokenId(json) : null;
+String? nullableBoardingTokenIdToJson(BoardingTokenId? id) => id?.value;
+
 // Coordinates
 Coordinates coordinatesFromJson(Map<String, dynamic> json) => Coordinates(
       latitude: (json['latitude'] as num).toDouble(),

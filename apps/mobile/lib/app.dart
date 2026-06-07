@@ -9,7 +9,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
-import 'package:sayr_mobile/core/app_bloc_observer.dart';
+import 'package:talker_bloc_logger/talker_bloc_logger.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 import 'package:sayr_mobile/core/fcm_service.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
@@ -200,7 +201,9 @@ Future<void> runSayrApp() async {
   ).start();
 
   // Set up bloc observer
-  Bloc.observer = AppBlocObserver();
+  Bloc.observer = TalkerBlocObserver(
+    talker: sl<Talker>(),
+  );
 
   // Set up router
   final router = AppRouter();

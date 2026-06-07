@@ -94,6 +94,15 @@ abstract class DataRepositoriesModule {
         remoteDatasource: remote,
       );
 
+  /// Provides the singleton instance of [BoardingRepository].
+  @lazySingleton
+  BoardingRepository boardingRepository(
+    RemoteDatasource remote,
+  ) =>
+      BoardingRepositoryImpl(
+        remoteDatasource: remote,
+      );
+
   /// Provides the singleton instance of [SecureStorageService].
   @lazySingleton
   SecureStorageService get secureStorageService => SecureStorageService();

@@ -17,7 +17,11 @@ class SayrMap extends StatefulWidget {
     this.markers = const [],
     this.routePoints,
     this.myLocationEnabled = false,
+    this.useCluster = false,
   });
+
+  /// Whether to use marker clustering.
+  final bool useCluster;
 
   /// The initial camera position.
   final CameraPosition? initialCameraPosition;
@@ -48,6 +52,7 @@ class _SayrMapState extends State<SayrMap> {
   MapLibreMapController? _controller;
   final Map<String, Symbol> _symbols = {};
   Line? _routeLine;
+  bool _sourceAdded = false;
 
   @override
   void initState() {
@@ -103,56 +108,169 @@ class _SayrMapState extends State<SayrMap> {
     final controller = _controller;
     if (controller == null) return;
 
-    try {
-      final activeIds = <String>{};
+    if (widget.useCluster) {
+      try {
+        // Remove individual symbol markers if any exist
+        final idsToRemove = _symbols.keys.toList();
+        for (final id in idsToRemove) {
+          final symbol = _symbols.remove(id);
+          if (symbol != null) {
+            await controller.removeSymbol(symbol);
+          }
+        }
 
-      for (var i = 0; i < widget.markers.length; i++) {
-        final marker = widget.markers[i];
-        final id = marker.id ?? 'marker_$i';
-        activeIds.add(id);
+        final geojson = _buildGeoJson(widget.markers);
 
-        final existingSymbol = _symbols[id];
-        if (existingSymbol != null) {
-          if (existingSymbol.options.geometry != marker.position ||
-              existingSymbol.options.iconImage !=
-                  (marker.iconImage ?? 'bus-icon') ||
-              existingSymbol.options.iconSize != (marker.iconSize ?? 0.08)) {
-            await controller.updateSymbol(
-              existingSymbol,
+        if (!_sourceAdded) {
+          await controller.addSource(
+            'markers-source',
+            GeojsonSourceProperties(
+              data: geojson,
+              cluster: true,
+              clusterMaxZoom: 14,
+              clusterRadius: 50,
+            ),
+          );
+
+          // 1. Cluster circle layer
+          await controller.addCircleLayer(
+            'markers-source',
+            'clusters-circle',
+            const CircleLayerProperties(
+              circleColor: [
+                'step',
+                ['get', 'point_count'],
+                '#3B82F6',
+                5,
+                '#F59E0B',
+                15,
+                '#EF4444'
+              ],
+              circleRadius: [
+                'step',
+                ['get', 'point_count'],
+                20.0,
+                5,
+                25.0,
+                15,
+                30.0
+              ],
+            ),
+            filter: ['has', 'point_count'],
+          );
+
+          // 2. Cluster text labels layer
+          await controller.addSymbolLayer(
+            'markers-source',
+            'clusters-label',
+            const SymbolLayerProperties(
+              textField: '{point_count}',
+              textSize: 12.0,
+              textColor: '#FFFFFF',
+              textIgnorePlacement: true,
+              textAllowOverlap: true,
+            ),
+            filter: ['has', 'point_count'],
+          );
+
+          // 3. Unclustered points layer (actual buses)
+          await controller.addSymbolLayer(
+            'markers-source',
+            'unclustered-points',
+            const SymbolLayerProperties(
+              iconImage: '{icon}',
+              iconSize: 0.08,
+              iconAllowOverlap: true,
+            ),
+            filter: [
+              '!',
+              ['has', 'point_count']
+            ],
+          );
+
+          _sourceAdded = true;
+        } else {
+          await controller.setGeoJsonSource('markers-source', geojson);
+        }
+      } catch (e) {
+        // The source manager or channel may not be initialized yet.
+        // Retry in the next frame to prevent runtime crashes.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(_syncMarkers());
+        });
+      }
+    } else {
+      try {
+        final activeIds = <String>{};
+
+        for (var i = 0; i < widget.markers.length; i++) {
+          final marker = widget.markers[i];
+          final id = marker.id ?? 'marker_$i';
+          activeIds.add(id);
+
+          final existingSymbol = _symbols[id];
+          if (existingSymbol != null) {
+            if (existingSymbol.options.geometry != marker.position ||
+                existingSymbol.options.iconImage !=
+                    (marker.iconImage ?? 'bus-icon') ||
+                existingSymbol.options.iconSize != (marker.iconSize ?? 0.08)) {
+              await controller.updateSymbol(
+                existingSymbol,
+                SymbolOptions(
+                  geometry: marker.position,
+                  iconImage: marker.iconImage ?? 'bus-icon',
+                  iconSize: marker.iconSize ?? 0.08,
+                ),
+              );
+            }
+          } else {
+            final symbol = await controller.addSymbol(
               SymbolOptions(
                 geometry: marker.position,
                 iconImage: marker.iconImage ?? 'bus-icon',
                 iconSize: marker.iconSize ?? 0.08,
               ),
             );
+            _symbols[id] = symbol;
           }
-        } else {
-          final symbol = await controller.addSymbol(
-            SymbolOptions(
-              geometry: marker.position,
-              iconImage: marker.iconImage ?? 'bus-icon',
-              iconSize: marker.iconSize ?? 0.08,
-            ),
-          );
-          _symbols[id] = symbol;
         }
-      }
 
-      final idsToRemove =
-          _symbols.keys.where((id) => !activeIds.contains(id)).toList();
-      for (final id in idsToRemove) {
-        final symbol = _symbols.remove(id);
-        if (symbol != null) {
-          await controller.removeSymbol(symbol);
+        final idsToRemove =
+            _symbols.keys.where((id) => !activeIds.contains(id)).toList();
+        for (final id in idsToRemove) {
+          final symbol = _symbols.remove(id);
+          if (symbol != null) {
+            await controller.removeSymbol(symbol);
+          }
         }
+      } catch (e) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(_syncMarkers());
+        });
       }
-    } catch (e) {
-      // The symbol manager or channel may not be initialized yet.
-      // Retry in the next frame to prevent runtime crashes.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(_syncMarkers());
-      });
     }
+  }
+
+  Map<String, dynamic> _buildGeoJson(List<SayrMarker> markers) {
+    return {
+      'type': 'FeatureCollection',
+      'features': markers.map((marker) {
+        return {
+          'type': 'Feature',
+          'geometry': {
+            'type': 'Point',
+            'coordinates': [
+              marker.position.longitude,
+              marker.position.latitude
+            ],
+          },
+          'properties': {
+            'id': marker.id,
+            'icon': marker.iconImage ?? 'bus-icon',
+          },
+        };
+      }).toList(),
+    };
   }
 
   @override

@@ -81,6 +81,7 @@ void main() {
         return RoutesBloc(routeRepository: mockRepo);
       },
       act: (bloc) => bloc.add(const RoutesSearchRequested('Basra')),
+      wait: const Duration(milliseconds: 500),
       expect: () => [
         isA<RoutesLoading>(),
         isA<RoutesLoaded>(),
@@ -98,6 +99,7 @@ void main() {
         return RoutesBloc(routeRepository: mockRepo);
       },
       act: (bloc) => bloc.add(const RoutesSearchRequested('xyz')),
+      wait: const Duration(milliseconds: 500),
       expect: () => [
         isA<RoutesLoading>(),
         isA<RoutesError>(),
@@ -113,6 +115,7 @@ void main() {
         return RoutesBloc(routeRepository: mockRepo);
       },
       act: (bloc) => bloc.add(const RoutesSearchRequested('')),
+      wait: const Duration(milliseconds: 500),
       expect: () => [
         isA<RoutesLoading>(),
         isA<RoutesLoaded>(),
@@ -128,6 +131,7 @@ void main() {
         return RoutesBloc(routeRepository: mockRepo);
       },
       act: (bloc) => bloc.add(const RoutesSearchRequested('   ')),
+      wait: const Duration(milliseconds: 500),
       expect: () => [
         isA<RoutesLoading>(),
         isA<RoutesLoaded>(),
@@ -143,6 +147,7 @@ void main() {
         return RoutesBloc(routeRepository: mockRepo);
       },
       act: (bloc) => bloc.add(const RoutesSearchRequested('  Basra  ')),
+      wait: const Duration(milliseconds: 500),
       verify: (_) => verify(() => mockRepo.search('Basra')).called(1),
     );
   });

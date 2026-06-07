@@ -8,6 +8,8 @@ import 'package:sayr_mobile/features/auth/presentation/pages/onboarding_page.dar
 import 'package:sayr_mobile/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/signup_page.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/splash_page.dart';
+import 'package:sayr_mobile/features/boarding/presentation/pages/boarding_qr_page.dart';
+import 'package:sayr_mobile/features/boarding/presentation/pages/boarding_scanner_page.dart';
 import 'package:sayr_mobile/features/chat/presentation/pages/chat_list_page.dart';
 import 'package:sayr_mobile/features/chat/presentation/pages/chat_page.dart';
 import 'package:sayr_mobile/features/home/presentation/pages/home_page.dart';
@@ -161,6 +163,19 @@ class AppRouter {
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
+        path: '/boarding',
+        name: 'boarding',
+        builder: (context, state) => const BoardingQrPage(),
+      ),
+      GoRoute(
+        path: '/driver-trip/:tripId/boarding',
+        name: 'driver-boarding',
+        builder: (context, state) {
+          final tripId = TripId(state.pathParameters['tripId']!);
+          return BoardingScannerPage(tripId: tripId);
+        },
       ),
     ],
     errorBuilder: (context, state) =>

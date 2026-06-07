@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:stream_transform/stream_transform.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
@@ -11,7 +13,13 @@ class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
       : _routeRepository = routeRepository,
         super(const RoutesInitial()) {
     on<RoutesLoadRequested>(_onLoadRequested);
-    on<RoutesSearchRequested>(_onSearchRequested);
+    on<RoutesSearchRequested>(
+      _onSearchRequested,
+      transformer: (events, mapper) => restartable<RoutesSearchRequested>()(
+        events.debounce(const Duration(milliseconds: 400)),
+        mapper,
+      ),
+    );
   }
 
   final RouteRepository _routeRepository;

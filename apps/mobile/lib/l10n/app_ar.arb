@@ -311,6 +311,36 @@
     }
   },
   "ratingFailed": "فشل حفظ التقييم. حاول مجدداً.",
-  "ratingRequired": "يرجى تحديد التقييم بالنجوم"
+  "ratingRequired": "يرجى تحديد التقييم بالنجوم",
+  "cancelTripConfirm": "إلغاء الرحلة؟",
+  "cancelTripConfirmMessage": "هل أنت متأكد من رغبتك في إلغاء هذه الرحلة؟",
+  "boardingTitle": "الصعود إلى الحافلة",
+  "boardingShowQrToDriver": "اعرض هذا الرمز على السائق عند الصعود",
+  "boardingRotatesAutomatically": "الرمز يتجدد تلقائياً كل دقيقة",
+  "boardingNoActiveTrip": "لا توجد رحلة نشطة حالياً",
+  "boardingNoActiveTripHint": "ستظهر رحلتك هنا عندما يقترب موعدها ويبدأ السائق بالرحلة",
+  "boardingError": "حدث خطأ",
+  "boardingScannerTitle": "مسح صعود الركاب",
+  "boardingToggleFlash": "تشغيل/إطفاء الفلاش",
+  "boardingSwitchCamera": "تبديل الكاميرا",
+  "boardingScanSuccess": "تم صعود {name} بنجاح",
+  "@boardingScanSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "boardingPassengers": "الركاب ({count})",
+  "@boardingPassengers": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "boardingNoPassengersYet": "لم يصعد أحد بعد",
+  "boardingUnknownStudent": "طالب",
+  "scanBoardingQr": "مَسح رمز صعود الحافلة",
+  "boardingNearBus": "أنت بالقرب من الحافلة",
+  "boardingNearBusHint": "اسحب لتسجيل صعودك فوراً",
+  "boardingProximitySuccess": "أهلاً بك على متن الحافلة!",
+  "slideToBoard": "اسحب لتأكيد الصعود"
 }
 

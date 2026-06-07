@@ -13,9 +13,12 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:sayr_core/sayr_core.dart' as _i385;
 import 'package:sayr_data/sayr_data.dart' as _i773;
+import 'package:sayr_mobile/core/services/ble_beacon_service.dart' as _i385;
 import 'package:sayr_mobile/core/services/osrm_service.dart' as _i105;
+import 'package:sayr_mobile/core/talker_service.dart' as _i754;
 import 'package:sayr_mobile/di/data_repositories_module.dart' as _i1014;
 import 'package:sayr_mobile/routing/app_router.dart' as _i290;
+import 'package:talker_flutter/talker_flutter.dart' as _i207;
 
 extension GetItInjectableX on _i174.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -28,8 +31,11 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
+    final talkerModule = _$TalkerModule();
     final dataRepositoriesModule = _$DataRepositoriesModule();
+    gh.lazySingleton<_i385.BleBeaconService>(() => _i385.BleBeaconService());
     gh.lazySingleton<_i105.OsrmService>(() => _i105.OsrmService());
+    gh.lazySingleton<_i207.Talker>(() => talkerModule.talker);
     gh.lazySingleton<_i773.RemoteDatasource>(
         () => dataRepositoriesModule.remoteDatasource);
     gh.lazySingleton<_i773.AppDatabase>(
@@ -45,6 +51,8 @@ extension GetItInjectableX on _i174.GetIt {
         .notificationsRepository(gh<_i773.RemoteDatasource>()));
     gh.lazySingleton<_i385.EmergencyRepository>(() => dataRepositoriesModule
         .emergencyRepository(gh<_i773.RemoteDatasource>()));
+    gh.lazySingleton<_i385.BoardingRepository>(() => dataRepositoriesModule
+        .boardingRepository(gh<_i773.RemoteDatasource>()));
     gh.lazySingleton<_i773.LocalDatasource>(
         () => dataRepositoriesModule.localDatasource(gh<_i773.AppDatabase>()));
     gh.lazySingleton<_i385.AuthRepository>(
@@ -65,5 +73,7 @@ extension GetItInjectableX on _i174.GetIt {
     return this;
   }
 }
+
+class _$TalkerModule extends _i754.TalkerModule {}
 
 class _$DataRepositoriesModule extends _i1014.DataRepositoriesModule {}

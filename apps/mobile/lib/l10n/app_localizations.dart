@@ -1435,6 +1435,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please select a star rating'**
   String get ratingRequired;
+
+  /// No description provided for @cancelTripConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Trip?'**
+  String get cancelTripConfirm;
+
+  /// No description provided for @cancelTripConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this trip?'**
+  String get cancelTripConfirmMessage;
+
+  /// No description provided for @boardingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Board Bus'**
+  String get boardingTitle;
+
+  /// No description provided for @boardingShowQrToDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Show this QR code to the driver at boarding'**
+  String get boardingShowQrToDriver;
+
+  /// No description provided for @boardingRotatesAutomatically.
+  ///
+  /// In en, this message translates to:
+  /// **'Code refreshes automatically every minute'**
+  String get boardingRotatesAutomatically;
+
+  /// No description provided for @boardingNoActiveTrip.
+  ///
+  /// In en, this message translates to:
+  /// **'No active trip right now'**
+  String get boardingNoActiveTrip;
+
+  /// No description provided for @boardingNoActiveTripHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your trip will appear here when it\'s time to board'**
+  String get boardingNoActiveTripHint;
+
+  /// No description provided for @boardingError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get boardingError;
+
+  /// No description provided for @boardingScannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Boarding Pass'**
+  String get boardingScannerTitle;
+
+  /// No description provided for @boardingToggleFlash.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle flash'**
+  String get boardingToggleFlash;
+
+  /// No description provided for @boardingSwitchCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch camera'**
+  String get boardingSwitchCamera;
+
+  /// No description provided for @boardingScanSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Boarded {name} successfully'**
+  String boardingScanSuccess(String name);
+
+  /// No description provided for @boardingPassengers.
+  ///
+  /// In en, this message translates to:
+  /// **'Passengers ({count})'**
+  String boardingPassengers(int count);
+
+  /// No description provided for @boardingNoPassengersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No passengers yet'**
+  String get boardingNoPassengersYet;
+
+  /// No description provided for @boardingUnknownStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get boardingUnknownStudent;
+
+  /// No description provided for @scanBoardingQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Boarding QR'**
+  String get scanBoardingQr;
+
+  /// No description provided for @boardingNearBus.
+  ///
+  /// In en, this message translates to:
+  /// **'You are near the bus'**
+  String get boardingNearBus;
+
+  /// No description provided for @boardingNearBusHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide to board the bus instantly'**
+  String get boardingNearBusHint;
+
+  /// No description provided for @boardingProximitySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome aboard!'**
+  String get boardingProximitySuccess;
+
+  /// No description provided for @slideToBoard.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide to Board'**
+  String get slideToBoard;
 }
 
 class _AppLocalizationsDelegate

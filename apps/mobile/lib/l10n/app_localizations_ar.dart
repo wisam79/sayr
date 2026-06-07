@@ -718,4 +718,70 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ratingRequired => 'يرجى تحديد التقييم بالنجوم';
+
+  @override
+  String get cancelTripConfirm => 'إلغاء الرحلة؟';
+
+  @override
+  String get cancelTripConfirmMessage =>
+      'هل أنت متأكد من رغبتك في إلغاء هذه الرحلة؟';
+
+  @override
+  String get boardingTitle => 'الصعود إلى الحافلة';
+
+  @override
+  String get boardingShowQrToDriver => 'اعرض هذا الرمز على السائق عند الصعود';
+
+  @override
+  String get boardingRotatesAutomatically => 'الرمز يتجدد تلقائياً كل دقيقة';
+
+  @override
+  String get boardingNoActiveTrip => 'لا توجد رحلة نشطة حالياً';
+
+  @override
+  String get boardingNoActiveTripHint =>
+      'ستظهر رحلتك هنا عندما يقترب موعدها ويبدأ السائق بالرحلة';
+
+  @override
+  String get boardingError => 'حدث خطأ';
+
+  @override
+  String get boardingScannerTitle => 'مسح صعود الركاب';
+
+  @override
+  String get boardingToggleFlash => 'تشغيل/إطفاء الفلاش';
+
+  @override
+  String get boardingSwitchCamera => 'تبديل الكاميرا';
+
+  @override
+  String boardingScanSuccess(String name) {
+    return 'تم صعود $name بنجاح';
+  }
+
+  @override
+  String boardingPassengers(int count) {
+    return 'الركاب ($count)';
+  }
+
+  @override
+  String get boardingNoPassengersYet => 'لم يصعد أحد بعد';
+
+  @override
+  String get boardingUnknownStudent => 'طالب';
+
+  @override
+  String get scanBoardingQr => 'مَسح رمز صعود الحافلة';
+
+  @override
+  String get boardingNearBus => 'أنت بالقرب من الحافلة';
+
+  @override
+  String get boardingNearBusHint => 'اسحب لتسجيل صعودك فوراً';
+
+  @override
+  String get boardingProximitySuccess => 'أهلاً بك على متن الحافلة!';
+
+  @override
+  String get slideToBoard => 'اسحب لتأكيد الصعود';
 }

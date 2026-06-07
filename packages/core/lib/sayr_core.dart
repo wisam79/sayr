@@ -2,6 +2,7 @@
 library sayr_core;
 
 export 'src/entities/app_config.dart';
+export 'src/entities/boarding_record.dart';
 export 'src/entities/driver.dart';
 export 'src/entities/emergency_report.dart';
 export 'src/entities/institution.dart';

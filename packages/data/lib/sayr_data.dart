@@ -8,12 +8,14 @@ export 'src/datasources/remote_datasource.dart';
 export 'src/local/app_database.dart';
 export 'src/local/location_queue_dao.dart';
 export 'src/local/tables.dart';
+export 'src/models/boarding_record_model.dart';
 export 'src/models/payment_info.dart';
 export 'src/models/route_model.dart';
 // Models
 export 'src/models/user_model.dart';
 // Repositories
 export 'src/repositories/auth_repository.dart';
+export 'src/repositories/boarding_repository.dart';
 export 'src/repositories/chat_repository.dart';
 export 'src/repositories/emergency_repository.dart';
 export 'src/repositories/notifications_repository.dart';

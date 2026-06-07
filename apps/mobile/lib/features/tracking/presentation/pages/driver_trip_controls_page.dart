@@ -1,11 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/formatting.dart';
+import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
+import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
@@ -30,6 +34,8 @@ class DriverTripControlsPage extends StatefulWidget {
 class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   geo.LocationSettings? _locationSettings;
   StreamSubscription<geo.Position>? _positionSubscription;
+  Timer? _bleOtpTimer;
+  String? _currentOtp;
 
   @override
   void initState() {
@@ -40,7 +46,53 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   @override
   void dispose() {
     _stopLocationTracking();
+    _stopBleProximity();
     super.dispose();
+  }
+
+  String _generateOtp() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final rnd = Random();
+    return String.fromCharCodes(
+      Iterable.generate(6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
+    );
+  }
+
+  void _startBleProximity(TripId tripId) {
+    if (_bleOtpTimer != null) return;
+
+    final bleService = sl<BleBeaconService>();
+    final tripRepo = sl<TripRepository>();
+
+    void updateOtp() async {
+      final otp = _generateOtp();
+      _currentOtp = otp;
+      final expiresAt = DateTime.now().add(const Duration(seconds: 45));
+
+      // Update database
+      await tripRepo.updateBleOtp(
+        tripId: tripId,
+        otp: otp,
+        expiresAt: expiresAt,
+      );
+
+      // Refresh advertising
+      await bleService.startAdvertising(tripId: tripId, otp: otp);
+    }
+
+    // Initial trigger
+    updateOtp();
+
+    // Rotate OTP every 30 seconds
+    _bleOtpTimer =
+        Timer.periodic(const Duration(seconds: 30), (_) => updateOtp());
+  }
+
+  void _stopBleProximity() {
+    _bleOtpTimer?.cancel();
+    _bleOtpTimer = null;
+    _currentOtp = null;
+    sl<BleBeaconService>().stopAdvertising();
   }
 
   Future<void> _startLocationTracking(TripId tripId) async {
@@ -101,9 +153,18 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
       extendBodyBehindAppBar: true,
       body: BlocConsumer<TrackingBloc, TrackingState>(
         listener: (context, state) {
-          if (state is TrackingDriverActive && state.isTrackingLocation) {
-            if (_positionSubscription == null) {
-              _startLocationTracking(state.trip.id);
+          if (state is TrackingDriverActive) {
+            if (state.isTrackingLocation) {
+              if (_positionSubscription == null) {
+                _startLocationTracking(state.trip.id);
+              }
+            }
+            final status = state.trip.status;
+            if (status == TripStatus.driverWaiting ||
+                status == TripStatus.inTransit) {
+              _startBleProximity(state.trip.id);
+            } else {
+              _stopBleProximity();
             }
           } else if (state is TrackingError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -114,6 +175,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
             );
           } else {
             _stopLocationTracking();
+            _stopBleProximity();
           }
         },
         builder: (context, state) {
@@ -314,20 +376,102 @@ class _ActionButtons extends StatelessWidget {
     final actions = validActions.where(_isVisible).toList();
     if (actions.isEmpty) return const SizedBox.shrink();
 
-    return Row(
-      children: actions.map((event) {
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-            child: PrimaryButton(
-              label: _label(event, l10n),
-              icon: _icon(event),
-              onPressed: () => onAction(_buildEvent(event)),
-            ),
-          ),
-        );
-      }).toList(),
+    TripEvent? progressiveAction;
+    for (final event in actions) {
+      if (event != TripEvent.cancel) {
+        progressiveAction = event;
+        break;
+      }
+    }
+    final hasCancel = actions.contains(TripEvent.cancel);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (progressiveAction != null)
+          _buildSwipeButton(context, progressiveAction, l10n),
+        if (progressiveAction != null && hasCancel)
+          const SizedBox(height: AppSpacing.md),
+        if (hasCancel) _buildCancelButton(context, l10n),
+      ],
     );
+  }
+
+  Widget _buildSwipeButton(
+    BuildContext context,
+    TripEvent event,
+    AppLocalizations l10n,
+  ) {
+    final Color color;
+    if (event == TripEvent.arrive) {
+      color = AppColors.secondary;
+    } else if (event == TripEvent.start) {
+      color = AppColors.primary;
+    } else if (event == TripEvent.complete) {
+      color = AppColors.success;
+    } else {
+      color = AppColors.primary;
+    }
+
+    return SwipeButton.expand(
+      thumb: Icon(
+        _icon(event),
+        color: Colors.white,
+      ),
+      activeThumbColor: color,
+      activeTrackColor: color.withValues(alpha: 0.1),
+      child: Text(
+        _label(event, l10n),
+        style: TextStyle(
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      onSwipe: () => onAction(_buildEvent(event)),
+    );
+  }
+
+  Widget _buildCancelButton(BuildContext context, AppLocalizations l10n) {
+    return TextButton.icon(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.error,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+      ),
+      onPressed: () => _confirmCancel(context, l10n),
+      icon: const Icon(Icons.close, size: 20),
+      label: Text(l10n.cancel),
+    );
+  }
+
+  void _confirmCancel(BuildContext context, AppLocalizations l10n) {
+    showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: Text(l10n.cancelTripConfirm),
+        content: Text(l10n.cancelTripConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.no),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.error,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.yes),
+          ),
+        ],
+      ),
+    ).then((confirmed) {
+      if (confirmed ?? false) {
+        onAction(_buildEvent(TripEvent.cancel));
+      }
+    });
   }
 
   bool _isVisible(TripEvent event) {

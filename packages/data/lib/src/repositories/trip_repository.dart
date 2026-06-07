@@ -154,6 +154,24 @@ class TripRepositoryImpl implements TripRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> updateBleOtp({
+    required TripId tripId,
+    required String otp,
+    required DateTime expiresAt,
+  }) async {
+    try {
+      await _remoteDatasource.updateTripBleOtp(
+        tripId: tripId.value,
+        otp: otp,
+        expiresAt: expiresAt.toUtc().toIso8601String(),
+      );
+      return const Right<Failure, Unit>(unit);
+    } catch (e) {
+      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> bulkUpdateLocations(
     List<
             ({

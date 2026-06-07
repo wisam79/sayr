@@ -723,4 +723,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ratingRequired => 'Please select a star rating';
+
+  @override
+  String get cancelTripConfirm => 'Cancel Trip?';
+
+  @override
+  String get cancelTripConfirmMessage =>
+      'Are you sure you want to cancel this trip?';
+
+  @override
+  String get boardingTitle => 'Board Bus';
+
+  @override
+  String get boardingShowQrToDriver =>
+      'Show this QR code to the driver at boarding';
+
+  @override
+  String get boardingRotatesAutomatically =>
+      'Code refreshes automatically every minute';
+
+  @override
+  String get boardingNoActiveTrip => 'No active trip right now';
+
+  @override
+  String get boardingNoActiveTripHint =>
+      'Your trip will appear here when it\'s time to board';
+
+  @override
+  String get boardingError => 'Something went wrong';
+
+  @override
+  String get boardingScannerTitle => 'Scan Boarding Pass';
+
+  @override
+  String get boardingToggleFlash => 'Toggle flash';
+
+  @override
+  String get boardingSwitchCamera => 'Switch camera';
+
+  @override
+  String boardingScanSuccess(String name) {
+    return 'Boarded $name successfully';
+  }
+
+  @override
+  String boardingPassengers(int count) {
+    return 'Passengers ($count)';
+  }
+
+  @override
+  String get boardingNoPassengersYet => 'No passengers yet';
+
+  @override
+  String get boardingUnknownStudent => 'Student';
+
+  @override
+  String get scanBoardingQr => 'Scan Boarding QR';
+
+  @override
+  String get boardingNearBus => 'You are near the bus';
+
+  @override
+  String get boardingNearBusHint => 'Slide to board the bus instantly';
+
+  @override
+  String get boardingProximitySuccess => 'Welcome aboard!';
+
+  @override
+  String get slideToBoard => 'Slide to Board';
 }

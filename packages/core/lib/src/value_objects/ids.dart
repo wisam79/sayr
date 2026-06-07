@@ -86,3 +86,13 @@ class NotificationId extends Id {
 class EmergencyReportId extends Id {
   const EmergencyReportId(super.value);
 }
+
+/// A boarding record ID.
+class BoardingId extends Id {
+  const BoardingId(super.value);
+}
+
+/// A boarding token ID.
+class BoardingTokenId extends Id {
+  const BoardingTokenId(super.value);
+}

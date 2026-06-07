@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
+import 'package:sayr_core/src/entities/boarding_record.dart';
 import 'package:sayr_core/src/entities/driver.dart';
 import 'package:sayr_core/src/entities/emergency_report.dart';
 import 'package:sayr_core/src/entities/message.dart';
@@ -108,6 +109,13 @@ abstract class TripRepository {
     required TripId tripId,
     required double lat,
     required double lng,
+  });
+
+  /// Update the trip's BLE OTP.
+  Future<Either<Failure, Unit>> updateBleOtp({
+    required TripId tripId,
+    required String otp,
+    required DateTime expiresAt,
   });
 
   /// Bulk update locations.
@@ -244,4 +252,53 @@ abstract class EmergencyRepository {
 
   /// Resolve (cancel) an active report.
   Future<Either<Failure, Unit>> resolveReport(EmergencyReportId id);
+}
+
+/// Lightweight result for [BoardingRepository.generateBoardingToken].
+class BoardingTokenResult {
+  /// Creates a [BoardingTokenResult].
+  const BoardingTokenResult({
+    required this.token,
+    required this.expiresAt,
+  });
+
+  /// The raw token string to embed in the QR code.
+  final String token;
+
+  /// When this token expires.
+  final DateTime expiresAt;
+}
+
+/// Interface for the QR-based boarding system.
+abstract class BoardingRepository {
+  /// Student side: get the currently active trip ID for one of the student's
+  /// subscribed routes. Returns `null` if no trip is in a boardable state.
+  Future<Either<Failure, TripId?>> getActiveTripForSubscription();
+
+  /// Student side: generate a fresh one-time-use QR token for the given trip.
+  Future<Either<Failure, BoardingTokenResult>> generateBoardingToken(
+    TripId tripId,
+  );
+
+  /// Driver side: validate a scanned token and create a boarding record.
+  Future<Either<Failure, BoardingRecord>> validateBoarding({
+    required String token,
+    required TripId tripId,
+    Coordinates? driverLocation,
+  });
+
+  /// Driver side: list all students who have boarded a trip.
+  Future<Either<Failure, List<BoardingRecord>>> getTripPassengers(
+    TripId tripId,
+  );
+
+  /// Watch the live passenger list for a trip (realtime).
+  Stream<List<BoardingRecord>> watchTripPassengers(TripId tripId);
+
+  /// Student side: validate boarding via BLE proximity using OTP.
+  Future<Either<Failure, BoardingRecord>> validateBoardingViaProximity({
+    required TripId tripId,
+    required String otp,
+    Coordinates? studentLocation,
+  });
 }

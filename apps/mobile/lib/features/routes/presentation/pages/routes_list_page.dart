@@ -37,78 +37,107 @@ class _RoutesListPageState extends State<RoutesListPage> {
               title: Text(l10n.routesTitle),
             )
           : null,
-      body: BlocBuilder<RoutesBloc, RoutesState>(
-        builder: (context, state) {
-          return switch (state) {
-            RoutesInitial() || RoutesLoading() => Skeletonizer(
-                enabled: true,
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                  itemCount: 3,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (context, index) {
-                    return RouteCard(
-                      title: 'Baghdad University Campus Route',
-                      startLocation: 'Karrada District Baghdad',
-                      endLocation: 'Al-Jadriya Campus University',
-                      availableSeats: 10,
-                      capacity: 25,
-                      formattedPrice: '5,000 IQD',
-                      hasSeats: true,
-                      availableLabel: l10n.available,
-                      completedLabel: l10n.full,
-                      onTap: () {},
-                    );
-                  },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.pagePadding,
+              vertical: AppSpacing.sm,
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: l10n.searchRoutes,
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                filled: true,
               ),
-            RoutesError(:final failure) => AppErrorWidget(
-                message: failure.message ?? l10n.error,
-                title: l10n.error,
-                retryLabel: l10n.retry,
-                onRetry: () {
-                  context.read<RoutesBloc>().add(const RoutesLoadRequested());
-                },
-              ),
-            RoutesLoaded(:final routes) when routes.isEmpty => EmptyState(
-                icon: Icons.directions_bus_outlined,
-                title: l10n.noRoutesAvailable,
-                subtitle: l10n.tryAgainLater,
-              ),
-            RoutesLoaded(:final routes) => RefreshIndicator(
-                onRefresh: () async {
-                  context.read<RoutesBloc>().add(const RoutesLoadRequested());
-                },
-                child: ListView.separated(
-                  padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                  itemCount: routes.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (context, index) {
-                    final route = routes[index];
-                    return RouteCard(
-                      title: route.title,
-                      startLocation: route.startLocation,
-                      endLocation: route.endLocation,
-                      availableSeats: route.availableSeats,
-                      capacity: route.capacity,
-                      formattedPrice: route.price.format(),
-                      hasSeats: route.hasSeats,
-                      availableLabel: l10n.available,
-                      completedLabel: l10n.full,
-                      onTap: () {
-                        context.push(
-                          '/route/${route.id.value}',
-                          extra: route,
-                        );
+              onChanged: (query) {
+                context.read<RoutesBloc>().add(RoutesSearchRequested(query));
+              },
+            ),
+          ),
+          Expanded(
+            child: BlocBuilder<RoutesBloc, RoutesState>(
+              builder: (context, state) {
+                return switch (state) {
+                  RoutesInitial() || RoutesLoading() => Skeletonizer(
+                      enabled: true,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                        itemCount: 3,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSpacing.md),
+                        itemBuilder: (context, index) {
+                          return RouteCard(
+                            title: 'Baghdad University Campus Route',
+                            startLocation: 'Karrada District Baghdad',
+                            endLocation: 'Al-Jadriya Campus University',
+                            availableSeats: 10,
+                            capacity: 25,
+                            formattedPrice: '5,000 IQD',
+                            hasSeats: true,
+                            availableLabel: l10n.available,
+                            completedLabel: l10n.full,
+                            onTap: () {},
+                          );
+                        },
+                      ),
+                    ),
+                  RoutesError(:final failure) => AppErrorWidget(
+                      message: failure.message ?? l10n.error,
+                      title: l10n.error,
+                      retryLabel: l10n.retry,
+                      onRetry: () {
+                        context
+                            .read<RoutesBloc>()
+                            .add(const RoutesLoadRequested());
                       },
-                    );
-                  },
-                ),
-              ),
-          };
-        },
+                    ),
+                  RoutesLoaded(:final routes) when routes.isEmpty => EmptyState(
+                      icon: Icons.directions_bus_outlined,
+                      title: l10n.noRoutesAvailable,
+                      subtitle: l10n.tryAgainLater,
+                    ),
+                  RoutesLoaded(:final routes) => RefreshIndicator(
+                      onRefresh: () async {
+                        context
+                            .read<RoutesBloc>()
+                            .add(const RoutesLoadRequested());
+                      },
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                        itemCount: routes.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: AppSpacing.md),
+                        itemBuilder: (context, index) {
+                          final route = routes[index];
+                          return RouteCard(
+                            title: route.title,
+                            startLocation: route.startLocation,
+                            endLocation: route.endLocation,
+                            availableSeats: route.availableSeats,
+                            capacity: route.capacity,
+                            formattedPrice: route.price.format(),
+                            hasSeats: route.hasSeats,
+                            availableLabel: l10n.available,
+                            completedLabel: l10n.full,
+                            onTap: () {
+                              context.push(
+                                '/route/${route.id.value}',
+                                extra: route,
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                };
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

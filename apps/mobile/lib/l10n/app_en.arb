@@ -322,6 +322,36 @@
     }
   },
   "ratingFailed": "Failed to save rating. Try again.",
-  "ratingRequired": "Please select a star rating"
+  "ratingRequired": "Please select a star rating",
+  "cancelTripConfirm": "Cancel Trip?",
+  "cancelTripConfirmMessage": "Are you sure you want to cancel this trip?",
+  "boardingTitle": "Board Bus",
+  "boardingShowQrToDriver": "Show this QR code to the driver at boarding",
+  "boardingRotatesAutomatically": "Code refreshes automatically every minute",
+  "boardingNoActiveTrip": "No active trip right now",
+  "boardingNoActiveTripHint": "Your trip will appear here when it's time to board",
+  "boardingError": "Something went wrong",
+  "boardingScannerTitle": "Scan Boarding Pass",
+  "boardingToggleFlash": "Toggle flash",
+  "boardingSwitchCamera": "Switch camera",
+  "boardingScanSuccess": "Boarded {name} successfully",
+  "@boardingScanSuccess": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "boardingPassengers": "Passengers ({count})",
+  "@boardingPassengers": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "boardingNoPassengersYet": "No passengers yet",
+  "boardingUnknownStudent": "Student",
+  "scanBoardingQr": "Scan Boarding QR",
+  "boardingNearBus": "You are near the bus",
+  "boardingNearBusHint": "Slide to board the bus instantly",
+  "boardingProximitySuccess": "Welcome aboard!",
+  "slideToBoard": "Slide to Board"
 }
 

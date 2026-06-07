@@ -116,7 +116,10 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
       children: [
         Expanded(
           flex: 4,
-          child: SayrMap(markers: markers),
+          child: SayrMap(
+            markers: markers,
+            useCluster: true,
+          ),
         ),
         Expanded(
           flex: 3,
