@@ -49,8 +49,8 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
           listener: (context, state) {
             if (state is LicenseActivated) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('تم تفعيل الترخيص بنجاح!'),
+                SnackBar(
+                  content: Text(l10n.licenseActivated),
                   backgroundColor: AppColors.success,
                 ),
               );
@@ -58,7 +58,7 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
             } else if (state is SubscriptionsError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.failure.message ?? 'فشل التفعيل'),
+                  content: Text(state.failure.message ?? l10n.activationFailed),
                   backgroundColor: AppColors.error,
                 ),
               );
@@ -90,7 +90,7 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     AppTextField(
-                      label: 'كود الترخيص',
+                      label: l10n.licenseCodeLabel,
                       hint: 'A1B2C3D4',
                       controller: _codeController,
                       keyboardType: TextInputType.visiblePassword,
@@ -112,7 +112,7 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
                       prefixIcon: Icons.key,
                       validator: (value) {
                         if (value == null || value.length != 8) {
-                          return 'يجب أن يكون 8 أحرف';
+                          return l10n.licenseCodeValidation;
                         }
                         return null;
                       },

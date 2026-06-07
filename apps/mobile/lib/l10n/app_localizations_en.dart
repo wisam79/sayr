@@ -128,13 +128,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterLicenseCode => 'Enter the 8-character license code';
 
   @override
+  String get licenseCodeLabel => 'License code';
+
+  @override
   String get licenseCodeHint => 'A1B2C3D4';
+
+  @override
+  String get licenseCodeValidation => 'Must be 8 characters';
 
   @override
   String get activate => 'Activate';
 
   @override
   String get licenseActivated => 'License activated successfully!';
+
+  @override
+  String get activationFailed => 'Activation failed';
 
   @override
   String get activeSubscription => 'Active subscription';

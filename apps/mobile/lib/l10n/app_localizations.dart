@@ -332,11 +332,23 @@ abstract class AppLocalizations {
   /// **'Enter the 8-character license code'**
   String get enterLicenseCode;
 
+  /// No description provided for @licenseCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'License code'**
+  String get licenseCodeLabel;
+
   /// No description provided for @licenseCodeHint.
   ///
   /// In en, this message translates to:
   /// **'A1B2C3D4'**
   String get licenseCodeHint;
+
+  /// No description provided for @licenseCodeValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be 8 characters'**
+  String get licenseCodeValidation;
 
   /// No description provided for @activate.
   ///
@@ -349,6 +361,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'License activated successfully!'**
   String get licenseActivated;
+
+  /// No description provided for @activationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Activation failed'**
+  String get activationFailed;
 
   /// No description provided for @activeSubscription.
   ///

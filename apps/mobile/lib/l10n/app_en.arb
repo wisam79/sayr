@@ -49,9 +49,12 @@
 
   "activateLicense": "Activate license",
   "enterLicenseCode": "Enter the 8-character license code",
+  "licenseCodeLabel": "License code",
   "licenseCodeHint": "A1B2C3D4",
+  "licenseCodeValidation": "Must be 8 characters",
   "activate": "Activate",
   "licenseActivated": "License activated successfully!",
+  "activationFailed": "Activation failed",
 
   "activeSubscription": "Active subscription",
   "noActiveSubscription": "No active subscription",

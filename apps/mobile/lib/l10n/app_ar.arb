@@ -48,9 +48,12 @@
 
   "activateLicense": "تفعيل ترخيص",
   "enterLicenseCode": "أدخل كود الترخيص المكون من 8 أحرف",
+  "licenseCodeLabel": "كود الترخيص",
   "licenseCodeHint": "A1B2C3D4",
+  "licenseCodeValidation": "يجب أن يكون 8 أحرف",
   "activate": "تفعيل",
   "licenseActivated": "تم تفعيل الترخيص بنجاح!",
+  "activationFailed": "فشل التفعيل",
 
   "activeSubscription": "اشتراك نشط",
   "noActiveSubscription": "لا يوجد اشتراك نشط",

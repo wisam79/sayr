@@ -128,13 +128,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get enterLicenseCode => 'أدخل كود الترخيص المكون من 8 أحرف';
 
   @override
+  String get licenseCodeLabel => 'كود الترخيص';
+
+  @override
   String get licenseCodeHint => 'A1B2C3D4';
+
+  @override
+  String get licenseCodeValidation => 'يجب أن يكون 8 أحرف';
 
   @override
   String get activate => 'تفعيل';
 
   @override
   String get licenseActivated => 'تم تفعيل الترخيص بنجاح!';
+
+  @override
+  String get activationFailed => 'فشل التفعيل';
 
   @override
   String get activeSubscription => 'اشتراك نشط';
