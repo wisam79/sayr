@@ -1,9 +1,17 @@
 /// Sayr Data - Supabase + Drift layer
 library sayr_data;
 
+export 'src/datasources/auth_remote_datasource.dart';
+export 'src/datasources/boarding_remote_datasource.dart';
+export 'src/datasources/chat_remote_datasource.dart';
+export 'src/datasources/emergency_remote_datasource.dart';
 export 'src/datasources/local_datasource.dart';
+export 'src/datasources/notification_remote_datasource.dart';
 // Datasources
 export 'src/datasources/remote_datasource.dart';
+export 'src/datasources/route_remote_datasource.dart';
+export 'src/datasources/subscription_remote_datasource.dart';
+export 'src/datasources/trip_remote_datasource.dart';
 // Local DB
 export 'src/local/app_database.dart';
 export 'src/local/location_queue_dao.dart';

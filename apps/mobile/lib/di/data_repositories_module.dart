@@ -11,7 +11,26 @@ import 'package:sayr_data/sayr_data.dart';
 abstract class DataRepositoriesModule {
   /// Provides the singleton instance of [RemoteDatasource].
   @lazySingleton
-  RemoteDatasource get remoteDatasource => RemoteDatasourceImpl();
+  RemoteDatasource remoteDatasource(
+    AuthRemoteDatasource auth,
+    ChatRemoteDatasource chat,
+    EmergencyRemoteDatasource emergency,
+    NotificationRemoteDatasource notifications,
+    RouteRemoteDatasource routes,
+    SubscriptionRemoteDatasource subscriptions,
+    TripRemoteDatasource trips,
+    BoardingRemoteDatasource boarding,
+  ) =>
+      RemoteDatasourceImpl(
+        auth: auth,
+        chat: chat,
+        emergency: emergency,
+        notifications: notifications,
+        routes: routes,
+        subscriptions: subscriptions,
+        trips: trips,
+        boarding: boarding,
+      );
 
   /// Provides the singleton instance of [AppDatabase].
   @lazySingleton

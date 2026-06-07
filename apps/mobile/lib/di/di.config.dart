@@ -36,13 +36,22 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i385.BleBeaconService>(() => _i385.BleBeaconService());
     gh.lazySingleton<_i105.OsrmService>(() => _i105.OsrmService());
     gh.lazySingleton<_i207.Talker>(() => talkerModule.talker);
-    gh.lazySingleton<_i773.RemoteDatasource>(
-        () => dataRepositoriesModule.remoteDatasource);
     gh.lazySingleton<_i773.AppDatabase>(
         () => dataRepositoriesModule.appDatabase);
     gh.lazySingleton<_i773.SecureStorageService>(
         () => dataRepositoriesModule.secureStorageService);
     gh.lazySingleton<_i290.AppRouter>(() => _i290.AppRouter());
+    gh.lazySingleton<_i773.RemoteDatasource>(
+        () => dataRepositoriesModule.remoteDatasource(
+              gh<_i773.AuthRemoteDatasource>(),
+              gh<_i773.ChatRemoteDatasource>(),
+              gh<_i773.EmergencyRemoteDatasource>(),
+              gh<_i773.NotificationRemoteDatasource>(),
+              gh<_i773.RouteRemoteDatasource>(),
+              gh<_i773.SubscriptionRemoteDatasource>(),
+              gh<_i773.TripRemoteDatasource>(),
+              gh<_i773.BoardingRemoteDatasource>(),
+            ));
     gh.lazySingleton<_i385.SubscriptionRepository>(() => dataRepositoriesModule
         .subscriptionRepository(gh<_i773.RemoteDatasource>()));
     gh.lazySingleton<_i385.ChatRepository>(() =>
