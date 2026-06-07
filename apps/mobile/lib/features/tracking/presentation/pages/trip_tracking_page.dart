@@ -36,7 +36,8 @@ class TripTrackingPage extends StatelessWidget {
         BlocProvider(
           create: (_) => TripDetailsCubit(
             routeRepository: sl<RouteRepository>(),
-            tripRepository: sl<TripRepository>(),
+            driverRepository: sl<DriverRepository>(),
+            ratingRepository: sl<RatingRepository>(),
           ),
         ),
         BlocProvider(create: (_) => TrackingUiCubit()),

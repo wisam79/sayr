@@ -7,7 +7,9 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/trip_details_cub
 
 class MockRouteRepository extends Mock implements RouteRepository {}
 
-class MockTripRepository extends Mock implements TripRepository {}
+class MockDriverRepository extends Mock implements DriverRepository {}
+
+class MockRatingRepository extends Mock implements RatingRepository {}
 
 void main() {
   setUpAll(() {
@@ -18,7 +20,8 @@ void main() {
   });
 
   late MockRouteRepository mockRouteRepo;
-  late MockTripRepository mockTripRepo;
+  late MockDriverRepository mockDriverRepo;
+  late MockRatingRepository mockRatingRepo;
   late TripDetailsCubit cubit;
 
   const testRoute = Route(
@@ -61,10 +64,12 @@ void main() {
 
   setUp(() {
     mockRouteRepo = MockRouteRepository();
-    mockTripRepo = MockTripRepository();
+    mockDriverRepo = MockDriverRepository();
+    mockRatingRepo = MockRatingRepository();
     cubit = TripDetailsCubit(
       routeRepository: mockRouteRepo,
-      tripRepository: mockTripRepo,
+      driverRepository: mockDriverRepo,
+      ratingRepository: mockRatingRepo,
     );
   });
 
@@ -80,18 +85,19 @@ void main() {
       when(() => mockRouteRepo.getById(any())).thenAnswer(
         (_) async => const Right<Failure, Route>(testRoute),
       );
-      when(() => mockTripRepo.getDriverById(any())).thenAnswer(
+      when(() => mockDriverRepo.getDriverById(any())).thenAnswer(
         (_) async => const Right<Failure, Driver>(testDriver),
       );
-      when(() => mockTripRepo.getDriverProfile(any())).thenAnswer(
+      when(() => mockDriverRepo.getDriverProfile(any())).thenAnswer(
         (_) async => const Right<Failure, User>(testDriverProfile),
       );
-      when(() => mockTripRepo.getTripRating(any())).thenAnswer(
+      when(() => mockRatingRepo.getTripRating(any())).thenAnswer(
         (_) async => Right<Failure, Rating?>(testRating),
       );
       return TripDetailsCubit(
         routeRepository: mockRouteRepo,
-        tripRepository: mockTripRepo,
+        driverRepository: mockDriverRepo,
+        ratingRepository: mockRatingRepo,
       );
     },
     act: (cubit) => cubit.loadTripDetails(
@@ -113,15 +119,16 @@ void main() {
           ServerFailure(message: 'oops'),
         ),
       );
-      when(() => mockTripRepo.getDriverById(any())).thenAnswer(
+      when(() => mockDriverRepo.getDriverById(any())).thenAnswer(
         (_) async => const Right<Failure, Driver>(testDriver),
       );
-      when(() => mockTripRepo.getTripRating(any())).thenAnswer(
+      when(() => mockRatingRepo.getTripRating(any())).thenAnswer(
         (_) async => const Right<Failure, Rating?>(null),
       );
       return TripDetailsCubit(
         routeRepository: mockRouteRepo,
-        tripRepository: mockTripRepo,
+        driverRepository: mockDriverRepo,
+        ratingRepository: mockRatingRepo,
       );
     },
     act: (cubit) => cubit.loadTripDetails(
@@ -140,7 +147,8 @@ void main() {
     build: () {
       return TripDetailsCubit(
         routeRepository: mockRouteRepo,
-        tripRepository: mockTripRepo,
+        driverRepository: mockDriverRepo,
+        ratingRepository: mockRatingRepo,
       );
     },
     seed: () => const TripDetailsLoaded(
@@ -149,7 +157,7 @@ void main() {
     ),
     act: (cubit) {
       when(
-        () => mockTripRepo.submitRating(
+        () => mockRatingRepo.submitRating(
           tripId: any(named: 'tripId'),
           driverId: any(named: 'driverId'),
           rating: any(named: 'rating'),

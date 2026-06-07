@@ -8,20 +8,19 @@ import 'package:sayr_mobile/features/payment/presentation/bloc/payment_bloc.dart
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_event.dart';
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_state.dart';
 
-class MockTripRepository extends Mock implements TripRepository {}
+class MockPaymentRepository extends Mock implements PaymentRepository {}
 
 void main() {
   setUpAll(() {
     registerFallbackValue(const RouteId('fallback'));
-    registerFallbackValue(const TripId('fallback'));
   });
 
-  late MockTripRepository mockRepo;
+  late MockPaymentRepository mockRepo;
   late PaymentBloc bloc;
 
   setUp(() {
-    mockRepo = MockTripRepository();
-    bloc = PaymentBloc(tripRepository: mockRepo);
+    mockRepo = MockPaymentRepository();
+    bloc = PaymentBloc(paymentRepository: mockRepo);
   });
 
   tearDown(() {
@@ -79,7 +78,7 @@ void main() {
         when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
           (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       act: (bloc) => bloc.add(
         const PaymentStartZainCash(
@@ -114,7 +113,7 @@ void main() {
             ServerFailure(message: 'Payment gateway error'),
           ),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       act: (bloc) => bloc.add(
         const PaymentStartZainCash(
@@ -131,7 +130,7 @@ void main() {
 
     blocTest<PaymentBloc, PaymentState>(
       'emits PaymentInitial on reset',
-      build: () => PaymentBloc(tripRepository: mockRepo),
+      build: () => PaymentBloc(paymentRepository: mockRepo),
       act: (bloc) => bloc.add(const PaymentReset()),
       expect: () => [isA<PaymentInitial>()],
     );
@@ -142,7 +141,7 @@ void main() {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
           (_) async => const Right<Failure, PaymentInfo>(completedPayment),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
       act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
@@ -161,7 +160,7 @@ void main() {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
           (_) async => const Right<Failure, PaymentInfo>(failedPayment),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
       act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
@@ -176,7 +175,7 @@ void main() {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
           (_) async => const Right<Failure, PaymentInfo>(expiredPayment),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
       act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
@@ -193,7 +192,7 @@ void main() {
             NetworkFailure(message: 'No connection'),
           ),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
       act: (bloc) => bloc.add(const PaymentPollStatus(paymentId: 'pay-1')),
@@ -206,7 +205,7 @@ void main() {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
           (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
       act: (bloc) async {
@@ -225,7 +224,7 @@ void main() {
         when(() => mockRepo.getPaymentStatus('pay-1')).thenAnswer(
           (_) async => const Right<Failure, PaymentInfo>(testPayment),
         );
-        return PaymentBloc(tripRepository: mockRepo);
+        return PaymentBloc(paymentRepository: mockRepo);
       },
       seed: () => const PaymentAwaitingCompletion(paymentId: 'pay-1'),
       act: (bloc) async {

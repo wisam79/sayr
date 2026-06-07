@@ -1,12 +1,9 @@
 import 'package:fpdart/fpdart.dart';
 
 import 'package:sayr_core/src/entities/boarding_record.dart';
-import 'package:sayr_core/src/entities/driver.dart';
 import 'package:sayr_core/src/entities/emergency_report.dart';
 import 'package:sayr_core/src/entities/message.dart';
 import 'package:sayr_core/src/entities/notification.dart';
-import 'package:sayr_core/src/entities/payment_info.dart';
-import 'package:sayr_core/src/entities/rating.dart';
 import 'package:sayr_core/src/entities/route.dart';
 import 'package:sayr_core/src/entities/subscription.dart';
 import 'package:sayr_core/src/entities/trip.dart';
@@ -129,35 +126,6 @@ abstract class TripRepository {
         locations,
   );
 
-  /// Create a Zain Cash payment.
-  Future<Either<Failure, PaymentInfo>> createPayment({
-    required RouteId routeId,
-    required int amount,
-    required String currency,
-    required String method,
-  });
-
-  /// Get payment status.
-  Future<Either<Failure, PaymentInfo>> getPaymentStatus(
-    String paymentId,
-  );
-
-  /// Fetch driver details.
-  Future<Either<Failure, Driver>> getDriverById(DriverId id);
-
-  /// Fetch user profile (to load name/avatar/phone for contact).
-  Future<Either<Failure, User>> getDriverProfile(UserId userId);
-
-  /// Submit a student rating for a trip.
-  Future<Either<Failure, Rating>> submitRating({
-    required TripId tripId,
-    required DriverId driverId,
-    required int rating,
-    String? comment,
-  });
-
-  /// Get an existing rating for a trip.
-  Future<Either<Failure, Rating?>> getTripRating(TripId tripId);
 }
 
 /// Interface for subscription operations repository.

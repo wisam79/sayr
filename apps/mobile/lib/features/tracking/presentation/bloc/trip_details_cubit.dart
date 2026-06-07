@@ -4,17 +4,19 @@ import 'package:sayr_core/sayr_core.dart';
 
 /// Manages loading of route details for trip tracking page.
 class TripDetailsCubit extends Cubit<TripDetailsState> {
-  /// Creates a [TripDetailsCubit] with the given [routeRepository]
-  /// and [tripRepository].
+  /// Creates a [TripDetailsCubit] with the given repositories.
   TripDetailsCubit({
     required RouteRepository routeRepository,
-    required TripRepository tripRepository,
+    required DriverRepository driverRepository,
+    required RatingRepository ratingRepository,
   })  : _routeRepository = routeRepository,
-        _tripRepository = tripRepository,
+        _driverRepository = driverRepository,
+        _ratingRepository = ratingRepository,
         super(const TripDetailsInitial());
 
   final RouteRepository _routeRepository;
-  final TripRepository _tripRepository;
+  final DriverRepository _driverRepository;
+  final RatingRepository _ratingRepository;
 
   /// Loads the route and driver details for the given [routeId],
   /// [driverId], and [tripId].
@@ -35,8 +37,8 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
     // Load route, driver details, and rating in parallel
     final results = await Future.wait([
       _routeRepository.getById(routeId),
-      _tripRepository.getDriverById(driverId),
-      _tripRepository.getTripRating(tripId),
+      _driverRepository.getDriverById(driverId),
+      _ratingRepository.getTripRating(tripId),
     ]);
 
     final routeResult = results[0] as Either<Failure, Route>;
@@ -59,7 +61,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
       driver = driverResult.getOrElse((_) => throw StateError('Unreachable'));
       // Fetch the driver's profile info (avatar, name, phone)
       final profileResult =
-          await _tripRepository.getDriverProfile(driver.userId);
+          await _driverRepository.getDriverProfile(driver.userId);
       if (profileResult.isRight()) {
         driverProfile =
             profileResult.getOrElse((_) => throw StateError('Unreachable'));
@@ -88,7 +90,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
     final current = state;
     if (current is! TripDetailsLoaded) return false;
 
-    final result = await _tripRepository.submitRating(
+    final result = await _ratingRepository.submitRating(
       tripId: tripId,
       driverId: driverId,
       rating: rating,

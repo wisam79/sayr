@@ -98,9 +98,11 @@ class TripMockLoader extends StatelessWidget {
   Widget _skeletonButtons() {
     return Row(
       children: [
-        Expanded(child: _greyBox(width: double.infinity, height: 48, radius: 12)),
+        Expanded(
+            child: _greyBox(width: double.infinity, height: 48, radius: 12)),
         const SizedBox(width: AppSpacing.md),
-        Expanded(child: _greyBox(width: double.infinity, height: 48, radius: 12)),
+        Expanded(
+            child: _greyBox(width: double.infinity, height: 48, radius: 12)),
       ],
     );
   }

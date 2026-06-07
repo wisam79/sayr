@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Search, Check, X, Star, Calendar, User, Phone, Bus, FileText, Users } from 'lucide-react';
+import { Search, Check, X, Star, Calendar, User, Phone, Bus, FileText, Users, Shield } from 'lucide-react';
 import { useToast } from '../components/Toast';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
@@ -40,7 +40,7 @@ export const UsersList: React.FC = () => {
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'driver'>('all');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'student' | 'driver' | 'admin'>('all');
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
@@ -53,6 +53,15 @@ export const UsersList: React.FC = () => {
   const [inspectingDriver, setInspectingDriver] = useState<Profile | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [ratingsLoading, setRatingsLoading] = useState(false);
+
+  // Promote to Driver Modal State
+  const [driverModalOpen, setDriverModalOpen] = useState(false);
+  const [promotingUser, setPromotingUser] = useState<Profile | null>(null);
+  const [vehicleModel, setVehicleModel] = useState('');
+  const [vehiclePlate, setVehiclePlate] = useState('');
+  const [capacity, setCapacity] = useState('14');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [licenseExpiry, setLicenseExpiry] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -208,6 +217,177 @@ export const UsersList: React.FC = () => {
     setRatings([]);
   };
 
+  const handlePromoteToAdmin = async (profile: Profile) => {
+    setActionLoadingId(profile.id);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: 'admin' })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(u => {
+        if (u.id === profile.id) {
+          return { ...u, role: 'admin' };
+        }
+        return u;
+      }));
+
+      showToast(`تمت ترقية "${profile.full_name || 'المستخدم'}" إلى مسؤول بنجاح`, 'success');
+    } catch (err) {
+      showToast('فشل في الترقية إلى مسؤول', 'error');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const triggerPromoteToAdmin = (profile: Profile) => {
+    setConfirmMessage(`هل أنت متأكد من تعيين "${profile.full_name || 'هذا المستخدم'}" كمسؤول؟ سيحصل على كامل صلاحيات الإدارة.`);
+    setConfirmAction(() => async () => {
+      await handlePromoteToAdmin(profile);
+    });
+    setConfirmOpen(true);
+  };
+
+  const handleDemoteAdmin = async (profile: Profile) => {
+    setActionLoadingId(profile.id);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: 'student' })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(u => {
+        if (u.id === profile.id) {
+          return { ...u, role: 'student' };
+        }
+        return u;
+      }));
+
+      showToast(`تم إلغاء صلاحيات المسؤول للمستخدم "${profile.full_name || 'المستخدم'}"`, 'success');
+    } catch (err) {
+      showToast('فشل في إلغاء صلاحيات المسؤول', 'error');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const triggerDemoteAdmin = (profile: Profile) => {
+    setConfirmMessage(`هل أنت متأكد من إلغاء صلاحيات المسؤول للمستخدم "${profile.full_name || 'هذا المستخدم'}" وتحويله إلى طالب؟`);
+    setConfirmAction(() => async () => {
+      await handleDemoteAdmin(profile);
+    });
+    setConfirmOpen(true);
+  };
+
+  const handleDemoteDriver = async (profile: Profile) => {
+    setActionLoadingId(profile.id);
+    try {
+      // Deleting driver from drivers table.
+      // Trigger sync_driver_role_demotion will automatically update profiles.role = 'student' and raw_app_meta_data.
+      const { error } = await supabase
+        .from('drivers')
+        .delete()
+        .eq('user_id', profile.id);
+
+      if (error) throw error;
+
+      setUsers(prev => prev.map(u => {
+        if (u.id === profile.id) {
+          return { ...u, role: 'student', drivers: null };
+        }
+        return u;
+      }));
+
+      showToast(`تم تنزيل "${profile.full_name || 'المستخدم'}" إلى طالب بنجاح وحذف معلومات المركبة`, 'success');
+    } catch (err) {
+      showToast('فشل في تنزيل السائق إلى طالب', 'error');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const triggerDemoteDriver = (profile: Profile) => {
+    setConfirmMessage(`هل أنت متأكد من تنزيل السائق "${profile.full_name || 'هذا السائق'}" إلى طالب؟ سيتم حذف بيانات مركبته بالكامل.`);
+    setConfirmAction(() => async () => {
+      await handleDemoteDriver(profile);
+    });
+    setConfirmOpen(true);
+  };
+
+  const handlePromoteToDriverSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promotingUser) return;
+
+    setActionLoadingId(promotingUser.id);
+    try {
+      const parsedCapacity = parseInt(capacity, 10);
+      if (isNaN(parsedCapacity) || parsedCapacity <= 0) {
+        showToast('يرجى إدخال حمولة صالحة للمركبة', 'error');
+        return;
+      }
+
+      // Insert into drivers table
+      // Trigger sync_driver_role_promotion will automatically update profiles.role = 'driver' and raw_app_meta_data
+      const { data, error } = await supabase
+        .from('drivers')
+        .insert({
+          user_id: promotingUser.id,
+          vehicle_model: vehicleModel,
+          vehicle_plate: vehiclePlate,
+          capacity: parsedCapacity,
+          license_number: licenseNumber || null,
+          license_expiry: licenseExpiry || null,
+          is_verified: true // Promote with active verification directly
+        })
+        .select();
+
+      if (error) throw error;
+
+      const newDriver = data && data[0];
+
+      setUsers(prev => prev.map(u => {
+        if (u.id === promotingUser.id) {
+          return {
+            ...u,
+            role: 'driver',
+            drivers: {
+              id: newDriver.id,
+              vehicle_model: vehicleModel,
+              vehicle_plate: vehiclePlate,
+              capacity: parsedCapacity,
+              license_number: licenseNumber,
+              is_verified: true,
+              rating: 0,
+              total_trips: 0
+            }
+          };
+        }
+        return u;
+      }));
+
+      showToast(`تمت ترقية "${promotingUser.full_name || 'المستخدم'}" إلى سائق بنجاح`, 'success');
+      setDriverModalOpen(false);
+      setPromotingUser(null);
+      setVehicleModel('');
+      setVehiclePlate('');
+      setCapacity('14');
+      setLicenseNumber('');
+      setLicenseExpiry('');
+    } catch (err: any) {
+      if (err.code === '23505') {
+        showToast('رقم لوحة المركبة مسجل بالفعل لمركبة أخرى', 'error');
+      } else {
+        showToast('فشل في الترقية إلى سائق', 'error');
+      }
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   // Filter logic
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
@@ -252,6 +432,7 @@ export const UsersList: React.FC = () => {
               <option value="all">الكل</option>
               <option value="student">الطلاب</option>
               <option value="driver">السائقين</option>
+              <option value="admin">المسؤولين</option>
             </select>
           </div>
 
@@ -316,8 +497,14 @@ export const UsersList: React.FC = () => {
                   </td>
                   <td>{user.phone || '—'}</td>
                   <td>
-                    <span className={`badge ${user.role === 'driver' ? 'badge-warning' : 'badge-active'}`}>
-                      {user.role === 'driver' ? 'سائق حافلة' : 'طالب'}
+                    <span className={`badge ${
+                      user.role === 'driver' 
+                        ? 'badge-warning' 
+                        : user.role === 'admin' 
+                          ? 'badge-danger' 
+                          : 'badge-active'
+                    }`}>
+                      {user.role === 'driver' ? 'سائق حافلة' : user.role === 'admin' ? 'مسؤول' : 'طالب'}
                     </span>
                   </td>
                   <td>
@@ -338,33 +525,87 @@ export const UsersList: React.FC = () => {
                   </td>
                   <td>{new Date(user.created_at).toLocaleDateString('ar-IQ')}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button
-                        className={`btn ${user.is_verified ? 'btn-secondary' : 'btn-primary'}`}
-                        style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }}
-                        onClick={() => triggerToggleVerification(user)}
-                        disabled={actionLoadingId === user.id}
-                      >
-                        {actionLoadingId === user.id ? 'جاري التعديل...' : (
-                          user.is_verified ? (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--danger)' }}>
-                              <X size={14} /> إلغاء التوثيق
-                            </span>
-                          ) : (
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <Check size={14} /> توثيق الحساب
-                            </span>
-                          )
-                        )}
-                      </button>
-
-                      {user.role === 'driver' && user.drivers && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                      {/* Common Toggle Verification for Student and Driver */}
+                      {user.role !== 'admin' && (
                         <button
-                          className="btn btn-secondary"
-                          style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px', borderColor: 'var(--primary)', color: 'var(--primary)' }}
-                          onClick={() => handleInspectDriver(user)}
+                          className={`btn ${user.is_verified ? 'btn-secondary' : 'btn-primary'}`}
+                          style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px' }}
+                          onClick={() => triggerToggleVerification(user)}
+                          disabled={actionLoadingId === user.id}
                         >
-                          معاينة التقييمات
+                          {actionLoadingId === user.id ? 'جاري التعديل...' : (
+                            user.is_verified ? (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--danger)' }}>
+                                <X size={14} /> إلغاء التوثيق
+                              </span>
+                            ) : (
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Check size={14} /> توثيق الحساب
+                              </span>
+                            )
+                          )}
+                        </button>
+                      )}
+
+                      {/* Student Actions */}
+                      {user.role === 'student' && (
+                        <>
+                          <button
+                            className="btn btn-secondary"
+                            style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px', display: 'flex', alignItems: 'center', gap: '4px', borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                            onClick={() => {
+                              setPromotingUser(user);
+                              setDriverModalOpen(true);
+                            }}
+                            disabled={actionLoadingId === user.id}
+                          >
+                            <Bus size={14} /> ترقية لسائق
+                          </button>
+                          
+                          <button
+                            className="btn btn-secondary"
+                            style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => triggerPromoteToAdmin(user)}
+                            disabled={actionLoadingId === user.id}
+                          >
+                            <Shield size={14} /> تعيين كمسؤول
+                          </button>
+                        </>
+                      )}
+
+                      {/* Driver Actions */}
+                      {user.role === 'driver' && (
+                        <>
+                          {user.drivers && (
+                            <button
+                              className="btn btn-secondary"
+                              style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px', borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                              onClick={() => handleInspectDriver(user)}
+                            >
+                              معاينة التقييمات
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-danger"
+                            style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => triggerDemoteDriver(user)}
+                            disabled={actionLoadingId === user.id}
+                          >
+                            تنزيل لطالب
+                          </button>
+                        </>
+                      )}
+
+                      {/* Admin Actions */}
+                      {user.role === 'admin' && (
+                        <button
+                          className="btn btn-danger"
+                          style={{ height: '32px', fontSize: '0.8rem', padding: '0 12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                          onClick={() => triggerDemoteAdmin(user)}
+                          disabled={actionLoadingId === user.id}
+                        >
+                          <Shield size={14} /> إلغاء المسؤولية
                         </button>
                       )}
                     </div>
@@ -506,9 +747,104 @@ export const UsersList: React.FC = () => {
         </div>
       )}
 
+      {/* Promote to Driver Modal */}
+      {driverModalOpen && promotingUser && (
+        <div className="modal-overlay" onClick={() => { setDriverModalOpen(false); setPromotingUser(null); }}>
+          <div className="modal-content" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>ترقية المستخدم إلى سائق حافلة</h2>
+              <button className="close-btn" onClick={() => { setDriverModalOpen(false); setPromotingUser(null); }}><X size={18} /></button>
+            </div>
+
+            <form onSubmit={handlePromoteToDriverSubmit}>
+              <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto', paddingLeft: '4px', paddingRight: '4px' }}>
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                  أنت تقوم بترقية <strong>{promotingUser.full_name}</strong> إلى سائق. يرجى إدخال تفاصيل المركبة والترخيص أدناه:
+                </p>
+
+                <div className="form-group">
+                  <label className="form-label">موديل ونوع المركبة (مثل: كيا بيستيا 2018)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={vehicleModel}
+                    onChange={(e) => setVehicleModel(e.target.value)}
+                    placeholder="مثال: تويوتا كوستر 2020"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">رقم اللوحة</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    required
+                    value={vehiclePlate}
+                    onChange={(e) => setVehiclePlate(e.target.value)}
+                    placeholder="مثال: 12345 بغداد أ"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">الحمولة القصوى (عدد الركاب)</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    required
+                    min="1"
+                    value={capacity}
+                    onChange={(e) => setCapacity(e.target.value)}
+                    placeholder="مثال: 14"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">رقم رخصة القيادة (اختياري)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={licenseNumber}
+                    onChange={(e) => setLicenseNumber(e.target.value)}
+                    placeholder="مثال: DL-987654"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">تاريخ انتهاء الرخصة (اختياري)</label>
+                  <input
+                    type="date"
+                    className="form-input"
+                    value={licenseExpiry}
+                    onChange={(e) => setLicenseExpiry(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ marginTop: '20px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => { setDriverModalOpen(false); setPromotingUser(null); }}
+                >
+                  إلغاء
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={actionLoadingId === promotingUser.id}
+                >
+                  {actionLoadingId === promotingUser.id ? 'جاري الترقية...' : 'ترقية وتفعيل الحساب'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <ConfirmDialog
         isOpen={confirmOpen}
-        title="تأكيد تعديل التوثيق"
+        title="تأكيد العملية"
         message={confirmMessage}
         variant="danger"
         confirmLabel="نعم، تأكيد"

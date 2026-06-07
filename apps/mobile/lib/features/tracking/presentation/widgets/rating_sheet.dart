@@ -123,7 +123,8 @@ class _RatingSheetState extends State<RatingSheet> {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.12),
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.12),
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(

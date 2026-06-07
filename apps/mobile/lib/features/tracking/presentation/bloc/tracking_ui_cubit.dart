@@ -27,7 +27,8 @@ class TrackingUiState extends Equatable {
   final RouteId? loadedRouteId;
 
   @override
-  List<Object?> get props => [ratingShown, isFetchingRoute, routePoints, loadedRouteId];
+  List<Object?> get props =>
+      [ratingShown, isFetchingRoute, routePoints, loadedRouteId];
 
   TrackingUiState copyWith({
     bool? ratingShown,
@@ -39,7 +40,8 @@ class TrackingUiState extends Equatable {
       ratingShown: ratingShown ?? this.ratingShown,
       isFetchingRoute: isFetchingRoute ?? this.isFetchingRoute,
       routePoints: routePoints != null ? routePoints() : this.routePoints,
-      loadedRouteId: loadedRouteId != null ? loadedRouteId() : this.loadedRouteId,
+      loadedRouteId:
+          loadedRouteId != null ? loadedRouteId() : this.loadedRouteId,
     );
   }
 

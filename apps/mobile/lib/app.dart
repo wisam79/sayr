@@ -92,7 +92,7 @@ class SayrApp extends StatelessWidget {
         ),
         BlocProvider<PaymentBloc>(
           create: (_) => PaymentBloc(
-            tripRepository: sl<TripRepository>(),
+            paymentRepository: sl<PaymentRepository>(),
           ),
         ),
         BlocProvider<LocaleCubit>(

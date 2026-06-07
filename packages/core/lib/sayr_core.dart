@@ -30,6 +30,9 @@ export 'src/fsm/trip_event.dart';
 // FSM
 export 'src/fsm/trip_state_machine.dart';
 // Repositories
+export 'src/repositories/driver_repository.dart';
+export 'src/repositories/payment_repository.dart';
+export 'src/repositories/rating_repository.dart';
 export 'src/repositories/repository_interfaces.dart';
 // Utils
 export 'src/utils/string_utils.dart';

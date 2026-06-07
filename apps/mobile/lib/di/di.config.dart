@@ -62,6 +62,12 @@ extension GetItInjectableX on _i174.GetIt {
         .emergencyRepository(gh<_i773.RemoteDatasource>()));
     gh.lazySingleton<_i385.BoardingRepository>(() => dataRepositoriesModule
         .boardingRepository(gh<_i773.RemoteDatasource>()));
+    gh.lazySingleton<_i385.PaymentRepository>(() =>
+        dataRepositoriesModule.paymentRepository(gh<_i773.RemoteDatasource>()));
+    gh.lazySingleton<_i385.DriverRepository>(() =>
+        dataRepositoriesModule.driverRepository(gh<_i773.RemoteDatasource>()));
+    gh.lazySingleton<_i385.RatingRepository>(() =>
+        dataRepositoriesModule.ratingRepository(gh<_i773.RemoteDatasource>()));
     gh.lazySingleton<_i773.LocalDatasource>(
         () => dataRepositoriesModule.localDatasource(gh<_i773.AppDatabase>()));
     gh.lazySingleton<_i385.AuthRepository>(

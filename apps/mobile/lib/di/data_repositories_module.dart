@@ -122,6 +122,33 @@ abstract class DataRepositoriesModule {
         remoteDatasource: remote,
       );
 
+  /// Provides the singleton instance of [PaymentRepository].
+  @lazySingleton
+  PaymentRepository paymentRepository(
+    RemoteDatasource remote,
+  ) =>
+      PaymentRepositoryImpl(
+        remoteDatasource: remote,
+      );
+
+  /// Provides the singleton instance of [DriverRepository].
+  @lazySingleton
+  DriverRepository driverRepository(
+    RemoteDatasource remote,
+  ) =>
+      DriverRepositoryImpl(
+        remoteDatasource: remote,
+      );
+
+  /// Provides the singleton instance of [RatingRepository].
+  @lazySingleton
+  RatingRepository ratingRepository(
+    RemoteDatasource remote,
+  ) =>
+      RatingRepositoryImpl(
+        remoteDatasource: remote,
+      );
+
   /// Provides the singleton instance of [SecureStorageService].
   @lazySingleton
   SecureStorageService get secureStorageService => SecureStorageService();

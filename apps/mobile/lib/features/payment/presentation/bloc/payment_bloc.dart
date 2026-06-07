@@ -8,10 +8,10 @@ import 'package:sayr_mobile/features/payment/presentation/bloc/payment_state.dar
 
 /// BLoC for the payment flow (Zain Cash).
 class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
-  /// Creates a [PaymentBloc] with the given [tripRepository].
+  /// Creates a [PaymentBloc] with the given [paymentRepository].
   PaymentBloc({
-    required TripRepository tripRepository,
-  })  : _tripRepository = tripRepository,
+    required PaymentRepository paymentRepository,
+  })  : _paymentRepository = paymentRepository,
         super(const PaymentState.initial()) {
     on<PaymentStartZainCash>(_onStartZainCash);
     on<PaymentPollStatus>(_onPollStatus);
@@ -19,7 +19,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     on<PaymentStatusChanged>(_onStatusChanged);
   }
 
-  final TripRepository _tripRepository;
+  final PaymentRepository _paymentRepository;
   StreamSubscription<dynamic>? _pollSubscription;
   bool _isPollingCanceled = false;
 
@@ -35,7 +35,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   ) async {
     emit(const PaymentState.loading(message: 'جاري إنشاء الدفع...'));
 
-    final result = await _tripRepository.createPayment(
+    final result = await _paymentRepository.createPayment(
       routeId: event.routeId,
       amount: event.amount,
       currency: event.currency,
@@ -69,7 +69,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
 
     // Perform initial check synchronously
     final initialResult =
-        await _tripRepository.getPaymentStatus(event.paymentId);
+        await _paymentRepository.getPaymentStatus(event.paymentId);
     if (!isClosed) {
       add(PaymentStatusChanged(result: initialResult));
     }
@@ -79,7 +79,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     // Set up periodic polling
     _pollSubscription = Stream.periodic(
       const Duration(seconds: 3),
-      (_) => _tripRepository.getPaymentStatus(event.paymentId),
+      (_) => _paymentRepository.getPaymentStatus(event.paymentId),
     ).takeWhile((_) => !_isPollingCanceled && !isClosed).listen((result) async {
       final r = await result;
       if (!isClosed && !_isPollingCanceled) {
