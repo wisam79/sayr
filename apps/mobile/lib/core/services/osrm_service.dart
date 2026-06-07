@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 import 'package:flutter/foundation.dart';
@@ -14,6 +15,7 @@ class OsrmService {
   }
 
   Dio _dio;
+  final Logger _logger = Logger();
 
   /// Setter for mock injections in testing.
   @visibleForTesting
@@ -47,8 +49,12 @@ class OsrmService {
           }).toList();
         }
       }
-    } catch (_) {
-      // Return straight line fallback on any API error or timeout
+    } catch (e, st) {
+      _logger.w(
+        'OSRM route request failed; falling back to straight line',
+        error: e,
+        stackTrace: st,
+      );
     }
     return [start, end];
   }

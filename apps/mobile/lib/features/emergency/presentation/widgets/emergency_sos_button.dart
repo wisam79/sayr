@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_state.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+
+final Logger _emergencyLogger = Logger();
 
 /// Floating SOS button. Tapping shows a confirmation dialog before
 /// dispatching [EmergencyTriggered].
@@ -107,7 +110,12 @@ class EmergencySosButton extends StatelessWidget {
         latitude: position.latitude,
         longitude: position.longitude,
       );
-    } catch (_) {
+    } catch (e, st) {
+      _emergencyLogger.w(
+        'Failed to capture location for SOS; proceeding without coords',
+        error: e,
+        stackTrace: st,
+      );
       return null;
     }
   }

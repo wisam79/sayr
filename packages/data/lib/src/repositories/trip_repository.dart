@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
@@ -16,6 +17,7 @@ class TripRepositoryImpl implements TripRepository {
         _localDatasource = localDatasource;
   final RemoteDatasource _remoteDatasource;
   final LocalDatasource _localDatasource;
+  final Logger _logger = Logger();
 
   @override
   Future<Either<Failure, List<Trip>>> getActiveTrips() async {
@@ -25,8 +27,12 @@ class TripRepositoryImpl implements TripRepository {
           response.map((json) => TripModel.fromJson(json).toEntity()).toList();
       try {
         await _localDatasource.cacheTrips(trips);
-      } catch (_) {
-        // Ignore cache write errors
+      } catch (e, st) {
+        _logger.w(
+          'Failed to cache active trips; serving from network only',
+          error: e,
+          stackTrace: st,
+        );
       }
       return Right<Failure, List<Trip>>(trips);
     } catch (e) {
@@ -35,8 +41,12 @@ class TripRepositoryImpl implements TripRepository {
         if (cached.isNotEmpty) {
           return Right<Failure, List<Trip>>(cached);
         }
-      } catch (_) {
-        // Fallback if cache read fails
+      } catch (cacheError, st) {
+        _logger.w(
+          'Failed to read cached trips during offline fallback',
+          error: cacheError,
+          stackTrace: st,
+        );
       }
       return Left<Failure, List<Trip>>(ServerFailure(message: e.toString()));
     }
@@ -85,8 +95,12 @@ class TripRepositoryImpl implements TripRepository {
         final cached = await _localDatasource.getCachedTrips();
         final trip = cached.firstWhere((t) => t.id == id);
         return Right<Failure, Trip>(trip);
-      } catch (_) {
-        // Fallback to original failure if not found in cache
+      } catch (cacheError, st) {
+        _logger.w(
+          'Failed to read cached trip during offline fallback',
+          error: cacheError,
+          stackTrace: st,
+        );
       }
       return Left<Failure, Trip>(ServerFailure(message: e.toString()));
     }

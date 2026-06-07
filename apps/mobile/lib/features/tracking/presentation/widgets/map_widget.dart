@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 import 'package:sayr_mobile/core/map_config.dart';
@@ -53,6 +54,7 @@ class _SayrMapState extends State<SayrMap> {
   final Map<String, Symbol> _symbols = {};
   Line? _routeLine;
   bool _sourceAdded = false;
+  final Logger _logger = Logger();
 
   @override
   void initState() {
@@ -96,8 +98,12 @@ class _SayrMapState extends State<SayrMap> {
           ),
         );
       }
-    } catch (_) {
-      // Retry in the next frame if the controller or layout is not ready
+    } catch (e, st) {
+      _logger.d(
+        'Route line sync failed; retrying on next frame',
+        error: e,
+        stackTrace: st,
+      );
       WidgetsBinding.instance.addPostFrameCallback((_) {
         unawaited(_syncRouteLine());
       });

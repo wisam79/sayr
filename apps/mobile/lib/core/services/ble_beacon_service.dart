@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_ble_peripheral/flutter_ble_peripheral.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 /// Service to handle BLE-based proximity boarding.
@@ -15,6 +16,7 @@ class BleBeaconService {
   BleBeaconService() : _blePeripheral = FlutterBlePeripheral();
 
   final FlutterBlePeripheral _blePeripheral;
+  final Logger _logger = Logger();
   final _discoveredTripsController =
       StreamController<({TripId tripId, String otp})>.broadcast();
   StreamSubscription<List<ScanResult>>? _scanSubscription;
@@ -64,7 +66,13 @@ class BleBeaconService {
     try {
       await _blePeripheral.stop();
       debugPrint('BLE Advertising stopped');
-    } catch (_) {}
+    } catch (e, st) {
+      _logger.d(
+        'BLE stopAdvertising threw (peripheral may already be stopped)',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   /// Starts scanning for nearby Sayr Beacons.
@@ -102,7 +110,14 @@ class BleBeaconService {
               try {
                 final tripId = TripId(tripIdStr);
                 _discoveredTripsController.add((tripId: tripId, otp: otp));
-              } catch (_) {}
+              } catch (e, st) {
+                _logger.d(
+                  'Skipping malformed TripId in BLE advertisement: '
+                  '"$tripIdStr"',
+                  error: e,
+                  stackTrace: st,
+                );
+              }
             }
           }
         }
@@ -124,7 +139,13 @@ class BleBeaconService {
     try {
       await FlutterBluePlus.stopScan();
       debugPrint('BLE Scanning stopped');
-    } catch (_) {}
+    } catch (e, st) {
+      _logger.d(
+        'BLE stopScan threw (scanner may already be stopped)',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   void _startMockAdvertising(TripId tripId, String otp) {

@@ -1,4 +1,5 @@
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:logger/logger.dart';
 import 'package:sayr_data/src/supabase/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -15,6 +16,7 @@ class SayrSupabase {
 
   late supabase.SupabaseClient _client;
   bool _initialized = false;
+  final Logger _logger = Logger();
 
   /// The underlying Supabase client.
   supabase.SupabaseClient get client {
@@ -88,8 +90,12 @@ class SayrSupabase {
       // Force account chooser dialog by signing out from Google client first
       try {
         await googleSignIn.signOut();
-      } catch (_) {
-        // Ignore errors if sign out fails
+      } catch (e, st) {
+        _logger.d(
+          'Google signOut before re-auth failed; proceeding with signIn',
+          error: e,
+          stackTrace: st,
+        );
       }
 
       final googleUser = await googleSignIn.signIn();
@@ -150,8 +156,12 @@ class SayrSupabase {
     await _client.auth.signOut();
     try {
       await GoogleSignIn().signOut();
-    } catch (_) {
-      // Ignore errors if Google Sign-In was not initialized or fails
+    } catch (e, st) {
+      _logger.d(
+        'Google signOut during app signOut failed (likely not initialized)',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 
