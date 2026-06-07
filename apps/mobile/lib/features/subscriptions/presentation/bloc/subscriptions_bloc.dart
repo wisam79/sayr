@@ -52,7 +52,7 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
     if (code == null) {
       emit(
         const SubscriptionsError(
-          ValidationFailure(message: 'كود الترخيص غير صحيح'),
+          ValidationFailure(message: ''),
         ),
       );
       return;

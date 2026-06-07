@@ -357,7 +357,7 @@ class _TrackingView extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Text(
-                                        formatDurationAr(trip.duration!),
+                                        formatDurationAr(l10n, trip.duration!),
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -614,7 +614,7 @@ class _DriverSection extends StatelessWidget {
                       messenger.showSnackBar(
                         SnackBar(
                           content: Text(
-                            failure.message ?? 'فشل بدء المحادثة',
+                            failure.message ?? l10n.failedToStartChat,
                           ),
                           backgroundColor: AppColors.error,
                         ),

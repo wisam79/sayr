@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
@@ -58,7 +59,11 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
             } else if (state is SubscriptionsError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.failure.message ?? l10n.activationFailed),
+                  content: Text(
+                    state.failure is ValidationFailure
+                        ? l10n.invalidLicenseCode
+                        : (state.failure.message ?? l10n.activationFailed),
+                  ),
                   backgroundColor: AppColors.error,
                 ),
               );

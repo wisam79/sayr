@@ -16,7 +16,7 @@ class RouteDetailsCubit extends Cubit<RouteDetailsState> {
     final result = await _routeRepository.getById(routeId);
     result.fold(
       (failure) =>
-          emit(RouteDetailsError(failure.message ?? 'فشل تحميل تفاصيل الخط')),
+          emit(RouteDetailsError(failure.message ?? '')),
       (route) => emit(RouteDetailsLoaded(route)),
     );
   }

@@ -355,6 +355,36 @@
   "boardingNearBus": "You are near the bus",
   "boardingNearBusHint": "Slide to board the bus instantly",
   "boardingProximitySuccess": "Welcome aboard!",
-  "slideToBoard": "Slide to Board"
+  "slideToBoard": "Slide to Board",
+
+  "browsingOffline": "You are currently browsing offline",
+  "directPaymentAmount": "Direct electronic payment of {price}",
+  "@directPaymentAmount": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "failedToStartChat": "Failed to start chat",
+  "invalidLicenseCode": "Invalid license code",
+  "creatingPayment": "Creating payment...",
+  "paymentFailedWithStatus": "Payment failed: {status}",
+  "@paymentFailedWithStatus": {
+    "placeholders": {
+      "status": {"type": "String"}
+    }
+  },
+  "durationHoursMinutes": "{hours} hours {minutes} minutes",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {"type": "int"},
+      "minutes": {"type": "int"}
+    }
+  },
+  "durationMinutesOnly": "{minutes} minutes",
+  "@durationMinutesOnly": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  }
 }
 

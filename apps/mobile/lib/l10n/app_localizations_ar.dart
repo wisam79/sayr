@@ -793,4 +793,36 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get slideToBoard => 'اسحب لتأكيد الصعود';
+
+  @override
+  String get browsingOffline => 'أنت تتصفح حالياً بدون اتصال بالإنترنت';
+
+  @override
+  String directPaymentAmount(String price) {
+    return 'دفع إلكتروني مباشر بقيمة $price';
+  }
+
+  @override
+  String get failedToStartChat => 'فشل بدء المحادثة';
+
+  @override
+  String get invalidLicenseCode => 'كود الترخيص غير صحيح';
+
+  @override
+  String get creatingPayment => 'جاري إنشاء الدفع...';
+
+  @override
+  String paymentFailedWithStatus(String status) {
+    return 'فشل الدفع: $status';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours ساعة $minutes دقيقة';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes دقيقة';
+  }
 }

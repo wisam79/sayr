@@ -66,7 +66,7 @@ class _RouteDetailsContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(state.message),
+                  Text(state.message.isEmpty ? l10n.routeLoadFailed : state.message),
                   const SizedBox(height: AppSpacing.md),
                   if (routeId != null)
                     ElevatedButton(
@@ -241,7 +241,7 @@ class _RouteDetailsBody extends StatelessWidget {
                   ),
                   title: Text(l10n.paymentViaZainCash),
                   subtitle: Text(
-                    'دفع إلكتروني مباشر بقيمة ${route.price.format()}',
+                    l10n.directPaymentAmount(route.price.format()),
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {

@@ -1573,6 +1573,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Slide to Board'**
   String get slideToBoard;
+
+  /// No description provided for @browsingOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are currently browsing offline'**
+  String get browsingOffline;
+
+  /// No description provided for @directPaymentAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct electronic payment of {price}'**
+  String directPaymentAmount(String price);
+
+  /// No description provided for @failedToStartChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start chat'**
+  String get failedToStartChat;
+
+  /// No description provided for @invalidLicenseCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid license code'**
+  String get invalidLicenseCode;
+
+  /// No description provided for @creatingPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating payment...'**
+  String get creatingPayment;
+
+  /// No description provided for @paymentFailedWithStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed: {status}'**
+  String paymentFailedWithStatus(String status);
+
+  /// No description provided for @durationHoursMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours {minutes} minutes'**
+  String durationHoursMinutes(int hours, int minutes);
+
+  /// No description provided for @durationMinutesOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes'**
+  String durationMinutesOnly(int minutes);
 }
 
 class _AppLocalizationsDelegate

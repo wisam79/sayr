@@ -275,7 +275,7 @@ class _OfflineBannerWrapperState extends State<OfflineBannerWrapper> {
       return widget.child;
     }
 
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final l10n = AppLocalizations.of(context);
 
     return Stack(
       children: [
@@ -311,9 +311,7 @@ class _OfflineBannerWrapperState extends State<OfflineBannerWrapper> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        isRtl
-                            ? 'أنت تتصفح حالياً بدون اتصال بالإنترنت'
-                            : 'You are currently browsing offline',
+                        l10n.browsingOffline,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

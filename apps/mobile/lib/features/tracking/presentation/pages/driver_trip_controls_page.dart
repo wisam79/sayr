@@ -35,7 +35,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   geo.LocationSettings? _locationSettings;
   StreamSubscription<geo.Position>? _positionSubscription;
   Timer? _bleOtpTimer;
-  String? _currentOtp;
   geo.Position? _lastSentPosition;
   DateTime? _lastSentTime;
 
@@ -68,7 +67,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
 
     void updateOtp() async {
       final otp = _generateOtp();
-      _currentOtp = otp;
       final expiresAt = DateTime.now().add(const Duration(seconds: 45));
 
       // Update database
@@ -93,7 +91,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   void _stopBleProximity() {
     _bleOtpTimer?.cancel();
     _bleOtpTimer = null;
-    _currentOtp = null;
     sl<BleBeaconService>().stopAdvertising();
   }
 
@@ -369,7 +366,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                               ),
                               const SizedBox(width: AppSpacing.xs),
                               Text(
-                                l10n.duration(formatDurationAr(trip.duration!)),
+                                l10n.duration(formatDurationAr(l10n, trip.duration!)),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium

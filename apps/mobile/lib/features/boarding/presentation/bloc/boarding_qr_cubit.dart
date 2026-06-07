@@ -90,7 +90,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
 
   Timer? _refreshTimer;
   Timer? _tickerTimer;
-  StreamSubscription? _bleSubscription;
+  StreamSubscription<({TripId tripId, String otp})>? _bleSubscription;
   TripId? _activeTripId;
   DateTime? _currentExpiresAt;
 

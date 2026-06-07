@@ -344,6 +344,36 @@
   "boardingNearBus": "أنت بالقرب من الحافلة",
   "boardingNearBusHint": "اسحب لتسجيل صعودك فوراً",
   "boardingProximitySuccess": "أهلاً بك على متن الحافلة!",
-  "slideToBoard": "اسحب لتأكيد الصعود"
+  "slideToBoard": "اسحب لتأكيد الصعود",
+
+  "browsingOffline": "أنت تتصفح حالياً بدون اتصال بالإنترنت",
+  "directPaymentAmount": "دفع إلكتروني مباشر بقيمة {price}",
+  "@directPaymentAmount": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "failedToStartChat": "فشل بدء المحادثة",
+  "invalidLicenseCode": "كود الترخيص غير صحيح",
+  "creatingPayment": "جاري إنشاء الدفع...",
+  "paymentFailedWithStatus": "فشل الدفع: {status}",
+  "@paymentFailedWithStatus": {
+    "placeholders": {
+      "status": {"type": "String"}
+    }
+  },
+  "durationHoursMinutes": "{hours} ساعة {minutes} دقيقة",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {"type": "int"},
+      "minutes": {"type": "int"}
+    }
+  },
+  "durationMinutesOnly": "{minutes} دقيقة",
+  "@durationMinutesOnly": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  }
 }
 

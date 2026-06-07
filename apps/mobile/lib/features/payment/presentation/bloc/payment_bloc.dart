@@ -33,7 +33,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
     PaymentStartZainCash event,
     Emitter<PaymentState> emit,
   ) async {
-    emit(const PaymentState.loading(message: 'جاري إنشاء الدفع...'));
+    emit(const PaymentState.loading());
 
     final result = await _paymentRepository.createPayment(
       routeId: event.routeId,
@@ -113,7 +113,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
           emit(
             PaymentState.failed(
               failure: BusinessRuleFailure(
-                message: 'فشل الدفع: ${payment.status}',
+                message: 'Payment failed: ${payment.status}',
               ),
             ),
           );

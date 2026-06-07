@@ -26,7 +26,9 @@ class FcmService {
     if (_initialized) return;
     _initialized = true;
 
-    // Init awesome_notifications.
+    // NOTE: Channel names/descriptions are Arabic-only because they are set
+    // during init() before the widget tree is available. Android notification
+    // channels are visible in system settings and can't use Flutter l10n here.
     await AwesomeNotifications().initialize(
       null,
       [

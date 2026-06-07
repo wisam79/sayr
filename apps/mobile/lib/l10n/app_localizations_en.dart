@@ -800,4 +800,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get slideToBoard => 'Slide to Board';
+
+  @override
+  String get browsingOffline => 'You are currently browsing offline';
+
+  @override
+  String directPaymentAmount(String price) {
+    return 'Direct electronic payment of $price';
+  }
+
+  @override
+  String get failedToStartChat => 'Failed to start chat';
+
+  @override
+  String get invalidLicenseCode => 'Invalid license code';
+
+  @override
+  String get creatingPayment => 'Creating payment...';
+
+  @override
+  String paymentFailedWithStatus(String status) {
+    return 'Payment failed: $status';
+  }
+
+  @override
+  String durationHoursMinutes(int hours, int minutes) {
+    return '$hours hours $minutes minutes';
+  }
+
+  @override
+  String durationMinutesOnly(int minutes) {
+    return '$minutes minutes';
+  }
 }

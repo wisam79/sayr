@@ -17,7 +17,7 @@ class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
     result.fold(
       (failure) => emit(
         state.copyWith(
-          errorMessage: failure.message ?? 'فشل تحميل الخطوط',
+          errorMessage: failure.message,
         ),
       ),
       (routes) => emit(

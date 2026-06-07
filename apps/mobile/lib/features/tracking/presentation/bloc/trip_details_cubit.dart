@@ -47,7 +47,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
 
     if (routeResult.isLeft()) {
       final msg = routeResult.fold((f) => f.message, (_) => null) ??
-          'فشل تحميل تفاصيل الرحلة';
+          '';
       emit(TripDetailsError(msg));
       return;
     }

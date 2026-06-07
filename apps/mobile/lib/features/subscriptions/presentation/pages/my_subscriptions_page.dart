@@ -59,7 +59,9 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             LicenseActivating() => const LoadingWidget(),
             LicenseActivated() => const LoadingWidget(),
             SubscriptionsError(:final failure) => AppErrorWidget(
-                message: failure.message ?? l10n.errorOccurred,
+                message: failure is ValidationFailure
+                    ? l10n.invalidLicenseCode
+                    : (failure.message ?? l10n.errorOccurred),
                 title: l10n.error,
                 retryLabel: l10n.retry,
                 onRetry: () {
