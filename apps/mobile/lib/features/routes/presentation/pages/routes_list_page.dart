@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// Page responsible for displaying the list of active routes.
 class RoutesListPage extends StatefulWidget {
@@ -63,7 +63,6 @@ class _RoutesListPageState extends State<RoutesListPage> {
               builder: (context, state) {
                 return switch (state) {
                   RoutesInitial() || RoutesLoading() => Skeletonizer(
-                      enabled: true,
                       child: ListView.separated(
                         padding: const EdgeInsets.all(AppSpacing.pagePadding),
                         itemCount: 3,

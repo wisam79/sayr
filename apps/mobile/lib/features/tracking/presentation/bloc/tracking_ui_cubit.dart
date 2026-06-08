@@ -45,7 +45,7 @@ class TrackingUiState extends Equatable {
     );
   }
 
-  static final initial = TrackingUiState();
+  static const initial = TrackingUiState();
 }
 
 /// Manages ephemeral UI state for the trip tracking view.
@@ -77,7 +77,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
         isFetchingRoute: false,
         routePoints: () => points,
         loadedRouteId: () => routeId,
-      ));
+      ),);
     } catch (_) {
       emit(state.copyWith(
         isFetchingRoute: false,
@@ -86,7 +86,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
           LatLng(end.latitude, end.longitude),
         ],
         loadedRouteId: () => routeId,
-      ));
+      ),);
     }
   }
 

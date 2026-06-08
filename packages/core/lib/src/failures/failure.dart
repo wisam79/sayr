@@ -14,7 +14,7 @@ sealed class Failure extends Equatable {
   List<Object?> get props => [message];
 
   @override
-  String toString() => '$runtimeType($message)';
+  String toString() => 'Failure($message)';
 }
 
 /// Network connectivity error.

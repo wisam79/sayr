@@ -93,7 +93,7 @@ class _SayrMapState extends State<SayrMap> {
           LineOptions(
             geometry: points,
             lineColor: '#3B82F6',
-            lineWidth: 5.0,
+            lineWidth: 5,
             lineOpacity: 0.8,
           ),
         );
@@ -134,7 +134,6 @@ class _SayrMapState extends State<SayrMap> {
               data: geojson,
               cluster: true,
               clusterMaxZoom: 14,
-              clusterRadius: 50,
             ),
           );
 
@@ -150,7 +149,7 @@ class _SayrMapState extends State<SayrMap> {
                 5,
                 '#F59E0B',
                 15,
-                '#EF4444'
+                '#EF4444',
               ],
               circleRadius: [
                 'step',
@@ -159,7 +158,7 @@ class _SayrMapState extends State<SayrMap> {
                 5,
                 25.0,
                 15,
-                30.0
+                30.0,
               ],
             ),
             filter: ['has', 'point_count'],
@@ -190,7 +189,7 @@ class _SayrMapState extends State<SayrMap> {
             ),
             filter: [
               '!',
-              ['has', 'point_count']
+              ['has', 'point_count'],
             ],
           );
 
@@ -267,7 +266,7 @@ class _SayrMapState extends State<SayrMap> {
             'type': 'Point',
             'coordinates': [
               marker.position.longitude,
-              marker.position.latitude
+              marker.position.latitude,
             ],
           },
           'properties': {

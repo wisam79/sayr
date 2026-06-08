@@ -11,8 +11,7 @@ abstract class BoardingRecordModel with _$BoardingRecordModel {
     @JsonKey(name: 'trip_id') required String tripId,
     @JsonKey(name: 'subscription_id') required String subscriptionId,
     @JsonKey(name: 'student_id') required String studentId,
-    @JsonKey(name: 'student_name') String? studentName,
-    @JsonKey(name: 'boarded_at') required DateTime boardedAt,
+    @JsonKey(name: 'boarded_at') required DateTime boardedAt, @JsonKey(name: 'student_name') String? studentName,
     @JsonKey(name: 'boarding_method') @Default('qr_scan') String boardingMethod,
   }) = _BoardingRecordModel;
 

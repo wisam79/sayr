@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
@@ -51,12 +51,12 @@ void main() {
     when(() => mockBle.startAdvertising(
           tripId: any(named: 'tripId'),
           otp: any(named: 'otp'),
-        )).thenAnswer((_) async {});
+        ),).thenAnswer((_) async {});
     when(() => mockTripRepo.updateBleOtp(
           tripId: any(named: 'tripId'),
           otp: any(named: 'otp'),
           expiresAt: any(named: 'expiresAt'),
-        )).thenAnswer((_) async => const Right(unit));
+        ),).thenAnswer((_) async => const Right(unit));
 
     GetIt.I.registerFactory<BleBeaconService>(() => mockBle);
     GetIt.I.registerFactory<TripRepository>(() => mockTripRepo);

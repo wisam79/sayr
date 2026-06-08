@@ -12,6 +12,7 @@ class SayrSupabase {
   static SayrSupabase? _instance;
 
   /// The singleton instance.
+  // ignore: prefer_constructors_over_static_methods, singleton getter pattern is preferred over factory in this codebase
   static SayrSupabase get instance => _instance ??= SayrSupabase._();
 
   late supabase.SupabaseClient _client;

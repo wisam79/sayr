@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
@@ -11,7 +13,7 @@ import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 /// The [trip] and [driverName] are required. The sheet calls
 /// [TripDetailsCubit.submitTripRating] on submission.
 class RatingSheet extends StatefulWidget {
-  const RatingSheet({required this.trip, required this.driverName});
+  const RatingSheet({required this.trip, required this.driverName, super.key});
 
   final Trip trip;
   final String driverName;
@@ -143,9 +145,10 @@ class _RatingSheetState extends State<RatingSheet> {
               isLoading: _isSubmitting,
               onPressed: _selectedRating == 0
                   ? null
-                  : () async {
+                    : () async {
                       final messenger = ScaffoldMessenger.of(context);
                       final navigator = Navigator.of(context);
+                      final rootNavigator = Navigator.of(context, rootNavigator: true);
                       final cubit = context.read<TripDetailsCubit>();
 
                       setState(() => _isSubmitting = true);
@@ -157,58 +160,60 @@ class _RatingSheetState extends State<RatingSheet> {
                             ? null
                             : _commentController.text.trim(),
                       );
-                      if (mounted) {
+                      if (context.mounted) {
                         setState(() => _isSubmitting = false);
                         if (success) {
                           navigator.pop();
-                          showDialog<void>(
-                            context: context,
-                            builder: (dialogContext) {
-                              return Dialog(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(AppSpacing.xl),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      SizedBox(
-                                        height: 120,
-                                        width: 120,
-                                        child: Lottie.network(
-                                          'https://lottie.host/7ca67c51-57d4-469b-9861-12c8b74681f2/Z7oH1oWwK8.json',
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return const Icon(
-                                              Icons.check_circle,
-                                              color: AppColors.success,
-                                              size: 80,
-                                            );
-                                          },
-                                          repeat: false,
-                                        ),
-                                      ),
-                                      const SizedBox(height: AppSpacing.lg),
-                                      Text(
-                                        l10n.ratingSuccess,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
+                          unawaited(
+                            showDialog<void>(
+                              context: context,
+                              builder: (dialogContext) {
+                                return Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
                                   ),
-                                ),
-                              );
-                            },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(AppSpacing.xl),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        SizedBox(
+                                          height: 120,
+                                          width: 120,
+                                          child: Lottie.network(
+                                            'https://lottie.host/7ca67c51-57d4-469b-9861-12c8b74681f2/Z7oH1oWwK8.json',
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return const Icon(
+                                                Icons.check_circle,
+                                                color: AppColors.success,
+                                                size: 80,
+                                              );
+                                            },
+                                            repeat: false,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppSpacing.lg),
+                                        Text(
+                                          l10n.ratingSuccess,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           );
                           Future.delayed(const Duration(seconds: 2), () {
-                            if (navigator.mounted) {
-                              Navigator.of(context, rootNavigator: true).pop();
+                            if (rootNavigator.mounted) {
+                              rootNavigator.pop();
                             }
                           });
                         } else {

@@ -9,8 +9,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
-import 'package:talker_bloc_logger/talker_bloc_logger.dart';
-import 'package:talker_flutter/talker_flutter.dart';
 import 'package:sayr_mobile/core/fcm_service.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
@@ -30,6 +28,8 @@ import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_mobile/routing/app_router.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:talker_bloc_logger/talker_bloc_logger.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// Root widget of the Sayr application.
 class SayrApp extends StatelessWidget {
@@ -110,7 +110,7 @@ class SayrApp extends StatelessWidget {
           if (state is AuthAuthenticated) {
             // Register current FCM push token for notifications
             unawaited(FcmService.registerDeviceToken(
-                context.read<NotificationsBloc>()));
+                context.read<NotificationsBloc>(),),);
 
             if (isAuthEntry) {
               router.config.go('/');

@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 void main() {
   final now = DateTime.now();
-  final fixedNow = DateTime(now.year, now.month, now.day, 8, 0, 0);
+  final fixedNow = DateTime(now.year, now.month, now.day, 8);
 
   BoardingToken makeToken({
     DateTime? issuedAt,
@@ -116,7 +116,6 @@ void main() {
         tripId: const TripId('trip-1'),
         subscriptionId: const SubscriptionId('sub-1'),
         studentId: const UserId('user-1'),
-        studentName: null,
         boardedAt: fixedNow,
       );
       expect(record.studentName, isNull);

@@ -3,7 +3,7 @@ import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 /// Skeleton placeholder shown while the tracking stream connects.
 class TripMockLoader extends StatelessWidget {
-  const TripMockLoader();
+  const TripMockLoader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,9 +30,9 @@ class TripMockLoader extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      _greyBox(width: 80, height: 24, radius: 6),
+                      _greyBox(radius: 6),
                       const Spacer(),
-                      _greyBox(width: 50, height: 24, radius: 6),
+                      _greyBox(width: 50, radius: 6),
                     ],
                   ),
                   const SizedBox(height: AppSpacing.md),
@@ -86,11 +86,11 @@ class TripMockLoader extends StatelessWidget {
             children: [
               _greyBox(width: 120),
               const SizedBox(height: 4),
-              _greyBox(width: 80, height: 12),
+              _greyBox(height: 12),
             ],
           ),
         ),
-        _greyBox(width: 40, height: 24, radius: 6),
+        _greyBox(width: 40, radius: 6),
       ],
     );
   }
@@ -99,10 +99,10 @@ class TripMockLoader extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-            child: _greyBox(width: double.infinity, height: 48, radius: 12)),
+            child: _greyBox(width: double.infinity, height: 48, radius: 12),),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-            child: _greyBox(width: double.infinity, height: 48, radius: 12)),
+            child: _greyBox(width: double.infinity, height: 48, radius: 12),),
       ],
     );
   }

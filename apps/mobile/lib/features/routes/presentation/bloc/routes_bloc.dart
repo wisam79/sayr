@@ -1,10 +1,9 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:stream_transform/stream_transform.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
-
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 /// Bloc for fetching and managing routes.
 class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {

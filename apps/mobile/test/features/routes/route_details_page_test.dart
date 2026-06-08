@@ -15,7 +15,7 @@ void main() {
   late MockRouteRepository mockRepo;
   late RouteDetailsCubit detailsCubit;
 
-  final testRoute = const Route(
+  const testRoute = Route(
     id: RouteId('route-1'),
     driverId: DriverId('driver-1'),
     title: 'Baghdad - Basra',
@@ -56,7 +56,7 @@ void main() {
 
   testWidgets('Directly passed Route object renders details correctly',
       (tester) async {
-    await tester.pumpWidget(wrap(RouteDetailsPage(route: testRoute)));
+    await tester.pumpWidget(wrap(const RouteDetailsPage(route: testRoute)));
     await tester.pumpAndSettle();
 
     expect(find.text('Baghdad - Basra'), findsWidgets);
@@ -68,7 +68,7 @@ void main() {
 
   testWidgets('Tapping Subscribe shows Zain Cash and License options sheet',
       (tester) async {
-    await tester.pumpWidget(wrap(RouteDetailsPage(route: testRoute)));
+    await tester.pumpWidget(wrap(const RouteDetailsPage(route: testRoute)));
     await tester.pumpAndSettle();
 
     final subscribeBtn = find.widgetWithText(PrimaryButton, 'اشترك الآن');

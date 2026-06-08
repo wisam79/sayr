@@ -65,7 +65,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
     final bleService = sl<BleBeaconService>();
     final tripRepo = sl<TripRepository>();
 
-    void updateOtp() async {
+    Future<void> updateOtp() async {
       final otp = _generateOtp();
       final expiresAt = DateTime.now().add(const Duration(seconds: 45));
 
@@ -121,7 +121,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
         if (!mounted) return;
 
         final now = DateTime.now();
-        bool shouldUpdate = false;
+        var shouldUpdate = false;
 
         if (_lastSentPosition == null || _lastSentTime == null) {
           shouldUpdate = true;

@@ -35,23 +35,23 @@ void main() {
   });
 
   tearDown(() async {
-    bleController.close();
+    await bleController.close();
     await GetIt.I.reset();
   });
 
   Widget wrap() {
     GetIt.I.registerFactory<BoardingRepository>(() => mockRepo);
     GetIt.I.registerFactory<BleBeaconService>(() => mockBle);
-    return MaterialApp(
-      localizationsDelegates: const [
+    return const MaterialApp(
+      localizationsDelegates: [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: const Locale('ar'),
-      home: const BoardingQrPage(),
+      locale: Locale('ar'),
+      home: BoardingQrPage(),
     );
   }
 

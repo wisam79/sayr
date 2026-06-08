@@ -7,6 +7,10 @@ on:
     branches: [main, develop]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   FLUTTER_VERSION: "3.32.8"
   DART_VERSION: "3.8.1"
@@ -41,11 +45,23 @@ jobs:
       - name: Verify formatting
         run: melos run format:check
 
+      - name: Cache build_runner outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .dart_tool/build/
+            apps/mobile/.dart_tool/build/
+            packages/core/.dart_tool/build/
+            packages/data/.dart_tool/build/
+          key: ${{ runner.os }}-build-runner-${{ hashFiles('**/pubspec.lock', '**/build.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-runner-
+
       - name: Run build_runner
         run: melos run build:runner
 
-      - name: Run analyze
-        run: melos run analyze
+      - name: Run analyze (strict)
+        run: melos run analyze:strict
 
   test:
     name: Test
@@ -68,6 +84,18 @@ jobs:
 
       - name: Bootstrap
         run: melos bootstrap
+
+      - name: Cache build_runner outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .dart_tool/build/
+            apps/mobile/.dart_tool/build/
+            packages/core/.dart_tool/build/
+            packages/data/.dart_tool/build/
+          key: ${{ runner.os }}-build-runner-${{ hashFiles('**/pubspec.lock', '**/build.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-runner-
 
       - name: Run build_runner
         run: melos run build:runner

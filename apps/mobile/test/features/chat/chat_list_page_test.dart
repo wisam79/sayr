@@ -87,8 +87,8 @@ void main() {
 
   testWidgets('shows error body with retry button', (tester) async {
     when(() => mockBloc.state).thenReturn(
-      ChatListState.error(
-        failure: const ServerFailure(message: 'Failed to load'),
+      const ChatListState.error(
+        failure: ServerFailure(message: 'Failed to load'),
       ),
     );
 

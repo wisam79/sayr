@@ -171,7 +171,7 @@ class _InstitutionDropdown extends StatelessWidget {
         }
 
         return DropdownButtonFormField<String>(
-          value: state.selectedInstitutionId,
+          initialValue: state.selectedInstitutionId,
           decoration: InputDecoration(
             labelText: l10n.university,
             prefixIcon: const Icon(Icons.school_rounded),

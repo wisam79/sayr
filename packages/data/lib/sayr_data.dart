@@ -25,13 +25,13 @@ export 'src/models/user_model.dart';
 export 'src/repositories/auth_repository.dart';
 export 'src/repositories/boarding_repository.dart';
 export 'src/repositories/chat_repository.dart';
+export 'src/repositories/driver_repository.dart';
 export 'src/repositories/emergency_repository.dart';
 export 'src/repositories/notifications_repository.dart';
-export 'src/repositories/route_repository.dart';
-export 'src/repositories/subscription_repository.dart';
-export 'src/repositories/driver_repository.dart';
 export 'src/repositories/payment_repository.dart';
 export 'src/repositories/rating_repository.dart';
+export 'src/repositories/route_repository.dart';
+export 'src/repositories/subscription_repository.dart';
 export 'src/repositories/trip_repository.dart';
 // Secure storage
 export 'src/storage/secure_storage.dart';

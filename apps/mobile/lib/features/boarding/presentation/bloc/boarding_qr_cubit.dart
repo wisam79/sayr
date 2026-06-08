@@ -145,13 +145,13 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
       (failure) {
         emit(current.copyWith(
           isSubmittingProximity: false,
-        ));
+        ),);
       },
       (record) {
         emit(current.copyWith(
           isSubmittingProximity: false,
           proximityRecord: record,
-        ));
+        ),);
       },
     );
   }
@@ -222,8 +222,8 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
   Future<void> close() async {
     _refreshTimer?.cancel();
     _tickerTimer?.cancel();
-    _bleSubscription?.cancel();
-    _bleBeaconService.stopScanning();
+    await _bleSubscription?.cancel();
+    await _bleBeaconService.stopScanning();
     return super.close();
   }
 }

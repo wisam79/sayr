@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:sayr_core/sayr_core.dart' show TripStateMachine;
 import 'package:sayr_core/src/fsm/trip_state_machine.dart'
     show TripStateMachine;
@@ -6,6 +7,7 @@ import 'package:sayr_core/src/fsm/trip_state_machine.dart'
 ///
 /// Events trigger state transitions. The transition rules
 /// are defined in [TripStateMachine].
+@immutable
 class TripEvent {
   const TripEvent._(this.name);
 

@@ -21,7 +21,7 @@ void main() {
 
     test('getRoute returns route coordinates on success', () async {
       const start = LatLng(33.5, 44.5);
-      const end = LatLng(33.0, 44.0);
+      const end = LatLng(33, 44);
 
       final response = MockResponse();
       when(() => response.statusCode).thenReturn(200);
@@ -54,10 +54,10 @@ void main() {
     test('getRoute returns straight line fallback on API failure or timeout',
         () async {
       const start = LatLng(33.5, 44.5);
-      const end = LatLng(33.0, 44.0);
+      const end = LatLng(33, 44);
 
       when(() => mockDio.get<Map<String, dynamic>>(any())).thenThrow(
-        DioException(requestOptions: RequestOptions(path: '')),
+        DioException(requestOptions: RequestOptions()),
       );
 
       final route = await osrmService.getRoute(start, end);

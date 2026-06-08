@@ -172,6 +172,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
   /// Fetches the full profile from `profiles` table and merges it with
   /// auth user data (email). Returns null if the profile doesn't exist yet.
+  @override
   Future<User?> fetchFullProfile() async {
     final authUser = _remoteDatasource.currentUser;
     if (authUser == null) return null;

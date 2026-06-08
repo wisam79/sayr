@@ -32,7 +32,7 @@ void main() {
       subscriptionId: const SubscriptionId('sub-1'),
       studentId: UserId(studentId!),
       studentName: studentName,
-      boardedAt: boardedAt ?? DateTime(2026, 6, 7, 8, 0, 0),
+      boardedAt: boardedAt ?? DateTime(2026, 6, 7, 8),
       boardingMethod: method,
     );
   }
@@ -124,11 +124,11 @@ void main() {
               token: any(named: 'token'),
               tripId: any(named: 'tripId'),
               driverLocation: any(named: 'driverLocation'),
-            )).thenAnswer(
+            ),).thenAnswer(
           (_) async => Right<Failure, BoardingRecord>(makeRecord(
             id: 'rec-99',
             studentName: 'New Student',
-          )),
+          ),),
         );
         return buildCubit();
       },
@@ -151,7 +151,7 @@ void main() {
               token: any(named: 'token'),
               tripId: any(named: 'tripId'),
               driverLocation: any(named: 'driverLocation'),
-            )).thenAnswer(
+            ),).thenAnswer(
           (_) async => const Left<Failure, BoardingRecord>(
             ServerFailure(message: 'expired token'),
           ),
@@ -176,7 +176,7 @@ void main() {
               token: any(named: 'token'),
               tripId: any(named: 'tripId'),
               driverLocation: any(named: 'driverLocation'),
-            )).thenAnswer(
+            ),).thenAnswer(
           (_) async =>
               const Left<Failure, BoardingRecord>(ServerFailure(message: null)),
         );
@@ -197,7 +197,7 @@ void main() {
               token: any(named: 'token'),
               tripId: any(named: 'tripId'),
               driverLocation: any(named: 'driverLocation'),
-            )).thenAnswer(
+            ),).thenAnswer(
           (_) async => Right<Failure, BoardingRecord>(makeRecord()),
         );
         return buildCubit();
@@ -212,7 +212,7 @@ void main() {
               tripId: testTripId,
               driverLocation:
                   const Coordinates(latitude: 33.315, longitude: 44.366),
-            )).called(1);
+            ),).called(1);
       },
     );
 
@@ -221,19 +221,18 @@ void main() {
             token: any(named: 'token'),
             tripId: any(named: 'tripId'),
             driverLocation: any(named: 'driverLocation'),
-          )).thenAnswer(
+          ),).thenAnswer(
         (_) async => Right<Failure, BoardingRecord>(makeRecord()),
       );
 
-      final cubit = buildCubit();
-      cubit.start();
+      final cubit = buildCubit()..start();
       await Future<void>.delayed(Duration.zero);
       passengerController.add([makeRecord(id: 'rec-existing')]);
       await Future<void>.delayed(const Duration(milliseconds: 30));
 
       await cubit.processToken('raw-token-xyz');
       expect((cubit.state as BoardingScannerReady).lastScan,
-          isA<BoardingScanSuccess>());
+          isA<BoardingScanSuccess>(),);
 
       cubit.clearLastScan();
 
@@ -246,16 +245,15 @@ void main() {
     });
 
     test('clearLastScan is a no-op when not in Ready state', () {
-      final cubit = buildCubit();
-      cubit.clearLastScan();
+      final cubit = buildCubit()..clearLastScan();
       expect(cubit.state, isA<BoardingScannerInitial>());
       cubit.close();
     });
 
     test('start() called twice replaces the previous subscription', () async {
-      final cubit = buildCubit();
-      cubit.start();
-      cubit.start();
+      final cubit = buildCubit()
+        ..start()
+        ..start();
       verify(() => mockRepo.watchTripPassengers(testTripId)).called(2);
       await cubit.close();
     });

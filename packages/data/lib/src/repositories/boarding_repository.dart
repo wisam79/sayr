@@ -60,12 +60,11 @@ class BoardingRepositoryImpl implements BoardingRepository {
         studentId: row['student_id'] as String,
         studentName: row['student_name'] as String?,
         boardedAt: DateTime.parse(row['boarded_at'] as String),
-        boardingMethod: 'qr_scan',
       );
       return Right<Failure, BoardingRecord>(model.toEntity());
     } catch (e) {
       return Left<Failure, BoardingRecord>(
-          ServerFailure(message: e.toString()));
+          ServerFailure(message: e.toString()),);
     }
   }
 
@@ -108,7 +107,6 @@ class BoardingRepositoryImpl implements BoardingRepository {
                   tripId: tripId.value,
                   subscriptionId: r['subscription_id'] as String? ?? '',
                   studentId: r['student_id'] as String,
-                  studentName: null,
                   boardedAt: DateTime.parse(r['boarded_at'] as String),
                   boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
                 ).toEntity(),
@@ -142,7 +140,7 @@ class BoardingRepositoryImpl implements BoardingRepository {
       return Right<Failure, BoardingRecord>(model.toEntity());
     } catch (e) {
       return Left<Failure, BoardingRecord>(
-          ServerFailure(message: e.toString()));
+          ServerFailure(message: e.toString()),);
     }
   }
 }

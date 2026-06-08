@@ -71,7 +71,7 @@ void main() {
 
   testWidgets('shows empty state when no notifications', (tester) async {
     when(() => mockBloc.state).thenReturn(
-      const NotificationsState.loaded(notifications: [], unreadCount: 0),
+      const NotificationsState.loaded(notifications: []),
     );
 
     await tester.pumpWidget(wrap(const NotificationsPage()));
@@ -114,8 +114,8 @@ void main() {
 
   testWidgets('shows error body with retry button', (tester) async {
     when(() => mockBloc.state).thenReturn(
-      NotificationsState.error(
-        failure: const ServerFailure(message: 'Connection failed'),
+      const NotificationsState.error(
+        failure: ServerFailure(message: 'Connection failed'),
       ),
     );
 

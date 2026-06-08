@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
-
-import 'package:flutter/foundation.dart';
 
 /// Service to query project-osrm.org public routing API.
 @lazySingleton
@@ -17,7 +16,10 @@ class OsrmService {
   Dio _dio;
   final Logger _logger = Logger();
 
-  /// Setter for mock injections in testing.
+  /// Getter/Setter for mock injections in testing.
+  @visibleForTesting
+  Dio get dioInstance => _dio;
+
   @visibleForTesting
   set dioInstance(Dio value) => _dio = value;
 

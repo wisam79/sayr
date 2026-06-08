@@ -59,7 +59,7 @@ void main() {
 
   testWidgets('shows error message with failure text', (tester) async {
     when(() => mockBloc.state).thenReturn(
-      ChatState.error(failure: const ServerFailure(message: 'Network error')),
+      const ChatState.error(failure: ServerFailure(message: 'Network error')),
     );
 
     await tester.pumpWidget(
@@ -76,7 +76,6 @@ void main() {
       const ChatState.loaded(
         conversationId: ConversationId('conv-1'),
         messages: [],
-        isSending: false,
       ),
     );
 
@@ -113,7 +112,6 @@ void main() {
       ChatState.loaded(
         conversationId: const ConversationId('conv-1'),
         messages: messages,
-        isSending: false,
       ),
     );
 

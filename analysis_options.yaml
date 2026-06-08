@@ -63,7 +63,8 @@ linter:
     sort_pub_dependencies: false
 
     # Documentation
-    public_member_api_docs: true
+    public_member_api_docs: false
+    lines_longer_than_80_chars: false
     flutter_style_todos: true
 
     # Misc

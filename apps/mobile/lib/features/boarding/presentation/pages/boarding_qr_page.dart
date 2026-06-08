@@ -90,9 +90,12 @@ class _BoardingQrView extends StatelessWidget {
                 );
               },
             );
+            final rootNavigator = Navigator.of(context, rootNavigator: true);
             Future.delayed(const Duration(seconds: 2), () {
+              if (rootNavigator.mounted) {
+                rootNavigator.pop();
+              }
               if (navigator.mounted) {
-                Navigator.of(context, rootNavigator: true).pop();
                 navigator.pop();
               }
             });
@@ -317,7 +320,7 @@ class _StatusMessage extends StatelessWidget {
             Icon(icon, size: 80, color: AppColors.textSecondary),
             const SizedBox(height: 16),
             Text(title,
-                style: textTheme.titleLarge, textAlign: TextAlign.center),
+                style: textTheme.titleLarge, textAlign: TextAlign.center,),
             const SizedBox(height: 8),
             Text(
               subtitle,

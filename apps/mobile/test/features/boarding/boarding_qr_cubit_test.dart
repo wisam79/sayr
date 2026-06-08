@@ -210,7 +210,7 @@ void main() {
       final original = BoardingQrReady(
         tripId: const TripId('trip-1'),
         token: 'old-token',
-        expiresAt: DateTime(2026, 6, 7, 9, 0, 0),
+        expiresAt: DateTime(2026, 6, 7, 9),
         secondsUntilRefresh: 30,
       );
       final updated = original.copyWith(token: 'new-token');
@@ -293,8 +293,7 @@ void main() {
       when(() => mockRepo.validateBoardingViaProximity(
             tripId: tripId,
             otp: 'ABC123',
-            studentLocation: null,
-          )).thenAnswer((_) async => Right<Failure, BoardingRecord>(record));
+          ),).thenAnswer((_) async => Right<Failure, BoardingRecord>(record));
 
       final emitted = <BoardingQrState>[];
       final sub = cubit.stream.listen(emitted.add);

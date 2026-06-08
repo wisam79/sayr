@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:latlong2/latlong.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -21,6 +20,7 @@ import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_mock_loa
 import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Student view: live tracking of a single trip on a map.
@@ -197,9 +197,8 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
               );
             }
 
-            return Skeletonizer(
-              enabled: true,
-              child: const TripMockLoader(),
+            return const Skeletonizer(
+              child: TripMockLoader(),
             );
           },
         ),

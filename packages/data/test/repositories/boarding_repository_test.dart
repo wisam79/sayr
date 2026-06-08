@@ -17,7 +17,7 @@ void main() {
   });
 
   const testTripId = TripId('trip-1');
-  final testExpiresAt = DateTime(2026, 6, 7, 8, 1, 0);
+  final testExpiresAt = DateTime(2026, 6, 7, 8, 1);
 
   group('getActiveTripForSubscription', () {
     test('returns Right<Failure, TripId?> with TripId on success', () async {
@@ -106,9 +106,7 @@ void main() {
       when(() => mockRemote.validateBoarding(
             token: 'raw-token-xyz',
             tripId: 'trip-1',
-            lat: null,
-            lng: null,
-          )).thenAnswer(
+          ),).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -146,7 +144,7 @@ void main() {
             tripId: 'trip-1',
             lat: 33.315,
             lng: 44.366,
-          )).thenAnswer(
+          ),).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -168,7 +166,7 @@ void main() {
             tripId: 'trip-1',
             lat: 33.315,
             lng: 44.366,
-          )).called(1);
+          ),).called(1);
     });
 
     test('returns Left<ServerFailure> on exception', () async {
@@ -177,7 +175,7 @@ void main() {
             tripId: any(named: 'tripId'),
             lat: any(named: 'lat'),
             lng: any(named: 'lng'),
-          )).thenThrow(Exception('invalid token'));
+          ),).thenThrow(Exception('invalid token'));
 
       final result = await repository.validateBoarding(
         token: 'bad-token',
@@ -335,16 +333,17 @@ void main() {
         ]),
       );
 
-      controller.add(<Map<String, dynamic>>[]);
-      controller.add([
-        {
-          'id': 'rec-1',
-          'subscription_id': 'sub-1',
-          'student_id': 'user-1',
-          'boarded_at': '2026-06-07T08:00:30Z',
-          'boarding_method': 'qr_scan',
-        },
-      ]);
+      controller
+        ..add(<Map<String, dynamic>>[])
+        ..add([
+          {
+            'id': 'rec-1',
+            'subscription_id': 'sub-1',
+            'student_id': 'user-1',
+            'boarded_at': '2026-06-07T08:00:30Z',
+            'boarding_method': 'qr_scan',
+          },
+        ]);
 
       await controller.close();
     });
@@ -389,9 +388,7 @@ void main() {
       when(() => mockRemote.validateBoardingViaProximity(
             tripId: 'trip-1',
             otp: '123456',
-            lat: null,
-            lng: null,
-          )).thenAnswer(
+          ),).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -429,7 +426,7 @@ void main() {
             otp: '123456',
             lat: 33.315,
             lng: 44.366,
-          )).thenAnswer(
+          ),).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -451,7 +448,7 @@ void main() {
             otp: '123456',
             lat: 33.315,
             lng: 44.366,
-          )).called(1);
+          ),).called(1);
     });
 
     test('returns Left<ServerFailure> on exception', () async {
@@ -460,7 +457,7 @@ void main() {
             otp: any(named: 'otp'),
             lat: any(named: 'lat'),
             lng: any(named: 'lng'),
-          )).thenThrow(Exception('invalid otp'));
+          ),).thenThrow(Exception('invalid otp'));
 
       final result = await repository.validateBoardingViaProximity(
         tripId: testTripId,

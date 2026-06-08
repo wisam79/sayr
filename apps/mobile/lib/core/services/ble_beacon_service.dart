@@ -9,7 +9,7 @@ import 'package:sayr_core/sayr_core.dart';
 /// Service to handle BLE-based proximity boarding.
 ///
 /// In driver mode: Advertises the [TripId] as the primary Service UUID and the rotating OTP as the device's local name.
-/// In student mode: Scans for nearby BLE peripherals with local names matching "SAYR_[OTP]".
+/// In student mode: Scans for nearby BLE peripherals with local names matching "SAYR_OTP".
 @lazySingleton
 class BleBeaconService {
   /// Creates a [BleBeaconService].
@@ -51,7 +51,7 @@ class BleBeaconService {
       await _blePeripheral.start(advertiseData: data);
       _isMockMode = false;
       debugPrint(
-          'BLE Advertising started for TripId: ${tripId.value}, OTP: $otp');
+          'BLE Advertising started for TripId: ${tripId.value}, OTP: $otp',);
     } catch (e) {
       debugPrint('BLE Advertising error: $e. Switching to mock mode.');
       _isMockMode = true;
@@ -97,10 +97,10 @@ class BleBeaconService {
         androidUsesFineLocation: true,
       );
 
-      _scanSubscription?.cancel();
+      await _scanSubscription?.cancel();
       _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
         for (final r in results) {
-          final localName = r.advertisementData.localName;
+          final localName = r.advertisementData.advName;
           if (localName.startsWith(localNamePrefix) &&
               localName.length == (localNamePrefix.length + 6)) {
             final otp = localName.substring(localNamePrefix.length);
@@ -134,7 +134,7 @@ class BleBeaconService {
   /// Stops BLE scanning.
   Future<void> stopScanning() async {
     _mockTimer?.cancel();
-    _scanSubscription?.cancel();
+    await _scanSubscription?.cancel();
     if (_isMockMode) return;
     try {
       await FlutterBluePlus.stopScan();
@@ -161,7 +161,7 @@ class BleBeaconService {
       _discoveredTripsController.add((
         tripId: const TripId('00000000-0000-0000-0000-000000000000'),
         otp: 'MOCK12',
-      ));
+      ),);
     });
   }
 }

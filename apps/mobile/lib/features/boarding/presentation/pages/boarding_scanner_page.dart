@@ -72,12 +72,12 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on),
-            onPressed: () => _controller.toggleTorch(),
+            onPressed: _controller.toggleTorch,
             tooltip: l10n.boardingToggleFlash,
           ),
           IconButton(
             icon: const Icon(Icons.cameraswitch),
-            onPressed: () => _controller.switchCamera(),
+            onPressed: _controller.switchCamera,
             tooltip: l10n.boardingSwitchCamera,
           ),
         ],
@@ -86,8 +86,7 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
         listener: (context, state) {
           if (state is BoardingScannerReady && state.lastScan != null) {
             final scan = state.lastScan!;
-            final messenger = ScaffoldMessenger.of(context);
-            messenger.clearSnackBars();
+            final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
             if (scan is BoardingScanSuccess) {
               messenger.showSnackBar(
                 SnackBar(
@@ -106,7 +105,7 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
               );
             }
             Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
+              if (context.mounted) {
                 context.read<BoardingScannerCubit>().clearLastScan();
               }
             });
@@ -139,9 +138,9 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
                       ),
                     ),
                     if (_isProcessing)
-                      Container(
+                      const ColoredBox(
                         color: Colors.black54,
-                        child: const Center(
+                        child: Center(
                           child: CircularProgressIndicator(
                             color: Colors.white,
                           ),

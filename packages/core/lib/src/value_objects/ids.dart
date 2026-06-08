@@ -14,7 +14,7 @@ sealed class Id extends Equatable {
   List<Object?> get props => [value];
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => 'Id($value)';
 }
 
 /// A user ID.

@@ -154,7 +154,7 @@ class FcmService {
         bloc.add(NotificationRegisterTokenRequested(
           fcmToken: token,
           platform: platform,
-        ));
+        ),);
       }
 
       // Also listen to token refresh events.
@@ -164,7 +164,7 @@ class FcmService {
         bloc.add(NotificationRegisterTokenRequested(
           fcmToken: newToken,
           platform: platform,
-        ));
+        ),);
       });
     } catch (e) {
       // Failed to retrieve or register token
