@@ -367,7 +367,11 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                               const SizedBox(width: AppSpacing.xs),
                               Text(
                                 l10n.duration(
-                                    formatDurationAr(l10n, trip.duration!)),
+                                  formatDurationAr(
+                                    l10n,
+                                    trip.duration!,
+                                  ),
+                                ),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium

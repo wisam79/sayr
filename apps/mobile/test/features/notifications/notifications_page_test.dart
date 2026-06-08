@@ -91,12 +91,22 @@ void main() {
     await tester.pumpWidget(wrap(const NotificationsPage()));
     await tester.pump();
 
-    expect(find.text('Trip Update'), findsOneWidget);
     expect(
-        find.text('Your trip to Baghdad has been confirmed'), findsOneWidget);
-    expect(find.text('Payment Received'), findsOneWidget);
+      find.text('Trip Update'),
+      findsOneWidget,
+    );
     expect(
-        find.text('Your payment of 5000 IQD was successful'), findsOneWidget);
+      find.text('Your trip to Baghdad has been confirmed'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Payment Received'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Your payment of 5000 IQD was successful'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shows mark all as read button when unread exists',

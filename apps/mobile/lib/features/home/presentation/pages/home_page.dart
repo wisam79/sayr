@@ -466,7 +466,8 @@ class _CreateTripDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         DropdownButtonFormField<core.Route>(
-          initialValue: state.selectedRoute,
+          // ignore: deprecated_member_use
+          value: state.selectedRoute,
           decoration: InputDecoration(
             labelText: l10n.routeTitle,
             border: const OutlineInputBorder(),

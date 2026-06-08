@@ -40,6 +40,7 @@ class SayrSupabase {
 
     await supabase.Supabase.initialize(
       url: cfg.url,
+      // ignore: deprecated_member_use
       anonKey: cfg.anonKey,
     );
 
