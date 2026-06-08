@@ -73,20 +73,24 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
         LatLng(start.latitude, start.longitude),
         LatLng(end.latitude, end.longitude),
       );
-      emit(state.copyWith(
-        isFetchingRoute: false,
-        routePoints: () => points,
-        loadedRouteId: () => routeId,
-      ),);
+      emit(
+        state.copyWith(
+          isFetchingRoute: false,
+          routePoints: () => points,
+          loadedRouteId: () => routeId,
+        ),
+      );
     } catch (_) {
-      emit(state.copyWith(
-        isFetchingRoute: false,
-        routePoints: () => [
-          LatLng(start.latitude, start.longitude),
-          LatLng(end.latitude, end.longitude),
-        ],
-        loadedRouteId: () => routeId,
-      ),);
+      emit(
+        state.copyWith(
+          isFetchingRoute: false,
+          routePoints: () => [
+            LatLng(start.latitude, start.longitude),
+            LatLng(end.latitude, end.longitude),
+          ],
+          loadedRouteId: () => routeId,
+        ),
+      );
     }
   }
 

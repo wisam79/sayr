@@ -70,7 +70,8 @@ void main() {
     expect(find.text('Network error'), findsOneWidget);
   });
 
-  testWidgets('shows empty chat state and chat input when loaded with no messages',
+  testWidgets(
+      'shows empty chat state and chat input when loaded with no messages',
       (tester) async {
     when(() => mockBloc.state).thenReturn(
       const ChatState.loaded(

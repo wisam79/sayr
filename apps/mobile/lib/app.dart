@@ -109,8 +109,11 @@ class SayrApp extends StatelessWidget {
 
           if (state is AuthAuthenticated) {
             // Register current FCM push token for notifications
-            unawaited(FcmService.registerDeviceToken(
-                context.read<NotificationsBloc>(),),);
+            unawaited(
+              FcmService.registerDeviceToken(
+                context.read<NotificationsBloc>(),
+              ),
+            );
 
             if (isAuthEntry) {
               router.config.go('/');

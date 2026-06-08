@@ -120,15 +120,19 @@ void main() {
     blocTest<BoardingScannerCubit, BoardingScannerState>(
       'processToken on success emits Ready with lastScan = BoardingScanSuccess',
       build: () {
-        when(() => mockRepo.validateBoarding(
-              token: any(named: 'token'),
-              tripId: any(named: 'tripId'),
-              driverLocation: any(named: 'driverLocation'),
-            ),).thenAnswer(
-          (_) async => Right<Failure, BoardingRecord>(makeRecord(
-            id: 'rec-99',
-            studentName: 'New Student',
-          ),),
+        when(
+          () => mockRepo.validateBoarding(
+            token: any(named: 'token'),
+            tripId: any(named: 'tripId'),
+            driverLocation: any(named: 'driverLocation'),
+          ),
+        ).thenAnswer(
+          (_) async => Right<Failure, BoardingRecord>(
+            makeRecord(
+              id: 'rec-99',
+              studentName: 'New Student',
+            ),
+          ),
         );
         return buildCubit();
       },
@@ -147,11 +151,13 @@ void main() {
     blocTest<BoardingScannerCubit, BoardingScannerState>(
       'processToken on failure emits Ready with lastScan = BoardingScanFailure',
       build: () {
-        when(() => mockRepo.validateBoarding(
-              token: any(named: 'token'),
-              tripId: any(named: 'tripId'),
-              driverLocation: any(named: 'driverLocation'),
-            ),).thenAnswer(
+        when(
+          () => mockRepo.validateBoarding(
+            token: any(named: 'token'),
+            tripId: any(named: 'tripId'),
+            driverLocation: any(named: 'driverLocation'),
+          ),
+        ).thenAnswer(
           (_) async => const Left<Failure, BoardingRecord>(
             ServerFailure(message: 'expired token'),
           ),
@@ -172,11 +178,13 @@ void main() {
     blocTest<BoardingScannerCubit, BoardingScannerState>(
       'processToken with unknown error uses unknown_error fallback',
       build: () {
-        when(() => mockRepo.validateBoarding(
-              token: any(named: 'token'),
-              tripId: any(named: 'tripId'),
-              driverLocation: any(named: 'driverLocation'),
-            ),).thenAnswer(
+        when(
+          () => mockRepo.validateBoarding(
+            token: any(named: 'token'),
+            tripId: any(named: 'tripId'),
+            driverLocation: any(named: 'driverLocation'),
+          ),
+        ).thenAnswer(
           (_) async =>
               const Left<Failure, BoardingRecord>(ServerFailure(message: null)),
         );
@@ -193,11 +201,13 @@ void main() {
     blocTest<BoardingScannerCubit, BoardingScannerState>(
       'processToken forwards driverLocation coordinates to repository',
       build: () {
-        when(() => mockRepo.validateBoarding(
-              token: any(named: 'token'),
-              tripId: any(named: 'tripId'),
-              driverLocation: any(named: 'driverLocation'),
-            ),).thenAnswer(
+        when(
+          () => mockRepo.validateBoarding(
+            token: any(named: 'token'),
+            tripId: any(named: 'tripId'),
+            driverLocation: any(named: 'driverLocation'),
+          ),
+        ).thenAnswer(
           (_) async => Right<Failure, BoardingRecord>(makeRecord()),
         );
         return buildCubit();
@@ -207,21 +217,25 @@ void main() {
         driverLocation: const Coordinates(latitude: 33.315, longitude: 44.366),
       ),
       verify: (_) {
-        verify(() => mockRepo.validateBoarding(
-              token: 'token-abc',
-              tripId: testTripId,
-              driverLocation:
-                  const Coordinates(latitude: 33.315, longitude: 44.366),
-            ),).called(1);
+        verify(
+          () => mockRepo.validateBoarding(
+            token: 'token-abc',
+            tripId: testTripId,
+            driverLocation:
+                const Coordinates(latitude: 33.315, longitude: 44.366),
+          ),
+        ).called(1);
       },
     );
 
     test('clearLastScan removes lastScan but keeps passengers', () async {
-      when(() => mockRepo.validateBoarding(
-            token: any(named: 'token'),
-            tripId: any(named: 'tripId'),
-            driverLocation: any(named: 'driverLocation'),
-          ),).thenAnswer(
+      when(
+        () => mockRepo.validateBoarding(
+          token: any(named: 'token'),
+          tripId: any(named: 'tripId'),
+          driverLocation: any(named: 'driverLocation'),
+        ),
+      ).thenAnswer(
         (_) async => Right<Failure, BoardingRecord>(makeRecord()),
       );
 
@@ -231,8 +245,10 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 30));
 
       await cubit.processToken('raw-token-xyz');
-      expect((cubit.state as BoardingScannerReady).lastScan,
-          isA<BoardingScanSuccess>(),);
+      expect(
+        (cubit.state as BoardingScannerReady).lastScan,
+        isA<BoardingScanSuccess>(),
+      );
 
       cubit.clearLastScan();
 

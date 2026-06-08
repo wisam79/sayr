@@ -48,15 +48,19 @@ void main() {
 
     when(() => mockEmergencyBloc.state).thenReturn(const EmergencyIdle());
     when(() => mockBle.stopAdvertising()).thenAnswer((_) async {});
-    when(() => mockBle.startAdvertising(
-          tripId: any(named: 'tripId'),
-          otp: any(named: 'otp'),
-        ),).thenAnswer((_) async {});
-    when(() => mockTripRepo.updateBleOtp(
-          tripId: any(named: 'tripId'),
-          otp: any(named: 'otp'),
-          expiresAt: any(named: 'expiresAt'),
-        ),).thenAnswer((_) async => const Right(unit));
+    when(
+      () => mockBle.startAdvertising(
+        tripId: any(named: 'tripId'),
+        otp: any(named: 'otp'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockTripRepo.updateBleOtp(
+        tripId: any(named: 'tripId'),
+        otp: any(named: 'otp'),
+        expiresAt: any(named: 'expiresAt'),
+      ),
+    ).thenAnswer((_) async => const Right(unit));
 
     GetIt.I.registerFactory<BleBeaconService>(() => mockBle);
     GetIt.I.registerFactory<TripRepository>(() => mockTripRepo);

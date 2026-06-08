@@ -143,15 +143,19 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
 
     result.fold(
       (failure) {
-        emit(current.copyWith(
-          isSubmittingProximity: false,
-        ),);
+        emit(
+          current.copyWith(
+            isSubmittingProximity: false,
+          ),
+        );
       },
       (record) {
-        emit(current.copyWith(
-          isSubmittingProximity: false,
-          proximityRecord: record,
-        ),);
+        emit(
+          current.copyWith(
+            isSubmittingProximity: false,
+            proximityRecord: record,
+          ),
+        );
       },
     );
   }

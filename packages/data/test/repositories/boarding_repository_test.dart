@@ -103,10 +103,12 @@ void main() {
 
   group('validateBoarding', () {
     test('returns Right<Failure, BoardingRecord> on success', () async {
-      when(() => mockRemote.validateBoarding(
-            token: 'raw-token-xyz',
-            tripId: 'trip-1',
-          ),).thenAnswer(
+      when(
+        () => mockRemote.validateBoarding(
+          token: 'raw-token-xyz',
+          tripId: 'trip-1',
+        ),
+      ).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -139,12 +141,14 @@ void main() {
     test('forwards driverLocation latitude/longitude to the remote call',
         () async {
       const driverLocation = Coordinates(latitude: 33.315, longitude: 44.366);
-      when(() => mockRemote.validateBoarding(
-            token: 'raw-token-xyz',
-            tripId: 'trip-1',
-            lat: 33.315,
-            lng: 44.366,
-          ),).thenAnswer(
+      when(
+        () => mockRemote.validateBoarding(
+          token: 'raw-token-xyz',
+          tripId: 'trip-1',
+          lat: 33.315,
+          lng: 44.366,
+        ),
+      ).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -161,21 +165,25 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
-      verify(() => mockRemote.validateBoarding(
-            token: 'raw-token-xyz',
-            tripId: 'trip-1',
-            lat: 33.315,
-            lng: 44.366,
-          ),).called(1);
+      verify(
+        () => mockRemote.validateBoarding(
+          token: 'raw-token-xyz',
+          tripId: 'trip-1',
+          lat: 33.315,
+          lng: 44.366,
+        ),
+      ).called(1);
     });
 
     test('returns Left<ServerFailure> on exception', () async {
-      when(() => mockRemote.validateBoarding(
-            token: any(named: 'token'),
-            tripId: any(named: 'tripId'),
-            lat: any(named: 'lat'),
-            lng: any(named: 'lng'),
-          ),).thenThrow(Exception('invalid token'));
+      when(
+        () => mockRemote.validateBoarding(
+          token: any(named: 'token'),
+          tripId: any(named: 'tripId'),
+          lat: any(named: 'lat'),
+          lng: any(named: 'lng'),
+        ),
+      ).thenThrow(Exception('invalid token'));
 
       final result = await repository.validateBoarding(
         token: 'bad-token',
@@ -385,10 +393,12 @@ void main() {
 
   group('validateBoardingViaProximity', () {
     test('returns Right<Failure, BoardingRecord> on success', () async {
-      when(() => mockRemote.validateBoardingViaProximity(
-            tripId: 'trip-1',
-            otp: '123456',
-          ),).thenAnswer(
+      when(
+        () => mockRemote.validateBoardingViaProximity(
+          tripId: 'trip-1',
+          otp: '123456',
+        ),
+      ).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -421,12 +431,14 @@ void main() {
     test('forwards studentLocation latitude/longitude to the remote call',
         () async {
       const studentLocation = Coordinates(latitude: 33.315, longitude: 44.366);
-      when(() => mockRemote.validateBoardingViaProximity(
-            tripId: 'trip-1',
-            otp: '123456',
-            lat: 33.315,
-            lng: 44.366,
-          ),).thenAnswer(
+      when(
+        () => mockRemote.validateBoardingViaProximity(
+          tripId: 'trip-1',
+          otp: '123456',
+          lat: 33.315,
+          lng: 44.366,
+        ),
+      ).thenAnswer(
         (_) async => {
           'boarding_id': 'rec-1',
           'subscription_id': 'sub-1',
@@ -443,21 +455,25 @@ void main() {
       );
 
       expect(result.isRight(), isTrue);
-      verify(() => mockRemote.validateBoardingViaProximity(
-            tripId: 'trip-1',
-            otp: '123456',
-            lat: 33.315,
-            lng: 44.366,
-          ),).called(1);
+      verify(
+        () => mockRemote.validateBoardingViaProximity(
+          tripId: 'trip-1',
+          otp: '123456',
+          lat: 33.315,
+          lng: 44.366,
+        ),
+      ).called(1);
     });
 
     test('returns Left<ServerFailure> on exception', () async {
-      when(() => mockRemote.validateBoardingViaProximity(
-            tripId: any(named: 'tripId'),
-            otp: any(named: 'otp'),
-            lat: any(named: 'lat'),
-            lng: any(named: 'lng'),
-          ),).thenThrow(Exception('invalid otp'));
+      when(
+        () => mockRemote.validateBoardingViaProximity(
+          tripId: any(named: 'tripId'),
+          otp: any(named: 'otp'),
+          lat: any(named: 'lat'),
+          lng: any(named: 'lng'),
+        ),
+      ).thenThrow(Exception('invalid otp'));
 
       final result = await repository.validateBoardingViaProximity(
         tripId: testTripId,

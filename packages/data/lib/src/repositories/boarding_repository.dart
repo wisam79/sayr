@@ -64,7 +64,8 @@ class BoardingRepositoryImpl implements BoardingRepository {
       return Right<Failure, BoardingRecord>(model.toEntity());
     } catch (e) {
       return Left<Failure, BoardingRecord>(
-          ServerFailure(message: e.toString()),);
+        ServerFailure(message: e.toString()),
+      );
     }
   }
 
@@ -140,7 +141,8 @@ class BoardingRepositoryImpl implements BoardingRepository {
       return Right<Failure, BoardingRecord>(model.toEntity());
     } catch (e) {
       return Left<Failure, BoardingRecord>(
-          ServerFailure(message: e.toString()),);
+        ServerFailure(message: e.toString()),
+      );
     }
   }
 }

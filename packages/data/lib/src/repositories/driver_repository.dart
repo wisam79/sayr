@@ -8,7 +8,7 @@ import 'package:sayr_data/src/models/user_model.dart';
 @LazySingleton(as: DriverRepository)
 class DriverRepositoryImpl implements DriverRepository {
   DriverRepositoryImpl({required RemoteDatasource remoteDatasource})
-    : _remoteDatasource = remoteDatasource;
+      : _remoteDatasource = remoteDatasource;
 
   final RemoteDatasource _remoteDatasource;
 

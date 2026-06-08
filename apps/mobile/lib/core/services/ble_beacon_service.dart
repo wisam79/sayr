@@ -51,7 +51,8 @@ class BleBeaconService {
       await _blePeripheral.start(advertiseData: data);
       _isMockMode = false;
       debugPrint(
-          'BLE Advertising started for TripId: ${tripId.value}, OTP: $otp',);
+        'BLE Advertising started for TripId: ${tripId.value}, OTP: $otp',
+      );
     } catch (e) {
       debugPrint('BLE Advertising error: $e. Switching to mock mode.');
       _isMockMode = true;
@@ -158,10 +159,12 @@ class BleBeaconService {
     // Simulate discovering a mock trip for development testing
     _mockTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       // Broadcast a mock trip ID and OTP (simulating proximity)
-      _discoveredTripsController.add((
-        tripId: const TripId('00000000-0000-0000-0000-000000000000'),
-        otp: 'MOCK12',
-      ),);
+      _discoveredTripsController.add(
+        (
+          tripId: const TripId('00000000-0000-0000-0000-000000000000'),
+          otp: 'MOCK12',
+        ),
+      );
     });
   }
 }

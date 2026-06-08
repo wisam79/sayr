@@ -28,7 +28,7 @@ CREATE INDEX idx_boarding_tokens_expires ON public.boarding_tokens(expires_at);
 -- "revoke any older unused tokens for this student+trip"
 CREATE INDEX idx_boarding_tokens_student_trip_active
   ON public.boarding_tokens(student_id, trip_id)
-  WHERE consumed_at IS NULL AND expires_at > NOW();
+  WHERE consumed_at IS NULL;
 -- Index for audit/diagnostics queries that filter consumed tokens
 CREATE INDEX idx_boarding_tokens_consumed
   ON public.boarding_tokens(consumed_by_trip_id, consumed_at DESC)

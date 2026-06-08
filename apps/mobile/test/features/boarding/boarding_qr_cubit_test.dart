@@ -290,10 +290,12 @@ void main() {
         boardingMethod: 'self_check_in',
       );
 
-      when(() => mockRepo.validateBoardingViaProximity(
-            tripId: tripId,
-            otp: 'ABC123',
-          ),).thenAnswer((_) async => Right<Failure, BoardingRecord>(record));
+      when(
+        () => mockRepo.validateBoardingViaProximity(
+          tripId: tripId,
+          otp: 'ABC123',
+        ),
+      ).thenAnswer((_) async => Right<Failure, BoardingRecord>(record));
 
       final emitted = <BoardingQrState>[];
       final sub = cubit.stream.listen(emitted.add);

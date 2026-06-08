@@ -99,10 +99,12 @@ class TripMockLoader extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-            child: _greyBox(width: double.infinity, height: 48, radius: 12),),
+          child: _greyBox(width: double.infinity, height: 48, radius: 12),
+        ),
         const SizedBox(width: AppSpacing.md),
         Expanded(
-            child: _greyBox(width: double.infinity, height: 48, radius: 12),),
+          child: _greyBox(width: double.infinity, height: 48, radius: 12),
+        ),
       ],
     );
   }

@@ -124,7 +124,9 @@ void main() {
     // Student should see 5 bottom navigation items:
     // 0: Home, 1: Routes, 2: Active Trips, 3: Subscriptions, 4: Profile
     expect(
-        find.byIcon(Icons.home), findsOneWidget,); // selected tab (activeIcon)
+      find.byIcon(Icons.home),
+      findsOneWidget,
+    ); // selected tab (activeIcon)
     expect(find.byIcon(Icons.directions_bus_outlined), findsOneWidget);
     expect(find.byIcon(Icons.map_outlined), findsOneWidget);
     expect(find.byIcon(Icons.confirmation_number_outlined), findsOneWidget);
@@ -142,7 +144,9 @@ void main() {
     // Driver should see 3 bottom navigation items:
     // 0: Home, 1: Active Trips, 2: Profile
     expect(
-        find.byIcon(Icons.home), findsOneWidget,); // selected tab (activeIcon)
+      find.byIcon(Icons.home),
+      findsOneWidget,
+    ); // selected tab (activeIcon)
     expect(find.byIcon(Icons.directions_bus_outlined), findsOneWidget);
     expect(find.byIcon(Icons.person_outline), findsOneWidget);
 

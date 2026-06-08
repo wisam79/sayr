@@ -125,7 +125,6 @@ abstract class TripRepository {
             })>
         locations,
   );
-
 }
 
 /// Interface for subscription operations repository.

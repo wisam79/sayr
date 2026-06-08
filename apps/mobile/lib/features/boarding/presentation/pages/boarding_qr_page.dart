@@ -319,8 +319,11 @@ class _StatusMessage extends StatelessWidget {
           children: [
             Icon(icon, size: 80, color: AppColors.textSecondary),
             const SizedBox(height: 16),
-            Text(title,
-                style: textTheme.titleLarge, textAlign: TextAlign.center,),
+            Text(
+              title,
+              style: textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
             Text(
               subtitle,

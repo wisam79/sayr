@@ -151,20 +151,24 @@ class FcmService {
       if (token != null) {
         final platform =
             Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
-        bloc.add(NotificationRegisterTokenRequested(
-          fcmToken: token,
-          platform: platform,
-        ),);
+        bloc.add(
+          NotificationRegisterTokenRequested(
+            fcmToken: token,
+            platform: platform,
+          ),
+        );
       }
 
       // Also listen to token refresh events.
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
         final platform =
             Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
-        bloc.add(NotificationRegisterTokenRequested(
-          fcmToken: newToken,
-          platform: platform,
-        ),);
+        bloc.add(
+          NotificationRegisterTokenRequested(
+            fcmToken: newToken,
+            platform: platform,
+          ),
+        );
       });
     } catch (e) {
       // Failed to retrieve or register token

@@ -66,7 +66,9 @@ class _RouteDetailsContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(state.message.isEmpty ? l10n.routeLoadFailed : state.message),
+                  Text(state.message.isEmpty
+                      ? l10n.routeLoadFailed
+                      : state.message),
                   const SizedBox(height: AppSpacing.md),
                   if (routeId != null)
                     ElevatedButton(

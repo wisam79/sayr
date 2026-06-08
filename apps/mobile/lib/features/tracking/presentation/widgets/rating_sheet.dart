@@ -145,10 +145,11 @@ class _RatingSheetState extends State<RatingSheet> {
               isLoading: _isSubmitting,
               onPressed: _selectedRating == 0
                   ? null
-                    : () async {
+                  : () async {
                       final messenger = ScaffoldMessenger.of(context);
                       final navigator = Navigator.of(context);
-                      final rootNavigator = Navigator.of(context, rootNavigator: true);
+                      final rootNavigator =
+                          Navigator.of(context, rootNavigator: true);
                       final cubit = context.read<TripDetailsCubit>();
 
                       setState(() => _isSubmitting = true);
@@ -173,7 +174,8 @@ class _RatingSheetState extends State<RatingSheet> {
                                     borderRadius: BorderRadius.circular(24),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(AppSpacing.xl),
+                                    padding:
+                                        const EdgeInsets.all(AppSpacing.xl),
                                     child: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [

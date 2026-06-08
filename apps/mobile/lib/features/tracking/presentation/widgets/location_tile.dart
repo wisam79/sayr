@@ -3,7 +3,11 @@ import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 /// A single location line showing an [icon], [color], and [label].
 class LocationTile extends StatelessWidget {
-  const LocationTile({required this.icon, required this.color, required this.label, super.key,
+  const LocationTile({
+    required this.icon,
+    required this.color,
+    required this.label,
+    super.key,
   });
 
   final IconData icon;

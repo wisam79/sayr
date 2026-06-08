@@ -46,8 +46,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
     final ratingResult = results[2] as Either<Failure, Rating?>;
 
     if (routeResult.isLeft()) {
-      final msg = routeResult.fold((f) => f.message, (_) => null) ??
-          '';
+      final msg = routeResult.fold((f) => f.message, (_) => null) ?? '';
       emit(TripDetailsError(msg));
       return;
     }
