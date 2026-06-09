@@ -48,6 +48,7 @@ class AppRouter {
     '/onboarding',
     '/login',
     '/signup',
+    '/complete-profile',
   };
 
   /// The main [GoRouter] configuration instance.
