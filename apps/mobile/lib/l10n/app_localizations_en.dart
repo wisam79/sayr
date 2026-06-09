@@ -12,6 +12,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Sayr';
 
   @override
+  String get approximateRouteWarning =>
+      'Displayed route is approximate due to a routing server issue';
+
+  @override
   String get loginTitle => 'Login';
 
   @override
@@ -832,4 +836,45 @@ class AppLocalizationsEn extends AppLocalizations {
   String durationMinutesOnly(int minutes) {
     return '$minutes minutes';
   }
+
+  @override
+  String get failureNetwork => 'No internet connection';
+
+  @override
+  String get failureServer => 'Server error';
+
+  @override
+  String get failureUnauthorized => 'Unauthorized';
+
+  @override
+  String get failureForbidden => 'Forbidden';
+
+  @override
+  String get failureNotFound => 'Resource not found';
+
+  @override
+  String get failureValidation => 'Invalid data';
+
+  @override
+  String get failureRateLimit => 'Rate limit exceeded';
+
+  @override
+  String get failureCache => 'Local storage error';
+
+  @override
+  String get failureInvalidStateTransition => 'Invalid state transition';
+
+  @override
+  String get failureUnknown => 'Unknown error';
+
+  @override
+  String get alreadyHasActiveSubscription =>
+      'You already have an active subscription on this route';
+
+  @override
+  String get licenseNotActive => 'License is not active';
+
+  @override
+  String get bluetoothRequired =>
+      'Please enable Bluetooth to use proximity boarding';
 }

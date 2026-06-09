@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/formatting.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
@@ -33,6 +34,11 @@ class TripTrackingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+          create: (_) => TrackingBloc(
+            tripRepository: sl<TripRepository>(),
+          ),
+        ),
         BlocProvider(
           create: (_) => TripDetailsCubit(
             routeRepository: sl<RouteRepository>(),
@@ -148,7 +154,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
               } else if (state is TrackingError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.failure.message ?? l10n.error),
+                    content: Text(state.failure.toLocalizedString(context)),
                     backgroundColor: AppColors.error,
                   ),
                 );
@@ -189,7 +195,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
-                      state.failure.message ?? l10n.error,
+                      state.failure.toLocalizedString(context),
                       style: Theme.of(context).textTheme.bodyLarge,
                     ),
                   ],
@@ -270,20 +276,25 @@ class _TrackingView extends StatelessWidget {
     ];
 
     String? etaText;
-    if (hasLocation && trip.routeStartLocation != null) {
-      final startLoc = trip.routeStartLocation!;
-      final driverLoc = state.driverLocation!;
+    if (hasLocation) {
+      final targetLoc = (trip.status == TripStatus.inTransit)
+          ? trip.routeEndLocation
+          : trip.routeStartLocation;
 
-      final distance = const geo.Distance().as(
-        geo.LengthUnit.Meter,
-        geo.LatLng(startLoc.latitude, startLoc.longitude),
-        geo.LatLng(driverLoc.latitude, driverLoc.longitude),
-      );
+      if (targetLoc != null) {
+        final driverLoc = state.driverLocation!;
 
-      final distanceKm = (distance / 1000).toStringAsFixed(1);
-      final minutes = (distance / 500).round();
+        final distance = const geo.Distance().as(
+          geo.LengthUnit.Meter,
+          geo.LatLng(targetLoc.latitude, targetLoc.longitude),
+          geo.LatLng(driverLoc.latitude, driverLoc.longitude),
+        );
 
-      etaText = l10n.etaDistance(distanceKm, '$minutes');
+        final distanceKm = (distance / 1000).toStringAsFixed(1);
+        final minutes = (distance / 500).round();
+
+        etaText = l10n.etaDistance(distanceKm, '$minutes');
+      }
     }
 
     return BlocBuilder<TrackingUiCubit, TrackingUiState>(
@@ -297,6 +308,49 @@ class _TrackingView extends StatelessWidget {
                 routePoints: uiState.routePoints,
               ),
             ),
+            if (uiState.isApproximate)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + AppSpacing.md,
+                left: AppSpacing.md,
+                right: AppSpacing.md,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.sm,
+                    horizontal: AppSpacing.md,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          l10n.approximateRouteWarning,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Positioned(
               left: AppSpacing.md,
               right: AppSpacing.md,
@@ -613,7 +667,7 @@ class _DriverSection extends StatelessWidget {
                       messenger.showSnackBar(
                         SnackBar(
                           content: Text(
-                            failure.message ?? l10n.failedToStartChat,
+                            failure.toLocalizedString(context),
                           ),
                           backgroundColor: AppColors.error,
                         ),

@@ -25,7 +25,7 @@ void main() {
     mockBle = MockBleBeaconService();
     bleController = StreamController<({TripId tripId, String otp})>.broadcast();
 
-    when(() => mockBle.startScanning()).thenAnswer((_) async {});
+    when(() => mockBle.startScanning()).thenAnswer((_) async => true);
     when(() => mockBle.stopScanning()).thenAnswer((_) async {});
     when(() => mockBle.discoveredTrips).thenAnswer((_) => bleController.stream);
   });
@@ -153,15 +153,14 @@ void main() {
 
       expect(cubit.state, isA<BoardingQrError>());
       final error = cubit.state as BoardingQrError;
-      expect(error.message, equals('no internet'));
+      expect(error.failure, const ServerFailure(message: 'no internet'));
 
       await cubit.close();
     });
 
-    test('start() falls back to unknown_error when failure.message is null',
-        () async {
+    test('start() preserves failure when failure.message is null', () async {
       when(() => mockRepo.getActiveTripForSubscription()).thenAnswer(
-        (_) async => const Left<Failure, TripId?>(ServerFailure(message: null)),
+        (_) async => const Left<Failure, TripId?>(ServerFailure()),
       );
 
       final cubit = BoardingQrCubit(
@@ -173,7 +172,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
 
       final error = cubit.state as BoardingQrError;
-      expect(error.message, equals('unknown_error'));
+      expect(error.failure, const ServerFailure());
 
       await cubit.close();
     });
@@ -199,7 +198,7 @@ void main() {
 
       expect(cubit.state, isA<BoardingQrError>());
       final error = cubit.state as BoardingQrError;
-      expect(error.message, equals('rate limit'));
+      expect(error.failure, const ServerFailure(message: 'rate limit'));
 
       verify(() => mockRepo.generateBoardingToken(tripId)).called(1);
 

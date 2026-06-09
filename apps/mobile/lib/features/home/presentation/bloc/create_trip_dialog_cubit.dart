@@ -12,12 +12,12 @@ class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
 
   /// Loads the routes associated with the current driver.
   Future<void> loadRoutes() async {
-    emit(state.copyWith(loadingRoutes: true));
+    emit(state.copyWith(loadingRoutes: true, clearError: true));
     final result = await _routeRepository.getMyDriverRoutes();
     result.fold(
       (failure) => emit(
         state.copyWith(
-          errorMessage: failure.message,
+          failure: failure,
         ),
       ),
       (routes) => emit(
@@ -54,11 +54,11 @@ class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
     );
   }
 
-  /// Sets or clears the error message in the state.
-  void setError(String? message) {
+  /// Sets or clears the failure in the state.
+  void setError(Failure? failure) {
     emit(
       state.copyWith(
-        errorMessage: message,
+        failure: failure,
       ),
     );
   }
@@ -73,7 +73,7 @@ class CreateTripDialogState {
     this.scheduledAt,
     this.isSubmitting = false,
     this.loadingRoutes = true,
-    this.errorMessage,
+    this.failure,
   });
 
   /// The list of available routes.
@@ -91,8 +91,8 @@ class CreateTripDialogState {
   /// Whether the routes are currently loading.
   final bool loadingRoutes;
 
-  /// The error message if any occurred during the process.
-  final String? errorMessage;
+  /// The failure if any occurred during the process.
+  final Failure? failure;
 
   /// Creates a copy of the state with modified fields.
   CreateTripDialogState copyWith({
@@ -102,7 +102,7 @@ class CreateTripDialogState {
     DateTime? scheduledAt,
     bool isSubmitting = false,
     bool loadingRoutes = false,
-    String? errorMessage,
+    Failure? failure,
     bool clearError = false,
   }) {
     return CreateTripDialogState(
@@ -112,7 +112,7 @@ class CreateTripDialogState {
       scheduledAt: scheduledAt ?? this.scheduledAt,
       isSubmitting: isSubmitting,
       loadingRoutes: loadingRoutes,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      failure: clearError ? null : (failure ?? this.failure),
     );
   }
 }

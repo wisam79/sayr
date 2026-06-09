@@ -6,15 +6,15 @@ pre-commit:
       run: dart format {staged_files}
       stage_fixed: true
     analyze:
-      run: melos run analyze
+      run: melos run analyze:strict --no-select
+      fail_text: "❌ Flutter analyze failed. Run 'melos run analyze:strict' to see errors."
+    format:check:
+      run: melos run format:check --no-select
+      fail_text: "❌ Dart format check failed. Run 'melos run format' to fix."
 
 pre-push:
   parallel: false
   commands:
     test:all:
-      run: melos run test
-
-commit-msg:
-  commands:
-    conventional:
-      run: cz check --commit-msg-file {1}
+      run: melos run test --no-select
+      fail_text: "❌ Tests failed. Run 'melos run test' to see failures."

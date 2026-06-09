@@ -24,70 +24,74 @@ import 'package:sayr_core/src/fsm/trip_event.dart';
 class TripStateMachine {
   const TripStateMachine._();
 
-  /// Internal transition map.
-  static const Map<TripStatus, Map<String, TripStatus>> _transitions = {
-    TripStatus.scheduled: {
-      'arrive': TripStatus.driverWaiting,
-      'markAbsent': TripStatus.absent,
-      'cancel': TripStatus.cancelled,
-    },
-    TripStatus.driverWaiting: {
-      'start': TripStatus.inTransit,
-      'markAbsent': TripStatus.absent,
-      'cancel': TripStatus.cancelled,
-    },
-    TripStatus.inTransit: {
-      'complete': TripStatus.completed,
-      'cancel': TripStatus.cancelled,
-    },
-    TripStatus.absent: {
-      'cancel': TripStatus.cancelled,
-    },
-    TripStatus.completed: {},
-    TripStatus.cancelled: {},
-  };
-
   /// Returns the next [TripStatus] for a given [from] state and [event],
   /// or `null` if the transition is not allowed.
   static TripStatus? transition(TripStatus from, TripEvent event) {
-    return _transitions[from]?[event.name];
+    return switch ((from, event)) {
+      (TripStatus.scheduled, TripEvent.arrive) => TripStatus.driverWaiting,
+      (TripStatus.scheduled, TripEvent.markAbsent) => TripStatus.absent,
+      (TripStatus.scheduled, TripEvent.cancel) => TripStatus.cancelled,
+      (TripStatus.driverWaiting, TripEvent.start) => TripStatus.inTransit,
+      (TripStatus.driverWaiting, TripEvent.markAbsent) => TripStatus.absent,
+      (TripStatus.driverWaiting, TripEvent.cancel) => TripStatus.cancelled,
+      (TripStatus.inTransit, TripEvent.complete) => TripStatus.completed,
+      (TripStatus.inTransit, TripEvent.cancel) => TripStatus.cancelled,
+      (TripStatus.absent, TripEvent.cancel) => TripStatus.cancelled,
+      _ => null,
+    };
   }
 
   /// Returns `true` if the transition is valid.
   static bool canTransition(TripStatus from, TripEvent event) {
-    return _transitions[from]?.containsKey(event.name) ?? false;
+    return transition(from, event) != null;
   }
 
   /// Returns `true` if the state is terminal (no further transitions).
   static bool isTerminal(TripStatus state) {
-    return _transitions[state]?.isEmpty ?? true;
+    return switch (state) {
+      TripStatus.completed || TripStatus.cancelled => true,
+      _ => false,
+    };
   }
 
   /// Returns all valid events from a given state.
   static List<TripEvent> validEventsFrom(TripStatus state) {
-    final events = _transitions[state]?.keys.toList() ?? <String>[];
-    return events.map(_eventFromName).whereType<TripEvent>().toList();
+    return switch (state) {
+      TripStatus.scheduled => const [
+          TripEvent.arrive,
+          TripEvent.markAbsent,
+          TripEvent.cancel,
+        ],
+      TripStatus.driverWaiting => const [
+          TripEvent.start,
+          TripEvent.markAbsent,
+          TripEvent.cancel,
+        ],
+      TripStatus.inTransit => const [TripEvent.complete, TripEvent.cancel],
+      TripStatus.absent => const [TripEvent.cancel],
+      TripStatus.completed || TripStatus.cancelled => const [],
+    };
   }
 
   /// Returns all valid next states from a given state.
   static List<TripStatus> validNextStates(TripStatus state) {
-    return _transitions[state]?.values.toList() ?? <TripStatus>[];
-  }
-
-  static TripEvent? _eventFromName(String name) {
-    switch (name) {
-      case 'arrive':
-        return TripEvent.arrive;
-      case 'start':
-        return TripEvent.start;
-      case 'complete':
-        return TripEvent.complete;
-      case 'markAbsent':
-        return TripEvent.markAbsent;
-      case 'cancel':
-        return TripEvent.cancel;
-      default:
-        return null;
-    }
+    return switch (state) {
+      TripStatus.scheduled => const [
+          TripStatus.driverWaiting,
+          TripStatus.absent,
+          TripStatus.cancelled,
+        ],
+      TripStatus.driverWaiting => const [
+          TripStatus.inTransit,
+          TripStatus.absent,
+          TripStatus.cancelled,
+        ],
+      TripStatus.inTransit => const [
+          TripStatus.completed,
+          TripStatus.cancelled,
+        ],
+      TripStatus.absent => const [TripStatus.cancelled],
+      TripStatus.completed || TripStatus.cancelled => const [],
+    };
   }
 }

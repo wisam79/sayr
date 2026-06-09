@@ -15,7 +15,7 @@ class RouteDetailsCubit extends Cubit<RouteDetailsState> {
     emit(const RouteDetailsLoading());
     final result = await _routeRepository.getById(routeId);
     result.fold(
-      (failure) => emit(RouteDetailsError(failure.message ?? '')),
+      (failure) => emit(RouteDetailsError(failure)),
       (route) => emit(RouteDetailsLoaded(route)),
     );
   }
@@ -56,8 +56,8 @@ class RouteDetailsLoaded extends RouteDetailsState {
 /// State when loading route details fails.
 class RouteDetailsError extends RouteDetailsState {
   /// Constructor for [RouteDetailsError].
-  const RouteDetailsError(this.message);
+  const RouteDetailsError(this.failure);
 
-  /// The error message.
-  final String message;
+  /// The failure.
+  final Failure failure;
 }

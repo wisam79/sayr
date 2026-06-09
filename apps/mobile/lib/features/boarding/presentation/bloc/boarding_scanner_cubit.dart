@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_data/sayr_data.dart';
 
 /// State for the driver-side boarding scanner.
 sealed class BoardingScannerState {
@@ -24,8 +25,8 @@ class BoardingScannerReady extends BoardingScannerState {
 }
 
 class BoardingScannerError extends BoardingScannerState {
-  const BoardingScannerError({required this.message});
-  final String message;
+  const BoardingScannerError({required this.failure});
+  final Failure failure;
 }
 
 /// Result of a single QR scan attempt.
@@ -39,8 +40,8 @@ class BoardingScanSuccess extends BoardingScanResult {
 }
 
 class BoardingScanFailure extends BoardingScanResult {
-  const BoardingScanFailure({required this.reason});
-  final String reason;
+  const BoardingScanFailure({required this.failure});
+  final Failure failure;
 }
 
 /// Cubit for the driver-side boarding scanner.
@@ -75,7 +76,10 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
         );
       },
       onError: (Object error) {
-        emit(BoardingScannerError(message: error.toString()));
+        final failure = _boardingRepository is BaseRepository
+            ? (_boardingRepository as BaseRepository).mapException(error)
+            : UnknownFailure(message: error.toString());
+        emit(BoardingScannerError(failure: failure));
       },
     );
   }
@@ -98,7 +102,7 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
             tripId: _tripId,
             passengers: passengers,
             lastScan: BoardingScanFailure(
-              reason: failure.message ?? 'unknown_error',
+              failure: failure,
             ),
           ),
         );

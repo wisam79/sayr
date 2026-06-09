@@ -1,12 +1,13 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/formatting.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/di/di.dart';
@@ -22,76 +23,58 @@ import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 /// Driver view: trip lifecycle controls + live location streaming.
 class DriverTripControlsPage extends StatefulWidget {
   /// Creates a [DriverTripControlsPage].
-  const DriverTripControlsPage({required this.tripId, super.key});
+  const DriverTripControlsPage({
+    required this.tripId,
+    this.trackingBloc,
+    super.key,
+  });
 
   /// The active trip ID.
   final TripId tripId;
+
+  /// Optional [TrackingBloc] for testing.
+  final TrackingBloc? trackingBloc;
 
   @override
   State<DriverTripControlsPage> createState() => _DriverTripControlsPageState();
 }
 
 class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
+  final Logger _logger = Logger();
+  late final TrackingBloc _trackingBloc;
   geo.LocationSettings? _locationSettings;
   StreamSubscription<geo.Position>? _positionSubscription;
-  Timer? _bleOtpTimer;
   geo.Position? _lastSentPosition;
   DateTime? _lastSentTime;
 
   @override
   void initState() {
     super.initState();
-    context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: widget.tripId));
+    _trackingBloc = widget.trackingBloc ??
+        TrackingBloc(tripRepository: sl<TripRepository>());
+    if (widget.trackingBloc == null) {
+      _trackingBloc.add(TrackingWatchTrip(tripId: widget.tripId));
+    }
   }
 
   @override
   void dispose() {
+    _trackingBloc.close();
     _stopLocationTracking();
     _stopBleProximity();
     super.dispose();
   }
 
-  String _generateOtp() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final rnd = Random();
-    return String.fromCharCodes(
-      Iterable.generate(6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))),
+  void _startBleProximity(TripId tripId) {
+    sl<BleBeaconService>().startRotatingOtpAdvertising(
+      tripId: tripId,
+      tripRepository: sl<TripRepository>(),
+      logger: _logger,
     );
   }
 
-  void _startBleProximity(TripId tripId) {
-    if (_bleOtpTimer != null) return;
-
-    final bleService = sl<BleBeaconService>();
-    final tripRepo = sl<TripRepository>();
-
-    Future<void> updateOtp() async {
-      final otp = _generateOtp();
-      final expiresAt = DateTime.now().add(const Duration(seconds: 45));
-
-      // Update database
-      await tripRepo.updateBleOtp(
-        tripId: tripId,
-        otp: otp,
-        expiresAt: expiresAt,
-      );
-
-      // Refresh advertising
-      await bleService.startAdvertising(tripId: tripId, otp: otp);
-    }
-
-    // Initial trigger
-    updateOtp();
-
-    // Rotate OTP every 30 seconds
-    _bleOtpTimer =
-        Timer.periodic(const Duration(seconds: 30), (_) => updateOtp());
-  }
-
   void _stopBleProximity() {
-    _bleOtpTimer?.cancel();
-    _bleOtpTimer = null;
-    sl<BleBeaconService>().stopAdvertising();
+    sl<BleBeaconService>().stopRotatingOtpAdvertising();
   }
 
   Future<void> _startLocationTracking(TripId tripId) async {
@@ -111,7 +94,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
 
     _locationSettings = const geo.LocationSettings(
       accuracy: geo.LocationAccuracy.high,
-      distanceFilter: 20,
     );
 
     _positionSubscription =
@@ -183,95 +165,98 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          l10n.tripControl,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+    return BlocProvider.value(
+      value: _trackingBloc,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            l10n.tripControl,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
         ),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      extendBodyBehindAppBar: true,
-      body: BlocConsumer<TrackingBloc, TrackingState>(
-        listener: (context, state) {
-          if (state is TrackingDriverActive) {
-            if (state.isTrackingLocation) {
-              if (_positionSubscription == null) {
-                _startLocationTracking(state.trip.id);
+        extendBodyBehindAppBar: true,
+        body: BlocConsumer<TrackingBloc, TrackingState>(
+          listener: (context, state) {
+            if (state is TrackingDriverActive) {
+              if (state.isTrackingLocation) {
+                if (_positionSubscription == null) {
+                  _startLocationTracking(state.trip.id);
+                }
               }
-            }
-            final status = state.trip.status;
-            if (status == TripStatus.driverWaiting ||
-                status == TripStatus.inTransit) {
-              _startBleProximity(state.trip.id);
+              final status = state.trip.status;
+              if (status == TripStatus.driverWaiting ||
+                  status == TripStatus.inTransit) {
+                _startBleProximity(state.trip.id);
+              } else {
+                _stopBleProximity();
+              }
+            } else if (state is TrackingError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.failure.toLocalizedString(context)),
+                  backgroundColor: AppColors.error,
+                ),
+              );
             } else {
+              _stopLocationTracking();
               _stopBleProximity();
             }
-          } else if (state is TrackingError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.failure.message ?? l10n.errorOccurred),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          } else {
-            _stopLocationTracking();
-            _stopBleProximity();
-          }
-        },
-        builder: (context, state) {
-          if (state is TrackingDriverActive) {
-            return _buildDriverView(state);
-          }
-          if (state is TrackingError) {
-            final previous = state.previousState;
-            if (previous is TrackingDriverActive) {
-              return _buildDriverView(previous);
+          },
+          builder: (context, state) {
+            if (state is TrackingDriverActive) {
+              return _buildDriverView(state);
             }
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Text(
-                  state.failure.message ?? l10n.errorOccurred,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                  textAlign: TextAlign.center,
+            if (state is TrackingError) {
+              final previous = state.previousState;
+              if (previous is TrackingDriverActive) {
+                return _buildDriverView(previous);
+              }
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.xl),
+                  child: Text(
+                    state.failure.toLocalizedString(context),
+                    style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
+              );
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
+        floatingActionButton: BlocBuilder<TrackingBloc, TrackingState>(
+          buildWhen: (prev, curr) {
+            final prevId = prev.maybeWhen(
+              driverActive: (t, _, __, ___, ____) => t.id,
+              orElse: () => null,
             );
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
-      floatingActionButton: BlocBuilder<TrackingBloc, TrackingState>(
-        buildWhen: (prev, curr) {
-          final prevId = prev.maybeWhen(
-            driverActive: (t, _, __, ___, ____) => t.id,
-            orElse: () => null,
-          );
-          final currId = curr.maybeWhen(
-            driverActive: (t, _, __, ___, ____) => t.id,
-            orElse: () => null,
-          );
-          return prevId != currId;
-        },
-        builder: (context, state) {
-          final tripId = state.maybeWhen(
-            driverActive: (t, _, __, ___, ____) => t.id,
-            orElse: () => null,
-          );
-          final routeId = state.maybeWhen(
-            driverActive: (t, _, __, ___, ____) => t.routeId,
-            orElse: () => null,
-          );
-          if (tripId == null || routeId == null) {
-            return const SizedBox.shrink();
-          }
-          return Padding(
-            padding: const EdgeInsetsDirectional.only(bottom: 12),
-            child: EmergencySosButton(tripId: tripId, routeId: routeId),
-          );
-        },
+            final currId = curr.maybeWhen(
+              driverActive: (t, _, __, ___, ____) => t.id,
+              orElse: () => null,
+            );
+            return prevId != currId;
+          },
+          builder: (context, state) {
+            final tripId = state.maybeWhen(
+              driverActive: (t, _, __, ___, ____) => t.id,
+              orElse: () => null,
+            );
+            final routeId = state.maybeWhen(
+              driverActive: (t, _, __, ___, ____) => t.routeId,
+              orElse: () => null,
+            );
+            if (tripId == null || routeId == null) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsetsDirectional.only(bottom: 12),
+              child: EmergencySosButton(tripId: tripId, routeId: routeId),
+            );
+          },
+        ),
       ),
     );
   }

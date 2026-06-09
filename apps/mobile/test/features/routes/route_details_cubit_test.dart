@@ -75,7 +75,7 @@ void main() {
     ],
     verify: (cubit) {
       final state = cubit.state as RouteDetailsError;
-      expect(state.message, 'not found');
+      expect(state.failure, const ServerFailure(message: 'not found'));
     },
   );
 

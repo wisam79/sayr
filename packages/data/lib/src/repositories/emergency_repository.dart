@@ -1,13 +1,14 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/emergency_report_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of EmergencyRepository using Remote data source.
 @LazySingleton(as: EmergencyRepository)
-class EmergencyRepositoryImpl implements EmergencyRepository {
+class EmergencyRepositoryImpl extends BaseRepository
+    implements EmergencyRepository {
   EmergencyRepositoryImpl({
     required RemoteDatasource remoteDatasource,
   }) : _remoteDatasource = remoteDatasource;
@@ -20,10 +21,10 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
     required Coordinates location,
     String? message,
   }) async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, EmergencyReport>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
       final reportId = await _remoteDatasource.triggerEmergency(
@@ -44,26 +45,22 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
         createdAt: DateTime.now().toUtc(),
       );
 
-      return Right<Failure, EmergencyReport>(model.toEntity());
-    } catch (e) {
-      return Left<Failure, EmergencyReport>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+      return model.toEntity();
+    });
   }
 
   @override
   Future<Either<Failure, EmergencyReport?>> getActiveReport() async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, EmergencyReport?>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
       final response =
           await _remoteDatasource.getActiveEmergencyReport(currentUserId);
       if (response == null) {
-        return const Right<Failure, EmergencyReport?>(null);
+        return null;
       }
 
       // Map latitude and longitude properly for DTO
@@ -73,26 +70,18 @@ class EmergencyRepositoryImpl implements EmergencyRepository {
         'longitude': (response['longitude'] as num).toDouble(),
       };
 
-      return Right<Failure, EmergencyReport?>(
-        EmergencyReportModel.fromJson(map).toEntity(),
-      );
-    } catch (e) {
-      return Left<Failure, EmergencyReport?>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+      return EmergencyReportModel.fromJson(map).toEntity();
+    });
   }
 
   @override
   Future<Either<Failure, Unit>> resolveReport(EmergencyReportId id) async {
-    try {
+    return guard(() async {
       await _remoteDatasource.resolveEmergencyReport(
         id: id.value,
         resolvedAt: DateTime.now().toUtc().toIso8601String(),
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 }

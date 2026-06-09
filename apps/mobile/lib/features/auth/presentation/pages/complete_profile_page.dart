@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
@@ -53,7 +54,7 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
         if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.failure.message ?? ''),
+              content: Text(state.failure.toLocalizedString(context)),
               backgroundColor: colorScheme.error,
             ),
           );
@@ -171,7 +172,7 @@ class _InstitutionDropdown extends StatelessWidget {
         }
 
         return DropdownButtonFormField<String>(
-          // ignore: deprecated_member_use
+          // ignore: deprecated_member_use — DropdownButtonFormField has no non-deprecated null-safe override
           value: state.selectedInstitutionId,
           decoration: InputDecoration(
             labelText: l10n.university,

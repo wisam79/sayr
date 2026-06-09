@@ -42,7 +42,7 @@ void main() {
     expect(cubit.state.scheduledAt, isNull);
     expect(cubit.state.isSubmitting, isFalse);
     expect(cubit.state.loadingRoutes, isTrue);
-    expect(cubit.state.errorMessage, isNull);
+    expect(cubit.state.failure, isNull);
   });
 
   group('loadRoutes', () {
@@ -59,7 +59,7 @@ void main() {
         expect(cubit.state.routes, hasLength(1));
         expect(cubit.state.selectedRoute, testRoute);
         expect(cubit.state.loadingRoutes, isFalse);
-        expect(cubit.state.errorMessage, isNull);
+        expect(cubit.state.failure, isNull);
       },
     );
 
@@ -75,7 +75,10 @@ void main() {
       },
       act: (cubit) => cubit.loadRoutes(),
       verify: (cubit) {
-        expect(cubit.state.errorMessage, 'network error');
+        expect(
+          cubit.state.failure,
+          const ServerFailure(message: 'network error'),
+        );
         expect(cubit.state.loadingRoutes, isFalse);
         expect(cubit.state.selectedRoute, isNull);
       },
@@ -98,11 +101,13 @@ void main() {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'updates scheduledAt and clears error',
       build: () => CreateTripDialogCubit(routeRepository: mockRepo),
-      seed: () => const CreateTripDialogState(errorMessage: 'old error'),
+      seed: () => const CreateTripDialogState(
+        failure: ServerFailure(message: 'old error'),
+      ),
       act: (cubit) => cubit.updateScheduledAt(DateTime(2026, 1, 1, 10)),
       verify: (cubit) {
         expect(cubit.state.scheduledAt, DateTime(2026, 1, 1, 10));
-        expect(cubit.state.errorMessage, isNull);
+        expect(cubit.state.failure, isNull);
       },
     );
   });
@@ -111,11 +116,12 @@ void main() {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'setSubmitting(true) sets isSubmitting and clears error',
       build: () => CreateTripDialogCubit(routeRepository: mockRepo),
-      seed: () => const CreateTripDialogState(errorMessage: 'old'),
+      seed: () =>
+          const CreateTripDialogState(failure: ServerFailure(message: 'old')),
       act: (cubit) => cubit.setSubmitting(isSubmitting: true),
       verify: (cubit) {
         expect(cubit.state.isSubmitting, isTrue);
-        expect(cubit.state.errorMessage, isNull);
+        expect(cubit.state.failure, isNull);
       },
     );
 
@@ -123,9 +129,9 @@ void main() {
       'setError sets error message and stops submitting',
       build: () => CreateTripDialogCubit(routeRepository: mockRepo),
       seed: () => const CreateTripDialogState(isSubmitting: true),
-      act: (cubit) => cubit.setError('boom'),
+      act: (cubit) => cubit.setError(const ServerFailure(message: 'boom')),
       verify: (cubit) {
-        expect(cubit.state.errorMessage, 'boom');
+        expect(cubit.state.failure, const ServerFailure(message: 'boom'));
         expect(cubit.state.isSubmitting, isFalse);
       },
     );

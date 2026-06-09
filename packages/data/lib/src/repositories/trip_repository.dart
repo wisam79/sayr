@@ -5,10 +5,11 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/trip_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of TripRepository using Remote and Local data sources.
 @LazySingleton(as: TripRepository)
-class TripRepositoryImpl implements TripRepository {
+class TripRepositoryImpl extends BaseRepository implements TripRepository {
   TripRepositoryImpl({
     required RemoteDatasource remoteDatasource,
     required LocalDatasource localDatasource,
@@ -47,7 +48,7 @@ class TripRepositoryImpl implements TripRepository {
           stackTrace: st,
         );
       }
-      return Left<Failure, List<Trip>>(ServerFailure(message: e.toString()));
+      return Left<Failure, List<Trip>>(mapException(e));
     }
   }
 
@@ -56,19 +57,17 @@ class TripRepositoryImpl implements TripRepository {
     required RouteId routeId,
     required DateTime scheduledAt,
   }) async {
-    try {
+    return guard(() async {
       final tripId = await _remoteDatasource.createTrip(
         routeId: routeId.value,
         scheduledAt: scheduledAt,
       );
       final response = await _remoteDatasource.getTripById(tripId);
       if (response == null) {
-        return const Left<Failure, Trip>(NotFoundFailure(resource: 'trip'));
+        throw const NotFoundFailure(resource: 'trip');
       }
-      return Right<Failure, Trip>(TripModel.fromJson(response).toEntity());
-    } catch (e) {
-      return Left<Failure, Trip>(ServerFailure(message: e.toString()));
-    }
+      return TripModel.fromJson(response).toEntity();
+    });
   }
 
   @override
@@ -101,7 +100,7 @@ class TripRepositoryImpl implements TripRepository {
           stackTrace: st,
         );
       }
-      return Left<Failure, Trip>(ServerFailure(message: e.toString()));
+      return Left<Failure, Trip>(mapException(e));
     }
   }
 
@@ -124,17 +123,15 @@ class TripRepositoryImpl implements TripRepository {
             ),
           );
         }
-        try {
+        return guard(() async {
           final response = await _remoteDatasource.updateTripStatus(
             tripId: tripId.value,
             newStatus: _statusToDb(newStatus),
             lat: location?.latitude,
             lng: location?.longitude,
           );
-          return Right<Failure, Trip>(TripModel.fromJson(response).toEntity());
-        } catch (e) {
-          return Left<Failure, Trip>(ServerFailure(message: e.toString()));
-        }
+          return TripModel.fromJson(response).toEntity();
+        });
       },
     );
   }
@@ -161,7 +158,7 @@ class TripRepositoryImpl implements TripRepository {
         );
         return const Right<Failure, Unit>(unit);
       } catch (dbErr) {
-        return Left<Failure, Unit>(ServerFailure(message: dbErr.toString()));
+        return Left<Failure, Unit>(mapException(dbErr));
       }
     }
   }
@@ -172,16 +169,14 @@ class TripRepositoryImpl implements TripRepository {
     required String otp,
     required DateTime expiresAt,
   }) async {
-    try {
+    return guard(() async {
       await _remoteDatasource.updateTripBleOtp(
         tripId: tripId.value,
         otp: otp,
         expiresAt: expiresAt.toUtc().toIso8601String(),
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   @override
@@ -194,7 +189,7 @@ class TripRepositoryImpl implements TripRepository {
             })>
         locations,
   ) async {
-    try {
+    return guard(() async {
       final locationsJson = locations
           .map(
             (l) => {
@@ -206,10 +201,8 @@ class TripRepositoryImpl implements TripRepository {
           .toList();
 
       await _remoteDatasource.bulkUpdateTripLocations(locationsJson);
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   String _statusToDb(TripStatus status) {

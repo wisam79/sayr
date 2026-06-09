@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_state.dart';
@@ -60,7 +61,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
           if (state is NotificationsError) {
             SayrFlash.error(
               context,
-              state.failure.message ?? l10n.loadFailed,
+              state.failure.toLocalizedString(context),
             );
           }
         },
@@ -178,7 +179,7 @@ class _ErrorBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              failure.message ?? l10n.errorOccurred,
+              failure.toLocalizedString(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),

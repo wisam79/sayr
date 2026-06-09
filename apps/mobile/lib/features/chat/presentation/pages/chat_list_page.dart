@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_state.dart';
@@ -47,7 +48,7 @@ class _ChatListPageState extends State<ChatListPage> {
           if (state is ChatListError) {
             SayrFlash.error(
               context,
-              state.failure.message ?? l10n.errorOccurred,
+              state.failure.toLocalizedString(context),
             );
           }
         },
@@ -161,7 +162,7 @@ class _ErrorBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              failure.message ?? l10n.errorOccurred,
+              failure.toLocalizedString(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.lg),

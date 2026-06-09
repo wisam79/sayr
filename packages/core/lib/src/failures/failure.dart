@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 ///
 /// A [Failure] is the typed error returned from a use case
 /// or repository operation. UI layer maps these to user-facing messages.
-sealed class Failure extends Equatable {
+sealed class Failure extends Equatable implements Exception {
   const Failure({this.message});
 
   /// Human-readable message (in user's locale).
@@ -19,12 +19,12 @@ sealed class Failure extends Equatable {
 
 /// Network connectivity error.
 class NetworkFailure extends Failure {
-  const NetworkFailure({super.message = 'لا يوجد اتصال بالإنترنت'});
+  const NetworkFailure({super.message});
 }
 
 /// Server-side error (5xx, unexpected).
 class ServerFailure extends Failure {
-  const ServerFailure({super.message = 'خطأ في الخادم', this.statusCode});
+  const ServerFailure({super.message, this.statusCode});
 
   /// HTTP status code if available.
   final int? statusCode;
@@ -35,17 +35,17 @@ class ServerFailure extends Failure {
 
 /// Authentication error (401).
 class UnauthorizedFailure extends Failure {
-  const UnauthorizedFailure({super.message = 'غير مصرح'});
+  const UnauthorizedFailure({super.message});
 }
 
 /// Authorization error (403) - user lacks permission.
 class ForbiddenFailure extends Failure {
-  const ForbiddenFailure({super.message = 'غير مسموح'});
+  const ForbiddenFailure({super.message});
 }
 
 /// Resource not found (404).
 class NotFoundFailure extends Failure {
-  const NotFoundFailure({super.message = 'غير موجود', this.resource});
+  const NotFoundFailure({super.message, this.resource});
 
   /// Name of the resource that was not found.
   final String? resource;
@@ -57,7 +57,7 @@ class NotFoundFailure extends Failure {
 /// Validation error (422).
 class ValidationFailure extends Failure {
   const ValidationFailure({
-    super.message = 'بيانات غير صحيحة',
+    super.message,
     this.errors = const <String>[],
   });
 
@@ -71,7 +71,7 @@ class ValidationFailure extends Failure {
 /// Rate limit exceeded (429).
 class RateLimitFailure extends Failure {
   const RateLimitFailure({
-    super.message = 'تجاوزت الحد المسموح',
+    super.message,
     this.retryAfter,
   });
 
@@ -84,7 +84,7 @@ class RateLimitFailure extends Failure {
 
 /// Cache/Local storage error.
 class CacheFailure extends Failure {
-  const CacheFailure({super.message = 'خطأ في التخزين المحلي'});
+  const CacheFailure({super.message});
 }
 
 /// Domain-specific failure: business rule violation.
@@ -95,7 +95,7 @@ class BusinessRuleFailure extends Failure {
 /// State machine transition failure.
 class InvalidStateTransitionFailure extends Failure {
   const InvalidStateTransitionFailure({
-    super.message = 'انتقال حالة غير مسموح',
+    super.message,
     this.from,
     this.event,
   });
@@ -112,5 +112,5 @@ class InvalidStateTransitionFailure extends Failure {
 
 /// Unknown error (catch-all).
 class UnknownFailure extends Failure {
-  const UnknownFailure({super.message = 'خطأ غير معروف'});
+  const UnknownFailure({super.message});
 }

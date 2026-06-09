@@ -180,7 +180,7 @@ void main() {
             expect(failure, isA<BusinessRuleFailure>());
             expect(
               (failure as BusinessRuleFailure).message,
-              contains('لديك اشتراك نشط'),
+              contains('already_has_active_subscription'),
             );
           },
           (_) => fail('should fail'),
@@ -200,7 +200,7 @@ void main() {
             expect(failure, isA<BusinessRuleFailure>());
             expect(
               (failure as BusinessRuleFailure).message,
-              contains('الترخيص غير مفعّل'),
+              contains('license_not_active'),
             );
           },
           (_) => fail('should fail'),

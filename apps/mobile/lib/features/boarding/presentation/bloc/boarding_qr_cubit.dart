@@ -68,8 +68,8 @@ class BoardingQrReady extends BoardingQrState {
 }
 
 class BoardingQrError extends BoardingQrState {
-  const BoardingQrError({required this.message});
-  final String message;
+  const BoardingQrError({required this.failure});
+  final Failure failure;
 }
 
 /// Cubit for the student-side QR boarding page.
@@ -100,7 +100,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final result = await _boardingRepository.getActiveTripForSubscription();
     await result.fold(
       (failure) async {
-        emit(BoardingQrError(message: failure.message ?? 'unknown_error'));
+        emit(BoardingQrError(failure: failure));
       },
       (tripId) async {
         if (tripId == null) {
@@ -109,14 +109,22 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
         }
         _activeTripId = tripId;
         await _refreshToken();
-        _startBleScanning();
+        await _startBleScanning();
       },
     );
   }
 
-  void _startBleScanning() {
-    _bleSubscription?.cancel();
-    _bleBeaconService.startScanning();
+  Future<void> _startBleScanning() async {
+    unawaited(_bleSubscription?.cancel());
+    final started = await _bleBeaconService.startScanning();
+    if (!started) {
+      emit(
+        const BoardingQrError(
+          failure: ValidationFailure(message: 'bluetooth_disabled'),
+        ),
+      );
+      return;
+    }
     _bleSubscription = _bleBeaconService.discoveredTrips.listen((data) {
       final current = state;
       if (current is BoardingQrReady) {
@@ -168,7 +176,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final result = await _boardingRepository.generateBoardingToken(tripId);
     result.fold(
       (failure) => emit(
-        BoardingQrError(message: failure.message ?? 'unknown_error'),
+        BoardingQrError(failure: failure),
       ),
       (tokenResult) {
         _currentExpiresAt = tokenResult.expiresAt;

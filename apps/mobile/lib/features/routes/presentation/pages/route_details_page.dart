@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/route_details_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
@@ -67,9 +68,7 @@ class _RouteDetailsContent extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    state.message.isEmpty
-                        ? l10n.routeLoadFailed
-                        : state.message,
+                    state.failure.toLocalizedString(context),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   if (routeId != null)

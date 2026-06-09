@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_state.dart';
@@ -68,7 +69,7 @@ class _ChatPageState extends State<ChatPage> {
           if (state is ChatError) {
             SayrFlash.error(
               context,
-              state.failure.message ?? l10n.failedToLoadMessages,
+              state.failure.toLocalizedString(context),
             );
           }
           if (state is ChatLoaded) {
@@ -197,7 +198,6 @@ class _ChatErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
@@ -211,7 +211,7 @@ class _ChatErrorBody extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              failure.message ?? l10n.errorOccurred,
+              failure.toLocalizedString(context),
               textAlign: TextAlign.center,
             ),
           ],

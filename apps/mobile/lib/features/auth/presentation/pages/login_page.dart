@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
@@ -62,7 +63,7 @@ class _LoginViewState extends State<_LoginView> {
             if (state is AuthError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.failure.message ?? l10n.unknownError),
+                  content: Text(state.failure.toLocalizedString(context)),
                   backgroundColor: AppColors.error,
                 ),
               );

@@ -2,10 +2,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of [RatingRepository] using the remote datasource.
 @LazySingleton(as: RatingRepository)
-class RatingRepositoryImpl implements RatingRepository {
+class RatingRepositoryImpl extends BaseRepository implements RatingRepository {
   RatingRepositoryImpl({required RemoteDatasource remoteDatasource})
       : _remoteDatasource = remoteDatasource;
 
@@ -18,10 +19,10 @@ class RatingRepositoryImpl implements RatingRepository {
     required int rating,
     String? comment,
   }) async {
-    try {
+    return guard(() async {
       final studentId = _remoteDatasource.currentUser?.id;
       if (studentId == null) {
-        return const Left<Failure, Rating>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
       final response = await _remoteDatasource.submitRating(
         tripId: tripId.value,
@@ -30,30 +31,26 @@ class RatingRepositoryImpl implements RatingRepository {
         rating: rating,
         comment: comment,
       );
-      return Right<Failure, Rating>(_ratingFromDb(response));
-    } catch (e) {
-      return Left<Failure, Rating>(ServerFailure(message: e.toString()));
-    }
+      return _ratingFromDb(response);
+    });
   }
 
   @override
   Future<Either<Failure, Rating?>> getTripRating(TripId tripId) async {
-    try {
+    return guard(() async {
       final studentId = _remoteDatasource.currentUser?.id;
       if (studentId == null) {
-        return const Left<Failure, Rating?>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
       final response = await _remoteDatasource.getTripRating(
         tripId: tripId.value,
         studentId: studentId,
       );
       if (response == null) {
-        return const Right<Failure, Rating?>(null);
+        return null;
       }
-      return Right<Failure, Rating?>(_ratingFromDb(response));
-    } catch (e) {
-      return Left<Failure, Rating?>(ServerFailure(message: e.toString()));
-    }
+      return _ratingFromDb(response);
+    });
   }
 
   Rating _ratingFromDb(Map<String, dynamic> json) {

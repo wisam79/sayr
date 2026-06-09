@@ -3,10 +3,12 @@ import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/boarding_record_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of [BoardingRepository] using the remote datasource.
 @LazySingleton(as: BoardingRepository)
-class BoardingRepositoryImpl implements BoardingRepository {
+class BoardingRepositoryImpl extends BaseRepository
+    implements BoardingRepository {
   /// Creates a [BoardingRepositoryImpl].
   BoardingRepositoryImpl({required RemoteDatasource remoteDatasource})
       : _remoteDatasource = remoteDatasource;
@@ -14,29 +16,24 @@ class BoardingRepositoryImpl implements BoardingRepository {
 
   @override
   Future<Either<Failure, TripId?>> getActiveTripForSubscription() async {
-    try {
+    return guard(() async {
       final id = await _remoteDatasource.getActiveTripForSubscription();
-      return Right<Failure, TripId?>(id == null ? null : TripId(id));
-    } catch (e) {
-      return Left<Failure, TripId?>(ServerFailure(message: e.toString()));
-    }
+      return id == null ? null : TripId(id);
+    });
   }
 
   @override
   Future<Either<Failure, BoardingTokenResult>> generateBoardingToken(
     TripId tripId,
   ) async {
-    try {
+    return guard(() async {
       final result =
           await _remoteDatasource.generateBoardingToken(tripId.value);
-      return Right<Failure, BoardingTokenResult>(
-        BoardingTokenResult(token: result.token, expiresAt: result.expiresAt),
+      return BoardingTokenResult(
+        token: result.token,
+        expiresAt: result.expiresAt,
       );
-    } catch (e) {
-      return Left<Failure, BoardingTokenResult>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+    });
   }
 
   @override
@@ -45,7 +42,7 @@ class BoardingRepositoryImpl implements BoardingRepository {
     required TripId tripId,
     Coordinates? driverLocation,
   }) async {
-    try {
+    return guard(() async {
       final row = await _remoteDatasource.validateBoarding(
         token: token,
         tripId: tripId.value,
@@ -61,21 +58,17 @@ class BoardingRepositoryImpl implements BoardingRepository {
         studentName: row['student_name'] as String?,
         boardedAt: DateTime.parse(row['boarded_at'] as String),
       );
-      return Right<Failure, BoardingRecord>(model.toEntity());
-    } catch (e) {
-      return Left<Failure, BoardingRecord>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+      return model.toEntity();
+    });
   }
 
   @override
   Future<Either<Failure, List<BoardingRecord>>> getTripPassengers(
     TripId tripId,
   ) async {
-    try {
+    return guard(() async {
       final rows = await _remoteDatasource.getTripPassengers(tripId.value);
-      final records = rows
+      return rows
           .map(
             (r) => BoardingRecordModel(
               id: r['boarding_id'] as String,
@@ -90,12 +83,7 @@ class BoardingRepositoryImpl implements BoardingRepository {
           )
           .map((m) => m.toEntity())
           .toList();
-      return Right<Failure, List<BoardingRecord>>(records);
-    } catch (e) {
-      return Left<Failure, List<BoardingRecord>>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+    });
   }
 
   @override
@@ -122,7 +110,7 @@ class BoardingRepositoryImpl implements BoardingRepository {
     required String otp,
     Coordinates? studentLocation,
   }) async {
-    try {
+    return guard(() async {
       final row = await _remoteDatasource.validateBoardingViaProximity(
         tripId: tripId.value,
         otp: otp,
@@ -138,11 +126,7 @@ class BoardingRepositoryImpl implements BoardingRepository {
         boardedAt: DateTime.parse(row['boarded_at'] as String),
         boardingMethod: 'self_check_in',
       );
-      return Right<Failure, BoardingRecord>(model.toEntity());
-    } catch (e) {
-      return Left<Failure, BoardingRecord>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+      return model.toEntity();
+    });
   }
 }

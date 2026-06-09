@@ -2,6 +2,8 @@
   "@@locale": "en",
   "appTitle": "Sayr",
   "@appTitle": {},
+  "approximateRouteWarning": "Displayed route is approximate due to a routing server issue",
+  "@approximateRouteWarning": {},
 
   "loginTitle": "Login",
   "loginSubtitle": "Welcome back! Please sign in to continue",
@@ -385,6 +387,19 @@
     "placeholders": {
       "minutes": {"type": "int"}
     }
-  }
+  },
+  "failureNetwork": "No internet connection",
+  "failureServer": "Server error",
+  "failureUnauthorized": "Unauthorized",
+  "failureForbidden": "Forbidden",
+  "failureNotFound": "Resource not found",
+  "failureValidation": "Invalid data",
+  "failureRateLimit": "Rate limit exceeded",
+  "failureCache": "Local storage error",
+  "failureInvalidStateTransition": "Invalid state transition",
+  "failureUnknown": "Unknown error",
+  "alreadyHasActiveSubscription": "You already have an active subscription on this route",
+  "licenseNotActive": "License is not active",
+  "bluetoothRequired": "Please enable Bluetooth to use proximity boarding"
 }
 

@@ -111,7 +111,7 @@ void main() {
         final state = cubit.state;
         expect(state, isA<BoardingScannerError>());
         expect(
-          (state as BoardingScannerError).message,
+          (state as BoardingScannerError).failure.message,
           contains('realtime disconnected'),
         );
       },
@@ -171,7 +171,7 @@ void main() {
         final ready = state as BoardingScannerReady;
         expect(ready.lastScan, isA<BoardingScanFailure>());
         final failure = ready.lastScan! as BoardingScanFailure;
-        expect(failure.reason, equals('expired token'));
+        expect(failure.failure.message, equals('expired token'));
       },
     );
 
@@ -185,8 +185,7 @@ void main() {
             driverLocation: any(named: 'driverLocation'),
           ),
         ).thenAnswer(
-          (_) async =>
-              const Left<Failure, BoardingRecord>(ServerFailure(message: null)),
+          (_) async => const Left<Failure, BoardingRecord>(ServerFailure()),
         );
         return buildCubit();
       },
@@ -194,7 +193,7 @@ void main() {
       verify: (cubit) {
         final ready = cubit.state as BoardingScannerReady;
         final failure = ready.lastScan! as BoardingScanFailure;
-        expect(failure.reason, equals('unknown_error'));
+        expect(failure.failure, const ServerFailure());
       },
     );
 

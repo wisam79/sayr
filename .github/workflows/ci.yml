@@ -7,13 +7,17 @@ on:
     branches: [main, develop]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  actions: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: "3.32.8"
-  DART_VERSION: "3.8.1"
+  FLUTTER_VERSION: "3.44.1"
+  DART_VERSION: "3.12.1"
 
 jobs:
   analyze:

@@ -1,14 +1,14 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/conversation_model.dart';
 import 'package:sayr_data/src/models/message_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of ChatRepository using Remote data source.
 @LazySingleton(as: ChatRepository)
-class ChatRepositoryImpl implements ChatRepository {
+class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
   ChatRepositoryImpl({
     required RemoteDatasource remoteDatasource,
   }) : _remoteDatasource = remoteDatasource;
@@ -16,15 +16,15 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, List<Conversation>>> getMyConversations() async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, List<Conversation>>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
       final response =
           await _remoteDatasource.getMyConversations(currentUserId);
-      final conversations = response.map((json) {
+      return response.map((json) {
         final otherName =
             _resolveOtherUserName(json: json, currentUserId: currentUserId);
         final routeName = _resolveRouteName(json: json);
@@ -35,13 +35,7 @@ class ChatRepositoryImpl implements ChatRepository {
         };
         return ConversationModel.fromJson(map).toEntity();
       }).toList();
-
-      return Right<Failure, List<Conversation>>(conversations);
-    } catch (e) {
-      return Left<Failure, List<Conversation>>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+    });
   }
 
   @override
@@ -76,10 +70,10 @@ class ChatRepositoryImpl implements ChatRepository {
     required RouteId routeId,
     required UserId driverUserId,
   }) async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, Conversation>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
       final existing = await _remoteDatasource.getConversation(
@@ -96,9 +90,7 @@ class ChatRepositoryImpl implements ChatRepository {
           'route_name': routeName,
           'other_user_name': otherName,
         };
-        return Right<Failure, Conversation>(
-          ConversationModel.fromJson(map).toEntity(),
-        );
+        return ConversationModel.fromJson(map).toEntity();
       }
 
       final created = await _remoteDatasource.createConversation(
@@ -115,32 +107,21 @@ class ChatRepositoryImpl implements ChatRepository {
         'route_name': routeName,
         'other_user_name': otherName,
       };
-      return Right<Failure, Conversation>(
-        ConversationModel.fromJson(map).toEntity(),
-      );
-    } catch (e) {
-      return Left<Failure, Conversation>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+      return ConversationModel.fromJson(map).toEntity();
+    });
   }
 
   @override
   Future<Either<Failure, List<Message>>> getMessages(
     ConversationId conversationId,
   ) async {
-    try {
+    return guard(() async {
       final response =
           await _remoteDatasource.getMessages(conversationId.value);
-      final messages = response
+      return response
           .map((json) => MessageModel.fromJson(json).toEntity())
           .toList();
-      return Right<Failure, List<Message>>(messages);
-    } catch (e) {
-      return Left<Failure, List<Message>>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+    });
   }
 
   @override
@@ -157,10 +138,10 @@ class ChatRepositoryImpl implements ChatRepository {
     required ConversationId conversationId,
     required String body,
   }) async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, Message>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
       final response = await _remoteDatasource.sendMessage(
@@ -174,35 +155,26 @@ class ChatRepositoryImpl implements ChatRepository {
         body: body,
         updatedAt: DateTime.now().toUtc().toIso8601String(),
       );
-      return Right<Failure, Message>(
-        MessageModel.fromJson(response).toEntity(),
-      );
-    } catch (e) {
-      return Left<Failure, Message>(ServerFailure(message: e.toString()));
-    }
+      return MessageModel.fromJson(response).toEntity();
+    });
   }
 
   @override
   Future<Either<Failure, Unit>> markAsRead(MessageId messageId) async {
-    try {
+    return guard(() async {
       await _remoteDatasource.markMessageAsRead(
         messageId: messageId.value,
         readAt: DateTime.now().toUtc().toIso8601String(),
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   @override
   Future<Either<Failure, int>> getUnreadCount() async {
-    try {
-      final result = await _remoteDatasource.getUnreadChatCount();
-      return Right<Failure, int>(result);
-    } catch (e) {
-      return Left<Failure, int>(ServerFailure(message: e.toString()));
-    }
+    return guard(() async {
+      return _remoteDatasource.getUnreadChatCount();
+    });
   }
 
   String? _resolveOtherUserName({

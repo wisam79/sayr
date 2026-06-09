@@ -12,6 +12,7 @@ class TrackingUiState extends Equatable {
     this.isFetchingRoute = false,
     this.routePoints,
     this.loadedRouteId,
+    this.isApproximate = false,
   });
 
   /// Whether the rating sheet has already been shown.
@@ -26,15 +27,19 @@ class TrackingUiState extends Equatable {
   /// Which route's path is currently cached in [routePoints].
   final RouteId? loadedRouteId;
 
+  /// Whether the current route points are a fallback straight-line approximation.
+  final bool isApproximate;
+
   @override
   List<Object?> get props =>
-      [ratingShown, isFetchingRoute, routePoints, loadedRouteId];
+      [ratingShown, isFetchingRoute, routePoints, loadedRouteId, isApproximate];
 
   TrackingUiState copyWith({
     bool? ratingShown,
     bool? isFetchingRoute,
     List<LatLng>? Function()? routePoints,
     RouteId? Function()? loadedRouteId,
+    bool? isApproximate,
   }) {
     return TrackingUiState(
       ratingShown: ratingShown ?? this.ratingShown,
@@ -42,6 +47,7 @@ class TrackingUiState extends Equatable {
       routePoints: routePoints != null ? routePoints() : this.routePoints,
       loadedRouteId:
           loadedRouteId != null ? loadedRouteId() : this.loadedRouteId,
+      isApproximate: isApproximate ?? this.isApproximate,
     );
   }
 
@@ -73,11 +79,18 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
         LatLng(start.latitude, start.longitude),
         LatLng(end.latitude, end.longitude),
       );
+      final isApprox = points.length == 2 &&
+          points.first.latitude == start.latitude &&
+          points.first.longitude == start.longitude &&
+          points.last.latitude == end.latitude &&
+          points.last.longitude == end.longitude;
+
       emit(
         state.copyWith(
           isFetchingRoute: false,
           routePoints: () => points,
           loadedRouteId: () => routeId,
+          isApproximate: isApprox,
         ),
       );
     } catch (_) {
@@ -89,6 +102,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
             LatLng(end.latitude, end.longitude),
           ],
           loadedRouteId: () => routeId,
+          isApproximate: true,
         ),
       );
     }

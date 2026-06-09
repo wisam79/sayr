@@ -1,6 +1,7 @@
 {
   "@@locale": "ar",
   "appTitle": "سير",
+  "approximateRouteWarning": "المسار المعروض تقريبي بسبب عطل في خادم الاتجاهات",
 
   "loginTitle": "تسجيل الدخول",
   "loginSubtitle": "أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة",
@@ -374,6 +375,19 @@
     "placeholders": {
       "minutes": {"type": "int"}
     }
-  }
+  },
+  "failureNetwork": "لا يوجد اتصال بالإنترنت",
+  "failureServer": "خطأ في الخادم",
+  "failureUnauthorized": "غير مصرح",
+  "failureForbidden": "غير مسموح",
+  "failureNotFound": "الطلب غير موجود",
+  "failureValidation": "بيانات غير صحيحة",
+  "failureRateLimit": "تجاوزت الحد المسموح",
+  "failureCache": "خطأ في التخزين المحلي",
+  "failureInvalidStateTransition": "انتقال حالة غير مسموح",
+  "failureUnknown": "خطأ غير معروف",
+  "alreadyHasActiveSubscription": "لديك اشتراك نشط بالفعل على هذا الخط",
+  "licenseNotActive": "الترخيص غير مفعّل",
+  "bluetoothRequired": "يرجى تشغيل البلوتوث لاستخدام الصعود التقاربي"
 }
 

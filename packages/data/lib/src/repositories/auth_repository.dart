@@ -4,11 +4,12 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/user_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 /// Concrete implementation of AuthRepository using Remote and Local data sources.
 @LazySingleton(as: AuthRepository)
-class AuthRepositoryImpl implements AuthRepository {
+class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   AuthRepositoryImpl({
     required RemoteDatasource remoteDatasource,
     required LocalDatasource localDatasource,
@@ -29,24 +30,18 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    try {
+    return guard(() async {
       final response = await _remoteDatasource.signInWithPassword(
         email: email,
         password: password,
       );
       if (response.user == null) {
-        return const Left(
-          UnauthorizedFailure(message: 'بيانات الدخول غير صحيحة'),
-        );
+        throw const UnauthorizedFailure(message: 'login_failed');
       }
       final user = UserModel.fromAuthUser(response.user!).toEntity();
       await _localDatasource.setUserId(user.id.value);
-      return Right(user);
-    } on supabase.AuthException catch (e) {
-      return Left(UnauthorizedFailure(message: e.message));
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+      return user;
+    });
   }
 
   @override
@@ -56,69 +51,75 @@ class AuthRepositoryImpl implements AuthRepository {
     required String fullName,
     String? phone,
   }) async {
-    try {
-      final response = await _remoteDatasource.signUp(
-        email: email,
-        password: password,
-        fullName: fullName,
-        phone: phone,
-      );
-      if (response.user == null) {
-        return const Left(ValidationFailure(message: 'فشل إنشاء الحساب'));
-      }
-      final user = UserModel.fromAuthUser(response.user!).toEntity();
-      await _localDatasource.setUserId(user.id.value);
-      return Right(user);
-    } on supabase.AuthException catch (e) {
-      return Left(ValidationFailure(message: e.message));
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+    return guard(
+      () async {
+        final response = await _remoteDatasource.signUp(
+          email: email,
+          password: password,
+          fullName: fullName,
+          phone: phone,
+        );
+        if (response.user == null) {
+          throw const ValidationFailure(message: 'signup_failed');
+        }
+        final user = UserModel.fromAuthUser(response.user!).toEntity();
+        await _localDatasource.setUserId(user.id.value);
+        return user;
+      },
+      errorMapper: (e) {
+        if (e is supabase.AuthException) {
+          return ValidationFailure(message: e.message);
+        }
+        return mapException(e);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, Unit>> signInWithGoogle() async {
-    try {
+    return guard(() async {
       final ok = await _remoteDatasource.signInWithGoogle();
       if (!ok) {
-        return const Left(
-          UnauthorizedFailure(message: 'فشل تسجيل الدخول عبر Google'),
-        );
+        throw const UnauthorizedFailure(message: 'google_signin_failed');
       }
       final user = _remoteDatasource.currentUser;
       if (user != null) {
         await _localDatasource.setUserId(user.id);
       }
-      return const Right(unit);
-    } on supabase.AuthException catch (e) {
-      return Left(UnauthorizedFailure(message: e.message));
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   @override
   Future<Either<Failure, Unit>> sendPasswordResetEmail(String email) async {
-    try {
-      await _remoteDatasource.sendPasswordResetEmail(email);
-      return const Right(unit);
-    } on supabase.AuthException catch (e) {
-      return Left(ValidationFailure(message: e.message));
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+    return guard(
+      () async {
+        await _remoteDatasource.sendPasswordResetEmail(email);
+        return unit;
+      },
+      errorMapper: (e) {
+        if (e is supabase.AuthException) {
+          return ValidationFailure(message: e.message);
+        }
+        return mapException(e);
+      },
+    );
   }
 
   @override
   Future<Either<Failure, Unit>> updatePassword(String password) async {
-    try {
-      await _remoteDatasource.updatePassword(password);
-      return const Right(unit);
-    } on supabase.AuthException catch (e) {
-      return Left(ValidationFailure(message: e.message));
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+    return guard(
+      () async {
+        await _remoteDatasource.updatePassword(password);
+        return unit;
+      },
+      errorMapper: (e) {
+        if (e is supabase.AuthException) {
+          return ValidationFailure(message: e.message);
+        }
+        return mapException(e);
+      },
+    );
   }
 
   @override
@@ -136,38 +137,33 @@ class AuthRepositoryImpl implements AuthRepository {
     required String phone,
     required String institutionId,
   }) async {
-    try {
+    return guard(() async {
       final authUser = _remoteDatasource.currentUser;
       if (authUser == null) {
-        return const Left(UnauthorizedFailure(message: 'المستخدم غير مسجّل'));
+        throw const UnauthorizedFailure(message: 'user_not_logged_in');
       }
       await _remoteDatasource.updateProfile(
         userId: authUser.id,
         phone: phone,
         institutionId: institutionId,
       );
-      return const Right(unit);
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   @override
   Future<Either<Failure, List<({String id, String name, String city})>>>
       getInstitutions() async {
-    try {
+    return guard(() async {
       final rows = await _remoteDatasource.getInstitutions();
-      final list = rows.map((r) {
+      return rows.map((r) {
         return (
           id: r['id'] as String,
           name: r['name'] as String,
           city: r['city'] as String? ?? '',
         );
       }).toList();
-      return Right(list);
-    } catch (e) {
-      return Left(UnknownFailure(message: e.toString()));
-    }
+    });
   }
 
   /// Fetches the full profile from `profiles` table and merges it with
@@ -183,5 +179,16 @@ class AuthRepositoryImpl implements AuthRepository {
       'email': authUser.email ?? '',
     });
     return model.toEntity();
+  }
+
+  @override
+  Failure mapException(Object e) {
+    if (e is supabase.AuthException) {
+      return UnauthorizedFailure(message: e.message);
+    }
+    if (e is Failure) {
+      return e;
+    }
+    return UnknownFailure(message: e.toString());
   }
 }

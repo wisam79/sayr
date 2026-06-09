@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_event.dart';
@@ -55,7 +56,7 @@ class _PaymentPageState extends State<PaymentPage> {
           if (state is PaymentFailed) {
             SayrFlash.error(
               context,
-              state.failure.message ?? l10n.paymentFailed,
+              state.failure.toLocalizedString(context),
             );
           }
         },
@@ -141,7 +142,7 @@ class _PaymentPageState extends State<PaymentPage> {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    state.failure.message ?? l10n.unexpectedError,
+                    state.failure.toLocalizedString(context),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.textSecondary,
                         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
@@ -85,7 +86,7 @@ class _RoutesListPageState extends State<RoutesListPage> {
                       ),
                     ),
                   RoutesError(:final failure) => AppErrorWidget(
-                      message: failure.message ?? l10n.error,
+                      message: failure.toLocalizedString(context),
                       title: l10n.error,
                       retryLabel: l10n.retry,
                       onRetry: () {

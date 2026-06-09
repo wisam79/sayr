@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
@@ -20,6 +21,7 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.da
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
+import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
@@ -458,7 +460,7 @@ class _CreateTripDialog extends StatelessWidget {
     if (state.routes.isEmpty) {
       return EmptyState(
         icon: Icons.route_outlined,
-        title: state.errorMessage ?? l10n.noDriverRoutes,
+        title: state.failure?.toLocalizedString(context) ?? l10n.noDriverRoutes,
         subtitle: l10n.activeRouteRequired,
       );
     }
@@ -466,7 +468,7 @@ class _CreateTripDialog extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         DropdownButtonFormField<core.Route>(
-          // ignore: deprecated_member_use
+          // ignore: deprecated_member_use — DropdownButtonFormField has no non-deprecated null-safe override
           value: state.selectedRoute,
           decoration: InputDecoration(
             labelText: l10n.routeTitle,
@@ -496,10 +498,10 @@ class _CreateTripDialog extends StatelessWidget {
           trailing: const Icon(Icons.edit_calendar),
           onTap: () => _pickScheduledAt(context, state),
         ),
-        if (state.errorMessage != null) ...[
+        if (state.failure != null) ...[
           const SizedBox(height: AppSpacing.sm),
           Text(
-            state.errorMessage!,
+            state.failure!.toLocalizedString(context),
             style: const TextStyle(color: AppColors.error),
           ),
         ],
@@ -511,7 +513,6 @@ class _CreateTripDialog extends StatelessWidget {
     BuildContext context,
     CreateTripDialogState state,
   ) async {
-    final l10n = AppLocalizations.of(context);
     final route = state.selectedRoute;
     if (route == null) return;
 
@@ -520,8 +521,7 @@ class _CreateTripDialog extends StatelessWidget {
 
     if (!scheduledAt.isAfter(DateTime.now())) {
       context.read<CreateTripDialogCubit>().setError(
-            context.read<CreateTripDialogCubit>().state.errorMessage ??
-                l10n.tripTimeMustBeFuture,
+            const core.ValidationFailure(message: 'trip_time_must_be_future'),
           );
       return;
     }
@@ -535,9 +535,7 @@ class _CreateTripDialog extends StatelessWidget {
 
     if (!context.mounted) return;
     result.fold(
-      (failure) => context
-          .read<CreateTripDialogCubit>()
-          .setError(failure.message ?? l10n.failedToCreateTrip),
+      (failure) => context.read<CreateTripDialogCubit>().setError(failure),
       (trip) => Navigator.of(context).pop(trip),
     );
   }
@@ -628,10 +626,180 @@ class _DriverTripsTabState extends State<_DriverTripsTab> {
               ),
             );
           }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
+            },
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.pagePadding,
+                vertical: AppSpacing.lg,
+              ),
+              itemCount: state.trips.length,
+              separatorBuilder: (_, __) =>
+                  const SizedBox(height: AppSpacing.md),
+              itemBuilder: (context, index) {
+                final trip = state.trips[index];
+                return _DriverTripCard(trip: trip);
+              },
+            ),
+          );
         }
         return const SizedBox.shrink();
       },
     );
+  }
+}
+
+class _DriverTripCard extends StatelessWidget {
+  const _DriverTripCard({required this.trip});
+
+  final core.Trip trip;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final statusColor = _statusColor;
+
+    return InkWell(
+      onTap: () {
+        context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: trip.id));
+        context.push('/driver-trip/${trip.id.value}');
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: 6,
+                  color: statusColor,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: statusColor.withValues(alpha: 0.12),
+                          child: Icon(
+                            _statusIcon,
+                            color: statusColor,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                trip.status.localizedName(l10n),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: AppColors.textSecondary
+                                        .withValues(alpha: 0.8),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _formattedTime,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Color get _statusColor {
+    switch (trip.status) {
+      case core.TripStatus.scheduled:
+        return Colors.orange[700]!;
+      case core.TripStatus.driverWaiting:
+        return Colors.blue[600]!;
+      case core.TripStatus.inTransit:
+        return AppColors.primary;
+      case core.TripStatus.completed:
+        return AppColors.success;
+      case core.TripStatus.absent:
+        return AppColors.error;
+      case core.TripStatus.cancelled:
+        return AppColors.textMuted;
+    }
+  }
+
+  IconData get _statusIcon {
+    switch (trip.status) {
+      case core.TripStatus.scheduled:
+        return Icons.schedule;
+      case core.TripStatus.driverWaiting:
+        return Icons.hourglass_top;
+      case core.TripStatus.inTransit:
+        return Icons.directions_bus;
+      case core.TripStatus.completed:
+        return Icons.check_circle;
+      case core.TripStatus.absent:
+        return Icons.cancel;
+      case core.TripStatus.cancelled:
+        return Icons.block;
+    }
+  }
+
+  String get _formattedTime {
+    final hour = trip.scheduledAt.hour.toString().padLeft(2, '0');
+    final minute = trip.scheduledAt.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
   }
 }
 

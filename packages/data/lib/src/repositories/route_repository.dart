@@ -5,10 +5,11 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/route_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of RouteRepository using Remote and Local data sources.
 @LazySingleton(as: RouteRepository)
-class RouteRepositoryImpl implements RouteRepository {
+class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   RouteRepositoryImpl({
     required RemoteDatasource remoteDatasource,
     required LocalDatasource localDatasource,
@@ -47,7 +48,7 @@ class RouteRepositoryImpl implements RouteRepository {
           stackTrace: st,
         );
       }
-      return Left(ServerFailure(message: e.toString()));
+      return Left(mapException(e));
     }
   }
 
@@ -80,7 +81,7 @@ class RouteRepositoryImpl implements RouteRepository {
           stackTrace: st,
         );
       }
-      return Left(ServerFailure(message: e.toString()));
+      return Left(mapException(e));
     }
   }
 
@@ -105,19 +106,17 @@ class RouteRepositoryImpl implements RouteRepository {
           stackTrace: st,
         );
       }
-      return Left(ServerFailure(message: e.toString()));
+      return Left(mapException(e));
     }
   }
 
   @override
   Future<Either<Failure, List<Route>>> search(String query) async {
-    try {
+    return guard(() async {
       final response = await _remoteDatasource.searchRoutes(query);
-      final routes =
-          response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
-      return Right(routes);
-    } catch (e) {
-      return Left(ServerFailure(message: e.toString()));
-    }
+      return response
+          .map((json) => RouteModel.fromJson(json).toEntity())
+          .toList();
+    });
   }
 }

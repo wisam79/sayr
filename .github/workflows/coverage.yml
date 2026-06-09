@@ -8,7 +8,11 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.32.8"
+  FLUTTER_VERSION: "3.44.1"
+
+permissions:
+  contents: read
+  actions: read
 
 jobs:
   coverage:

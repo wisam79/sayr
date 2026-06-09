@@ -88,7 +88,10 @@ void main() {
           BlocProvider<TrackingBloc>.value(value: mockTrackingBloc),
           BlocProvider<EmergencyBloc>.value(value: mockEmergencyBloc),
         ],
-        child: const DriverTripControlsPage(tripId: TripId('trip-1')),
+        child: DriverTripControlsPage(
+          tripId: const TripId('trip-1'),
+          trackingBloc: mockTrackingBloc,
+        ),
       ),
     );
   }

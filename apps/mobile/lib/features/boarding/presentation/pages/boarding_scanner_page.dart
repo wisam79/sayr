@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/boarding/presentation/bloc/boarding_scanner_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
@@ -100,7 +101,7 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
               messenger.showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.error,
-                  content: Text(scan.reason),
+                  content: Text(scan.failure.toLocalizedString(context)),
                 ),
               );
             }
@@ -172,7 +173,7 @@ class _PassengerList extends StatelessWidget {
     if (state is BoardingScannerError) {
       return Center(
         child: Text(
-          (state as BoardingScannerError).message,
+          (state as BoardingScannerError).failure.toLocalizedString(context),
           style: textTheme.bodyMedium?.copyWith(color: AppColors.error),
         ),
       );

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
@@ -59,9 +60,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             LicenseActivating() => const LoadingWidget(),
             LicenseActivated() => const LoadingWidget(),
             SubscriptionsError(:final failure) => AppErrorWidget(
-                message: failure is ValidationFailure
-                    ? l10n.invalidLicenseCode
-                    : (failure.message ?? l10n.errorOccurred),
+                message: failure.toLocalizedString(context),
                 title: l10n.error,
                 retryLabel: l10n.retry,
                 onRetry: () {

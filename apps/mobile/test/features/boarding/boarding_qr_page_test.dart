@@ -29,7 +29,7 @@ void main() {
     mockBle = MockBleBeaconService();
     bleController = StreamController<({TripId tripId, String otp})>.broadcast();
 
-    when(() => mockBle.startScanning()).thenAnswer((_) async {});
+    when(() => mockBle.startScanning()).thenAnswer((_) async => true);
     when(() => mockBle.stopScanning()).thenAnswer((_) async {});
     when(() => mockBle.discoveredTrips).thenAnswer((_) => bleController.stream);
   });
@@ -117,16 +117,16 @@ void main() {
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
   });
 
-  testWidgets('shows "unknown error" text when failure message is null',
+  testWidgets('shows default server error text when failure message is null',
       (tester) async {
     when(() => mockRepo.getActiveTripForSubscription()).thenAnswer(
-      (_) async => const Left<Failure, TripId?>(ServerFailure(message: null)),
+      (_) async => const Left<Failure, TripId?>(ServerFailure()),
     );
 
     await pumpAndSettle(tester);
 
     expect(find.text('حدث خطأ'), findsOneWidget);
-    expect(find.text('unknown_error'), findsOneWidget);
+    expect(find.text('خطأ في الخادم'), findsOneWidget);
   });
 
   testWidgets('shows QR code, countdown, and hint on Ready state',

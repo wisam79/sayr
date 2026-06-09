@@ -60,9 +60,17 @@ class _SayrMapState extends State<SayrMap> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_syncMarkers());
-      unawaited(_syncRouteLine());
+      if (mounted) {
+        unawaited(_syncMarkers());
+        unawaited(_syncRouteLine());
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    _controller = null;
+    super.dispose();
   }
 
   @override
@@ -77,6 +85,7 @@ class _SayrMapState extends State<SayrMap> {
   }
 
   Future<void> _syncRouteLine() async {
+    if (!mounted) return;
     final controller = _controller;
     if (controller == null) return;
 
@@ -89,6 +98,7 @@ class _SayrMapState extends State<SayrMap> {
 
       final points = widget.routePoints;
       if (points != null && points.isNotEmpty) {
+        if (!mounted) return;
         _routeLine = await controller.addLine(
           LineOptions(
             geometry: points,
@@ -104,13 +114,17 @@ class _SayrMapState extends State<SayrMap> {
         error: e,
         stackTrace: st,
       );
+      if (!mounted) return;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        unawaited(_syncRouteLine());
+        if (mounted) {
+          unawaited(_syncRouteLine());
+        }
       });
     }
   }
 
   Future<void> _syncMarkers() async {
+    if (!mounted) return;
     final controller = _controller;
     if (controller == null) return;
 
@@ -121,6 +135,7 @@ class _SayrMapState extends State<SayrMap> {
         for (final id in idsToRemove) {
           final symbol = _symbols.remove(id);
           if (symbol != null) {
+            if (!mounted) return;
             await controller.removeSymbol(symbol);
           }
         }
@@ -128,6 +143,7 @@ class _SayrMapState extends State<SayrMap> {
         final geojson = _buildGeoJson(widget.markers);
 
         if (!_sourceAdded) {
+          if (!mounted) return;
           await controller.addSource(
             'markers-source',
             GeojsonSourceProperties(
@@ -137,6 +153,7 @@ class _SayrMapState extends State<SayrMap> {
             ),
           );
 
+          if (!mounted) return;
           // 1. Cluster circle layer
           await controller.addCircleLayer(
             'markers-source',
@@ -164,6 +181,7 @@ class _SayrMapState extends State<SayrMap> {
             filter: ['has', 'point_count'],
           );
 
+          if (!mounted) return;
           // 2. Cluster text labels layer
           await controller.addSymbolLayer(
             'markers-source',
@@ -178,6 +196,7 @@ class _SayrMapState extends State<SayrMap> {
             filter: ['has', 'point_count'],
           );
 
+          if (!mounted) return;
           // 3. Unclustered points layer (actual buses)
           await controller.addSymbolLayer(
             'markers-source',
@@ -195,13 +214,17 @@ class _SayrMapState extends State<SayrMap> {
 
           _sourceAdded = true;
         } else {
+          if (!mounted) return;
           await controller.setGeoJsonSource('markers-source', geojson);
         }
       } catch (e) {
         // The source manager or channel may not be initialized yet.
         // Retry in the next frame to prevent runtime crashes.
+        if (!mounted) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(_syncMarkers());
+          if (mounted) {
+            unawaited(_syncMarkers());
+          }
         });
       }
     } else {
@@ -219,6 +242,7 @@ class _SayrMapState extends State<SayrMap> {
                 existingSymbol.options.iconImage !=
                     (marker.iconImage ?? 'bus-icon') ||
                 existingSymbol.options.iconSize != (marker.iconSize ?? 0.08)) {
+              if (!mounted) return;
               await controller.updateSymbol(
                 existingSymbol,
                 SymbolOptions(
@@ -229,6 +253,7 @@ class _SayrMapState extends State<SayrMap> {
               );
             }
           } else {
+            if (!mounted) return;
             final symbol = await controller.addSymbol(
               SymbolOptions(
                 geometry: marker.position,
@@ -245,12 +270,16 @@ class _SayrMapState extends State<SayrMap> {
         for (final id in idsToRemove) {
           final symbol = _symbols.remove(id);
           if (symbol != null) {
+            if (!mounted) return;
             await controller.removeSymbol(symbol);
           }
         }
       } catch (e) {
+        if (!mounted) return;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          unawaited(_syncMarkers());
+          if (mounted) {
+            unawaited(_syncMarkers());
+          }
         });
       }
     }

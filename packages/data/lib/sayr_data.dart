@@ -1,7 +1,10 @@
 /// Sayr Data - Supabase + Drift layer
 library sayr_data;
 
+import 'package:injectable/injectable.dart';
+
 export 'src/datasources/auth_remote_datasource.dart';
+
 export 'src/datasources/boarding_remote_datasource.dart';
 export 'src/datasources/chat_remote_datasource.dart';
 export 'src/datasources/emergency_remote_datasource.dart';
@@ -23,6 +26,7 @@ export 'src/models/route_model.dart';
 export 'src/models/user_model.dart';
 // Repositories
 export 'src/repositories/auth_repository.dart';
+export 'src/repositories/base_repository.dart';
 export 'src/repositories/boarding_repository.dart';
 export 'src/repositories/chat_repository.dart';
 export 'src/repositories/driver_repository.dart';
@@ -38,3 +42,6 @@ export 'src/storage/secure_storage.dart';
 // Supabase client
 export 'src/supabase/supabase_client.dart';
 export 'src/supabase/supabase_config.dart';
+
+@InjectableInit.microPackage()
+void initMicroPackage() {}

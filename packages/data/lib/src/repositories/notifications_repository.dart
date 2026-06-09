@@ -1,13 +1,14 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
-
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/notification_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of NotificationsRepository using Remote data source.
 @LazySingleton(as: NotificationsRepository)
-class NotificationsRepositoryImpl implements NotificationsRepository {
+class NotificationsRepositoryImpl extends BaseRepository
+    implements NotificationsRepository {
   NotificationsRepositoryImpl({
     required RemoteDatasource remoteDatasource,
   }) : _remoteDatasource = remoteDatasource;
@@ -17,12 +18,10 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
   Future<Either<Failure, List<AppNotification>>> getMyNotifications({
     int limit = 50,
   }) async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, List<AppNotification>>(
-          UnauthorizedFailure(),
-        );
+        throw const UnauthorizedFailure();
       }
 
       final response = await _remoteDatasource.getMyNotifications(
@@ -30,62 +29,49 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
         limit: limit,
       );
 
-      final notifications = response
+      return response
           .map((json) => NotificationModel.fromJson(json).toEntity())
           .toList();
-      return Right<Failure, List<AppNotification>>(notifications);
-    } catch (e) {
-      return Left<Failure, List<AppNotification>>(
-        ServerFailure(message: e.toString()),
-      );
-    }
+    });
   }
 
   @override
   Future<Either<Failure, int>> getUnreadCount() async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, int>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
-      final count =
-          await _remoteDatasource.getUnreadNotificationCount(currentUserId);
-      return Right<Failure, int>(count);
-    } catch (e) {
-      return Left<Failure, int>(ServerFailure(message: e.toString()));
-    }
+      return _remoteDatasource.getUnreadNotificationCount(currentUserId);
+    });
   }
 
   @override
   Future<Either<Failure, Unit>> markAsRead(NotificationId id) async {
-    try {
+    return guard(() async {
       await _remoteDatasource.markNotificationAsRead(
         id: id.value,
         readAt: DateTime.now().toUtc().toIso8601String(),
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   @override
   Future<Either<Failure, Unit>> markAllAsRead() async {
-    try {
+    return guard(() async {
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
-        return const Left<Failure, Unit>(UnauthorizedFailure());
+        throw const UnauthorizedFailure();
       }
 
       await _remoteDatasource.markAllNotificationsAsRead(
         userId: currentUserId,
         readAt: DateTime.now().toUtc().toIso8601String(),
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 
   @override
@@ -110,15 +96,13 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     required String platform,
     String? deviceId,
   }) async {
-    try {
+    return guard(() async {
       await _remoteDatasource.registerPushToken(
         fcmToken: fcmToken,
         platform: platform,
         deviceId: deviceId,
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      return Left<Failure, Unit>(ServerFailure(message: e.toString()));
-    }
+      return unit;
+    });
   }
 }

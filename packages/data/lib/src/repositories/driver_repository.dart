@@ -3,10 +3,11 @@ import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/user_model.dart';
+import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of [DriverRepository] using the remote datasource.
 @LazySingleton(as: DriverRepository)
-class DriverRepositoryImpl implements DriverRepository {
+class DriverRepositoryImpl extends BaseRepository implements DriverRepository {
   DriverRepositoryImpl({required RemoteDatasource remoteDatasource})
       : _remoteDatasource = remoteDatasource;
 
@@ -14,29 +15,25 @@ class DriverRepositoryImpl implements DriverRepository {
 
   @override
   Future<Either<Failure, Driver>> getDriverById(DriverId id) async {
-    try {
+    return guard(() async {
       final response = await _remoteDatasource.getDriverById(id.value);
       if (response == null) {
-        return const Left<Failure, Driver>(NotFoundFailure(resource: 'driver'));
+        throw const NotFoundFailure(resource: 'driver');
       }
-      return Right<Failure, Driver>(_driverFromDb(response));
-    } catch (e) {
-      return Left<Failure, Driver>(ServerFailure(message: e.toString()));
-    }
+      return _driverFromDb(response);
+    });
   }
 
   @override
   Future<Either<Failure, User>> getDriverProfile(UserId userId) async {
-    try {
+    return guard(() async {
       final response =
           await _remoteDatasource.fetchCurrentProfile(userId.value);
       if (response == null) {
-        return const Left<Failure, User>(NotFoundFailure(resource: 'profile'));
+        throw const NotFoundFailure(resource: 'profile');
       }
-      return Right<Failure, User>(UserModel.fromJson(response).toEntity());
-    } catch (e) {
-      return Left<Failure, User>(ServerFailure(message: e.toString()));
-    }
+      return UserModel.fromJson(response).toEntity();
+    });
   }
 
   Driver _driverFromDb(Map<String, dynamic> json) {

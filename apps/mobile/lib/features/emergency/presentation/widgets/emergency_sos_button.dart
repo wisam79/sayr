@@ -4,6 +4,7 @@ import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_state.dart';
@@ -131,7 +132,7 @@ class EmergencySosButton extends StatelessWidget {
         } else if (state is EmergencyFailed) {
           SayrFlash.error(
             context,
-            state.failure.message ?? l10n.emergencyFailed,
+            state.failure.toLocalizedString(context),
           );
         }
       },

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_ble_peripheral/flutter_ble_peripheral.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -21,6 +22,7 @@ class BleBeaconService {
       StreamController<({TripId tripId, String otp})>.broadcast();
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   Timer? _mockTimer;
+  Timer? _otpTimer;
   bool _isMockMode = false;
 
   /// Prefix used in local name advertisement.
@@ -38,6 +40,9 @@ class BleBeaconService {
     try {
       final isSupported = await _blePeripheral.isSupported;
       if (!isSupported) {
+        if (!kDebugMode) {
+          throw UnsupportedError('BLE not supported on this device');
+        }
         _isMockMode = true;
         _startMockAdvertising(tripId, otp);
         return;
@@ -54,7 +59,11 @@ class BleBeaconService {
         'BLE Advertising started for TripId: ${tripId.value}, OTP: $otp',
       );
     } catch (e) {
-      debugPrint('BLE Advertising error: $e. Switching to mock mode.');
+      debugPrint('BLE Advertising error: $e');
+      if (!kDebugMode) {
+        _logger.e('BLE Advertising failed: $e');
+        rethrow;
+      }
       _isMockMode = true;
       _startMockAdvertising(tripId, otp);
     }
@@ -77,20 +86,23 @@ class BleBeaconService {
   }
 
   /// Starts scanning for nearby Sayr Beacons.
-  Future<void> startScanning() async {
+  Future<bool> startScanning() async {
     try {
       final isSupported = await FlutterBluePlus.isSupported;
       if (!isSupported) {
+        if (!kDebugMode) {
+          throw UnsupportedError('BLE not supported on this device');
+        }
         _isMockMode = true;
         _startMockScanning();
-        return;
+        return true;
       }
 
       // Check if Bluetooth is turned on
       final state = await FlutterBluePlus.adapterState.first;
       if (state != BluetoothAdapterState.on) {
         debugPrint('Bluetooth is not ON (state: $state). Cannot scan.');
-        return;
+        return false;
       }
 
       await FlutterBluePlus.startScan(
@@ -125,10 +137,16 @@ class BleBeaconService {
       });
       _isMockMode = false;
       debugPrint('BLE Scanning started');
+      return true;
     } catch (e) {
-      debugPrint('BLE Scanning error: $e. Switching to mock mode.');
+      debugPrint('BLE Scanning error: $e');
+      if (!kDebugMode) {
+        _logger.e('BLE Scanning failed: $e');
+        rethrow;
+      }
       _isMockMode = true;
       _startMockScanning();
+      return true;
     }
   }
 
@@ -151,11 +169,19 @@ class BleBeaconService {
 
   void _startMockAdvertising(TripId tripId, String otp) {
     _mockTimer?.cancel();
+    if (!kDebugMode) {
+      debugPrint('Mock advertising is disabled in non-debug mode.');
+      return;
+    }
     debugPrint('Mock BLE Advertising: TripId=${tripId.value}, OTP=$otp');
   }
 
   void _startMockScanning() {
     _mockTimer?.cancel();
+    if (!kDebugMode) {
+      debugPrint('Mock scanning is disabled in non-debug mode.');
+      return;
+    }
     // Simulate discovering a mock trip for development testing
     _mockTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       // Broadcast a mock trip ID and OTP (simulating proximity)
@@ -166,5 +192,64 @@ class BleBeaconService {
         ),
       );
     });
+  }
+
+  /// Starts rotating BLE advertising for the given trip.
+  /// Automatically generates OTP, updates database via [tripRepository], and advertises.
+  void startRotatingOtpAdvertising({
+    required TripId tripId,
+    required TripRepository tripRepository,
+    required Logger logger,
+  }) {
+    _otpTimer?.cancel();
+
+    String generateOtp() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      final rnd = Random.secure();
+      return String.fromCharCodes(
+        Iterable.generate(
+          6,
+          (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
+        ),
+      );
+    }
+
+    Future<void> updateOtp() async {
+      try {
+        final otp = generateOtp();
+        final expiresAt = DateTime.now().add(const Duration(seconds: 45));
+
+        final result = await tripRepository.updateBleOtp(
+          tripId: tripId,
+          otp: otp,
+          expiresAt: expiresAt,
+        );
+
+        await result.fold(
+          (failure) async {
+            logger.e('Failed to update BLE OTP in repository: $failure');
+          },
+          (_) async {
+            await startAdvertising(tripId: tripId, otp: otp);
+          },
+        );
+      } catch (e, st) {
+        logger.e(
+          'Failed to rotate BLE OTP in periodic timer',
+          error: e,
+          stackTrace: st,
+        );
+      }
+    }
+
+    updateOtp();
+    _otpTimer = Timer.periodic(const Duration(seconds: 30), (_) => updateOtp());
+  }
+
+  /// Stops rotating BLE advertising.
+  void stopRotatingOtpAdvertising() {
+    _otpTimer?.cancel();
+    _otpTimer = null;
+    stopAdvertising();
   }
 }

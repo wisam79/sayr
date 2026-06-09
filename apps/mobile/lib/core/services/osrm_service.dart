@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
+import 'package:retry/retry.dart';
 
 /// Service to query project-osrm.org public routing API.
 @lazySingleton
@@ -11,6 +12,13 @@ class OsrmService {
   OsrmService() : _dio = Dio() {
     _dio.options.connectTimeout = const Duration(seconds: 5);
     _dio.options.receiveTimeout = const Duration(seconds: 5);
+    _dio.interceptors.add(
+      LogInterceptor(
+        responseHeader: false,
+        responseBody: true,
+        logPrint: (obj) => debugPrint(obj.toString()),
+      ),
+    );
   }
 
   Dio _dio;
@@ -33,7 +41,13 @@ class OsrmService {
     try {
       final url =
           '$_baseUrl/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson';
-      final response = await _dio.get<Map<String, dynamic>>(url);
+
+      final response = await retry(
+        () => _dio.get<Map<String, dynamic>>(url),
+        retryIf: (e) => e is DioException && e.type != DioExceptionType.cancel,
+        maxAttempts: 3,
+        delayFactor: const Duration(milliseconds: 10),
+      );
 
       if (response.statusCode == 200 && response.data != null) {
         final routes = response.data!['routes'] as List<dynamic>;

@@ -104,6 +104,12 @@ abstract class AppLocalizations {
   /// **'Sayr'**
   String get appTitle;
 
+  /// No description provided for @approximateRouteWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Displayed route is approximate due to a routing server issue'**
+  String get approximateRouteWarning;
+
   /// No description provided for @loginTitle.
   ///
   /// In en, this message translates to:
@@ -1621,6 +1627,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes} minutes'**
   String durationMinutesOnly(int minutes);
+
+  /// No description provided for @failureNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection'**
+  String get failureNetwork;
+
+  /// No description provided for @failureServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error'**
+  String get failureServer;
+
+  /// No description provided for @failureUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized'**
+  String get failureUnauthorized;
+
+  /// No description provided for @failureForbidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Forbidden'**
+  String get failureForbidden;
+
+  /// No description provided for @failureNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource not found'**
+  String get failureNotFound;
+
+  /// No description provided for @failureValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid data'**
+  String get failureValidation;
+
+  /// No description provided for @failureRateLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate limit exceeded'**
+  String get failureRateLimit;
+
+  /// No description provided for @failureCache.
+  ///
+  /// In en, this message translates to:
+  /// **'Local storage error'**
+  String get failureCache;
+
+  /// No description provided for @failureInvalidStateTransition.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid state transition'**
+  String get failureInvalidStateTransition;
+
+  /// No description provided for @failureUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error'**
+  String get failureUnknown;
+
+  /// No description provided for @alreadyHasActiveSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have an active subscription on this route'**
+  String get alreadyHasActiveSubscription;
+
+  /// No description provided for @licenseNotActive.
+  ///
+  /// In en, this message translates to:
+  /// **'License is not active'**
+  String get licenseNotActive;
+
+  /// No description provided for @bluetoothRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable Bluetooth to use proximity boarding'**
+  String get bluetoothRequired;
 }
 
 class _AppLocalizationsDelegate

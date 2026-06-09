@@ -12,6 +12,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get appTitle => 'سير';
 
   @override
+  String get approximateRouteWarning =>
+      'المسار المعروض تقريبي بسبب عطل في خادم الاتجاهات';
+
+  @override
   String get loginTitle => 'تسجيل الدخول';
 
   @override
@@ -825,4 +829,45 @@ class AppLocalizationsAr extends AppLocalizations {
   String durationMinutesOnly(int minutes) {
     return '$minutes دقيقة';
   }
+
+  @override
+  String get failureNetwork => 'لا يوجد اتصال بالإنترنت';
+
+  @override
+  String get failureServer => 'خطأ في الخادم';
+
+  @override
+  String get failureUnauthorized => 'غير مصرح';
+
+  @override
+  String get failureForbidden => 'غير مسموح';
+
+  @override
+  String get failureNotFound => 'الطلب غير موجود';
+
+  @override
+  String get failureValidation => 'بيانات غير صحيحة';
+
+  @override
+  String get failureRateLimit => 'تجاوزت الحد المسموح';
+
+  @override
+  String get failureCache => 'خطأ في التخزين المحلي';
+
+  @override
+  String get failureInvalidStateTransition => 'انتقال حالة غير مسموح';
+
+  @override
+  String get failureUnknown => 'خطأ غير معروف';
+
+  @override
+  String get alreadyHasActiveSubscription =>
+      'لديك اشتراك نشط بالفعل على هذا الخط';
+
+  @override
+  String get licenseNotActive => 'الترخيص غير مفعّل';
+
+  @override
+  String get bluetoothRequired =>
+      'يرجى تشغيل البلوتوث لاستخدام الصعود التقاربي';
 }
