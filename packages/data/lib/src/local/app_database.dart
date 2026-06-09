@@ -1,11 +1,13 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:injectable/injectable.dart';
 
 import 'package:sayr_data/src/local/tables.dart';
 
 part 'app_database.g.dart';
 
 /// Local SQLite database via Drift for offline location queue + caching.
+@lazySingleton
 @DriftDatabase(tables: [PendingLocationUpdate, CachedTrip, CachedRoute])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());

@@ -24,6 +24,8 @@ import 'package:sayr_data/src/datasources/route_remote_datasource.dart'
 import 'package:sayr_data/src/datasources/subscription_remote_datasource.dart'
     as _i635;
 import 'package:sayr_data/src/datasources/trip_remote_datasource.dart' as _i140;
+import 'package:sayr_data/src/di/data_module.dart' as _i121;
+import 'package:sayr_data/src/local/app_database.dart' as _i961;
 import 'package:sayr_data/src/local/location_queue_dao.dart' as _i368;
 import 'package:sayr_data/src/repositories/auth_repository.dart' as _i479;
 import 'package:sayr_data/src/repositories/boarding_repository.dart' as _i388;
@@ -45,6 +47,17 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
 // initializes the registration of main-scope dependencies inside of GetIt
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
+    final dataModule = _$DataModule();
+    gh.lazySingleton<_i961.AppDatabase>(() => _i961.AppDatabase());
+    gh.lazySingleton<_i558.FlutterSecureStorage>(
+        () => dataModule.secureStorage);
+    gh.lazySingleton<_i583.SayrSupabase>(() => dataModule.supabase);
+    gh.lazySingleton<_i368.LocationQueueDao>(
+        () => _i368.LocationQueueDao(db: gh<_i961.AppDatabase>()));
+    gh.lazySingleton<_i368.TripCacheDao>(
+        () => _i368.TripCacheDao(db: gh<_i961.AppDatabase>()));
+    gh.lazySingleton<_i368.RouteCacheDao>(
+        () => _i368.RouteCacheDao(db: gh<_i961.AppDatabase>()));
     gh.lazySingleton<_i1015.LocalDatasource>(() => _i1015.LocalDatasourceImpl(
           secureStorage: gh<_i417.SecureStorageService>(),
           locationQueueDao: gh<_i368.LocationQueueDao>(),
@@ -116,3 +129,5 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
             remoteDatasource: gh<_i263.RemoteDatasource>()));
   }
 }
+
+class _$DataModule extends _i121.DataModule {}

@@ -1,9 +1,11 @@
 import 'package:drift/drift.dart';
+import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 import 'package:sayr_data/src/local/app_database.dart';
 
 /// DAO for offline location queue operations.
+@lazySingleton
 class LocationQueueDao {
   /// Creates a [LocationQueueDao].
   LocationQueueDao({AppDatabase? db}) : _db = db ?? AppDatabase();
@@ -62,6 +64,7 @@ class LocationQueueDao {
 }
 
 /// DAO for cached trip data.
+@lazySingleton
 class TripCacheDao {
   /// Creates a [TripCacheDao].
   TripCacheDao({AppDatabase? db}) : _db = db ?? AppDatabase();
@@ -124,6 +127,7 @@ class TripCacheDao {
 }
 
 /// DAO for cached route data.
+@lazySingleton
 class RouteCacheDao {
   /// Creates a [RouteCacheDao].
   RouteCacheDao({AppDatabase? db}) : _db = db ?? AppDatabase();

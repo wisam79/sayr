@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:sayr_data/sayr_data.module.dart';
 
 import 'package:sayr_mobile/di/di.config.dart';
 
@@ -13,5 +14,9 @@ final GetIt sl = GetIt.instance;
 /// Initialize the DI container using [initDependencies].
 ///
 /// Must be called after `SayrSupabase.instance.init()`.
-@InjectableInit()
+@InjectableInit(
+  externalPackageModulesBefore: [
+    ExternalModule(SayrDataPackageModule),
+  ],
+)
 Future<void> initDependencies() async => sl.init();

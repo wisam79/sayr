@@ -15,6 +15,8 @@ export 'src/datasources/remote_datasource.dart';
 export 'src/datasources/route_remote_datasource.dart';
 export 'src/datasources/subscription_remote_datasource.dart';
 export 'src/datasources/trip_remote_datasource.dart';
+// DI Module
+export 'src/di/data_module.dart';
 // Local DB
 export 'src/local/app_database.dart';
 export 'src/local/location_queue_dao.dart';
