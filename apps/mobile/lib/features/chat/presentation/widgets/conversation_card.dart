@@ -28,43 +28,59 @@ class ConversationCard extends StatelessWidget {
     final title =
         conversation.otherUserName ?? conversation.routeName ?? l10n.chats;
 
-    return ListTile(
+    return GlassCard(
       onTap: onTap,
-      leading: CircleAvatar(
-        backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-        child: Text(
-          _initials(title),
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
-      title: Text(
-        title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: Theme.of(context).textTheme.titleSmall,
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsetsDirectional.only(top: 4),
-        child: Text(
-          conversation.lastMessagePreview ?? l10n.lastMessage,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: AppColors.primary.withValues(alpha: 0.15),
+            child: Text(
+              _initials(title),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
               ),
-        ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  conversation.lastMessagePreview ?? l10n.lastMessage,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          if (conversation.lastMessageAt != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
+              child: Text(
+                _formatRelative(conversation.lastMessageAt!, context),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+              ),
+            ),
+        ],
       ),
-      trailing: conversation.lastMessageAt != null
-          ? Text(
-              _formatRelative(conversation.lastMessageAt!, context),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            )
-          : null,
     );
   }
 

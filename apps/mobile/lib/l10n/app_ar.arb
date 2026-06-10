@@ -388,6 +388,56 @@
   "failureUnknown": "خطأ غير معروف",
   "alreadyHasActiveSubscription": "لديك اشتراك نشط بالفعل على هذا الخط",
   "licenseNotActive": "الترخيص غير مفعّل",
-  "bluetoothRequired": "يرجى تشغيل البلوتوث لاستخدام الصعود التقاربي"
+  "bluetoothRequired": "يرجى تشغيل البلوتوث لاستخدام الصعود التقاربي",
+  "themeMode": "مظهر التطبيق",
+  "themeLight": "المظهر الفاتح",
+  "themeDark": "المظهر الداكن",
+  "themeSystem": "حسب النظام",
+  "studentBadge": "طالب",
+  "driverBadge": "سائق",
+  "scanQrCode": "مسح الرمز",
+  "myDigitalPass": "بطاقتي الرقمية",
+  "daysRemainingShort": "متبقي {days} يوم",
+  "@daysRemainingShort": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "quickActions": "الوصول السريع",
+  "liveMap": "خريطة الرحلات",
+  "chatSupport": "الدعم الفني",
+  "safetyTips": "إرشادات السلامة",
+  "safetyTipsTitle": "نصائح السلامة في سير",
+  "safetyTip1": "احرص على إبقاء هاتفك قريباً وتفعيل البلوتوث للصعود التلقائي إلى الحافلة.",
+  "safetyTip2": "يرجى الانتظار حتى تتوقف الحافلة تماماً قبل الصعود أو النزول.",
+  "safetyTip3": "استخدم زر الاستغاثة (SOS) في صفحة التتبع إذا شعرت بعدم الأمان في أي وقت.",
+  "statsTrips": "الرحلات المكتملة",
+  "statsRating": "متوسط التقييم",
+  "driverDashboard": "لوحة تحكم السائق",
+  "editProfile": "تعديل الملف الشخصي",
+  "changePassword": "تغيير كلمة المرور",
+  "accountSettings": "إعدادات الحساب",
+  "appPreferences": "تفضيلات التطبيق",
+  "cacheAndSync": "التخزين والمزامنة",
+  "aboutApp": "حول تطبيق سير",
+  "appVersion": "الإصدار {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "bleProximityBoarding": "الصعود التقاربي التلقائي",
+  "bleProximityBoardingDesc": "اكتشاف إشارات الحافلة تلقائياً للصعود السريع",
+  "forceSync": "مزامنة البيانات المحلية",
+  "forceSyncDesc": "تحديث الخطوط والاشتراكات ومزامنة التغييرات المعلقة",
+  "editProfileSuccess": "تم تحديث الملف الشخصي بنجاح",
+  "changePasswordSuccess": "تم تحديث كلمة المرور بنجاح",
+  "newPasswordLabel": "كلمة المرور الجديدة",
+  "confirmNewPasswordLabel": "تأكيد كلمة المرور الجديدة",
+  "institutionLabel": "المؤسسة التعليمية / الجامعة",
+  "phoneLabel": "رقم الهاتف",
+  "saveButton": "حفظ التغييرات",
+  "syncCompleted": "اكتملت عملية المزامنة بنجاح",
+  "goHome": "العودة للرئيسية"
 }
 

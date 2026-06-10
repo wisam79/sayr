@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -213,18 +214,16 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
               if (previous is TrackingDriverActive) {
                 return _buildDriverView(previous);
               }
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  child: Text(
-                    state.failure.toLocalizedString(context),
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
+              return AppErrorWidget(
+                message: state.failure.toLocalizedString(context),
+                title: l10n.error,
+                retryLabel: l10n.retry,
+                onRetry: () => _trackingBloc.add(
+                  TrackingWatchTrip(tripId: widget.tripId),
                 ),
               );
             }
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingWidget());
           },
         ),
         floatingActionButton: BlocBuilder<TrackingBloc, TrackingState>(
@@ -288,46 +287,48 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
           bottom: AppSpacing.md,
           child: SafeArea(
             top: false,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor.withValues(alpha: 0.95),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 20,
-                    offset: const Offset(0, 4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor.withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.12),
+                        blurRadius: 20,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Handle bar decoration
-                      Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.textMuted.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(2),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Handle bar decoration
+                        Container(
+                          width: 40,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppColors.textMuted.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.md),
 
-                      // Status row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          TripStatusChip(status: trip.status),
-                        ],
-                      ),
+                        // Status row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TripStatusChip(status: trip.status),
+                          ],
+                        ),
                       const SizedBox(height: AppSpacing.md),
 
                       // Active duration
@@ -386,6 +387,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
             ),
           ),
         ),
+      ),
       ],
     );
   }

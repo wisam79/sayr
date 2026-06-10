@@ -23,17 +23,39 @@ import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_pa
 import 'package:sayr_mobile/features/tracking/presentation/pages/driver_trip_controls_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/trip_tracking_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-/// Centralized router configuration for the app.
-///
-/// Auth-aware navigation is handled in `SayrApp` via a `BlocListener<AuthBloc>`
-/// that calls `config.go` on state changes.
+CustomTransitionPage<void> _slideTransitionPage({required Widget child}) {
+  return CustomTransitionPage<void>(
+    child: child,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.05),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+          ),
+        ),
+        child: FadeTransition(
+          opacity: CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          ),
+          child: child,
+        ),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 250),
+  );
+}
+
 @lazySingleton
 class AppRouter {
-  /// Creates an [AppRouter].
   AppRouter();
 
-  /// Routes accessible without authentication.
   static const publicPaths = <String>{
     '/splash',
     '/onboarding',
@@ -43,7 +65,6 @@ class AppRouter {
     '/complete-profile',
   };
 
-  /// Public entry screens that should redirect home after authentication.
   static const authEntryPaths = <String>{
     '/onboarding',
     '/login',
@@ -51,149 +72,154 @@ class AppRouter {
     '/complete-profile',
   };
 
-  /// The main [GoRouter] configuration instance.
   late final GoRouter config = GoRouter(
     initialLocation: '/splash',
     routes: [
       GoRoute(
         path: '/splash',
         name: 'splash',
-        builder: (context, state) => const SplashPage(),
+        builder: (_, __) => const SplashPage(),
       ),
       GoRoute(
         path: '/onboarding',
         name: 'onboarding',
-        builder: (context, state) => const OnboardingPage(),
+        builder: (_, __) => const OnboardingPage(),
       ),
       GoRoute(
         path: '/login',
         name: 'login',
-        builder: (context, state) => const LoginPage(),
+        builder: (_, __) => const LoginPage(),
       ),
       GoRoute(
         path: '/signup',
         name: 'signup',
-        builder: (context, state) => const SignupPage(),
+        builder: (_, __) => const SignupPage(),
       ),
       GoRoute(
         path: '/reset-password',
         name: 'reset-password',
-        builder: (context, state) => const ResetPasswordPage(),
+        builder: (_, __) => const ResetPasswordPage(),
       ),
       GoRoute(
         path: '/complete-profile',
         name: 'complete-profile',
-        builder: (context, state) => const CompleteProfilePage(),
+        builder: (_, __) => const CompleteProfilePage(),
       ),
       GoRoute(
         path: '/',
         name: 'home',
-        builder: (context, state) => const HomePage(),
+        pageBuilder: (_, __) => const NoTransitionPage(child: HomePage()),
       ),
       GoRoute(
         path: '/routes',
         name: 'routes',
-        builder: (context, state) => const RoutesListPage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const RoutesListPage()),
       ),
       GoRoute(
         path: '/route/:routeId',
         name: 'route-details',
-        builder: (context, state) {
-          final route = state.extra as Route?;
-          final routeId = RouteId(state.pathParameters['routeId']!);
-          return RouteDetailsPage(route: route, routeId: routeId);
-        },
+        pageBuilder: (context, state) => _slideTransitionPage(
+          child: RouteDetailsPage(
+            route: state.extra as Route?,
+            routeId: RouteId(state.pathParameters['routeId']!),
+          ),
+        ),
       ),
       GoRoute(
         path: '/subscriptions',
         name: 'subscriptions',
-        builder: (context, state) => const MySubscriptionsPage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const MySubscriptionsPage()),
       ),
       GoRoute(
         path: '/activate-license',
         name: 'activate-license',
-        builder: (context, state) => const ActivateLicensePage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const ActivateLicensePage()),
       ),
       GoRoute(
         path: '/active-trips',
         name: 'active-trips',
-        builder: (context, state) => const ActiveTripsPage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const ActiveTripsPage()),
       ),
       GoRoute(
         path: '/trip/:tripId',
         name: 'trip-tracking',
-        builder: (context, state) {
-          final tripId = TripId(state.pathParameters['tripId']!);
-          return TripTrackingPage(tripId: tripId);
-        },
+        pageBuilder: (context, state) => _slideTransitionPage(
+          child: TripTrackingPage(
+            tripId: TripId(state.pathParameters['tripId']!),
+          ),
+        ),
       ),
       GoRoute(
         path: '/driver-trip/:tripId',
         name: 'driver-trip-controls',
-        builder: (context, state) {
-          final tripId = TripId(state.pathParameters['tripId']!);
-          return DriverTripControlsPage(tripId: tripId);
-        },
+        pageBuilder: (context, state) => _slideTransitionPage(
+          child: DriverTripControlsPage(
+            tripId: TripId(state.pathParameters['tripId']!),
+          ),
+        ),
       ),
       GoRoute(
         path: '/payment/:routeId/:amount',
         name: 'payment',
-        builder: (context, state) {
-          final routeId = RouteId(state.pathParameters['routeId']!);
-          final amount = int.parse(state.pathParameters['amount']!);
-          return PaymentPage(routeId: routeId, amount: amount);
-        },
+        pageBuilder: (context, state) => _slideTransitionPage(
+          child: PaymentPage(
+            routeId: RouteId(state.pathParameters['routeId']!),
+            amount: int.parse(state.pathParameters['amount']!),
+          ),
+        ),
       ),
       GoRoute(
         path: '/chat/:conversationId',
         name: 'chat',
-        builder: (context, state) {
-          return ChatPage(
+        pageBuilder: (context, state) => _slideTransitionPage(
+          child: ChatPage(
             conversationId: ConversationId(
               state.pathParameters['conversationId']!,
             ),
-          );
-        },
+          ),
+        ),
       ),
       GoRoute(
         path: '/chats',
         name: 'chats',
-        builder: (context, state) => const ChatListPage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const ChatListPage()),
       ),
       GoRoute(
         path: '/notifications',
         name: 'notifications',
-        builder: (context, state) => const NotificationsPage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const NotificationsPage()),
       ),
       GoRoute(
         path: '/boarding',
         name: 'boarding',
-        builder: (context, state) => const BoardingQrPage(),
+        pageBuilder: (_, __) =>
+            _slideTransitionPage(child: const BoardingQrPage()),
       ),
       GoRoute(
         path: '/driver-trip/:tripId/boarding',
         name: 'driver-boarding',
-        builder: (context, state) {
-          final tripId = TripId(state.pathParameters['tripId']!);
-          return BoardingScannerPage(tripId: tripId);
-        },
+        pageBuilder: (context, state) => _slideTransitionPage(
+          child: BoardingScannerPage(
+            tripId: TripId(state.pathParameters['tripId']!),
+          ),
+        ),
       ),
     ],
-    errorBuilder: (context, state) =>
-        _ErrorPage(error: state.error?.toString()),
-  );
-}
-
-class _ErrorPage extends StatelessWidget {
-  const _ErrorPage({this.error});
-  final String? error;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(error ?? AppLocalizations.of(context).pageNotFound),
+    errorBuilder: (context, state) => Scaffold(
+      appBar: AppBar(),
+      body: AppErrorWidget(
+        title: AppLocalizations.of(context).error,
+        message: state.error?.toString() ??
+            AppLocalizations.of(context).pageNotFound,
+        retryLabel: AppLocalizations.of(context).goHome,
+        onRetry: () => context.go('/'),
       ),
-    );
-  }
+    ),
+  );
 }

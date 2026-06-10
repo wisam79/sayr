@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:sayr_ui_kit/src/theme/app_colors.dart';
 import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
@@ -11,6 +12,7 @@ class AppTheme {
   /// Light theme.
   static ThemeData get light => ThemeData(
         useMaterial3: true,
+        fontFamily: GoogleFonts.ibmPlexSansArabic().fontFamily,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
@@ -120,6 +122,7 @@ class AppTheme {
   /// Dark theme.
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
+        fontFamily: GoogleFonts.ibmPlexSansArabic().fontFamily,
         brightness: Brightness.dark,
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,

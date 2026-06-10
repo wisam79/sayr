@@ -9,10 +9,9 @@ import 'package:sayr_mobile/features/notifications/presentation/bloc/notificatio
 import 'package:sayr_mobile/features/notifications/presentation/widgets/notification_card.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
-/// Page responsible for showing user notification inbox.
 class NotificationsPage extends StatefulWidget {
-  /// Creates a [NotificationsPage].
   const NotificationsPage({super.key});
 
   @override
@@ -67,11 +66,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
         },
         builder: (context, state) {
           return switch (state) {
-            NotificationsInitial() ||
-            NotificationsLoading() =>
-              const Center(child: CircularProgressIndicator()),
-            NotificationsError() => _ErrorBody(
-                failure: state.failure,
+            NotificationsInitial() || NotificationsLoading() =>
+              const _SkeletonLoading(),
+            NotificationsError(:final failure) => AppErrorWidget(
+                message: failure.toLocalizedString(context),
+                title: l10n.error,
+                retryLabel: l10n.retry,
                 onRetry: () => context
                     .read<NotificationsBloc>()
                     .add(const NotificationsRefreshRequested()),
@@ -80,6 +80,25 @@ class _NotificationsPageState extends State<NotificationsPage> {
               _NotificationsBody(notifications: notifications),
           };
         },
+      ),
+    );
+  }
+}
+
+class _SkeletonLoading extends StatelessWidget {
+  const _SkeletonLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Skeletonizer(
+      child: ListView(
+        padding: const EdgeInsetsDirectional.symmetric(
+          vertical: AppSpacing.sm,
+        ),
+        children: List.generate(
+          6,
+          (_) => _NotificationsBody._skeletonTile(),
+        ),
       ),
     );
   }
@@ -94,25 +113,10 @@ class _NotificationsBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (notifications.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.notifications_none,
-                size: 64,
-                color: AppColors.textSecondary,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                l10n.noNotifications,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ],
-          ),
-        ),
+      return EmptyState(
+        icon: Icons.notifications_none,
+        title: l10n.noNotifications,
+        subtitle: l10n.pullToRefresh,
       );
     }
 
@@ -127,7 +131,7 @@ class _NotificationsBody extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         itemCount: notifications.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
         itemBuilder: (context, index) {
           final n = notifications[index];
           return NotificationCard(
@@ -144,6 +148,15 @@ class _NotificationsBody extends StatelessWidget {
     );
   }
 
+  static ListTile _skeletonTile() => const ListTile(
+        leading: Bone.circle(size: 40),
+        title: Bone.text(),
+        subtitle: Padding(
+          padding: EdgeInsetsDirectional.only(top: 4),
+          child: Bone.text(),
+        ),
+      );
+
   void _onNotificationTap(BuildContext context, AppNotification n) {
     final tripId = n.data['trip_id'] as String?;
     if (tripId != null) {
@@ -154,42 +167,5 @@ class _NotificationsBody extends StatelessWidget {
     if (conversationId != null) {
       context.push('/chat/$conversationId');
     }
-  }
-}
-
-class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({required this.failure, required this.onRetry});
-
-  final Failure failure;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              failure.toLocalizedString(context),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

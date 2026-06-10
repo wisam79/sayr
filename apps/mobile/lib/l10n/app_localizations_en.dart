@@ -877,4 +877,133 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get bluetoothRequired =>
       'Please enable Bluetooth to use proximity boarding';
+
+  @override
+  String get themeMode => 'Theme Mode';
+
+  @override
+  String get themeLight => 'Light Mode';
+
+  @override
+  String get themeDark => 'Dark Mode';
+
+  @override
+  String get themeSystem => 'System Default';
+
+  @override
+  String get studentBadge => 'Student';
+
+  @override
+  String get driverBadge => 'Driver';
+
+  @override
+  String get scanQrCode => 'Scan QR Code';
+
+  @override
+  String get myDigitalPass => 'My Digital Pass';
+
+  @override
+  String daysRemainingShort(int days) {
+    return '$days days';
+  }
+
+  @override
+  String get quickActions => 'Quick Actions';
+
+  @override
+  String get liveMap => 'Live Map';
+
+  @override
+  String get chatSupport => 'Chat Support';
+
+  @override
+  String get safetyTips => 'Safety Tips';
+
+  @override
+  String get safetyTipsTitle => 'Sayr Safety Tips';
+
+  @override
+  String get safetyTip1 =>
+      'Always keep your phone handy and ensure Bluetooth is on for automatic boarding.';
+
+  @override
+  String get safetyTip2 =>
+      'Please wait for the bus to come to a complete stop before boarding or leaving.';
+
+  @override
+  String get safetyTip3 =>
+      'Use the SOS emergency button on the tracking page if you feel unsafe at any point.';
+
+  @override
+  String get statsTrips => 'Trips Completed';
+
+  @override
+  String get statsRating => 'Average Rating';
+
+  @override
+  String get driverDashboard => 'Driver Dashboard';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get accountSettings => 'Account Settings';
+
+  @override
+  String get appPreferences => 'App Preferences';
+
+  @override
+  String get cacheAndSync => 'Cache & Synchronization';
+
+  @override
+  String get aboutApp => 'About Sayr';
+
+  @override
+  String appVersion(String version) {
+    return 'Version $version';
+  }
+
+  @override
+  String get bleProximityBoarding => 'Auto BLE Boarding';
+
+  @override
+  String get bleProximityBoardingDesc =>
+      'Automatically detect bus beacons for quick boarding';
+
+  @override
+  String get forceSync => 'Synchronize Offline Cache';
+
+  @override
+  String get forceSyncDesc =>
+      'Force refresh routes, subscriptions, and sync pending updates';
+
+  @override
+  String get editProfileSuccess => 'Profile updated successfully';
+
+  @override
+  String get changePasswordSuccess => 'Password updated successfully';
+
+  @override
+  String get newPasswordLabel => 'New Password';
+
+  @override
+  String get confirmNewPasswordLabel => 'Confirm New Password';
+
+  @override
+  String get institutionLabel => 'University / Institution';
+
+  @override
+  String get phoneLabel => 'Phone Number';
+
+  @override
+  String get saveButton => 'Save Changes';
+
+  @override
+  String get syncCompleted => 'Synchronization completed';
+
+  @override
+  String get goHome => 'Go Home';
 }

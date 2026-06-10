@@ -38,6 +38,10 @@ scripts:
     description: Run tests with coverage
     run: melos exec -c 1 -- "flutter test --coverage"
 
+  test:integration:
+    description: Run mobile integration tests with mocked environment variables
+    run: melos exec --scope="sayr_mobile" -- "flutter test --dart-define=SUPABASE_URL=https://placeholder.supabase.co --dart-define=SUPABASE_ANON_KEY=placeholder integration_test/app_test.dart"
+
   build:android:
     description: Build Android APK
     run: melos exec --dir-exists="android" -- "flutter build apk --release"

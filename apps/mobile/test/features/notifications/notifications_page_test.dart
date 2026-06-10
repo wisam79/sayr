@@ -10,6 +10,8 @@ import 'package:sayr_mobile/features/notifications/presentation/bloc/notificatio
 import 'package:sayr_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 
+import 'package:skeletonizer/skeletonizer.dart';
+
 class MockNotificationsBloc
     extends MockBloc<NotificationsEvent, NotificationsState>
     implements NotificationsBloc {}
@@ -66,7 +68,10 @@ void main() {
     await tester.pumpWidget(wrap(const NotificationsPage()));
     await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((w) => w.runtimeType.toString().contains('Skeleton')),
+      findsAtLeastNWidgets(1),
+    );
   });
 
   testWidgets('shows empty state when no notifications', (tester) async {

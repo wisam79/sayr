@@ -9,6 +9,7 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// Page displaying subscriptions purchased by the user.
 class MySubscriptionsPage extends StatefulWidget {
@@ -55,10 +56,8 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
           return switch (state) {
-            SubscriptionsInitial() => const LoadingWidget(),
-            SubscriptionsLoading() => const LoadingWidget(),
-            LicenseActivating() => const LoadingWidget(),
-            LicenseActivated() => const LoadingWidget(),
+            SubscriptionsInitial() || SubscriptionsLoading() || LicenseActivating() || LicenseActivated() =>
+              const _SkeletonLoading(),
             SubscriptionsError(:final failure) => AppErrorWidget(
                 message: failure.toLocalizedString(context),
                 title: l10n.error,
@@ -81,18 +80,64 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                   onPressed: () => context.push('/activate-license'),
                 ),
               ),
-            SubscriptionsLoaded(:final subscriptions) => ListView.separated(
-                padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                itemCount: subscriptions.length,
-                separatorBuilder: (_, __) =>
-                    const SizedBox(height: AppSpacing.md),
-                itemBuilder: (context, index) {
-                  final sub = subscriptions[index];
-                  return _SubscriptionCard(subscription: sub);
+            SubscriptionsLoaded(:final subscriptions) => RefreshIndicator(
+                onRefresh: () async {
+                  context
+                      .read<SubscriptionsBloc>()
+                      .add(const SubscriptionsLoadRequested());
                 },
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  itemCount: subscriptions.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.md),
+                  itemBuilder: (context, index) {
+                    final sub = subscriptions[index];
+                    return _SubscriptionCard(subscription: sub);
+                  },
+                ),
               ),
           };
         },
+      ),
+    );
+  }
+}
+
+class _SkeletonLoading extends StatelessWidget {
+  const _SkeletonLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Skeletonizer(
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        children: List.generate(
+          3,
+          (_) => const Card(
+            margin: EdgeInsets.only(bottom: AppSpacing.md),
+            child: Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Bone.text(width: 160),
+                  SizedBox(height: AppSpacing.md),
+                  Row(
+                    children: [
+                      Bone.circle(size: 16),
+                      SizedBox(width: AppSpacing.xs),
+                      Bone.text(width: 120),
+                    ],
+                  ),
+                  SizedBox(height: AppSpacing.sm),
+                  Bone.text(width: 100),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -132,87 +177,84 @@ class _SubscriptionCard extends StatelessWidget {
               ),
           ],
         ),
-        child: Card(
+        child: GlassCard(
           margin: EdgeInsets.zero,
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      l10n.subscriptionType,
-                      style: Theme.of(context).textTheme.titleMedium,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.subscriptionType,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xxs,
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm,
-                        vertical: AppSpacing.xxs,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isActive
-                            ? AppColors.success.withValues(alpha: 0.1)
-                            : AppColors.error.withValues(alpha: 0.1),
-                        borderRadius:
-                            BorderRadius.circular(AppSpacing.inputRadius),
-                      ),
-                      child: Text(
-                        isActive
-                            ? l10n.subscriptionStatusActive
-                            : l10n.subscriptionStatusExpired,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: isActive
-                                  ? AppColors.success
-                                  : AppColors.error,
-                            ),
-                      ),
+                    decoration: BoxDecoration(
+                      color: isActive
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : AppColors.error.withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.inputRadius),
+                    ),
+                    child: Text(
+                      isActive
+                          ? l10n.subscriptionStatusActive
+                          : l10n.subscriptionStatusExpired,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: isActive
+                                ? AppColors.success
+                                : AppColors.error,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (subscription.endDate != null) ...[
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today_outlined,
+                      size: 16,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      l10n.subscriptionEndsOn(endDateStr),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.md),
-                if (subscription.endDate != null) ...[
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today_outlined,
-                        size: 16,
-                        color: AppColors.textSecondary,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        l10n.subscriptionEndsOn(endDateStr),
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
+                const SizedBox(height: AppSpacing.xs),
+                if (subscription.daysRemaining != null)
+                  Text(
+                    l10n.subscriptionDaysLeft(subscription.daysRemaining!),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                   ),
-                  const SizedBox(height: AppSpacing.xs),
-                  if (subscription.daysRemaining != null)
-                    Text(
-                      l10n.subscriptionDaysLeft(subscription.daysRemaining!),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondary,
-                          ),
-                    ),
-                ],
-                if (isActive) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  OutlinedButton(
-                    onPressed: () {
-                      context
-                          .read<SubscriptionsBloc>()
-                          .add(SubscriptionCancelRequested(subscription.id));
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error),
-                    ),
-                    child: Text(l10n.cancelSubscription),
-                  ),
-                ],
               ],
-            ),
+              if (isActive) ...[
+                const SizedBox(height: AppSpacing.lg),
+                OutlinedButton(
+                  onPressed: () {
+                    context
+                        .read<SubscriptionsBloc>()
+                        .add(SubscriptionCancelRequested(subscription.id));
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                  ),
+                  child: Text(l10n.cancelSubscription),
+                ),
+              ],
+            ],
           ),
         ),
       ),

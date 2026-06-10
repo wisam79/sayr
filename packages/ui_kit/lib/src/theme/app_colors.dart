@@ -5,7 +5,7 @@ class AppColors {
   AppColors._();
 
   /// Primary brand color (green).
-  static const Color primary = Color(0xFF2ECC40);
+  static const Color primary = Color(0xFF0E6245);
 
   /// Secondary brand color (deep blue).
   static const Color secondary = Color(0xFF1E5BFF);

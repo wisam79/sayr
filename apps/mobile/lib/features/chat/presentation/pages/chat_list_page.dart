@@ -11,9 +11,7 @@ import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-/// Page listing all conversations the current user participates in.
 class ChatListPage extends StatefulWidget {
-  /// Creates a [ChatListPage].
   const ChatListPage({super.key});
 
   @override
@@ -54,43 +52,34 @@ class _ChatListPageState extends State<ChatListPage> {
         },
         builder: (context, state) {
           return switch (state) {
-            ChatListInitial() || ChatListLoading() => const _LoadingBody(),
-            ChatListError() => _ErrorBody(
-                failure: state.failure,
+            ChatListInitial() || ChatListLoading() => Skeletonizer(
+                child: ListView.builder(
+                  padding: const EdgeInsetsDirectional.symmetric(
+                    vertical: AppSpacing.sm,
+                  ),
+                  itemCount: 6,
+                  itemBuilder: (_, __) => const ListTile(
+                    leading: Bone.circle(size: 40),
+                    title: Bone.text(),
+                    subtitle: Padding(
+                      padding: EdgeInsetsDirectional.only(top: 4),
+                      child: Bone.text(),
+                    ),
+                  ),
+                ),
+              ),
+            ChatListError(:final failure) => AppErrorWidget(
+                message: failure.toLocalizedString(context),
+                title: l10n.error,
+                retryLabel: l10n.retry,
                 onRetry: () => context
                     .read<ChatListBloc>()
                     .add(const ChatListRefreshRequested()),
               ),
-            ChatListLoaded(:final conversations) => _ChatListBody(
-                conversations: conversations,
-                onTapConversation: (c) => context.push('/chat/${c.id.value}'),
-              ),
+            ChatListLoaded(:final conversations) =>
+              _ChatListBody(conversations: conversations),
           };
         },
-      ),
-    );
-  }
-}
-
-class _LoadingBody extends StatelessWidget {
-  const _LoadingBody();
-
-  @override
-  Widget build(BuildContext context) {
-    return Skeletonizer(
-      child: ListView.builder(
-        padding: const EdgeInsetsDirectional.symmetric(
-          vertical: AppSpacing.sm,
-        ),
-        itemCount: 6,
-        itemBuilder: (_, __) => const ListTile(
-          leading: Bone.circle(size: 40),
-          title: Bone.text(),
-          subtitle: Padding(
-            padding: EdgeInsetsDirectional.only(top: 4),
-            child: Bone.text(),
-          ),
-        ),
       ),
     );
   }
@@ -99,22 +88,18 @@ class _LoadingBody extends StatelessWidget {
 class _ChatListBody extends StatelessWidget {
   const _ChatListBody({
     required this.conversations,
-    required this.onTapConversation,
   });
 
   final List<Conversation> conversations;
-  final ValueChanged<Conversation> onTapConversation;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     if (conversations.isEmpty) {
-      return Center(
-        child: EmptyState(
-          icon: Icons.chat_bubble_outline,
-          title: l10n.noChats,
-          subtitle: l10n.pullToRefresh,
-        ),
+      return EmptyState(
+        icon: Icons.chat_bubble_outline,
+        title: l10n.noChats,
+        subtitle: l10n.pullToRefresh,
       );
     }
 
@@ -127,51 +112,14 @@ class _ChatListBody extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         itemCount: conversations.length,
-        separatorBuilder: (_, __) => const Divider(height: 1),
+        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
         itemBuilder: (context, index) {
           final c = conversations[index];
           return ConversationCard(
             conversation: c,
-            onTap: () => onTapConversation(c),
+            onTap: () => context.push('/chat/${c.id.value}'),
           );
         },
-      ),
-    );
-  }
-}
-
-class _ErrorBody extends StatelessWidget {
-  const _ErrorBody({required this.failure, required this.onRetry});
-
-  final Failure failure;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: AppColors.error,
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              failure.toLocalizedString(context),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: Text(l10n.retry),
-            ),
-          ],
-        ),
       ),
     );
   }

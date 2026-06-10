@@ -11,6 +11,7 @@ import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.da
 import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 /// Student view: shows all active trips on a map.
 class ActiveTripsPage extends StatefulWidget {
@@ -50,37 +51,17 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
       body: BlocBuilder<TrackingBloc, TrackingState>(
         builder: (context, state) {
           if (state is TrackingLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const _SkeletonLoading();
           }
 
           if (state is TrackingError) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: AppColors.error,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      state.failure.toLocalizedString(context),
-                      style: Theme.of(context).textTheme.titleMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    PrimaryButton(
-                      label: l10n.retry,
-                      onPressed: () => context
-                          .read<TrackingBloc>()
-                          .add(const TrackingLoadActiveTrips()),
-                    ),
-                  ],
-                ),
-              ),
+            return AppErrorWidget(
+              message: state.failure.toLocalizedString(context),
+              title: l10n.error,
+              retryLabel: l10n.retry,
+              onRetry: () => context
+                  .read<TrackingBloc>()
+                  .add(const TrackingLoadActiveTrips()),
             );
           }
 
@@ -113,41 +94,107 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
         )
         .toList();
 
-    return Column(
-      children: [
-        Expanded(
-          flex: 4,
-          child: SayrMap(
-            markers: markers,
-            useCluster: true,
+    return RefreshIndicator(
+      onRefresh: () async {
+        context
+            .read<TrackingBloc>()
+            .add(const TrackingLoadActiveTrips());
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height -
+              kToolbarHeight - MediaQuery.of(context).padding.top,
+          child: Column(
+            children: [
+              Expanded(
+                flex: 4,
+                child: SayrMap(
+                  markers: markers,
+                  useCluster: true,
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(28),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 10,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: state.trips.isEmpty
+                      ? EmptyState(
+                          icon: Icons.directions_bus_outlined,
+                          title: l10n.noActiveTrips,
+                          subtitle: l10n.noTripsYet,
+                        )
+                      : _TripList(trips: state.trips),
+                ),
+              ),
+            ],
           ),
         ),
-        Expanded(
-          flex: 3,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(28),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
+      ),
+    );
+  }
+}
+
+class _SkeletonLoading extends StatelessWidget {
+  const _SkeletonLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Skeletonizer(
+      child: ListView(
+        children: [
+          Container(
+            height: MediaQuery.of(context).size.height * 0.55,
+            color: Theme.of(context).cardColor,
+            child: const Center(child: Bone.circle(size: 48)),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Bone.circle(size: 40),
+                  title: Bone.text(),
+                  subtitle: Padding(
+                    padding: EdgeInsetsDirectional.only(top: 4),
+                    child: Bone.text(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                ListTile(
+                  leading: Bone.circle(size: 40),
+                  title: Bone.text(),
+                  subtitle: Padding(
+                    padding: EdgeInsetsDirectional.only(top: 4),
+                    child: Bone.text(),
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                ListTile(
+                  leading: Bone.circle(size: 40),
+                  title: Bone.text(),
+                  subtitle: Padding(
+                    padding: EdgeInsetsDirectional.only(top: 4),
+                    child: Bone.text(),
+                  ),
                 ),
               ],
             ),
-            child: state.trips.isEmpty
-                ? EmptyState(
-                    icon: Icons.directions_bus_outlined,
-                    title: l10n.noActiveTrips,
-                    subtitle: l10n.noTripsYet,
-                  )
-                : _TripList(trips: state.trips),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -190,122 +237,94 @@ class _TripCard extends StatelessWidget {
         context.push('/trip/${trip.id.value}');
       },
       borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Left Accent Status Bar
-                Container(
-                  width: 6,
-                  color: statusColor,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Row(
-                      children: [
-                        // Status Icon
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: statusColor.withValues(alpha: 0.12),
-                          child: Icon(
-                            _statusIcon,
-                            color: statusColor,
-                            size: 20,
-                          ),
+      child: GlassCard(
+        onTap: () {},
+        padding: EdgeInsets.zero,
+        margin: EdgeInsets.zero,
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Left Accent Status Bar
+              Container(
+                width: 6,
+                color: statusColor,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Row(
+                    children: [
+                      // Status Icon
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: statusColor.withValues(alpha: 0.12),
+                        child: Icon(
+                          _statusIcon,
+                          color: statusColor,
+                          size: 20,
                         ),
-                        const SizedBox(width: AppSpacing.md),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
 
-                        // Details
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                trip.status.localizedName(l10n),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.access_time,
-                                    size: 14,
-                                    color: AppColors.textSecondary
-                                        .withValues(alpha: 0.8),
+                      // Details
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              trip.status.localizedName(l10n),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _formattedTime,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
-                                        ?.copyWith(
-                                          color: AppColors.textSecondary,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.access_time,
+                                  size: 14,
+                                  color: AppColors.textSecondary
+                                      .withValues(alpha: 0.8),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  _formattedTime,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
+                      ),
 
-                        // Right Arrow/Chevron
-                        Icon(
-                          Icons.chevron_right,
-                          color: AppColors.textSecondary.withValues(alpha: 0.5),
-                        ),
-                      ],
-                    ),
+                      // Right Arrow/Chevron
+                      Icon(
+                        Icons.chevron_right,
+                        color:
+                            AppColors.textSecondary.withValues(alpha: 0.5),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Color get _statusColor {
-    switch (trip.status) {
-      case TripStatus.scheduled:
-        return Colors.orange[700]!;
-      case TripStatus.driverWaiting:
-        return Colors.blue[600]!;
-      case TripStatus.inTransit:
-        return AppColors.primary;
-      case TripStatus.completed:
-        return AppColors.success;
-      case TripStatus.absent:
-        return AppColors.error;
-      case TripStatus.cancelled:
-        return AppColors.textMuted;
-    }
-  }
+  Color get _statusColor => trip.status.color;
 
   IconData get _statusIcon {
     switch (trip.status) {

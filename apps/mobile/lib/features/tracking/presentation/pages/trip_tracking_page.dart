@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,11 +18,9 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/trip_details_cub
 import 'package:sayr_mobile/features/tracking/presentation/widgets/location_tile.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/rating_sheet.dart';
-import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_mock_loader.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Student view: live tracking of a single trip on a map.
@@ -203,9 +202,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
               );
             }
 
-            return const Skeletonizer(
-              child: TripMockLoader(),
-            );
+            return const Center(child: LoadingWidget());
           },
         ),
       ),
@@ -357,28 +354,30 @@ class _TrackingView extends StatelessWidget {
               bottom: AppSpacing.md,
               child: SafeArea(
                 top: false,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor.withValues(alpha: 0.95),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Theme.of(context)
-                          .dividerColor
-                          .withValues(alpha: 0.08),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor.withValues(alpha: 0.85),
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: Theme.of(context)
+                              .dividerColor
+                              .withValues(alpha: 0.08),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.12),
+                            blurRadius: 20,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: BlocBuilder<TripDetailsCubit, TripDetailsState>(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: BlocBuilder<TripDetailsCubit, TripDetailsState>(
                         builder: (context, detailsState) {
                           final route = detailsState is TripDetailsLoaded
                               ? detailsState.route
@@ -482,6 +481,7 @@ class _TrackingView extends StatelessWidget {
                 ),
               ),
             ),
+          ),
           ],
         );
       },
@@ -506,15 +506,11 @@ class _EtaCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary.withValues(alpha: 0.15),
-            AppColors.primary.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.15),
         ),
-        borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [

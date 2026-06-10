@@ -1705,6 +1705,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enable Bluetooth to use proximity boarding'**
   String get bluetoothRequired;
+
+  /// No description provided for @themeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme Mode'**
+  String get themeMode;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light Mode'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark Mode'**
+  String get themeDark;
+
+  /// No description provided for @themeSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System Default'**
+  String get themeSystem;
+
+  /// No description provided for @studentBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get studentBadge;
+
+  /// No description provided for @driverBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get driverBadge;
+
+  /// No description provided for @scanQrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQrCode;
+
+  /// No description provided for @myDigitalPass.
+  ///
+  /// In en, this message translates to:
+  /// **'My Digital Pass'**
+  String get myDigitalPass;
+
+  /// No description provided for @daysRemainingShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days'**
+  String daysRemainingShort(int days);
+
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Actions'**
+  String get quickActions;
+
+  /// No description provided for @liveMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Map'**
+  String get liveMap;
+
+  /// No description provided for @chatSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat Support'**
+  String get chatSupport;
+
+  /// No description provided for @safetyTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety Tips'**
+  String get safetyTips;
+
+  /// No description provided for @safetyTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sayr Safety Tips'**
+  String get safetyTipsTitle;
+
+  /// No description provided for @safetyTip1.
+  ///
+  /// In en, this message translates to:
+  /// **'Always keep your phone handy and ensure Bluetooth is on for automatic boarding.'**
+  String get safetyTip1;
+
+  /// No description provided for @safetyTip2.
+  ///
+  /// In en, this message translates to:
+  /// **'Please wait for the bus to come to a complete stop before boarding or leaving.'**
+  String get safetyTip2;
+
+  /// No description provided for @safetyTip3.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the SOS emergency button on the tracking page if you feel unsafe at any point.'**
+  String get safetyTip3;
+
+  /// No description provided for @statsTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips Completed'**
+  String get statsTrips;
+
+  /// No description provided for @statsRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Rating'**
+  String get statsRating;
+
+  /// No description provided for @driverDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver Dashboard'**
+  String get driverDashboard;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfile;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePassword;
+
+  /// No description provided for @accountSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Settings'**
+  String get accountSettings;
+
+  /// No description provided for @appPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'App Preferences'**
+  String get appPreferences;
+
+  /// No description provided for @cacheAndSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache & Synchronization'**
+  String get cacheAndSync;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About Sayr'**
+  String get aboutApp;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String appVersion(String version);
+
+  /// No description provided for @bleProximityBoarding.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto BLE Boarding'**
+  String get bleProximityBoarding;
+
+  /// No description provided for @bleProximityBoardingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically detect bus beacons for quick boarding'**
+  String get bleProximityBoardingDesc;
+
+  /// No description provided for @forceSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronize Offline Cache'**
+  String get forceSync;
+
+  /// No description provided for @forceSyncDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Force refresh routes, subscriptions, and sync pending updates'**
+  String get forceSyncDesc;
+
+  /// No description provided for @editProfileSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get editProfileSuccess;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get changePasswordSuccess;
+
+  /// No description provided for @newPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPasswordLabel;
+
+  /// No description provided for @confirmNewPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPasswordLabel;
+
+  /// No description provided for @institutionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'University / Institution'**
+  String get institutionLabel;
+
+  /// No description provided for @phoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneLabel;
+
+  /// No description provided for @saveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveButton;
+
+  /// No description provided for @syncCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronization completed'**
+  String get syncCompleted;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get goHome;
 }
 
 class _AppLocalizationsDelegate

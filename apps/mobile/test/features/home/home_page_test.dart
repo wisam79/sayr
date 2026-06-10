@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
+import 'package:sayr_mobile/core/theme_cubit.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
@@ -41,6 +45,8 @@ class MockRoutesBloc extends MockBloc<RoutesEvent, RoutesState>
 
 class MockLocaleCubit extends MockCubit<Locale> implements LocaleCubit {}
 
+class MockThemeCubit extends MockCubit<ThemeMode> implements ThemeCubit {}
+
 void main() {
   late MockAuthBloc mockAuthBloc;
   late MockSubscriptionsBloc mockSubsBloc;
@@ -48,6 +54,7 @@ void main() {
   late MockTrackingBloc mockTrackingBloc;
   late MockRoutesBloc mockRoutesBloc;
   late MockLocaleCubit mockLocaleCubit;
+  late MockThemeCubit mockThemeCubit;
 
   const testStudent = User(
     id: UserId('student-1'),
@@ -72,6 +79,19 @@ void main() {
     endDate: DateTime(2026, 12, 31),
   );
 
+  late Directory tempDir;
+
+  setUpAll(() {
+    tempDir = Directory.systemTemp.createTempSync('hive_tests');
+    Hive.init(tempDir.path);
+  });
+
+  tearDownAll(() {
+    try {
+      tempDir.deleteSync(recursive: true);
+    } catch (_) {}
+  });
+
   setUp(() {
     mockAuthBloc = MockAuthBloc();
     mockSubsBloc = MockSubscriptionsBloc();
@@ -79,6 +99,7 @@ void main() {
     mockTrackingBloc = MockTrackingBloc();
     mockRoutesBloc = MockRoutesBloc();
     mockLocaleCubit = MockLocaleCubit();
+    mockThemeCubit = MockThemeCubit();
 
     // Default stubbing
     when(() => mockSubsBloc.state)
@@ -87,6 +108,7 @@ void main() {
     when(() => mockTrackingBloc.state).thenReturn(const TrackingInitial());
     when(() => mockRoutesBloc.state).thenReturn(const RoutesLoaded([]));
     when(() => mockLocaleCubit.state).thenReturn(const Locale('ar'));
+    when(() => mockThemeCubit.state).thenReturn(ThemeMode.system);
   });
 
   Widget wrap(Widget child) {
@@ -102,6 +124,7 @@ void main() {
       home: MultiBlocProvider(
         providers: [
           BlocProvider<LocaleCubit>.value(value: mockLocaleCubit),
+          BlocProvider<ThemeCubit>.value(value: mockThemeCubit),
           BlocProvider<AuthBloc>.value(value: mockAuthBloc),
           BlocProvider<SubscriptionsBloc>.value(value: mockSubsBloc),
           BlocProvider<NotificationsBloc>.value(value: mockNotifsBloc),

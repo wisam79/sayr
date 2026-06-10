@@ -3,17 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
-
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/complete_profile_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-/// Screen shown after Google sign-in when the user's profile is incomplete.
 class CompleteProfilePage extends StatelessWidget {
-  /// Creates a [CompleteProfilePage].
   const CompleteProfilePage({super.key});
 
   @override
@@ -73,12 +71,13 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const SizedBox(height: 48),
-
-                      // Header
-                      Icon(
-                        Icons.person_add_rounded,
-                        size: 64,
-                        color: colorScheme.primary,
+                      Semantics(
+                        header: true,
+                        child: Icon(
+                          Icons.person_add_rounded,
+                          size: 64,
+                          color: colorScheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 20),
                       Text(
@@ -98,16 +97,21 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 40),
-
-                      // Phone field
-                      _PhoneField(controller: _phoneController),
+                      AppTextField(
+                        label: l10n.phoneNumber,
+                        hint: l10n.phoneHint,
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        prefixIcon: Icons.phone_rounded,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(11),
+                        ],
+                        onChanged: context.read<CompleteProfileCubit>().phoneChanged,
+                      ),
                       const SizedBox(height: 20),
-
-                      // Institution dropdown
                       const _InstitutionDropdown(),
                       const SizedBox(height: 40),
-
-                      // Submit button
                       _SubmitButton(phoneController: _phoneController),
                       const SizedBox(height: 24),
                     ],
@@ -122,34 +126,6 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
   }
 }
 
-class _PhoneField extends StatelessWidget {
-  const _PhoneField({required this.controller});
-
-  final TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final cubit = context.read<CompleteProfileCubit>();
-
-    return TextFormField(
-      controller: controller,
-      keyboardType: TextInputType.phone,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(11),
-      ],
-      decoration: InputDecoration(
-        labelText: l10n.phoneNumber,
-        hintText: '07XXXXXXXXX',
-        prefixIcon: const Icon(Icons.phone_rounded),
-        border: const OutlineInputBorder(),
-      ),
-      onChanged: cubit.phoneChanged,
-    );
-  }
-}
-
 class _InstitutionDropdown extends StatelessWidget {
   const _InstitutionDropdown();
 
@@ -160,7 +136,7 @@ class _InstitutionDropdown extends StatelessWidget {
     return BlocBuilder<CompleteProfileCubit, CompleteProfileState>(
       builder: (context, state) {
         if (state.isLoadingInstitutions) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: LoadingWidget());
         }
 
         if (state.institutions.isEmpty) {
@@ -172,12 +148,11 @@ class _InstitutionDropdown extends StatelessWidget {
         }
 
         return DropdownButtonFormField<String>(
-          // ignore: deprecated_member_use — DropdownButtonFormField has no non-deprecated null-safe override
+          // ignore: deprecated_member_use
           value: state.selectedInstitutionId,
           decoration: InputDecoration(
             labelText: l10n.university,
             prefixIcon: const Icon(Icons.school_rounded),
-            border: const OutlineInputBorder(),
           ),
           items: state.institutions.map((inst) {
             return DropdownMenuItem(
@@ -223,7 +198,7 @@ class _SubmitButton extends StatelessWidget {
               icon: isLoading
                   ? const SizedBox.square(
                       dimension: 20,
-                      child: CircularProgressIndicator.adaptive(
+                      child: CircularProgressIndicator(
                         strokeWidth: 2,
                       ),
                     )

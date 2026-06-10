@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:sayr_ui_kit/src/theme/app_colors.dart';
-import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
+import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 /// A card displaying bus route details.
 class RouteCard extends StatelessWidget {
@@ -52,15 +51,11 @@ class RouteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return GlassCard(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
               Row(
                 children: [
                   Container(
@@ -187,9 +182,7 @@ class RouteCard extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }

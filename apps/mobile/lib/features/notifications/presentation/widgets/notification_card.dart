@@ -20,58 +20,72 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    final isUnread = !notification.isRead;
+
+    return GlassCard(
       onTap: onTap,
-      tileColor: notification.isRead
-          ? null
-          : AppColors.primary.withValues(alpha: 0.05),
-      leading: CircleAvatar(
-        backgroundColor: notification.isRead
-            ? Theme.of(context).colorScheme.surface
-            : AppColors.primary.withValues(alpha: 0.15),
-        child: Icon(
-          _iconForType(notification.data['type'] as String?),
-          color:
-              notification.isRead ? AppColors.textSecondary : AppColors.primary,
-        ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.md,
       ),
-      title: Text(
-        notification.title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight:
-                  notification.isRead ? FontWeight.normal : FontWeight.bold,
+      color: isUnread ? AppColors.primary.withValues(alpha: 0.03) : null,
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: isUnread
+                ? AppColors.primary.withValues(alpha: 0.15)
+                : Theme.of(context).colorScheme.surface,
+            child: Icon(
+              _iconForType(notification.data['type'] as String?),
+              size: 20,
+              color: isUnread ? AppColors.primary : AppColors.textSecondary,
             ),
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsetsDirectional.only(top: 4),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              notification.body,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  notification.title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight:
+                            isUnread ? FontWeight.bold : FontWeight.normal,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  notification.body,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _formatRelative(notification.createdAt),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              _formatRelative(notification.createdAt),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+          ),
+          if (isUnread)
+            const Padding(
+              padding: EdgeInsetsDirectional.only(start: AppSpacing.sm),
+              child: SizedBox(
+                width: 8,
+                height: 8,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
                   ),
-            ),
-          ],
-        ),
-      ),
-      trailing: notification.isRead
-          ? null
-          : Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
+                ),
               ),
             ),
+        ],
+      ),
     );
   }
 

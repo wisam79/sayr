@@ -9,17 +9,17 @@ extension TripStatusUi on TripStatus {
   Color get color {
     switch (this) {
       case TripStatus.scheduled:
-        return Colors.orange;
+        return AppColors.statusScheduled;
       case TripStatus.driverWaiting:
-        return Colors.blue;
+        return AppColors.statusDriverWaiting;
       case TripStatus.inTransit:
-        return AppColors.primary;
+        return AppColors.statusInTransit;
       case TripStatus.completed:
-        return AppColors.success;
+        return AppColors.statusCompleted;
       case TripStatus.absent:
-        return AppColors.error;
+        return AppColors.statusAbsent;
       case TripStatus.cancelled:
-        return AppColors.textSecondary;
+        return AppColors.statusCancelled;
     }
   }
 

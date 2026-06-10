@@ -870,4 +870,133 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get bluetoothRequired =>
       'يرجى تشغيل البلوتوث لاستخدام الصعود التقاربي';
+
+  @override
+  String get themeMode => 'مظهر التطبيق';
+
+  @override
+  String get themeLight => 'المظهر الفاتح';
+
+  @override
+  String get themeDark => 'المظهر الداكن';
+
+  @override
+  String get themeSystem => 'حسب النظام';
+
+  @override
+  String get studentBadge => 'طالب';
+
+  @override
+  String get driverBadge => 'سائق';
+
+  @override
+  String get scanQrCode => 'مسح الرمز';
+
+  @override
+  String get myDigitalPass => 'بطاقتي الرقمية';
+
+  @override
+  String daysRemainingShort(int days) {
+    return 'متبقي $days يوم';
+  }
+
+  @override
+  String get quickActions => 'الوصول السريع';
+
+  @override
+  String get liveMap => 'خريطة الرحلات';
+
+  @override
+  String get chatSupport => 'الدعم الفني';
+
+  @override
+  String get safetyTips => 'إرشادات السلامة';
+
+  @override
+  String get safetyTipsTitle => 'نصائح السلامة في سير';
+
+  @override
+  String get safetyTip1 =>
+      'احرص على إبقاء هاتفك قريباً وتفعيل البلوتوث للصعود التلقائي إلى الحافلة.';
+
+  @override
+  String get safetyTip2 =>
+      'يرجى الانتظار حتى تتوقف الحافلة تماماً قبل الصعود أو النزول.';
+
+  @override
+  String get safetyTip3 =>
+      'استخدم زر الاستغاثة (SOS) في صفحة التتبع إذا شعرت بعدم الأمان في أي وقت.';
+
+  @override
+  String get statsTrips => 'الرحلات المكتملة';
+
+  @override
+  String get statsRating => 'متوسط التقييم';
+
+  @override
+  String get driverDashboard => 'لوحة تحكم السائق';
+
+  @override
+  String get editProfile => 'تعديل الملف الشخصي';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get accountSettings => 'إعدادات الحساب';
+
+  @override
+  String get appPreferences => 'تفضيلات التطبيق';
+
+  @override
+  String get cacheAndSync => 'التخزين والمزامنة';
+
+  @override
+  String get aboutApp => 'حول تطبيق سير';
+
+  @override
+  String appVersion(String version) {
+    return 'الإصدار $version';
+  }
+
+  @override
+  String get bleProximityBoarding => 'الصعود التقاربي التلقائي';
+
+  @override
+  String get bleProximityBoardingDesc =>
+      'اكتشاف إشارات الحافلة تلقائياً للصعود السريع';
+
+  @override
+  String get forceSync => 'مزامنة البيانات المحلية';
+
+  @override
+  String get forceSyncDesc =>
+      'تحديث الخطوط والاشتراكات ومزامنة التغييرات المعلقة';
+
+  @override
+  String get editProfileSuccess => 'تم تحديث الملف الشخصي بنجاح';
+
+  @override
+  String get changePasswordSuccess => 'تم تحديث كلمة المرور بنجاح';
+
+  @override
+  String get newPasswordLabel => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmNewPasswordLabel => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get institutionLabel => 'المؤسسة التعليمية / الجامعة';
+
+  @override
+  String get phoneLabel => 'رقم الهاتف';
+
+  @override
+  String get saveButton => 'حفظ التغييرات';
+
+  @override
+  String get syncCompleted => 'اكتملت عملية المزامنة بنجاح';
+
+  @override
+  String get goHome => 'العودة للرئيسية';
 }

@@ -400,6 +400,56 @@
   "failureUnknown": "Unknown error",
   "alreadyHasActiveSubscription": "You already have an active subscription on this route",
   "licenseNotActive": "License is not active",
-  "bluetoothRequired": "Please enable Bluetooth to use proximity boarding"
+  "bluetoothRequired": "Please enable Bluetooth to use proximity boarding",
+  "themeMode": "Theme Mode",
+  "themeLight": "Light Mode",
+  "themeDark": "Dark Mode",
+  "themeSystem": "System Default",
+  "studentBadge": "Student",
+  "driverBadge": "Driver",
+  "scanQrCode": "Scan QR Code",
+  "myDigitalPass": "My Digital Pass",
+  "daysRemainingShort": "{days} days",
+  "@daysRemainingShort": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "quickActions": "Quick Actions",
+  "liveMap": "Live Map",
+  "chatSupport": "Chat Support",
+  "safetyTips": "Safety Tips",
+  "safetyTipsTitle": "Sayr Safety Tips",
+  "safetyTip1": "Always keep your phone handy and ensure Bluetooth is on for automatic boarding.",
+  "safetyTip2": "Please wait for the bus to come to a complete stop before boarding or leaving.",
+  "safetyTip3": "Use the SOS emergency button on the tracking page if you feel unsafe at any point.",
+  "statsTrips": "Trips Completed",
+  "statsRating": "Average Rating",
+  "driverDashboard": "Driver Dashboard",
+  "editProfile": "Edit Profile",
+  "changePassword": "Change Password",
+  "accountSettings": "Account Settings",
+  "appPreferences": "App Preferences",
+  "cacheAndSync": "Cache & Synchronization",
+  "aboutApp": "About Sayr",
+  "appVersion": "Version {version}",
+  "@appVersion": {
+    "placeholders": {
+      "version": {"type": "String"}
+    }
+  },
+  "bleProximityBoarding": "Auto BLE Boarding",
+  "bleProximityBoardingDesc": "Automatically detect bus beacons for quick boarding",
+  "forceSync": "Synchronize Offline Cache",
+  "forceSyncDesc": "Force refresh routes, subscriptions, and sync pending updates",
+  "editProfileSuccess": "Profile updated successfully",
+  "changePasswordSuccess": "Password updated successfully",
+  "newPasswordLabel": "New Password",
+  "confirmNewPasswordLabel": "Confirm New Password",
+  "institutionLabel": "University / Institution",
+  "phoneLabel": "Phone Number",
+  "saveButton": "Save Changes",
+  "syncCompleted": "Synchronization completed",
+  "goHome": "Go Home"
 }
 

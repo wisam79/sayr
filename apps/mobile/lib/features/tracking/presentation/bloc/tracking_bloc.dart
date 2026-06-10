@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/di/di.dart';
 
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
@@ -143,6 +144,30 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
           lastUpdated: DateTime.now(),
         ),
       );
+    } else if (current is TrackingInitial || current is TrackingLoading) {
+      // Handle the initial state when the bloc is first watching a trip
+      final currentUser = sl<AuthRepository>().currentUser;
+      final isDriver = currentUser != null && currentUser.id.value == event.trip.driverId.value;
+
+      if (isDriver) {
+        final actions = TripStateMachine.validEventsFrom(event.trip.status);
+        emit(
+          TrackingState.driverActive(
+            trip: event.trip,
+            validActions: actions,
+            currentLocation: event.trip.lastLocation,
+            lastUpdated: DateTime.now(),
+          ),
+        );
+      } else {
+        emit(
+          TrackingState.tripWatching(
+            trip: event.trip,
+            driverLocation: event.trip.lastLocation,
+            lastUpdated: DateTime.now(),
+          ),
+        );
+      }
     }
   }
 

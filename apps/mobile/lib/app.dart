@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_mobile/core/fcm_service.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
+import 'package:sayr_mobile/core/theme_cubit.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
@@ -98,6 +100,9 @@ class SayrApp extends StatelessWidget {
         BlocProvider<LocaleCubit>(
           create: (_) => LocaleCubit()..load(),
         ),
+        BlocProvider<ThemeCubit>(
+          create: (_) => ThemeCubit()..load(),
+        ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
@@ -127,12 +132,13 @@ class SayrApp extends StatelessWidget {
         child: BlocBuilder<LocaleCubit, Locale>(
           builder: (context, locale) {
             final isRtl = locale.languageCode == 'ar';
+            final themeMode = context.watch<ThemeCubit>().state;
             return MaterialApp.router(
               title: 'Sayr',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
-              themeMode: ThemeMode.light,
+              themeMode: themeMode,
               localizationsDelegates: const [
                 AppLocalizations.delegate,
                 GlobalMaterialLocalizations.delegate,
@@ -164,6 +170,9 @@ class SayrApp extends StatelessWidget {
 /// Top-level wrapper that initializes Sentry and other services.
 Future<void> runSayrApp() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Disable dynamic font download to force loading from assets/google_fonts
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Initialize Hive
   await Hive.initFlutter();
