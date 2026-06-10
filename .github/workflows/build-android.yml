@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  FLUTTER_VERSION: "3.32.8"
+  FLUTTER_VERSION: "3.44.1"
 
 jobs:
   build:
@@ -15,28 +15,40 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      
+
       - name: Install Melos
         run: dart pub global activate melos
-      
+
       - name: Bootstrap
-        run: dart pub global run melos bootstrap
-      
+        run: melos bootstrap
+
+      - name: Cache build_runner outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .dart_tool/build/
+            apps/mobile/.dart_tool/build/
+            packages/core/.dart_tool/build/
+            packages/data/.dart_tool/build/
+          key: ${{ runner.os }}-build-runner-${{ hashFiles('**/pubspec.lock', '**/build.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-runner-
+
       - name: Run build_runner
-        run: dart pub global run melos run build:runner
-      
+        run: melos run build:runner
+
       - name: Decode Keystore
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: echo "$KEYSTORE_BASE64" | base64 -d > apps/mobile/android/app/sayr-release.jks
-      
+
       - name: Create key.properties
         if: ${{ env.KEYSTORE_BASE64 != '' }}
         env:
@@ -48,13 +60,13 @@ jobs:
           keyAlias=${{ secrets.KEY_ALIAS }}
           storeFile=sayr-release.jks
           EOF
-      
+
       - name: Build APK
         run: cd apps/mobile && flutter build apk --release
-      
+
       - name: Build AAB
         run: cd apps/mobile && flutter build appbundle --release
-      
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
