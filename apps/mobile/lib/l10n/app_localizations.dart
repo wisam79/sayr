@@ -938,11 +938,23 @@ abstract class AppLocalizations {
   /// **'Active'**
   String get subscriptionStatusActive;
 
+  /// No description provided for @subscriptionStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get subscriptionStatusPending;
+
   /// No description provided for @subscriptionStatusExpired.
   ///
   /// In en, this message translates to:
   /// **'Expired'**
   String get subscriptionStatusExpired;
+
+  /// No description provided for @subscriptionStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get subscriptionStatusCancelled;
 
   /// No description provided for @subscriptionEndsOn.
   ///

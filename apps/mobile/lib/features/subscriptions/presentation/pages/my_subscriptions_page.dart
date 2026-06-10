@@ -153,9 +153,37 @@ class _SubscriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isActive = subscription.isActive && !subscription.isExpired;
+    final isCancellable = (subscription.status == SubscriptionStatus.active ||
+            subscription.status == SubscriptionStatus.pending) &&
+        !subscription.isExpired;
     final endDateStr =
         subscription.endDate!.toLocal().toString().split(' ').first;
+
+    final String statusLabel;
+    final Color statusColor;
+
+    if (subscription.status == SubscriptionStatus.cancelled) {
+      statusLabel = l10n.subscriptionStatusCancelled;
+      statusColor = AppColors.textSecondary;
+    } else if (subscription.isExpired) {
+      statusLabel = l10n.subscriptionStatusExpired;
+      statusColor = AppColors.error;
+    } else {
+      switch (subscription.status) {
+        case SubscriptionStatus.active:
+          statusLabel = l10n.subscriptionStatusActive;
+          statusColor = AppColors.success;
+        case SubscriptionStatus.pending:
+          statusLabel = l10n.subscriptionStatusPending;
+          statusColor = AppColors.warning;
+        case SubscriptionStatus.expired:
+          statusLabel = l10n.subscriptionStatusExpired;
+          statusColor = AppColors.error;
+        case SubscriptionStatus.cancelled:
+          statusLabel = l10n.subscriptionStatusCancelled;
+          statusColor = AppColors.textSecondary;
+      }
+    }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -165,7 +193,7 @@ class _SubscriptionCard extends StatelessWidget {
           motion: const DrawerMotion(),
           extentRatio: 0.28,
           children: [
-            if (isActive)
+            if (isCancellable)
               SlidableAction(
                 onPressed: (context) {
                   context
@@ -198,19 +226,14 @@ class _SubscriptionCard extends StatelessWidget {
                       vertical: AppSpacing.xxs,
                     ),
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? AppColors.success.withValues(alpha: 0.1)
-                          : AppColors.error.withValues(alpha: 0.1),
+                      color: statusColor.withValues(alpha: 0.1),
                       borderRadius:
                           BorderRadius.circular(AppSpacing.inputRadius),
                     ),
                     child: Text(
-                      isActive
-                          ? l10n.subscriptionStatusActive
-                          : l10n.subscriptionStatusExpired,
+                      statusLabel,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color:
-                                isActive ? AppColors.success : AppColors.error,
+                            color: statusColor,
                           ),
                     ),
                   ),
@@ -241,7 +264,7 @@ class _SubscriptionCard extends StatelessWidget {
                         ),
                   ),
               ],
-              if (isActive) ...[
+              if (isCancellable) ...[
                 const SizedBox(height: AppSpacing.lg),
                 OutlinedButton(
                   onPressed: () {

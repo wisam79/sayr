@@ -453,7 +453,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionStatusActive => 'Active';
 
   @override
+  String get subscriptionStatusPending => 'Pending';
+
+  @override
   String get subscriptionStatusExpired => 'Expired';
+
+  @override
+  String get subscriptionStatusCancelled => 'Cancelled';
 
   @override
   String subscriptionEndsOn(String date) {

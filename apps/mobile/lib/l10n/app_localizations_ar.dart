@@ -450,7 +450,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get subscriptionStatusActive => 'نشط';
 
   @override
+  String get subscriptionStatusPending => 'قيد الانتظار';
+
+  @override
   String get subscriptionStatusExpired => 'منتهي';
+
+  @override
+  String get subscriptionStatusCancelled => 'ملغي';
 
   @override
   String subscriptionEndsOn(String date) {

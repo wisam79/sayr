@@ -186,7 +186,9 @@
   "noSubscriptionsSubtitle": "Activate your first license to get started",
   "subscriptionType": "Subscription",
   "subscriptionStatusActive": "Active",
+  "subscriptionStatusPending": "Pending",
   "subscriptionStatusExpired": "Expired",
+  "subscriptionStatusCancelled": "Cancelled",
   "subscriptionEndsOn": "Ends on: {date}",
   "@subscriptionEndsOn": {
     "placeholders": {

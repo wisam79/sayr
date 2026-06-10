@@ -174,7 +174,9 @@
   "noSubscriptionsSubtitle": "فعّل ترخيصك الأول للبدء",
   "subscriptionType": "اشتراك",
   "subscriptionStatusActive": "نشط",
+  "subscriptionStatusPending": "قيد الانتظار",
   "subscriptionStatusExpired": "منتهي",
+  "subscriptionStatusCancelled": "ملغي",
   "subscriptionEndsOn": "ينتهي: {date}",
   "@subscriptionEndsOn": {
     "placeholders": {
