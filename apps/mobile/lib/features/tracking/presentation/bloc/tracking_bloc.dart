@@ -147,7 +147,8 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     } else if (current is TrackingInitial || current is TrackingLoading) {
       // Handle the initial state when the bloc is first watching a trip
       final currentUser = sl<AuthRepository>().currentUser;
-      final isDriver = currentUser != null && currentUser.id.value == event.trip.driverId.value;
+      final isDriver = currentUser != null &&
+          currentUser.id.value == event.trip.driverId.value;
 
       if (isDriver) {
         final actions = TripStateMachine.validEventsFrom(event.trip.status);

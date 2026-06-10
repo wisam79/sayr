@@ -107,7 +107,8 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(11),
                         ],
-                        onChanged: context.read<CompleteProfileCubit>().phoneChanged,
+                        onChanged:
+                            context.read<CompleteProfileCubit>().phoneChanged,
                       ),
                       const SizedBox(height: 20),
                       const _InstitutionDropdown(),

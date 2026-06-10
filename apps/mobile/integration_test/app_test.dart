@@ -17,13 +17,23 @@ import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 // Mock classes using mocktail
 class MockAuthRepository extends Mock implements AuthRepository {}
+
 class MockRouteRepository extends Mock implements RouteRepository {}
-class MockSubscriptionRepository extends Mock implements SubscriptionRepository {}
+
+class MockSubscriptionRepository extends Mock
+    implements SubscriptionRepository {}
+
 class MockTripRepository extends Mock implements TripRepository {}
+
 class MockChatRepository extends Mock implements ChatRepository {}
-class MockNotificationsRepository extends Mock implements NotificationsRepository {}
+
+class MockNotificationsRepository extends Mock
+    implements NotificationsRepository {}
+
 class MockEmergencyRepository extends Mock implements EmergencyRepository {}
+
 class MockPaymentRepository extends Mock implements PaymentRepository {}
+
 class MockBoardingRepository extends Mock implements BoardingRepository {}
 
 void main() {
@@ -34,7 +44,8 @@ void main() {
       registerFallbackValue(const TripId('fake-trip-id'));
       registerFallbackValue(const RouteId('fake-route-id'));
       registerFallbackValue(const UserId('fake-user-id'));
-      registerFallbackValue(const Coordinates(latitude: 33.3128, longitude: 44.3615));
+      registerFallbackValue(
+          const Coordinates(latitude: 33.3128, longitude: 44.3615));
       registerFallbackValue(DateTime(2026));
     });
 
@@ -47,7 +58,6 @@ void main() {
     late MockEmergencyRepository mockEmergencyRepository;
     late MockPaymentRepository mockPaymentRepository;
     late MockBoardingRepository mockBoardingRepository;
-
 
     const testStudent = User(
       id: UserId('test-student-id'),
@@ -122,17 +132,25 @@ void main() {
 
       // Configure default stubs for startup
       when(() => mockAuthRepository.currentUser).thenReturn(null);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => null);
-      when(() => mockAuthRepository.authStateChanges).thenAnswer((_) => const Stream.empty());
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => null);
+      when(() => mockAuthRepository.authStateChanges)
+          .thenAnswer((_) => const Stream.empty());
 
-      when(() => mockRouteRepository.getActiveRoutes()).thenAnswer((_) async => const Right([testRoute]));
-      when(() => mockRouteRepository.search(any())).thenAnswer((_) async => const Right([testRoute]));
+      when(() => mockRouteRepository.getActiveRoutes())
+          .thenAnswer((_) async => const Right([testRoute]));
+      when(() => mockRouteRepository.search(any()))
+          .thenAnswer((_) async => const Right([testRoute]));
 
-      when(() => mockSubscriptionRepository.getMySubscriptions()).thenAnswer((_) async => Right([testSubscription]));
-      when(() => mockSubscriptionRepository.getActiveSubscriptions()).thenAnswer((_) async => Right([testSubscription]));
+      when(() => mockSubscriptionRepository.getMySubscriptions())
+          .thenAnswer((_) async => Right([testSubscription]));
+      when(() => mockSubscriptionRepository.getActiveSubscriptions())
+          .thenAnswer((_) async => Right([testSubscription]));
 
-      when(() => mockTripRepository.getActiveTrips()).thenAnswer((_) async => Right([testTrip]));
-      when(() => mockTripRepository.watchTrip(any())).thenAnswer((_) => Stream.value(testTrip));
+      when(() => mockTripRepository.getActiveTrips())
+          .thenAnswer((_) async => Right([testTrip]));
+      when(() => mockTripRepository.watchTrip(any()))
+          .thenAnswer((_) => Stream.value(testTrip));
       when(
         () => mockTripRepository.updateBleOtp(
           tripId: any(named: 'tripId'),
@@ -143,13 +161,19 @@ void main() {
         (_) async => const Right(unit),
       );
 
-      when(() => mockChatRepository.getMyConversations()).thenAnswer((_) async => const Right([]));
-      when(() => mockChatRepository.watchMyConversations()).thenAnswer((_) => Stream.value([]));
-      when(() => mockChatRepository.getUnreadCount()).thenAnswer((_) async => const Right(0));
+      when(() => mockChatRepository.getMyConversations())
+          .thenAnswer((_) async => const Right([]));
+      when(() => mockChatRepository.watchMyConversations())
+          .thenAnswer((_) => Stream.value([]));
+      when(() => mockChatRepository.getUnreadCount())
+          .thenAnswer((_) async => const Right(0));
 
-      when(() => mockNotificationsRepository.getMyNotifications(limit: any(named: 'limit'))).thenAnswer((_) async => const Right([]));
-      when(() => mockNotificationsRepository.watchMyNotifications()).thenAnswer((_) => Stream.value([]));
-      when(() => mockNotificationsRepository.getUnreadCount()).thenAnswer((_) async => const Right(0));
+      when(() => mockNotificationsRepository.getMyNotifications(
+          limit: any(named: 'limit'))).thenAnswer((_) async => const Right([]));
+      when(() => mockNotificationsRepository.watchMyNotifications())
+          .thenAnswer((_) => Stream.value([]));
+      when(() => mockNotificationsRepository.getUnreadCount())
+          .thenAnswer((_) async => const Right(0));
       when(
         () => mockNotificationsRepository.registerPushToken(
           fcmToken: any(named: 'fcmToken'),
@@ -196,10 +220,13 @@ void main() {
         (_) async => Right(testBoardingRecord),
       );
 
-      when(() => mockEmergencyRepository.getActiveReport()).thenAnswer((_) async => const Right(null));
+      when(() => mockEmergencyRepository.getActiveReport())
+          .thenAnswer((_) async => const Right(null));
     });
 
-    testWidgets('Full student lifecycle flow (Splash -> Onboarding -> Login Validations -> Successful Auth -> Tabs Navigation -> Language Switch -> Logout)', (tester) async {
+    testWidgets(
+        'Full student lifecycle flow (Splash -> Onboarding -> Login Validations -> Successful Auth -> Tabs Navigation -> Language Switch -> Logout)',
+        (tester) async {
       // Initialize local assets/databases
       await Hive.initFlutter();
       final box = await Hive.openBox<String>('settings_box');
@@ -226,7 +253,8 @@ void main() {
         ..registerSingleton<SubscriptionRepository>(mockSubscriptionRepository)
         ..registerSingleton<TripRepository>(mockTripRepository)
         ..registerSingleton<ChatRepository>(mockChatRepository)
-        ..registerSingleton<NotificationsRepository>(mockNotificationsRepository)
+        ..registerSingleton<NotificationsRepository>(
+            mockNotificationsRepository)
         ..registerSingleton<EmergencyRepository>(mockEmergencyRepository)
         ..registerSingleton<PaymentRepository>(mockPaymentRepository)
         ..registerSingleton<BoardingRepository>(mockBoardingRepository);
@@ -241,9 +269,9 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
 
-
       // Diagnostics
-      final currentPath = sl<AppRouter>().config.routerDelegate.currentConfiguration.uri.path;
+      final currentPath =
+          sl<AppRouter>().config.routerDelegate.currentConfiguration.uri.path;
       final textWidgets = tester.widgetList<Text>(find.byType(Text));
       debugPrint('E2E DIAGNOSTIC - Current path: $currentPath');
       debugPrint(
@@ -260,7 +288,8 @@ void main() {
       // ─── 3. Login Page & Form Validation ───
       // Verify login page description
       expect(find.text('تسجيل الدخول'), findsWidgets);
-      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'), findsOneWidget);
+      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
+          findsOneWidget);
 
       final loginButton = find.widgetWithText(PrimaryButton, 'تسجيل الدخول');
       expect(loginButton, findsOneWidget);
@@ -284,7 +313,8 @@ void main() {
 
       // ─── 4. Successful Authentication ───
       // Input valid credentials
-      await tester.enterText(find.byType(TextFormField).at(0), 'test@student.iq');
+      await tester.enterText(
+          find.byType(TextFormField).at(0), 'test@student.iq');
       await tester.enterText(find.byType(TextFormField).at(1), 'TestPass123!');
       await tester.pumpAndSettle();
 
@@ -304,7 +334,8 @@ void main() {
         (_) async => const Right(testStudent),
       );
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => testStudent);
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => testStudent);
 
       // Tap login and wait for authentication logic to trigger
       await tester.tap(loginButton);
@@ -320,7 +351,7 @@ void main() {
       // 5.1 Navigate to Routes Tab (Index 1)
       await tester.tap(find.byIcon(Icons.directions_bus_outlined));
       await tester.pumpAndSettle();
-      
+
       // Verify search input is displayed and active route title is rendered
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('خط جامعة بغداد - الجادرية'), findsOneWidget);
@@ -342,7 +373,7 @@ void main() {
       // 5.4 Navigate to Profile Tab (Index 4)
       await tester.tap(find.byIcon(Icons.person_outline));
       await tester.pumpAndSettle();
-      
+
       // Verify user information matches test data
       expect(find.text('محمد علي'), findsOneWidget);
       expect(find.text('test@student.iq'), findsOneWidget);
@@ -399,20 +430,24 @@ void main() {
       // Stub AuthRepository to clear session
       when(() => mockAuthRepository.signOut()).thenAnswer((_) async {});
       when(() => mockAuthRepository.currentUser).thenReturn(null);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => null);
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => null);
 
-      final confirmLogoutButton = find.widgetWithText(FilledButton, 'تسجيل الخروج');
+      final confirmLogoutButton =
+          find.widgetWithText(FilledButton, 'تسجيل الخروج');
       expect(confirmLogoutButton, findsOneWidget);
       await tester.tap(confirmLogoutButton);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // ─── 8. Verification ───
       // The app should route back to the LoginPage successfully
-      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'), findsOneWidget);
+      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
+          findsOneWidget);
 
       // ─── 9. Driver Login & Authentication ───
       // Input driver credentials
-      await tester.enterText(find.byType(TextFormField).at(0), 'test@driver.iq');
+      await tester.enterText(
+          find.byType(TextFormField).at(0), 'test@driver.iq');
       await tester.enterText(find.byType(TextFormField).at(1), 'TestPass123!');
       await tester.pumpAndSettle();
 
@@ -432,7 +467,8 @@ void main() {
         (_) async => const Right(testDriver),
       );
       when(() => mockAuthRepository.currentUser).thenReturn(testDriver);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => testDriver);
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => testDriver);
 
       // Tap login and wait for authentication logic to trigger
       await tester.tap(loginButton);
@@ -478,7 +514,8 @@ void main() {
       // ─── 13. Student Boarding QR Page ───
       // Stub AuthRepository back to testStudent to test the student QR page
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => testStudent);
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => testStudent);
 
       // Route directly to student boarding QR page
       sl<AppRouter>().config.go('/boarding');
@@ -493,7 +530,8 @@ void main() {
       // ─── 14. Driver Logout Flow ───
       // Switch back to testDriver to perform driver logout
       when(() => mockAuthRepository.currentUser).thenReturn(testDriver);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => testDriver);
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => testDriver);
 
       // Navigate back home to select profile tab
       sl<AppRouter>().config.go('/');
@@ -515,15 +553,18 @@ void main() {
       // Confirm logout in dialog
       when(() => mockAuthRepository.signOut()).thenAnswer((_) async {});
       when(() => mockAuthRepository.currentUser).thenReturn(null);
-      when(() => mockAuthRepository.fetchFullProfile()).thenAnswer((_) async => null);
+      when(() => mockAuthRepository.fetchFullProfile())
+          .thenAnswer((_) async => null);
 
-      final confirmDriverLogoutButton = find.widgetWithText(FilledButton, 'تسجيل الخروج');
+      final confirmDriverLogoutButton =
+          find.widgetWithText(FilledButton, 'تسجيل الخروج');
       expect(confirmDriverLogoutButton, findsOneWidget);
       await tester.tap(confirmDriverLogoutButton);
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Verify redirection back to login
-      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'), findsOneWidget);
+      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
+          findsOneWidget);
     });
   });
 }

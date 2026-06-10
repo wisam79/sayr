@@ -60,7 +60,8 @@ void main() {
     await tester.pump();
 
     expect(
-      find.byWidgetPredicate((w) => w.runtimeType.toString().contains('Skeleton')),
+      find.byWidgetPredicate(
+          (w) => w.runtimeType.toString().contains('Skeleton')),
       findsAtLeastNWidgets(1),
     );
   });

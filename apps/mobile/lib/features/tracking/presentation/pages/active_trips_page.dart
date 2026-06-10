@@ -96,15 +96,14 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        context
-            .read<TrackingBloc>()
-            .add(const TrackingLoadActiveTrips());
+        context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
       },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: SizedBox(
           height: MediaQuery.of(context).size.height -
-              kToolbarHeight - MediaQuery.of(context).padding.top,
+              kToolbarHeight -
+              MediaQuery.of(context).padding.top,
           child: Column(
             children: [
               Expanded(
@@ -310,8 +309,7 @@ class _TripCard extends StatelessWidget {
                       // Right Arrow/Chevron
                       Icon(
                         Icons.chevron_right,
-                        color:
-                            AppColors.textSecondary.withValues(alpha: 0.5),
+                        color: AppColors.textSecondary.withValues(alpha: 0.5),
                       ),
                     ],
                   ),

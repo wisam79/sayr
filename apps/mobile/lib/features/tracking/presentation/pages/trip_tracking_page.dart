@@ -360,7 +360,8 @@ class _TrackingView extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor.withValues(alpha: 0.85),
+                        color:
+                            Theme.of(context).cardColor.withValues(alpha: 0.85),
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
                           color: Theme.of(context)
@@ -378,110 +379,112 @@ class _TrackingView extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.lg),
                         child: BlocBuilder<TripDetailsCubit, TripDetailsState>(
-                        builder: (context, detailsState) {
-                          final route = detailsState is TripDetailsLoaded
-                              ? detailsState.route
-                              : null;
-                          final driver = detailsState is TripDetailsLoaded
-                              ? detailsState.driver
-                              : null;
-                          final profile = detailsState is TripDetailsLoaded
-                              ? detailsState.driverProfile
-                              : null;
+                          builder: (context, detailsState) {
+                            final route = detailsState is TripDetailsLoaded
+                                ? detailsState.route
+                                : null;
+                            final driver = detailsState is TripDetailsLoaded
+                                ? detailsState.driver
+                                : null;
+                            final profile = detailsState is TripDetailsLoaded
+                                ? detailsState.driverProfile
+                                : null;
 
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  TripStatusChip(status: trip.status),
-                                  const Spacer(),
-                                  if (trip.duration != null)
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: AppSpacing.sm,
-                                        vertical: AppSpacing.xs,
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    TripStatusChip(status: trip.status),
+                                    const Spacer(),
+                                    if (trip.duration != null)
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: AppSpacing.sm,
+                                          vertical: AppSpacing.xs,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary
+                                              .withValues(alpha: 0.08),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          formatDurationAr(
+                                              l10n, trip.duration!),
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall
+                                              ?.copyWith(
+                                                color: AppColors.primary,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary
-                                            .withValues(alpha: 0.08),
-                                        borderRadius: BorderRadius.circular(8),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                if (etaText != null) ...[
+                                  _EtaCard(text: etaText),
+                                  const SizedBox(height: AppSpacing.md),
+                                ],
+                                LocationTile(
+                                  icon: Icons.circle,
+                                  color: AppColors.primary,
+                                  label: route?.startLocation ?? l10n.start,
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: SizedBox(
+                                    height: 12,
+                                    child: VerticalDivider(
+                                      width: 1,
+                                      thickness: 1.5,
+                                    ),
+                                  ),
+                                ),
+                                LocationTile(
+                                  icon: Icons.location_on,
+                                  color: AppColors.error,
+                                  label: route?.endLocation ?? l10n.destination,
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
+                                Divider(
+                                  color: Theme.of(context)
+                                      .dividerColor
+                                      .withValues(alpha: 0.08),
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                if (profile != null && driver != null) ...[
+                                  _DriverSection(
+                                    profile: profile,
+                                    driver: driver,
+                                    route: route,
+                                    trip: trip,
+                                  ),
+                                ] else ...[
+                                  if (!hasLocation &&
+                                      trip.status == TripStatus.scheduled)
+                                    Text(
+                                      l10n.waitingForDriver,
+                                      style: const TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontWeight: FontWeight.w500,
                                       ),
-                                      child: Text(
-                                        formatDurationAr(l10n, trip.duration!),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: AppColors.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
                                 ],
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              if (etaText != null) ...[
-                                _EtaCard(text: etaText),
-                                const SizedBox(height: AppSpacing.md),
                               ],
-                              LocationTile(
-                                icon: Icons.circle,
-                                color: AppColors.primary,
-                                label: route?.startLocation ?? l10n.start,
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 10),
-                                child: SizedBox(
-                                  height: 12,
-                                  child: VerticalDivider(
-                                    width: 1,
-                                    thickness: 1.5,
-                                  ),
-                                ),
-                              ),
-                              LocationTile(
-                                icon: Icons.location_on,
-                                color: AppColors.error,
-                                label: route?.endLocation ?? l10n.destination,
-                              ),
-                              const SizedBox(height: AppSpacing.lg),
-                              Divider(
-                                color: Theme.of(context)
-                                    .dividerColor
-                                    .withValues(alpha: 0.08),
-                              ),
-                              const SizedBox(height: AppSpacing.md),
-                              if (profile != null && driver != null) ...[
-                                _DriverSection(
-                                  profile: profile,
-                                  driver: driver,
-                                  route: route,
-                                  trip: trip,
-                                ),
-                              ] else ...[
-                                if (!hasLocation &&
-                                    trip.status == TripStatus.scheduled)
-                                  Text(
-                                    l10n.waitingForDriver,
-                                    style: const TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                              ],
-                            ],
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
           ],
         );
       },

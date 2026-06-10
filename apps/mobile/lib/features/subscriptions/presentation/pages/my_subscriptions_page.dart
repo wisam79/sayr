@@ -56,7 +56,10 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
           return switch (state) {
-            SubscriptionsInitial() || SubscriptionsLoading() || LicenseActivating() || LicenseActivated() =>
+            SubscriptionsInitial() ||
+            SubscriptionsLoading() ||
+            LicenseActivating() ||
+            LicenseActivated() =>
               const _SkeletonLoading(),
             SubscriptionsError(:final failure) => AppErrorWidget(
                 message: failure.toLocalizedString(context),
@@ -206,9 +209,8 @@ class _SubscriptionCard extends StatelessWidget {
                           ? l10n.subscriptionStatusActive
                           : l10n.subscriptionStatusExpired,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: isActive
-                                ? AppColors.success
-                                : AppColors.error,
+                            color:
+                                isActive ? AppColors.success : AppColors.error,
                           ),
                     ),
                   ),

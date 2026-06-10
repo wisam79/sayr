@@ -170,7 +170,7 @@ class SayrApp extends StatelessWidget {
 /// Top-level wrapper that initializes Sentry and other services.
 Future<void> runSayrApp() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Disable dynamic font download to force loading from assets/google_fonts
   GoogleFonts.config.allowRuntimeFetching = false;
 

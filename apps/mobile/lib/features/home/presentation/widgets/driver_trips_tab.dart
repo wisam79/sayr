@@ -60,9 +60,7 @@ class _DriverTripsTabState extends State<DriverTripsTab> {
 
           return RefreshIndicator(
             onRefresh: () async {
-              context
-                  .read<TrackingBloc>()
-                  .add(const TrackingLoadActiveTrips());
+              context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
             },
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(
@@ -129,83 +127,82 @@ class DriverTripCard extends StatelessWidget {
           context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: trip.id));
           context.push('/driver-trip/${trip.id.value}');
         },
-      borderRadius: BorderRadius.circular(16),
-      child: GlassCard(
-        onTap: () {},
-        padding: EdgeInsets.zero,
-        margin: EdgeInsets.zero,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                width: 6,
-                color: statusColor,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: statusColor.withValues(alpha: 0.12),
-                        child: Icon(
-                          _statusIcon,
-                          color: statusColor,
-                          size: 20,
+        borderRadius: BorderRadius.circular(16),
+        child: GlassCard(
+          onTap: () {},
+          padding: EdgeInsets.zero,
+          margin: EdgeInsets.zero,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: 6,
+                  color: statusColor,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 20,
+                          backgroundColor: statusColor.withValues(alpha: 0.12),
+                          child: Icon(
+                            _statusIcon,
+                            color: statusColor,
+                            size: 20,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              trip.status.localizedName(l10n),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  size: 14,
-                                  color: AppColors.textSecondary
-                                      .withValues(alpha: 0.8),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _formattedTime,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ],
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                trip.status.localizedName(l10n),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: AppColors.textSecondary
+                                        .withValues(alpha: 0.8),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _formattedTime,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.chevron_right,
-                        color:
-                            AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                    ],
+                        Icon(
+                          Icons.chevron_right,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

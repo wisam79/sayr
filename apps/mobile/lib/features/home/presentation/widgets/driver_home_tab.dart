@@ -112,9 +112,7 @@ class DriverHomeTab extends StatelessWidget {
             icon: Icons.play_arrow_outlined,
             iconColor: AppColors.secondary,
             onTap: () {
-              context
-                  .read<TrackingBloc>()
-                  .add(const TrackingLoadActiveTrips());
+              context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
               onOpenTrips();
             },
           ),
@@ -224,8 +222,9 @@ class DriverActionCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color:
-                isDark ? AppColors.darkSurface : iconColor.withValues(alpha: 0.05),
+            color: isDark
+                ? AppColors.darkSurface
+                : iconColor.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: iconColor.withValues(alpha: 0.15),

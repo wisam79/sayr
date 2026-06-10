@@ -476,10 +476,12 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                         labelText: l10n.institutionLabel,
                       ),
                       items: _institutions
-                          .map((inst) => DropdownMenuItem(
-                                value: inst.id,
-                                child: Text(inst.name),
-                              ),)
+                          .map(
+                            (inst) => DropdownMenuItem(
+                              value: inst.id,
+                              child: Text(inst.name),
+                            ),
+                          )
                           .toList(),
                       onChanged: (val) {
                         setState(() => _selectedInstitutionId = val);
@@ -501,7 +503,8 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
                 )
               : Text(l10n.saveButton),
         ),
@@ -626,7 +629,8 @@ class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2, color: Colors.white),
                 )
               : Text(l10n.saveButton),
         ),

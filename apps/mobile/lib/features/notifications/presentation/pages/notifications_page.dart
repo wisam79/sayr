@@ -66,7 +66,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         },
         builder: (context, state) {
           return switch (state) {
-            NotificationsInitial() || NotificationsLoading() =>
+            NotificationsInitial() ||
+            NotificationsLoading() =>
               const _SkeletonLoading(),
             NotificationsError(:final failure) => AppErrorWidget(
                 message: failure.toLocalizedString(context),

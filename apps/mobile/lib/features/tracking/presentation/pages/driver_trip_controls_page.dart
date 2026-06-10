@@ -296,7 +296,9 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                     color: Theme.of(context).cardColor.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                      color: Theme.of(context)
+                          .dividerColor
+                          .withValues(alpha: 0.08),
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -329,65 +331,65 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                             TripStatusChip(status: trip.status),
                           ],
                         ),
-                      const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.md),
 
-                      // Active duration
-                      if (trip.duration != null) ...[
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.md,
-                            vertical: AppSpacing.sm,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(
-                                Icons.timer_outlined,
-                                color: AppColors.primary,
-                                size: 16,
-                              ),
-                              const SizedBox(width: AppSpacing.xs),
-                              Text(
-                                l10n.duration(
-                                  formatDurationAr(
-                                    l10n,
-                                    trip.duration!,
-                                  ),
+                        // Active duration
+                        if (trip.duration != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.timer_outlined,
+                                  color: AppColors.primary,
+                                  size: 16,
                                 ),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.bold,
+                                const SizedBox(width: AppSpacing.xs),
+                                Text(
+                                  l10n.duration(
+                                    formatDurationAr(
+                                      l10n,
+                                      trip.duration!,
                                     ),
-                              ),
-                            ],
+                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                      ],
+                          const SizedBox(height: AppSpacing.lg),
+                        ],
 
-                      // Controls
-                      _ActionButtons(
-                        validActions: state.validActions,
-                        onAction: (event) {
-                          context.read<TrackingBloc>().add(event);
-                        },
-                        tripId: trip.id,
-                      ),
-                    ],
+                        // Controls
+                        _ActionButtons(
+                          validActions: state.validActions,
+                          onAction: (event) {
+                            context.read<TrackingBloc>().add(event);
+                          },
+                          tripId: trip.id,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
       ],
     );
   }
