@@ -45,7 +45,8 @@ void main() {
       registerFallbackValue(const RouteId('fake-route-id'));
       registerFallbackValue(const UserId('fake-user-id'));
       registerFallbackValue(
-          const Coordinates(latitude: 33.3128, longitude: 44.3615));
+        const Coordinates(latitude: 33.3128, longitude: 44.3615),
+      );
       registerFallbackValue(DateTime(2026));
     });
 
@@ -168,8 +169,11 @@ void main() {
       when(() => mockChatRepository.getUnreadCount())
           .thenAnswer((_) async => const Right(0));
 
-      when(() => mockNotificationsRepository.getMyNotifications(
-          limit: any(named: 'limit'))).thenAnswer((_) async => const Right([]));
+      when(
+        () => mockNotificationsRepository.getMyNotifications(
+          limit: any(named: 'limit'),
+        ),
+      ).thenAnswer((_) async => const Right([]));
       when(() => mockNotificationsRepository.watchMyNotifications())
           .thenAnswer((_) => Stream.value([]));
       when(() => mockNotificationsRepository.getUnreadCount())
@@ -254,7 +258,8 @@ void main() {
         ..registerSingleton<TripRepository>(mockTripRepository)
         ..registerSingleton<ChatRepository>(mockChatRepository)
         ..registerSingleton<NotificationsRepository>(
-            mockNotificationsRepository)
+          mockNotificationsRepository,
+        )
         ..registerSingleton<EmergencyRepository>(mockEmergencyRepository)
         ..registerSingleton<PaymentRepository>(mockPaymentRepository)
         ..registerSingleton<BoardingRepository>(mockBoardingRepository);
@@ -288,8 +293,10 @@ void main() {
       // ─── 3. Login Page & Form Validation ───
       // Verify login page description
       expect(find.text('تسجيل الدخول'), findsWidgets);
-      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
-          findsOneWidget);
+      expect(
+        find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
+        findsOneWidget,
+      );
 
       final loginButton = find.widgetWithText(PrimaryButton, 'تسجيل الدخول');
       expect(loginButton, findsOneWidget);
@@ -314,7 +321,9 @@ void main() {
       // ─── 4. Successful Authentication ───
       // Input valid credentials
       await tester.enterText(
-          find.byType(TextFormField).at(0), 'test@student.iq');
+        find.byType(TextFormField).at(0),
+        'test@student.iq',
+      );
       await tester.enterText(find.byType(TextFormField).at(1), 'TestPass123!');
       await tester.pumpAndSettle();
 
@@ -441,13 +450,17 @@ void main() {
 
       // ─── 8. Verification ───
       // The app should route back to the LoginPage successfully
-      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
-          findsOneWidget);
+      expect(
+        find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
+        findsOneWidget,
+      );
 
       // ─── 9. Driver Login & Authentication ───
       // Input driver credentials
       await tester.enterText(
-          find.byType(TextFormField).at(0), 'test@driver.iq');
+        find.byType(TextFormField).at(0),
+        'test@driver.iq',
+      );
       await tester.enterText(find.byType(TextFormField).at(1), 'TestPass123!');
       await tester.pumpAndSettle();
 
@@ -563,8 +576,10 @@ void main() {
       await tester.pumpAndSettle(const Duration(seconds: 1));
 
       // Verify redirection back to login
-      expect(find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
-          findsOneWidget);
+      expect(
+        find.text('أهلاً بعودتك! يرجى تسجيل الدخول للمتابعة'),
+        findsOneWidget,
+      );
     });
   });
 }
