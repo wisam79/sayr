@@ -6,6 +6,7 @@ import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/widgets/success_subscription_dialog.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
@@ -49,13 +50,16 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
         child: BlocConsumer<SubscriptionsBloc, SubscriptionsState>(
           listener: (context, state) {
             if (state is LicenseActivated) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(l10n.licenseActivated),
-                  backgroundColor: AppColors.success,
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) => SuccessSubscriptionDialog(
+                  onConfirm: () {
+                    Navigator.of(dialogContext).pop();
+                    context.pop();
+                  },
                 ),
               );
-              context.pop();
             } else if (state is SubscriptionsError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
