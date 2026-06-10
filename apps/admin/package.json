@@ -12,7 +12,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.43.5",
     "geolib": "^3.3.14",
-    "lucide-react": "^0.379.0",
+    "lucide-react": "^1.17.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^6.23.1",
