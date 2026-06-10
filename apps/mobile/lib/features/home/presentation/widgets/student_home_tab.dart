@@ -100,39 +100,52 @@ class StudentHomeTab extends StatelessWidget {
                 ),
           ),
           const SizedBox(height: AppSpacing.md),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                QuickActionCard(
-                  icon: Icons.search,
-                  label: l10n.browseRoutes,
-                  color: AppColors.primary,
-                  onTap: () => context.read<HomeNavCubit>().selectTab(1),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                QuickActionCard(
-                  icon: Icons.map,
-                  label: l10n.liveMap,
-                  color: AppColors.secondary,
-                  onTap: () => context.read<HomeNavCubit>().selectTab(2),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                QuickActionCard(
-                  icon: Icons.chat_bubble_outline,
-                  label: l10n.chatSupport,
-                  color: AppColors.info,
-                  onTap: () => context.push('/chats'),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                QuickActionCard(
-                  icon: Icons.security,
-                  label: l10n.safetyTips,
-                  color: AppColors.warning,
-                  onTap: () => showSafetyTipsBottomSheet(context),
-                ),
-              ],
-            ),
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: QuickActionCard(
+                      icon: LucideIcons.search,
+                      label: l10n.browseRoutes,
+                      color: AppColors.primary,
+                      onTap: () => context.read<HomeNavCubit>().selectTab(1),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: QuickActionCard(
+                      icon: LucideIcons.map,
+                      label: l10n.liveMap,
+                      color: AppColors.secondary,
+                      onTap: () => context.read<HomeNavCubit>().selectTab(2),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: QuickActionCard(
+                      icon: LucideIcons.message_square,
+                      label: l10n.chatSupport,
+                      color: AppColors.info,
+                      onTap: () => context.push('/chats'),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: QuickActionCard(
+                      icon: LucideIcons.shield,
+                      label: l10n.safetyTips,
+                      color: AppColors.warning,
+                      onTap: () => showSafetyTipsBottomSheet(context),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

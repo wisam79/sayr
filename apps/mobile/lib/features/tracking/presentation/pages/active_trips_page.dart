@@ -1,9 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/features/home/presentation/bloc/home_nav_cubit.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
@@ -80,6 +83,22 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
     TrackingActiveTripsLoaded state,
   ) {
     final l10n = AppLocalizations.of(context);
+
+    if (state.trips.isEmpty) {
+      return EmptyState(
+        icon: Icons.directions_bus_outlined,
+        title: l10n.noActiveTrips,
+        subtitle: l10n.noTripsYet,
+        action: PrimaryButton(
+          label: l10n.browseRoutes,
+          icon: Icons.search,
+          onPressed: () {
+            context.read<HomeNavCubit>().selectTab(1);
+          },
+        ),
+      );
+    }
+
     final markers = state.trips
         .where((t) => t.lastLocation != null)
         .map(
@@ -129,13 +148,7 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
                       ),
                     ],
                   ),
-                  child: state.trips.isEmpty
-                      ? EmptyState(
-                          icon: Icons.directions_bus_outlined,
-                          title: l10n.noActiveTrips,
-                          subtitle: l10n.noTripsYet,
-                        )
-                      : _TripList(trips: state.trips),
+                  child: _TripList(trips: state.trips),
                 ),
               ),
             ],
@@ -230,93 +243,123 @@ class _TripCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final statusColor = _statusColor;
 
-    return InkWell(
+    final routesState = context.watch<RoutesBloc>().state;
+    var routeTitle = l10n.routeNotFound;
+    if (routesState is RoutesLoaded) {
+      final route = routesState.routes
+          .cast<Route?>()
+          .firstWhere((r) => r?.id == trip.routeId, orElse: () => null);
+      if (route != null) {
+        routeTitle = route.title;
+      }
+    }
+
+    return GlassCard(
       onTap: () {
         context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: trip.id));
         context.push('/trip/${trip.id.value}');
       },
-      borderRadius: BorderRadius.circular(16),
-      child: GlassCard(
-        onTap: () {},
-        padding: EdgeInsets.zero,
-        margin: EdgeInsets.zero,
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Left Accent Status Bar
-              Container(
-                width: 6,
-                color: statusColor,
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      // Status Icon
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: statusColor.withValues(alpha: 0.12),
-                        child: Icon(
-                          _statusIcon,
-                          color: statusColor,
-                          size: 20,
-                        ),
+      padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
+      borderRadius: 16,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Left Accent Status Bar
+            Container(
+              width: 6,
+              color: statusColor,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    // Status Icon
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: statusColor.withValues(alpha: 0.12),
+                      child: Icon(
+                        _statusIcon,
+                        color: statusColor,
+                        size: 20,
                       ),
-                      const SizedBox(width: AppSpacing.md),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
 
-                      // Details
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              trip.status.localizedName(l10n),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
+                    // Details
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            routeTitle,
+                            style: (Theme.of(context).textTheme.titleMedium ??
+                                    const TextStyle())
+                                .copyWith(fontWeight: FontWeight.bold),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.access_time,
+                                    size: 14,
+                                    color: AppColors.textSecondary
+                                        .withValues(alpha: 0.8),
                                   ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.access_time,
-                                  size: 14,
-                                  color: AppColors.textSecondary
-                                      .withValues(alpha: 0.8),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _formattedTime,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: AppColors.textSecondary,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
                                 ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  _formattedTime,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .bodySmall
-                                      ?.copyWith(
-                                        color: AppColors.textSecondary,
-                                      ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                                child: Text(
+                                  trip.status.localizedName(l10n),
+                                  style: TextStyle(
+                                    color: statusColor,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
+                    ),
 
-                      // Right Arrow/Chevron
-                      Icon(
-                        Icons.chevron_right,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                    ],
-                  ),
+                    // Right Arrow/Chevron
+                    Icon(
+                      Icons.chevron_right,
+                      color: AppColors.textSecondary.withValues(alpha: 0.5),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

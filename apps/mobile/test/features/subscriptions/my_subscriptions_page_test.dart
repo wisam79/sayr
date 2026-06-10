@@ -10,7 +10,6 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/pages/my_subscriptions_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class MockSubscriptionsBloc
     extends MockBloc<SubscriptionsEvent, SubscriptionsState>
@@ -61,7 +60,8 @@ void main() {
 
     expect(
       find.byWidgetPredicate(
-          (w) => w.runtimeType.toString().contains('Skeleton')),
+        (w) => w.runtimeType.toString().contains('Skeleton'),
+      ),
       findsAtLeastNWidgets(1),
     );
   });

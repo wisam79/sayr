@@ -117,6 +117,29 @@ class AppTheme {
           type: BottomNavigationBarType.fixed,
           elevation: 8,
         ),
+        navigationBarTheme: NavigationBarThemeData(
+          height: 64,
+          backgroundColor: AppColors.surface,
+          indicatorColor: Colors.transparent,
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: AppColors.primary);
+            }
+            return const IconThemeData(color: AppColors.textSecondary);
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppTypography.light.labelMedium?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              );
+            }
+            return AppTypography.light.labelMedium?.copyWith(
+              color: AppColors.textSecondary,
+            );
+          }),
+        ),
       );
 
   /// Dark theme.
@@ -227,6 +250,29 @@ class AppTheme {
           unselectedItemColor: AppColors.textMuted,
           type: BottomNavigationBarType.fixed,
           elevation: 8,
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          height: 64,
+          backgroundColor: AppColors.darkSurface,
+          indicatorColor: Colors.transparent,
+          overlayColor: WidgetStateProperty.all(Colors.transparent),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: AppColors.white);
+            }
+            return const IconThemeData(color: AppColors.textMuted);
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppTypography.dark.labelMedium?.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.bold,
+              );
+            }
+            return AppTypography.dark.labelMedium?.copyWith(
+              color: AppColors.textMuted,
+            );
+          }),
         ),
       );
 }

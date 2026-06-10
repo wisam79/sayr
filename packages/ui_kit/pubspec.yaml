@@ -12,6 +12,7 @@ dependencies:
   equatable: ^2.0.5
   flutter:
     sdk: flutter
+  flutter_lucide: ^1.11.0
   flutter_svg: ^2.0.10
   google_fonts: ^6.2.1
 

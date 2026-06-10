@@ -16,6 +16,7 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/subscriptions/presentation/pages/my_subscriptions_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -110,51 +111,77 @@ class _HomeViewState extends State<_HomeView> {
       ),
       bottomNavigationBar: BlocBuilder<HomeNavCubit, int>(
         builder: (context, index) {
-          return BottomNavigationBar(
-            currentIndex: index,
-            onTap: (i) => context.read<HomeNavCubit>().selectTab(i),
-            items: isDriver
+          return NavigationBar(
+            selectedIndex: index,
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+            onDestinationSelected: (i) =>
+                context.read<HomeNavCubit>().selectTab(i),
+            destinations: isDriver
                 ? [
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.home_outlined),
-                      activeIcon: const Icon(Icons.home),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.home_outlined,
+                        selectedIcon: Icons.home_rounded,
+                        isSelected: index == 0,
+                      ),
                       label: l10n.homeTitle,
                     ),
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.directions_bus_outlined),
-                      activeIcon: const Icon(Icons.directions_bus),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.route_outlined,
+                        selectedIcon: Icons.route_rounded,
+                        isSelected: index == 1,
+                      ),
                       label: l10n.activeTrips,
                     ),
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.person_outline),
-                      activeIcon: const Icon(Icons.person),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.person_outline_rounded,
+                        selectedIcon: Icons.person_rounded,
+                        isSelected: index == 2,
+                      ),
                       label: l10n.profile,
                     ),
                   ]
                 : [
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.home_outlined),
-                      activeIcon: const Icon(Icons.home),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.home_outlined,
+                        selectedIcon: Icons.home_rounded,
+                        isSelected: index == 0,
+                      ),
                       label: l10n.homeTitle,
                     ),
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.directions_bus_outlined),
-                      activeIcon: const Icon(Icons.directions_bus),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.route_outlined,
+                        selectedIcon: Icons.route_rounded,
+                        isSelected: index == 1,
+                      ),
                       label: l10n.routesTitle,
                     ),
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.map_outlined),
-                      activeIcon: const Icon(Icons.map),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.map_outlined,
+                        selectedIcon: Icons.map_rounded,
+                        isSelected: index == 2,
+                      ),
                       label: l10n.activeTrips,
                     ),
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.confirmation_number_outlined),
-                      activeIcon: const Icon(Icons.confirmation_number),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.local_activity_outlined,
+                        selectedIcon: Icons.local_activity_rounded,
+                        isSelected: index == 3,
+                      ),
                       label: l10n.mySubscriptions,
                     ),
-                    BottomNavigationBarItem(
-                      icon: const Icon(Icons.person_outline),
-                      activeIcon: const Icon(Icons.person),
+                    NavigationDestination(
+                      icon: _AnimatedNavIcon(
+                        icon: Icons.person_outline_rounded,
+                        selectedIcon: Icons.person_rounded,
+                        isSelected: index == 4,
+                      ),
                       label: l10n.profile,
                     ),
                   ],
@@ -175,7 +202,7 @@ class _HeaderActions extends StatelessWidget {
     return Row(
       children: [
         IconButton(
-          icon: const Icon(Icons.chat_outlined),
+          icon: const Icon(LucideIcons.message_square),
           tooltip: l10n.chats,
           onPressed: () => context.push('/chats'),
         ),
@@ -196,7 +223,7 @@ class _HeaderActions extends StatelessWidget {
                 icon: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    const Icon(Icons.notifications_outlined),
+                    const Icon(LucideIcons.bell),
                     if (unread > 0)
                       PositionedDirectional(
                         top: -2,
@@ -230,6 +257,53 @@ class _HeaderActions extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+class _AnimatedNavIcon extends StatelessWidget {
+  const _AnimatedNavIcon({
+    required this.icon,
+    required this.selectedIcon,
+    required this.isSelected,
+  });
+
+  final IconData icon;
+  final IconData selectedIcon;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final activeColor = isDark ? AppColors.white : AppColors.primary;
+    final inactiveColor =
+        isDark ? AppColors.textMuted : AppColors.textSecondary;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      transitionBuilder: (child, animation) {
+        return ScaleTransition(
+          scale: animation,
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+        );
+      },
+      child: isSelected
+          ? Icon(
+              selectedIcon,
+              key: const ValueKey('selected'),
+              color: activeColor,
+              size: 26,
+            )
+          : Icon(
+              icon,
+              key: const ValueKey('unselected'),
+              color: inactiveColor,
+              size: 24,
+            ),
     );
   }
 }

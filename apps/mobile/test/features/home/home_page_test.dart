@@ -147,13 +147,13 @@ void main() {
     // Student should see 5 bottom navigation items:
     // 0: Home, 1: Routes, 2: Active Trips, 3: Subscriptions, 4: Profile
     expect(
-      find.byIcon(Icons.home),
+      find.byIcon(Icons.home_rounded),
       findsOneWidget,
     ); // selected tab (activeIcon)
-    expect(find.byIcon(Icons.directions_bus_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.route_outlined), findsOneWidget);
     expect(find.byIcon(Icons.map_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.confirmation_number_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.person_outline), findsOneWidget);
+    expect(find.byIcon(Icons.local_activity_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
   });
 
   testWidgets('HomePage renders driver tabs when authenticated as driver',
@@ -167,11 +167,11 @@ void main() {
     // Driver should see 3 bottom navigation items:
     // 0: Home, 1: Active Trips, 2: Profile
     expect(
-      find.byIcon(Icons.home),
+      find.byIcon(Icons.home_rounded),
       findsOneWidget,
     ); // selected tab (activeIcon)
-    expect(find.byIcon(Icons.directions_bus_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.person_outline), findsOneWidget);
+    expect(find.byIcon(Icons.route_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
 
     // map_outlined (student tracking map) should NOT be visible for driver home
     expect(find.byIcon(Icons.map_outlined), findsNothing);
@@ -185,7 +185,7 @@ void main() {
     await tester.pump();
 
     // Tap on the Routes tab (index 1)
-    await tester.tap(find.byIcon(Icons.directions_bus_outlined));
+    await tester.tap(find.byIcon(Icons.route_outlined));
     await tester.pumpAndSettle();
 
     // Verify it is on the routes page (which renders search bar)

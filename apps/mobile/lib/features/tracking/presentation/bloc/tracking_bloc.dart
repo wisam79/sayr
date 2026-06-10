@@ -86,10 +86,13 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
 
     final current = state;
     if (current is TrackingActiveTripsLoaded) {
-      final trip = current.trips.cast<Trip?>().firstWhere(
-            (t) => t!.id == event.tripId,
-            orElse: () => null,
-          );
+      Trip? trip;
+      for (final t in current.trips) {
+        if (t.id == event.tripId) {
+          trip = t;
+          break;
+        }
+      }
       if (trip != null) {
         emit(
           TrackingState.tripWatching(
@@ -124,52 +127,70 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
 
   void _onTripUpdated(_TripUpdated event, Emitter<TrackingState> emit) {
     final current = state;
-    if (current is TrackingTripWatching && event.trip.id == current.trip.id) {
-      emit(
-        TrackingState.tripWatching(
-          trip: event.trip,
-          driverLocation: event.trip.lastLocation,
-          lastUpdated: DateTime.now(),
-        ),
-      );
-    } else if (current is TrackingDriverActive &&
-        event.trip.id == current.trip.id) {
-      final actions = TripStateMachine.validEventsFrom(event.trip.status);
-      emit(
-        TrackingState.driverActive(
-          trip: event.trip,
-          validActions: actions,
-          currentLocation: current.currentLocation,
-          isTrackingLocation: current.isTrackingLocation,
-          lastUpdated: DateTime.now(),
-        ),
-      );
-    } else if (current is TrackingInitial || current is TrackingLoading) {
-      // Handle the initial state when the bloc is first watching a trip
-      final currentUser = sl<AuthRepository>().currentUser;
-      final isDriver = currentUser != null &&
-          currentUser.id.value == event.trip.driverId.value;
 
-      if (isDriver) {
-        final actions = TripStateMachine.validEventsFrom(event.trip.status);
-        emit(
-          TrackingState.driverActive(
-            trip: event.trip,
-            validActions: actions,
-            currentLocation: event.trip.lastLocation,
-            lastUpdated: DateTime.now(),
-          ),
+    switch (current) {
+      case TrackingTripWatching(:final trip) when trip.id == event.trip.id:
+        return _emitTripWatching(emit, event.trip, event.trip.lastLocation);
+
+      case TrackingDriverActive(
+            :final trip,
+            :final currentLocation,
+            :final isTrackingLocation,
+          )
+          when trip.id == event.trip.id:
+        return _emitDriverActive(
+          emit,
+          event.trip,
+          currentLocation: currentLocation,
+          isTrackingLocation: isTrackingLocation,
         );
-      } else {
-        emit(
-          TrackingState.tripWatching(
-            trip: event.trip,
-            driverLocation: event.trip.lastLocation,
-            lastUpdated: DateTime.now(),
-          ),
-        );
-      }
+
+      case TrackingInitial() || TrackingLoading():
+        final currentUser = sl<AuthRepository>().currentUser;
+        final isDriver = currentUser != null &&
+            currentUser.id.value == event.trip.driverId.value;
+
+        if (isDriver) {
+          return _emitDriverActive(emit, event.trip);
+        } else {
+          return _emitTripWatching(emit, event.trip, event.trip.lastLocation);
+        }
+
+      default:
+        break;
     }
+  }
+
+  void _emitTripWatching(
+    Emitter<TrackingState> emit,
+    Trip trip,
+    Coordinates? driverLocation,
+  ) {
+    emit(
+      TrackingState.tripWatching(
+        trip: trip,
+        driverLocation: driverLocation,
+        lastUpdated: DateTime.now(),
+      ),
+    );
+  }
+
+  void _emitDriverActive(
+    Emitter<TrackingState> emit,
+    Trip trip, {
+    Coordinates? currentLocation,
+    bool isTrackingLocation = false,
+  }) {
+    final actions = TripStateMachine.validEventsFrom(trip.status);
+    emit(
+      TrackingState.driverActive(
+        trip: trip,
+        validActions: actions,
+        currentLocation: currentLocation,
+        isTrackingLocation: isTrackingLocation,
+        lastUpdated: DateTime.now(),
+      ),
+    );
   }
 
   void _onTripUpdateError(
@@ -184,15 +205,20 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     );
   }
 
-  Future<void> _onDriverArrive(
-    TrackingDriverArrive event,
-    Emitter<TrackingState> emit,
-  ) async {
+  Future<void> _onDriverAction(
+    TripEvent action,
+    TripId tripId,
+    Coordinates? location,
+    Emitter<TrackingState> emit, {
+    bool cancelsSubscription = false,
+    bool activatesTracking = false,
+  }) async {
     final result = await _tripRepository.updateStatus(
-      tripId: event.tripId,
-      event: TripEvent.arrive,
-      location: event.location,
+      tripId: tripId,
+      event: action,
+      location: location,
     );
+
     result.fold(
       (failure) => emit(
         TrackingState.error(
@@ -200,138 +226,77 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
           previousState: state,
         ),
       ),
-      (trip) {
+      (trip) async {
+        if (cancelsSubscription) {
+          await _tripSubscription?.cancel();
+        }
         final actions = TripStateMachine.validEventsFrom(trip.status);
         emit(
           TrackingState.driverActive(
             trip: trip,
             validActions: actions,
-            currentLocation: event.location,
+            currentLocation: location ?? trip.lastLocation,
+            isTrackingLocation: activatesTracking,
             lastUpdated: DateTime.now(),
           ),
         );
       },
     );
   }
+
+  Future<void> _onDriverArrive(
+    TrackingDriverArrive event,
+    Emitter<TrackingState> emit,
+  ) =>
+      _onDriverAction(TripEvent.arrive, event.tripId, event.location, emit);
 
   Future<void> _onDriverStart(
     TrackingDriverStart event,
     Emitter<TrackingState> emit,
-  ) async {
-    final result = await _tripRepository.updateStatus(
-      tripId: event.tripId,
-      event: TripEvent.start,
-      location: event.location,
-    );
-    result.fold(
-      (failure) => emit(
-        TrackingState.error(
-          failure: failure,
-          previousState: state,
-        ),
-      ),
-      (trip) {
-        final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(
-          TrackingState.driverActive(
-            trip: trip,
-            validActions: actions,
-            currentLocation: event.location,
-            isTrackingLocation: true,
-            lastUpdated: DateTime.now(),
-          ),
-        );
-      },
-    );
-  }
+  ) =>
+      _onDriverAction(
+        TripEvent.start,
+        event.tripId,
+        event.location,
+        emit,
+        activatesTracking: true,
+      );
 
   Future<void> _onDriverComplete(
     TrackingDriverComplete event,
     Emitter<TrackingState> emit,
-  ) async {
-    final result = await _tripRepository.updateStatus(
-      tripId: event.tripId,
-      event: TripEvent.complete,
-      location: event.location,
-    );
-    result.fold(
-      (failure) => emit(
-        TrackingState.error(
-          failure: failure,
-          previousState: state,
-        ),
-      ),
-      (trip) async {
-        await _tripSubscription?.cancel();
-        final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(
-          TrackingState.driverActive(
-            trip: trip,
-            validActions: actions,
-            lastUpdated: DateTime.now(),
-          ),
-        );
-      },
-    );
-  }
+  ) =>
+      _onDriverAction(
+        TripEvent.complete,
+        event.tripId,
+        event.location,
+        emit,
+        cancelsSubscription: true,
+      );
 
   Future<void> _onDriverMarkAbsent(
     TrackingDriverMarkAbsent event,
     Emitter<TrackingState> emit,
-  ) async {
-    final result = await _tripRepository.updateStatus(
-      tripId: event.tripId,
-      event: TripEvent.markAbsent,
-    );
-    result.fold(
-      (failure) => emit(
-        TrackingState.error(
-          failure: failure,
-          previousState: state,
-        ),
-      ),
-      (trip) async {
-        await _tripSubscription?.cancel();
-        final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(
-          TrackingState.driverActive(
-            trip: trip,
-            validActions: actions,
-            lastUpdated: DateTime.now(),
-          ),
-        );
-      },
-    );
-  }
+  ) =>
+      _onDriverAction(
+        TripEvent.markAbsent,
+        event.tripId,
+        null,
+        emit,
+        cancelsSubscription: true,
+      );
 
   Future<void> _onDriverCancel(
     TrackingDriverCancel event,
     Emitter<TrackingState> emit,
-  ) async {
-    final result = await _tripRepository.updateStatus(
-      tripId: event.tripId,
-      event: TripEvent.cancel,
-    );
-    result.fold(
-      (failure) => emit(
-        TrackingState.error(
-          failure: failure,
-          previousState: state,
-        ),
-      ),
-      (trip) async {
-        await _tripSubscription?.cancel();
-        final actions = TripStateMachine.validEventsFrom(trip.status);
-        emit(
-          TrackingState.driverActive(
-            trip: trip,
-            validActions: actions,
-            lastUpdated: DateTime.now(),
-          ),
-        );
-      },
-    );
-  }
+  ) =>
+      _onDriverAction(
+        TripEvent.cancel,
+        event.tripId,
+        null,
+        emit,
+        cancelsSubscription: true,
+      );
 
   Future<void> _onUpdateLocation(
     TrackingUpdateLocation event,

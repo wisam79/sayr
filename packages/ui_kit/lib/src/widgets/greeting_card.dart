@@ -77,6 +77,14 @@ class GreetingCard extends StatelessWidget {
                 ),
               ),
             ),
+            // Baghdad University gate and landmarks (opacity 0.03)
+            const Positioned.fill(
+              child: CustomPaint(
+                painter: _UniversityGatePainter(
+                  color: Color(0x0BFFFFFF), // Very subtle white line art
+                ),
+              ),
+            ),
             // Card Content
             Padding(
               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -119,4 +127,97 @@ class GreetingCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A custom painter to draw a minimalist line art representation
+/// of Iraqi university landmarks.
+class _UniversityGatePainter extends CustomPainter {
+  const _UniversityGatePainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    final bottom = size.height;
+
+    // 1. Draw Gropius Arch (Iconic arch of the University of Baghdad)
+    final archCenter = size.width * 0.72;
+    final archWidth = size.width * 0.22;
+    final archHeight = size.height * 0.8;
+
+    final path = Path()
+      ..moveTo(archCenter - archWidth / 2, bottom)
+      ..quadraticBezierTo(
+        archCenter,
+        bottom - archHeight * 1.8,
+        archCenter + archWidth / 2,
+        bottom,
+      )
+      // Inner arch
+      ..moveTo(archCenter - archWidth * 0.35, bottom)
+      ..quadraticBezierTo(
+        archCenter,
+        bottom - archHeight * 1.3,
+        archCenter + archWidth * 0.35,
+        bottom,
+      );
+
+    // 2. Draw a university dome in the middle
+    final domeCenter = size.width * 0.45;
+    final domeRadius = size.width * 0.10;
+    path
+      ..moveTo(domeCenter - domeRadius, bottom)
+      ..quadraticBezierTo(
+        domeCenter,
+        bottom - domeRadius * 1.6,
+        domeCenter + domeRadius,
+        bottom,
+      )
+      // Dome top needle
+      ..moveTo(domeCenter, bottom - domeRadius * 0.85)
+      ..lineTo(domeCenter, bottom - domeRadius * 1.25);
+
+    // 3. Draw a clocktower on the left
+    final towerLeft = size.width * 0.18;
+    final towerWidth = size.width * 0.08;
+    final towerHeight = size.height * 0.75;
+
+    path
+      // Tower rect outline
+      ..addRect(
+        Rect.fromLTWH(
+          towerLeft,
+          bottom - towerHeight,
+          towerWidth,
+          towerHeight,
+        ),
+      )
+      // Tower roof triangle
+      ..moveTo(towerLeft, bottom - towerHeight)
+      ..lineTo(
+        towerLeft + towerWidth / 2,
+        bottom - towerHeight - towerWidth * 0.55,
+      )
+      ..lineTo(towerLeft + towerWidth, bottom - towerHeight)
+      // Clock outline
+      ..addOval(
+        Rect.fromCircle(
+          center: Offset(
+            towerLeft + towerWidth / 2,
+            bottom - towerHeight + towerWidth * 0.8,
+          ),
+          radius: towerWidth * 0.22,
+        ),
+      );
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

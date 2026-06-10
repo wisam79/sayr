@@ -10,8 +10,6 @@ import 'package:sayr_mobile/features/notifications/presentation/bloc/notificatio
 import 'package:sayr_mobile/features/notifications/presentation/pages/notifications_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 
-import 'package:skeletonizer/skeletonizer.dart';
-
 class MockNotificationsBloc
     extends MockBloc<NotificationsEvent, NotificationsState>
     implements NotificationsBloc {}
@@ -70,7 +68,8 @@ void main() {
 
     expect(
       find.byWidgetPredicate(
-          (w) => w.runtimeType.toString().contains('Skeleton')),
+        (w) => w.runtimeType.toString().contains('Skeleton'),
+      ),
       findsAtLeastNWidgets(1),
     );
   });

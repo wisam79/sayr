@@ -1,8 +1,6 @@
 import 'dart:ui';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -15,13 +13,13 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.d
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_ui_cubit.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/trip_details_cubit.dart';
+import 'package:sayr_mobile/features/tracking/presentation/widgets/driver_info_section.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/location_tile.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/rating_sheet.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// Student view: live tracking of a single trip on a map.
 class TripTrackingPage extends StatelessWidget {
@@ -412,7 +410,9 @@ class _TrackingView extends StatelessWidget {
                                         ),
                                         child: Text(
                                           formatDurationAr(
-                                              l10n, trip.duration!),
+                                            l10n,
+                                            trip.duration!,
+                                          ),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodySmall
@@ -457,7 +457,7 @@ class _TrackingView extends StatelessWidget {
                                 ),
                                 const SizedBox(height: AppSpacing.md),
                                 if (profile != null && driver != null) ...[
-                                  _DriverSection(
+                                  DriverInfoSection(
                                     profile: profile,
                                     driver: driver,
                                     route: route,
@@ -534,154 +534,6 @@ class _EtaCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DriverSection extends StatelessWidget {
-  const _DriverSection({
-    required this.profile,
-    required this.driver,
-    required this.route,
-    required this.trip,
-  });
-
-  final User profile;
-  final Driver driver;
-  final Route? route;
-  final Trip trip;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Column(
-      children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-              backgroundImage: profile.avatarUrl != null
-                  ? CachedNetworkImageProvider(profile.avatarUrl!)
-                  : null,
-              child: profile.avatarUrl == null
-                  ? const Icon(Icons.person, color: AppColors.primary)
-                  : null,
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        profile.fullName ?? '',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      if (driver.isVerified) ...[
-                        const SizedBox(width: 4),
-                        const Icon(
-                          Icons.verified,
-                          color: AppColors.primary,
-                          size: 16,
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${driver.vehicleModel} • ${driver.vehiclePlate}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 14),
-                  const SizedBox(width: 4),
-                  Text(
-                    driver.rating.toStringAsFixed(1),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.amber[800],
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        Row(
-          children: [
-            Expanded(
-              child: PrimaryButton(
-                label: l10n.callDriver,
-                icon: Icons.phone,
-                onPressed: () async {
-                  final phone = profile.phone;
-                  if (phone != null && phone.isNotEmpty) {
-                    final uri = Uri.parse('tel:$phone');
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
-                    }
-                  }
-                },
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: SecondaryButton(
-                label: l10n.chatDriver,
-                icon: Icons.chat_bubble_outline,
-                onPressed: () async {
-                  final chatRepo = sl<ChatRepository>();
-                  final messenger = ScaffoldMessenger.of(context);
-                  final router = GoRouter.of(context);
-
-                  final conversationResult =
-                      await chatRepo.getOrCreateConversation(
-                    routeId: route!.id,
-                    driverUserId: driver.userId,
-                  );
-                  conversationResult.fold(
-                    (failure) {
-                      messenger.showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            failure.toLocalizedString(context),
-                          ),
-                          backgroundColor: AppColors.error,
-                        ),
-                      );
-                    },
-                    (conversation) {
-                      router.push('/chat/${conversation.id.value}');
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

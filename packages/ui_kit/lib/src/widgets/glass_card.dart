@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import 'package:sayr_ui_kit/src/theme/app_colors.dart';
 import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 
 /// A premium glassmorphism card with backdrop blur, subtle border, and shadow.
@@ -52,8 +53,17 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = borderRadius ?? AppSpacing.cardRadius;
-    final bgColor = color ?? Theme.of(context).cardColor;
-    final borderColor = Theme.of(context).dividerColor;
+    final cardColor = Theme.of(context).cardColor;
+
+    // Use alpha blending to combine custom tint with base card color.
+    // This preserves high opacity (blocking noise) for text contrast.
+    final baseColor1 = cardColor.withValues(alpha: 0.94);
+    final baseColor2 = cardColor.withValues(alpha: 0.78);
+
+    final color1 =
+        color != null ? Color.alphaBlend(color!, baseColor1) : baseColor1;
+    final color2 =
+        color != null ? Color.alphaBlend(color!, baseColor2) : baseColor2;
 
     final card = ClipRRect(
       borderRadius: BorderRadius.circular(radius),
@@ -61,16 +71,23 @@ class GlassCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
         child: Container(
           decoration: BoxDecoration(
-            color: bgColor.withValues(alpha: 0.85),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [color1, color2],
+            ),
             borderRadius: BorderRadius.circular(radius),
             border: Border.all(
-              color: borderColor.withValues(alpha: borderOpacity),
+              color: (Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black)
+                  .withValues(alpha: borderOpacity),
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: shadowOpacity),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
+                color: AppColors.primary.withValues(alpha: shadowOpacity * 0.4),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
             ],
           ),

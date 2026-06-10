@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
-import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/theme_cubit.dart';
-import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+import 'package:sayr_mobile/features/home/presentation/widgets/change_password_dialog.dart';
+import 'package:sayr_mobile/features/home/presentation/widgets/edit_profile_dialog.dart';
 import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
@@ -114,69 +114,112 @@ class _ProfileViewState extends State<_ProfileView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
       children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 40,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+        GlassCard(
+          margin: EdgeInsets.zero,
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          color: AppColors.primary.withValues(alpha: isDark ? 0.05 : 0.02),
+          borderOpacity: isDark ? 0.12 : 0.08,
+          child: Column(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.18),
+                      AppColors.primary.withValues(alpha: 0.04),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.22),
+                    width: 1.5,
+                  ),
+                ),
+                child: Center(
                   child: Text(
                     widget.user.displayName.isNotEmpty
                         ? widget.user.displayName[0].toUpperCase()
                         : '?',
-                    style: Theme.of(context).textTheme.headlineLarge,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  widget.user.displayName,
-                  style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                widget.user.displayName,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  widget.user.email,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                widget.user.email,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
         Text(
           l10n.accountSettings,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Card(
+        GlassCard(
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
+          borderOpacity: isDark ? 0.12 : 0.08,
           child: Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.person_outline),
+                leading: const Icon(
+                  LucideIcons.user,
+                  color: AppColors.primary,
+                ),
                 title: Text(l10n.editProfile),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(
+                  LucideIcons.chevron_right,
+                  size: 20,
+                  color: AppColors.textMuted,
+                ),
                 onTap: () => showDialog<void>(
                   context: context,
-                  builder: (_) => _EditProfileDialog(user: widget.user),
+                  builder: (_) => EditProfileDialog(user: widget.user),
                 ),
               ),
               const Divider(height: 1),
               ListTile(
-                leading: const Icon(Icons.lock_outline),
+                leading: const Icon(
+                  LucideIcons.lock,
+                  color: AppColors.primary,
+                ),
                 title: Text(l10n.changePassword),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(
+                  LucideIcons.chevron_right,
+                  size: 20,
+                  color: AppColors.textMuted,
+                ),
                 onTap: () => showDialog<void>(
                   context: context,
-                  builder: (_) => const _ChangePasswordDialog(),
+                  builder: (_) => const ChangePasswordDialog(),
                 ),
               ),
             ],
@@ -185,52 +228,105 @@ class _ProfileViewState extends State<_ProfileView> {
         const SizedBox(height: AppSpacing.lg),
         Text(
           l10n.appPreferences,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Card(
+        GlassCard(
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
+          borderOpacity: isDark ? 0.12 : 0.08,
           child: Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.language),
+                leading:
+                    const Icon(LucideIcons.globe, color: AppColors.primary),
                 title: Text(l10n.language),
-                subtitle: Text(
-                  context.watch<LocaleCubit>().state.languageCode == 'ar'
-                      ? l10n.arabic
-                      : l10n.english,
+                trailing: SegmentedButton<String>(
+                  showSelectedIcon: false,
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  segments: const <ButtonSegment<String>>[
+                    ButtonSegment<String>(
+                      value: 'ar',
+                      label: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          'عربي',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    ButtonSegment<String>(
+                      value: 'en',
+                      label: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Text(
+                          'EN',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                  selected: <String>{
+                    context.watch<LocaleCubit>().state.languageCode,
+                  },
+                  onSelectionChanged: (Set<String> newSelection) {
+                    context
+                        .read<LocaleCubit>()
+                        .setLocale(Locale(newSelection.first));
+                  },
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  final current = context.read<LocaleCubit>().state;
-                  context.read<LocaleCubit>().setLocale(
-                        current.languageCode == 'ar'
-                            ? const Locale('en')
-                            : const Locale('ar'),
-                      );
-                },
               ),
               const Divider(height: 1),
               ListTile(
-                leading: const Icon(Icons.palette_outlined),
+                leading:
+                    const Icon(LucideIcons.palette, color: AppColors.primary),
                 title: Text(l10n.themeMode),
-                subtitle: Text(
-                  switch (context.watch<ThemeCubit>().state) {
-                    ThemeMode.light => l10n.themeLight,
-                    ThemeMode.dark => l10n.themeDark,
-                    ThemeMode.system => l10n.themeSystem,
+                trailing: SegmentedButton<ThemeMode>(
+                  showSelectedIcon: false,
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  segments: <ButtonSegment<ThemeMode>>[
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.light,
+                      icon: const Icon(LucideIcons.sun, size: 16),
+                      tooltip: l10n.themeLight,
+                    ),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.dark,
+                      icon: const Icon(LucideIcons.moon, size: 16),
+                      tooltip: l10n.themeDark,
+                    ),
+                    ButtonSegment<ThemeMode>(
+                      value: ThemeMode.system,
+                      icon: const Icon(LucideIcons.laptop, size: 16),
+                      tooltip: l10n.themeSystem,
+                    ),
+                  ],
+                  selected: <ThemeMode>{context.watch<ThemeCubit>().state},
+                  onSelectionChanged: (Set<ThemeMode> newSelection) {
+                    context.read<ThemeCubit>().setThemeMode(newSelection.first);
                   },
                 ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => _showThemeSelectionDialog(context),
               ),
               const Divider(height: 1),
               SwitchListTile(
-                secondary: const Icon(Icons.bluetooth),
+                secondary:
+                    const Icon(LucideIcons.bluetooth, color: AppColors.primary),
                 title: Text(l10n.bleProximityBoarding),
-                subtitle: Text(l10n.bleProximityBoardingDesc),
                 value: _bleEnabled,
                 onChanged: _isLoadingBle ? null : _toggleBle,
               ),
@@ -240,89 +336,66 @@ class _ProfileViewState extends State<_ProfileView> {
         const SizedBox(height: AppSpacing.lg),
         Text(
           l10n.cacheAndSync,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Card(
+        GlassCard(
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
+          borderOpacity: isDark ? 0.12 : 0.08,
           child: Column(
             children: [
               ListTile(
-                leading: const Icon(Icons.sync),
+                leading: const Icon(
+                  LucideIcons.refresh_cw,
+                  color: AppColors.primary,
+                ),
                 title: Text(l10n.forceSync),
-                subtitle: Text(l10n.forceSyncDesc),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(
+                  LucideIcons.chevron_right,
+                  size: 20,
+                  color: AppColors.textMuted,
+                ),
                 onTap: _syncCache,
               ),
             ],
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Card(
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.logout, color: AppColors.error),
-                title: Text(
-                  l10n.logout,
-                  style: const TextStyle(color: AppColors.error),
-                ),
-                onTap: () => _confirmLogout(context),
+        GlassCard(
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
+          color: AppColors.error.withValues(alpha: isDark ? 0.05 : 0.02),
+          child: ListTile(
+            leading: const Icon(LucideIcons.log_out, color: AppColors.error),
+            title: Text(
+              l10n.logout,
+              style: const TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.w600,
               ),
-            ],
+            ),
+            trailing: const Icon(
+              LucideIcons.chevron_right,
+              size: 20,
+              color: AppColors.error,
+            ),
+            onTap: () => _confirmLogout(context),
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
         Center(
           child: Text(
             l10n.appVersion('1.0.0'),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
+            ),
           ),
         ),
       ],
-    );
-  }
-
-  void _showThemeSelectionDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final currentTheme = context.read<ThemeCubit>().state;
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.themeMode),
-          content: RadioGroup<ThemeMode>(
-            groupValue: currentTheme,
-            onChanged: (value) {
-              if (value != null) {
-                context.read<ThemeCubit>().setThemeMode(value);
-                Navigator.of(dialogContext).pop();
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                RadioListTile<ThemeMode>(
-                  title: Text(l10n.themeLight),
-                  value: ThemeMode.light,
-                ),
-                RadioListTile<ThemeMode>(
-                  title: Text(l10n.themeDark),
-                  value: ThemeMode.dark,
-                ),
-                RadioListTile<ThemeMode>(
-                  title: Text(l10n.themeSystem),
-                  value: ThemeMode.system,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -348,293 +421,5 @@ class _ProfileViewState extends State<_ProfileView> {
     if ((confirmed ?? false) && context.mounted) {
       context.read<AuthBloc>().add(const AuthLogoutRequested());
     }
-  }
-}
-
-class _EditProfileDialog extends StatefulWidget {
-  const _EditProfileDialog({required this.user});
-  final core.User user;
-
-  @override
-  State<_EditProfileDialog> createState() => _EditProfileDialogState();
-}
-
-class _EditProfileDialogState extends State<_EditProfileDialog> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _phoneController;
-  String? _selectedInstitutionId;
-  List<({String id, String name, String city})> _institutions = [];
-  bool _isLoading = true;
-  bool _isSaving = false;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _phoneController = TextEditingController(text: widget.user.phone ?? '');
-    _selectedInstitutionId = widget.user.institutionId?.value;
-    _loadInstitutions();
-  }
-
-  @override
-  void dispose() {
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadInstitutions() async {
-    final result = await sl<core.AuthRepository>().getInstitutions();
-    if (mounted) {
-      result.fold(
-        (failure) => setState(() {
-          _errorMessage = failure.toLocalizedString(context);
-          _isLoading = false;
-        }),
-        (list) {
-          final exists = list.any((inst) => inst.id == _selectedInstitutionId);
-          setState(() {
-            _institutions = list;
-            if (!exists) {
-              _selectedInstitutionId = list.isNotEmpty ? list.first.id : null;
-            }
-            _isLoading = false;
-          });
-        },
-      );
-    }
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedInstitutionId == null) return;
-
-    setState(() {
-      _isSaving = true;
-      _errorMessage = null;
-    });
-
-    final result = await sl<core.AuthRepository>().updateProfile(
-      phone: _phoneController.text.trim(),
-      institutionId: _selectedInstitutionId!,
-    );
-
-    if (mounted) {
-      result.fold(
-        (failure) => setState(() {
-          _errorMessage = failure.toLocalizedString(context);
-          _isSaving = false;
-        }),
-        (_) {
-          context.read<AuthBloc>().add(const AuthCheckRequested());
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context).editProfileSuccess),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        },
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.editProfile),
-      content: Form(
-        key: _formKey,
-        child: _isLoading
-            ? const SizedBox(
-                height: 100,
-                child: Center(child: CircularProgressIndicator()),
-              )
-            : SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                        child: Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: AppColors.error),
-                        ),
-                      ),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: InputDecoration(
-                        labelText: l10n.phoneLabel,
-                      ),
-                      keyboardType: TextInputType.phone,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedInstitutionId,
-                      decoration: InputDecoration(
-                        labelText: l10n.institutionLabel,
-                      ),
-                      items: _institutions
-                          .map(
-                            (inst) => DropdownMenuItem(
-                              value: inst.id,
-                              child: Text(inst.name),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (val) {
-                        setState(() => _selectedInstitutionId = val);
-                      },
-                      validator: (val) => val == null ? l10n.error : null,
-                    ),
-                  ],
-                ),
-              ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: _isLoading || _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white),
-                )
-              : Text(l10n.saveButton),
-        ),
-      ],
-    );
-  }
-}
-
-class _ChangePasswordDialog extends StatefulWidget {
-  const _ChangePasswordDialog();
-
-  @override
-  State<_ChangePasswordDialog> createState() => _ChangePasswordDialogState();
-}
-
-class _ChangePasswordDialogState extends State<_ChangePasswordDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
-  bool _isSaving = false;
-  String? _errorMessage;
-
-  @override
-  void dispose() {
-    _passwordController.dispose();
-    _confirmController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _isSaving = true;
-      _errorMessage = null;
-    });
-
-    final result = await sl<core.AuthRepository>().updatePassword(
-      _passwordController.text.trim(),
-    );
-
-    if (mounted) {
-      result.fold(
-        (failure) => setState(() {
-          _errorMessage = failure.toLocalizedString(context);
-          _isSaving = false;
-        }),
-        (_) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context).changePasswordSuccess),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        },
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(l10n.changePassword),
-      content: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: AppColors.error),
-                  ),
-                ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  labelText: l10n.newPasswordLabel,
-                ),
-                obscureText: true,
-                validator: (val) {
-                  if (val == null || val.isEmpty) {
-                    return l10n.passwordRequired;
-                  }
-                  if (val.length < 6) {
-                    return l10n.passwordTooShort;
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.md),
-              TextFormField(
-                controller: _confirmController,
-                decoration: InputDecoration(
-                  labelText: l10n.confirmNewPasswordLabel,
-                ),
-                obscureText: true,
-                validator: (val) {
-                  if (val != _passwordController.text) {
-                    return l10n.passwordsDoNotMatch;
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: _isSaving ? null : _save,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2, color: Colors.white),
-                )
-              : Text(l10n.saveButton),
-        ),
-      ],
-    );
   }
 }

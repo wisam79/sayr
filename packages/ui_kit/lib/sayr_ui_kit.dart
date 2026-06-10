@@ -1,6 +1,8 @@
 /// Sayr UI Kit - Design system
 library sayr_ui_kit;
 
+export 'package:flutter_lucide/flutter_lucide.dart';
+
 export 'src/theme/app_colors.dart';
 export 'src/theme/app_spacing.dart';
 export 'src/theme/app_theme.dart';

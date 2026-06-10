@@ -5,25 +5,31 @@ class AppColors {
   AppColors._();
 
   /// Primary brand color (green).
-  static const Color primary = Color(0xFF0E6245);
+  static const Color primary = Color(0xFF00875A);
+
+  /// Primary Container color (slightly lighter green).
+  static const Color primaryContainer = Color(0xFF0EA36E);
+
+  /// Primary Fixed color (mint green accent).
+  static const Color primaryFixed = Color(0xFFA6FFCC);
 
   /// Secondary brand color (deep blue).
   static const Color secondary = Color(0xFF1E5BFF);
 
   /// Success color.
-  static const Color success = Color(0xFF22C55E);
+  static const Color success = Color(0xFF00875A);
 
   /// Warning color.
   static const Color warning = Color(0xFFF59E0B);
 
   /// Error color.
-  static const Color error = Color(0xFFEF4444);
+  static const Color error = Color(0xFFBA1A1A);
 
   /// Info color.
-  static const Color info = Color(0xFF3B82F6);
+  static const Color info = Color(0xFF555F6F);
 
   /// Primary text color.
-  static const Color textPrimary = Color(0xFF111827);
+  static const Color textPrimary = Color(0xFF151C27);
 
   /// Secondary text color.
   static const Color textSecondary = Color(0xFF6B7280);
@@ -32,7 +38,7 @@ class AppColors {
   static const Color textMuted = Color(0xFF9CA3AF);
 
   /// Background color.
-  static const Color background = Color(0xFFF9FAFB);
+  static const Color background = Color(0xFFF9F9FF);
 
   /// Dark background.
   static const Color backgroundDark = Color(0xFF111827);
@@ -43,14 +49,20 @@ class AppColors {
   /// Dark surface color.
   static const Color darkSurface = Color(0xFF1F2937);
 
-  /// Border color.
-  static const Color border = Color(0xFFE5E7EB);
+  /// Surface Container color (light blue/grey container background).
+  static const Color surfaceContainer = Color(0xFFE7EEFE);
+
+  /// Surface Variant color (neutral variant container background).
+  static const Color surfaceVariant = Color(0xFFDCE2F3);
+
+  /// Border color (Outline).
+  static const Color border = Color(0xFF6F7973);
 
   /// Dark border color.
   static const Color borderDark = Color(0xFF374151);
 
   /// Divider color.
-  static const Color divider = Color(0xFFF3F4F6);
+  static const Color divider = Color(0xFFE5E7EB);
 
   /// Dark divider color.
   static const Color dividerDark = Color(0xFF374151);

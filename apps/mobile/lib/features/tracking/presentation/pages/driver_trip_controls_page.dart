@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_swipe_button/flutter_swipe_button.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -16,6 +15,7 @@ import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_so
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
+import 'package:sayr_mobile/features/tracking/presentation/widgets/driver_action_buttons.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
@@ -375,7 +375,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                         ],
 
                         // Controls
-                        _ActionButtons(
+                        DriverActionButtons(
                           validActions: state.validActions,
                           onAction: (event) {
                             context.read<TrackingBloc>().add(event);
@@ -392,168 +392,5 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
         ),
       ],
     );
-  }
-}
-
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons({
-    required this.validActions,
-    required this.onAction,
-    required this.tripId,
-  });
-
-  final List<TripEvent> validActions;
-  final void Function(TrackingEvent) onAction;
-  final TripId tripId;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final actions = validActions.where(_isVisible).toList();
-    if (actions.isEmpty) return const SizedBox.shrink();
-
-    TripEvent? progressiveAction;
-    for (final event in actions) {
-      if (event != TripEvent.cancel) {
-        progressiveAction = event;
-        break;
-      }
-    }
-    final hasCancel = actions.contains(TripEvent.cancel);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (progressiveAction != null)
-          _buildSwipeButton(context, progressiveAction, l10n),
-        if (progressiveAction != null && hasCancel)
-          const SizedBox(height: AppSpacing.md),
-        if (hasCancel) _buildCancelButton(context, l10n),
-      ],
-    );
-  }
-
-  Widget _buildSwipeButton(
-    BuildContext context,
-    TripEvent event,
-    AppLocalizations l10n,
-  ) {
-    final Color color;
-    if (event == TripEvent.arrive) {
-      color = AppColors.secondary;
-    } else if (event == TripEvent.start) {
-      color = AppColors.primary;
-    } else if (event == TripEvent.complete) {
-      color = AppColors.success;
-    } else {
-      color = AppColors.primary;
-    }
-
-    return SwipeButton.expand(
-      thumb: Icon(
-        _icon(event),
-        color: Colors.white,
-      ),
-      activeThumbColor: color,
-      activeTrackColor: color.withValues(alpha: 0.1),
-      child: Text(
-        _label(event, l10n),
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      onSwipe: () => onAction(_buildEvent(event)),
-    );
-  }
-
-  Widget _buildCancelButton(BuildContext context, AppLocalizations l10n) {
-    return TextButton.icon(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.error,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-      ),
-      onPressed: () => _confirmCancel(context, l10n),
-      icon: const Icon(Icons.close, size: 20),
-      label: Text(l10n.cancel),
-    );
-  }
-
-  void _confirmCancel(BuildContext context, AppLocalizations l10n) {
-    showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext ctx) => AlertDialog(
-        title: Text(l10n.cancelTripConfirm),
-        content: Text(l10n.cancelTripConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.no),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.yes),
-          ),
-        ],
-      ),
-    ).then((confirmed) {
-      if (confirmed ?? false) {
-        onAction(_buildEvent(TripEvent.cancel));
-      }
-    });
-  }
-
-  bool _isVisible(TripEvent event) {
-    return event == TripEvent.arrive ||
-        event == TripEvent.start ||
-        event == TripEvent.complete ||
-        event == TripEvent.cancel;
-  }
-
-  TrackingEvent _buildEvent(TripEvent event) {
-    if (event == TripEvent.arrive) {
-      return TrackingDriverArrive(tripId: tripId);
-    } else if (event == TripEvent.start) {
-      return TrackingDriverStart(tripId: tripId);
-    } else if (event == TripEvent.complete) {
-      return TrackingDriverComplete(tripId: tripId);
-    } else {
-      return TrackingDriverCancel(tripId: tripId);
-    }
-  }
-
-  String _label(TripEvent event, AppLocalizations l10n) {
-    if (event == TripEvent.arrive) {
-      return l10n.arrive;
-    } else if (event == TripEvent.start) {
-      return l10n.begin;
-    } else if (event == TripEvent.complete) {
-      return l10n.complete;
-    } else if (event == TripEvent.cancel) {
-      return l10n.cancel;
-    } else {
-      return event.name;
-    }
-  }
-
-  IconData _icon(TripEvent event) {
-    if (event == TripEvent.arrive) {
-      return Icons.location_on;
-    } else if (event == TripEvent.start) {
-      return Icons.play_arrow;
-    } else if (event == TripEvent.complete) {
-      return Icons.check;
-    } else if (event == TripEvent.cancel) {
-      return Icons.close;
-    } else {
-      return Icons.help;
-    }
   }
 }

@@ -309,13 +309,16 @@ class _SayrMapState extends State<SayrMap> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mapStyle = isDark ? openFreeMapDarkStyle : openFreeMapLightStyle;
+
     return MapLibreMap(
       initialCameraPosition: widget.initialCameraPosition ??
           const CameraPosition(
             target: SayrMap.defaultCenter,
             zoom: 13,
           ),
-      styleString: openFreeMapStyleUrl,
+      styleString: mapStyle,
       myLocationEnabled: widget.myLocationEnabled,
       onMapCreated: (controller) {
         _controller = controller;
