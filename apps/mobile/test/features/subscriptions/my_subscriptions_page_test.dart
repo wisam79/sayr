@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
@@ -10,9 +12,6 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/pages/my_subscriptions_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
-
-import 'package:fpdart/fpdart.dart';
-import 'package:get_it/get_it.dart';
 
 class MockSubscriptionsBloc
     extends MockBloc<SubscriptionsEvent, SubscriptionsState>

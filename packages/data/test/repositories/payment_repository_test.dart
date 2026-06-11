@@ -27,12 +27,14 @@ void main() {
 
     group('createPayment', () {
       test('returns PaymentInfo on success', () async {
-        when(() => mockRemote.createPayment(
-              routeId: 'route-789',
-              amount: 15000,
-              currency: 'IQD',
-              method: 'zaincash',
-            )).thenAnswer((_) async => mockPaymentJson);
+        when(
+          () => mockRemote.createPayment(
+            routeId: 'route-789',
+            amount: 15000,
+            currency: 'IQD',
+            method: 'zaincash',
+          ),
+        ).thenAnswer((_) async => mockPaymentJson);
 
         final result = await repository.createPayment(
           routeId: const RouteId('route-789'),
@@ -48,20 +50,24 @@ void main() {
             expect(payment.id, 'pay-123');
             expect(payment.status, 'pending');
             expect(payment.amount, 15000);
-            expect(payment.paymentUrl,
-                'https://test.zaincash.iq/transaction/pay-123');
+            expect(
+              payment.paymentUrl,
+              'https://test.zaincash.iq/transaction/pay-123',
+            );
             expect(payment.routeId, 'route-789');
           },
         );
       });
 
       test('returns ServerFailure when remote throws exception', () async {
-        when(() => mockRemote.createPayment(
-              routeId: 'route-789',
-              amount: 15000,
-              currency: 'IQD',
-              method: 'zaincash',
-            )).thenThrow(Exception('Zain Cash API error'));
+        when(
+          () => mockRemote.createPayment(
+            routeId: 'route-789',
+            amount: 15000,
+            currency: 'IQD',
+            method: 'zaincash',
+          ),
+        ).thenThrow(Exception('Zain Cash API error'));
 
         final result = await repository.createPayment(
           routeId: const RouteId('route-789'),
@@ -92,8 +98,10 @@ void main() {
             expect(payment.id, 'pay-123');
             expect(payment.status, 'pending');
             expect(payment.amount, 15000);
-            expect(payment.paymentUrl,
-                'https://test.zaincash.iq/transaction/pay-123');
+            expect(
+              payment.paymentUrl,
+              'https://test.zaincash.iq/transaction/pay-123',
+            );
             expect(payment.routeId, 'route-789');
           },
         );
@@ -140,8 +148,10 @@ void main() {
             expect(payments.length, 1);
             expect(payments.first.id, 'pay-123');
             expect(payments.first.status, 'pending');
-            expect(payments.first.paymentUrl,
-                'https://test.zaincash.iq/transaction/pay-123');
+            expect(
+              payments.first.paymentUrl,
+              'https://test.zaincash.iq/transaction/pay-123',
+            );
           },
         );
       });

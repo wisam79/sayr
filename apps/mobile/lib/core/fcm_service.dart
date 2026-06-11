@@ -172,8 +172,9 @@ class FcmService {
         );
       });
     } catch (e) {
-      if (kDebugMode)
+      if (kDebugMode) {
         debugPrint('FCM: Failed to retrieve or register token: $e');
+      }
     }
   }
 }

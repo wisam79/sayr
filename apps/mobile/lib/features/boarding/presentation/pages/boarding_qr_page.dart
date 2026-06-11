@@ -207,11 +207,13 @@ class _ReadyView extends StatelessWidget {
                         ),
                         onSwipe: () async {
                           try {
-                            // ignore: deprecated_member_use
                             final position =
                                 await Geolocator.getCurrentPosition(
-                                    desiredAccuracy: LocationAccuracy.high,
-                                    timeLimit: const Duration(seconds: 5));
+                              locationSettings: const LocationSettings(
+                                accuracy: LocationAccuracy.high,
+                                timeLimit: Duration(seconds: 5),
+                              ),
+                            );
                             if (context.mounted) {
                               await context
                                   .read<BoardingQrCubit>()

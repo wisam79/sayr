@@ -124,7 +124,8 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     if (isClosed) return;
     if (!started) {
       debugPrint(
-          'BLE scanning not started. Student will use QR code boarding.');
+        'BLE scanning not started. Student will use QR code boarding.',
+      );
       return;
     }
     _bleSubscription = _bleBeaconService.discoveredTrips.listen((data) {

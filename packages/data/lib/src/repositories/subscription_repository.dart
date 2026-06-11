@@ -116,7 +116,7 @@ class SubscriptionRepositoryImpl extends BaseRepository
           }
           return Left(failure);
         },
-        (preview) => Right(preview),
+        Right.new,
       ),
     );
   }
