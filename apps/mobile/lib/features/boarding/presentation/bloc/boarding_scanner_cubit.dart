@@ -74,7 +74,8 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
             tripId: _tripId,
             passengers: passengers,
             lastScan: current is BoardingScannerReady ? current.lastScan : null,
-            isProcessing: current is BoardingScannerReady && current.isProcessing,
+            isProcessing:
+                current is BoardingScannerReady && current.isProcessing,
           ),
         );
       },

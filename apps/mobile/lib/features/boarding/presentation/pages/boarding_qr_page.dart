@@ -208,9 +208,14 @@ class _ReadyView extends StatelessWidget {
                         onSwipe: () async {
                           try {
                             // ignore: deprecated_member_use
-                            final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 5));
+                            final position =
+                                await Geolocator.getCurrentPosition(
+                                    desiredAccuracy: LocationAccuracy.high,
+                                    timeLimit: const Duration(seconds: 5));
                             if (context.mounted) {
-                              await context.read<BoardingQrCubit>().submitProximityCheckIn(
+                              await context
+                                  .read<BoardingQrCubit>()
+                                  .submitProximityCheckIn(
                                     Coordinates(
                                       latitude: position.latitude,
                                       longitude: position.longitude,
@@ -229,7 +234,8 @@ class _ReadyView extends StatelessWidget {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(l10n.locationPermissionRequired),
+                                  content:
+                                      Text(l10n.locationPermissionRequired),
                                 ),
                               );
                             }

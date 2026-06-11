@@ -48,7 +48,8 @@ void main() {
             expect(payment.id, 'pay-123');
             expect(payment.status, 'pending');
             expect(payment.amount, 15000);
-            expect(payment.paymentUrl, 'https://test.zaincash.iq/transaction/pay-123');
+            expect(payment.paymentUrl,
+                'https://test.zaincash.iq/transaction/pay-123');
             expect(payment.routeId, 'route-789');
           },
         );
@@ -91,7 +92,8 @@ void main() {
             expect(payment.id, 'pay-123');
             expect(payment.status, 'pending');
             expect(payment.amount, 15000);
-            expect(payment.paymentUrl, 'https://test.zaincash.iq/transaction/pay-123');
+            expect(payment.paymentUrl,
+                'https://test.zaincash.iq/transaction/pay-123');
             expect(payment.routeId, 'route-789');
           },
         );
@@ -138,7 +140,8 @@ void main() {
             expect(payments.length, 1);
             expect(payments.first.id, 'pay-123');
             expect(payments.first.status, 'pending');
-            expect(payments.first.paymentUrl, 'https://test.zaincash.iq/transaction/pay-123');
+            expect(payments.first.paymentUrl,
+                'https://test.zaincash.iq/transaction/pay-123');
           },
         );
       });

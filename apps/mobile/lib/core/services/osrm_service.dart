@@ -10,7 +10,8 @@ import 'package:sayr_data/sayr_data.dart';
 /// with the HF_TOKEN — the client never knows the HF Space URL or token.
 @lazySingleton
 class OsrmService {
-  OsrmService({SayrSupabase? supabase}) : _supabase = supabase ?? SayrSupabase.instance;
+  OsrmService({SayrSupabase? supabase})
+      : _supabase = supabase ?? SayrSupabase.instance;
 
   final SayrSupabase _supabase;
   final Logger _logger = Logger();
@@ -40,13 +41,16 @@ class OsrmService {
       final coordinates = data['coordinates'] as List<dynamic>?;
       if (coordinates == null || coordinates.isEmpty) return [start, end];
 
-      return coordinates.map((coord) {
-        if (coord is! List<dynamic> || coord.length < 2) return null;
-        final lat = coord[1];
-        final lng = coord[0];
-        if (lat is! num || lng is! num) return null;
-        return LatLng(lat.toDouble(), lng.toDouble());
-      }).whereType<LatLng>().toList();
+      return coordinates
+          .map((coord) {
+            if (coord is! List<dynamic> || coord.length < 2) return null;
+            final lat = coord[1];
+            final lng = coord[0];
+            if (lat is! num || lng is! num) return null;
+            return LatLng(lat.toDouble(), lng.toDouble());
+          })
+          .whereType<LatLng>()
+          .toList();
     } catch (e, st) {
       _logger.w(
         'Route geometry fetch failed; falling back to straight line',

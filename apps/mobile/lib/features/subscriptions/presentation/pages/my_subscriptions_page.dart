@@ -106,9 +106,10 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                     if (_pendingPayments.isNotEmpty) ...[
                       Text(
                         l10n.pendingPayments,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ..._pendingPayments.map(
@@ -136,7 +137,8 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                               children: [
                                 Text(
                                   l10n.noActiveSubscription,
-                                  style: Theme.of(context).textTheme.titleMedium,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: AppSpacing.md),
                                 PrimaryButton(
@@ -151,9 +153,10 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                     ] else ...[
                       Text(
                         l10n.mySubscriptions,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                       ...subscriptions.map(

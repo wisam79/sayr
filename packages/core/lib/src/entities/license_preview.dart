@@ -18,8 +18,7 @@ abstract class LicensePreview with _$LicensePreview {
     required String startLocation,
     required String endLocation,
     required int validDays,
-    @JsonKey(fromJson: moneyFromJson, toJson: moneyToJson)
-    required Money price,
+    @JsonKey(fromJson: moneyFromJson, toJson: moneyToJson) required Money price,
     required int availableSeats,
     required String status,
   }) = _LicensePreview;

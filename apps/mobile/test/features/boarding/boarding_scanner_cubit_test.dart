@@ -232,7 +232,8 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await cubit.processToken(
           'token-abc',
-          driverLocation: const Coordinates(latitude: 33.315, longitude: 44.366),
+          driverLocation:
+              const Coordinates(latitude: 33.315, longitude: 44.366),
         );
       },
       verify: (_) {

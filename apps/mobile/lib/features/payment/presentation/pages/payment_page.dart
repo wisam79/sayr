@@ -204,8 +204,7 @@ class _PaymentPageState extends State<PaymentPage> {
   }
 
   Future<void> _launchWhatsAppSupport(BuildContext context) async {
-    const message =
-        'مرحباً، أواجه مشكلة في تفعيل اشتراكي في تطبيق سير.';
+    const message = 'مرحباً، أواجه مشكلة في تفعيل اشتراكي في تطبيق سير.';
     final uri = Uri.parse(
       'https://wa.me/9647800000000?text=${Uri.encodeComponent(message)}',
     );

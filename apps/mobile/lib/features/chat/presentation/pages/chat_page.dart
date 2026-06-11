@@ -159,9 +159,8 @@ class _MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(vertical: 4),
       child: Column(
-        crossAxisAlignment: isMe == isRtl
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isMe == isRtl ? CrossAxisAlignment.start : CrossAxisAlignment.end,
         children: [
           BubbleNormal(
             text: message.body,

@@ -93,9 +93,11 @@ void main() {
     ).called(1);
   });
 
-  test('ArabicToEnglishDigitsFormatter translates Arabic and Persian digits to English digits', () {
+  test(
+      'ArabicToEnglishDigitsFormatter translates Arabic and Persian digits to English digits',
+      () {
     const formatter = ArabicToEnglishDigitsFormatter();
-    
+
     // Arabic digits
     final resultArabic = formatter.formatEditUpdate(
       TextEditingValue.empty,
