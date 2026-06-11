@@ -45,6 +45,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     emit(const ChatListState.loading());
 
     final initial = await _chatRepository.getMyConversations();
+    if (isClosed) return;
     initial.fold(
       (Failure failure) => emit(ChatListState.error(failure: failure)),
       (List<Conversation> list) =>
@@ -64,6 +65,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     Emitter<ChatListState> emit,
   ) async {
     final result = await _chatRepository.getMyConversations();
+    if (isClosed) return;
     result.fold(
       (Failure failure) => emit(ChatListState.error(failure: failure)),
       (List<Conversation> list) =>

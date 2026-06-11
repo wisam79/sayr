@@ -38,14 +38,27 @@ void main() {
   });
 
   group('Money - formatting', () {
-    test('format small amount', () {
+    test('format defaults to ar_IQ locale with IQD symbol', () {
       const money = Money(1000);
-      expect(money.format(), equals('1,000 د.ع'));
+      // NumberFormat.currency(locale: 'ar_IQ', symbol: 'د.ع', decimalDigits: 0)
+      // produces locale-specific thousand separators
+      final result = money.format();
+      expect(result, contains('1,000'));
+      expect(result, contains('د.ع'));
     });
 
     test('format with thousand separators', () {
       const money = Money(1234567);
-      expect(money.format(), equals('1,234,567 د.ع'));
+      final result = money.format();
+      expect(result, contains('1,234,567'));
+      expect(result, contains('د.ع'));
+    });
+
+    test('format with custom locale and symbol', () {
+      const money = Money(5000);
+      final result = money.format(locale: 'en_US', symbol: 'IQD ');
+      expect(result, contains('5,000'));
+      expect(result, contains('IQD'));
     });
   });
 }

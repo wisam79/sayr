@@ -68,5 +68,9 @@ enabled = true
 policy = "oneshot"
 inspector_port = 8083
 
+[functions]
+create-route.enabled = true
+keep-osrm-alive.enabled = true
+
 [analytics]
 enabled = false

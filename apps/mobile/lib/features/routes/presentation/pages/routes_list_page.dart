@@ -76,7 +76,7 @@ class _RoutesListPageState extends State<RoutesListPage> {
                             endLocation: 'Al-Jadriya Campus University',
                             availableSeats: 10,
                             capacity: 25,
-                            formattedPrice: '5,000 IQD',
+                            formattedPrice: '---',
                             hasSeats: true,
                             availableLabel: l10n.available,
                             completedLabel: l10n.full,

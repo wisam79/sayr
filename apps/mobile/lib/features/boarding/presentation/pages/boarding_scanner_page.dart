@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -39,7 +41,6 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
     detectionSpeed: DetectionSpeed.noDuplicates,
     formats: const [BarcodeFormat.qrCode],
   );
-  bool _isProcessing = false;
 
   @override
   void dispose() {
@@ -48,18 +49,15 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
   }
 
   Future<void> _onDetect(BarcodeCapture capture) async {
-    if (_isProcessing) return;
+    final cubit = context.read<BoardingScannerCubit>();
+    final state = cubit.state;
+    if (state is BoardingScannerReady && state.isProcessing) return;
+
     final barcode = capture.barcodes.firstOrNull;
     final raw = barcode?.rawValue;
     if (raw == null || raw.isEmpty) return;
-    setState(() => _isProcessing = true);
-    await context.read<BoardingScannerCubit>().processToken(raw);
-    if (!mounted) return;
-    // Small debounce to avoid double-scanning the same QR.
-    await Future<void>.delayed(const Duration(milliseconds: 1500));
-    if (mounted) {
-      setState(() => _isProcessing = false);
-    }
+
+    await cubit.processToken(raw);
   }
 
   @override
@@ -89,6 +87,9 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
             final scan = state.lastScan!;
             final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
             if (scan is BoardingScanSuccess) {
+              HapticFeedback.successNotification();
+              FlutterBeep.beep();
+
               messenger.showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.success,
@@ -98,6 +99,9 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
                 ),
               );
             } else if (scan is BoardingScanFailure) {
+              HapticFeedback.errorNotification();
+              FlutterBeep.beep(false);
+
               messenger.showSnackBar(
                 SnackBar(
                   backgroundColor: AppColors.error,
@@ -113,6 +117,9 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
           }
         },
         builder: (context, state) {
+          final isProcessing =
+              state is BoardingScannerReady && state.isProcessing;
+
           return Column(
             children: [
               Expanded(
@@ -138,7 +145,7 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
                         ),
                       ),
                     ),
-                    if (_isProcessing)
+                    if (isProcessing)
                       const ColoredBox(
                         color: Colors.black54,
                         child: Center(

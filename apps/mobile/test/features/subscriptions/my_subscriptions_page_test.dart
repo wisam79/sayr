@@ -11,15 +11,30 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/subscriptions/presentation/pages/my_subscriptions_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 
+import 'package:fpdart/fpdart.dart';
+import 'package:get_it/get_it.dart';
+
 class MockSubscriptionsBloc
     extends MockBloc<SubscriptionsEvent, SubscriptionsState>
     implements SubscriptionsBloc {}
 
+class MockPaymentRepository extends Mock implements PaymentRepository {}
+
 void main() {
   late MockSubscriptionsBloc mockBloc;
+  late MockPaymentRepository mockPaymentRepo;
 
   setUp(() {
     mockBloc = MockSubscriptionsBloc();
+    mockPaymentRepo = MockPaymentRepository();
+    GetIt.I.registerFactory<PaymentRepository>(() => mockPaymentRepo);
+    when(() => mockPaymentRepo.getPendingPayments()).thenAnswer(
+      (_) async => const Right([]),
+    );
+  });
+
+  tearDown(() async {
+    await GetIt.I.reset();
   });
 
   final pastDate = DateTime.now().subtract(const Duration(days: 30));

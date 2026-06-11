@@ -21,6 +21,7 @@ dependencies:
   flash: ^3.1.1
   flutter:
     sdk: flutter
+  flutter_beep: ^1.0.0
   flutter_ble_peripheral: ^2.1.1
   flutter_bloc: ^8.1.6
   flutter_blue_plus: ^1.31.0
@@ -69,11 +70,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^3.0.0
+  functions_client: ^2.5.0
   injectable_generator: ^2.6.0
   integration_test:
     sdk: flutter
   json_serializable: ^6.8.0
   mocktail: ^1.0.4
+  supabase_flutter: ^2.5.0
   very_good_analysis: ^6.0.0
 
 flutter:

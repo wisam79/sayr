@@ -27,7 +27,9 @@ class PaymentRepositoryImpl extends BaseRepository
         currency: currency,
         method: method,
       );
-      return PaymentInfo.fromJson(response);
+      final mappedResponse = Map<String, dynamic>.from(response);
+      mappedResponse['payment_url'] = response['reference_url'];
+      return PaymentInfo.fromJson(mappedResponse);
     });
   }
 
@@ -40,7 +42,21 @@ class PaymentRepositoryImpl extends BaseRepository
       if (response == null) {
         throw const NotFoundFailure(resource: 'payment');
       }
-      return PaymentInfo.fromJson(response);
+      final mappedResponse = Map<String, dynamic>.from(response);
+      mappedResponse['payment_url'] = response['reference_url'];
+      return PaymentInfo.fromJson(mappedResponse);
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<PaymentInfo>>> getPendingPayments() async {
+    return guard(() async {
+      final response = await _remoteDatasource.getPendingPayments();
+      return response.map((json) {
+        final mapped = Map<String, dynamic>.from(json);
+        mapped['payment_url'] = json['reference_url'];
+        return PaymentInfo.fromJson(mapped);
+      }).toList();
     });
   }
 }

@@ -169,6 +169,8 @@ class AppRouter {
           child: PaymentPage(
             routeId: RouteId(state.pathParameters['routeId']!),
             amount: int.parse(state.pathParameters['amount']!),
+            paymentId: state.uri.queryParameters['paymentId'],
+            paymentUrl: state.uri.queryParameters['paymentUrl'],
           ),
         ),
       ),

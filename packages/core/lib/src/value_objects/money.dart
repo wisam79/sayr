@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:intl/intl.dart';
 
 /// Represents a monetary amount in Iraqi Dinar (IQD).
 ///
@@ -46,13 +47,17 @@ class Money extends Equatable {
   /// Get the amount in IQD.
   int get inIQD => amountInFils;
 
-  /// Format as currency string (IQD).
-  String format({String locale = 'ar'}) {
-    final formatted = amountInFils.toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]},',
-        );
-    return '$formatted د.ع';
+  /// Format as currency string.
+  ///
+  /// Uses `NumberFormat.currency` from the intl package for locale-aware
+  /// thousand separators. [locale] defaults to `'ar_IQ'`; [symbol] defaults
+  /// to `'د.ع'`.
+  String format({String? locale, String symbol = 'د.ع'}) {
+    return NumberFormat.currency(
+      locale: locale ?? 'ar_IQ',
+      symbol: symbol,
+      decimalDigits: 0,
+    ).format(amountInFils);
   }
 
   @override

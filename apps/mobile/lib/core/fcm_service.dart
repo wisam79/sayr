@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show debugPrint;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart' show Color;
 
 import 'package:sayr_mobile/core/firebase_config.dart';
@@ -172,7 +172,7 @@ class FcmService {
         );
       });
     } catch (e) {
-      debugPrint('FCM: Failed to retrieve or register token: $e');
+      if (kDebugMode) debugPrint('FCM: Failed to retrieve or register token: $e');
     }
   }
 }

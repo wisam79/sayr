@@ -25,6 +25,7 @@ abstract class RouteModel with _$RouteModel {
     @JsonKey(name: 'departure_time') String? departureTime,
     @JsonKey(name: 'return_time') String? returnTime,
     @JsonKey(name: 'days_of_week') @Default(<String>[]) List<String> daysOfWeek,
+    String? geometry,
   }) = _RouteModel;
 
   const RouteModel._();
@@ -54,5 +55,6 @@ abstract class RouteModel with _$RouteModel {
         departureTime: departureTime,
         returnTime: returnTime,
         daysOfWeek: daysOfWeek,
+        geometry: geometry,
       );
 }

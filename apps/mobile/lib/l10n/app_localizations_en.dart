@@ -1012,4 +1012,41 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get goHome => 'Go Home';
+
+  @override
+  String get paymentHelpTitle => 'Payment Support';
+
+  @override
+  String get paymentHelpMessage =>
+      'If you faced issues with Zain Cash payment, please contact our support team.';
+
+  @override
+  String get contactWhatsApp => 'Contact via WhatsApp';
+
+  @override
+  String get contactEmail => 'Contact via Email';
+
+  @override
+  String get confirmActivation => 'Confirm Activation';
+
+  @override
+  String get licenseDetails => 'License Details';
+
+  @override
+  String get cancelSubscriptionConfirm => 'Cancel Subscription?';
+
+  @override
+  String get cancelSubscriptionConfirmMessage =>
+      'Are you sure you want to cancel your subscription? You will lose your reserved seat on this route, and you might not be able to subscribe again if the route becomes full.';
+
+  @override
+  String get pendingPayments => 'Pending Payments';
+
+  @override
+  String get resumePayment => 'Resume Payment';
+
+  @override
+  String pendingPaymentCardTitle(String amount) {
+    return 'Pending payment - $amount IQD';
+  }
 }

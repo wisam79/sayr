@@ -84,6 +84,7 @@ class CompleteProfileCubit extends Cubit<CompleteProfileState> {
   Future<void> loadInstitutions() async {
     emit(state.copyWith(isLoadingInstitutions: true, clearError: true));
     final result = await _authRepository.getInstitutions();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(
         state.copyWith(

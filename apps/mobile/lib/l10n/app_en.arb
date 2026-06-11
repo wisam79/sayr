@@ -452,6 +452,22 @@
   "phoneLabel": "Phone Number",
   "saveButton": "Save Changes",
   "syncCompleted": "Synchronization completed",
-  "goHome": "Go Home"
+  "goHome": "Go Home",
+  "paymentHelpTitle": "Payment Support",
+  "paymentHelpMessage": "If you faced issues with Zain Cash payment, please contact our support team.",
+  "contactWhatsApp": "Contact via WhatsApp",
+  "contactEmail": "Contact via Email",
+  "confirmActivation": "Confirm Activation",
+  "licenseDetails": "License Details",
+  "cancelSubscriptionConfirm": "Cancel Subscription?",
+  "cancelSubscriptionConfirmMessage": "Are you sure you want to cancel your subscription? You will lose your reserved seat on this route, and you might not be able to subscribe again if the route becomes full.",
+  "pendingPayments": "Pending Payments",
+  "resumePayment": "Resume Payment",
+  "pendingPaymentCardTitle": "Pending payment - {amount} IQD",
+  "@pendingPaymentCardTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  }
 }
 

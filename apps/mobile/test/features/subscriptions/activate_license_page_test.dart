@@ -89,7 +89,32 @@ void main() {
     await tester.tap(find.text('تفعيل'));
 
     verify(
-      () => mockBloc.add(const LicenseActivateRequested('TEST1234')),
+      () => mockBloc.add(const LicensePreviewRequested('TEST1234')),
     ).called(1);
+  });
+
+  test('ArabicToEnglishDigitsFormatter translates Arabic and Persian digits to English digits', () {
+    const formatter = ArabicToEnglishDigitsFormatter();
+    
+    // Arabic digits
+    final resultArabic = formatter.formatEditUpdate(
+      TextEditingValue.empty,
+      const TextEditingValue(text: '١٢٣٤٥٦٧٨٩٠'),
+    );
+    expect(resultArabic.text, '1234567890');
+
+    // Persian/Eastern Arabic digits
+    final resultPersian = formatter.formatEditUpdate(
+      TextEditingValue.empty,
+      const TextEditingValue(text: '۱۲۳۴۵۶۷۸۹۰'),
+    );
+    expect(resultPersian.text, '1234567890');
+
+    // Mixed input
+    final resultMixed = formatter.formatEditUpdate(
+      TextEditingValue.empty,
+      const TextEditingValue(text: 'ABC١٢٣xyz٤٥'),
+    );
+    expect(resultMixed.text, 'ABC123xyz45');
   });
 }

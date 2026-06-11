@@ -63,3 +63,33 @@ class LicenseActivated extends SubscriptionsState {
   @override
   List<Object?> get props => [subscriptionId];
 }
+
+/// State when details of a license code are being fetched for preview.
+class LicensePreviewLoading extends SubscriptionsState {
+  /// Constructor for [LicensePreviewLoading].
+  const LicensePreviewLoading();
+}
+
+/// State when details of a license code have been successfully fetched for preview.
+class LicensePreviewLoaded extends SubscriptionsState {
+  /// Constructor for [LicensePreviewLoaded].
+  const LicensePreviewLoaded(this.preview);
+
+  /// The license preview details.
+  final LicensePreview preview;
+
+  @override
+  List<Object?> get props => [preview];
+}
+
+/// State when fetching license details for preview fails.
+class LicensePreviewError extends SubscriptionsState {
+  /// Constructor for [LicensePreviewError].
+  const LicensePreviewError(this.failure);
+
+  /// The failure details.
+  final Failure failure;
+
+  @override
+  List<Object?> get props => [failure];
+}

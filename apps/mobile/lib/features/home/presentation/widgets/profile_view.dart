@@ -250,14 +250,14 @@ class _ProfileViewState extends State<_ProfileView> {
                     visualDensity: VisualDensity.compact,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  segments: const <ButtonSegment<String>>[
+                  segments: <ButtonSegment<String>>[
                     ButtonSegment<String>(
                       value: 'ar',
                       label: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Text(
-                          'عربي',
-                          style: TextStyle(
+                          l10n.arabic,
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -267,10 +267,10 @@ class _ProfileViewState extends State<_ProfileView> {
                     ButtonSegment<String>(
                       value: 'en',
                       label: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Text(
-                          'EN',
-                          style: TextStyle(
+                          l10n.english,
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),

@@ -4,6 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
@@ -24,10 +25,27 @@ class MySubscriptionsPage extends StatefulWidget {
 }
 
 class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
+  List<PaymentInfo> _pendingPayments = [];
+
   @override
   void initState() {
     super.initState();
     context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+    _fetchPendingPayments();
+  }
+
+  Future<void> _fetchPendingPayments() async {
+    if (!mounted) return;
+    final result = await sl<PaymentRepository>().getPendingPayments();
+    if (!mounted) return;
+    result.fold(
+      (failure) {},
+      (payments) {
+        setState(() {
+          _pendingPayments = payments;
+        });
+      },
+    );
   }
 
   @override
@@ -59,7 +77,10 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             SubscriptionsInitial() ||
             SubscriptionsLoading() ||
             LicenseActivating() ||
-            LicenseActivated() =>
+            LicenseActivated() ||
+            LicensePreviewLoading() ||
+            LicensePreviewLoaded() ||
+            LicensePreviewError() =>
               const _SkeletonLoading(),
             SubscriptionsError(:final failure) => AppErrorWidget(
                 message: failure.toLocalizedString(context),
@@ -71,34 +92,78 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                       .add(const SubscriptionsLoadRequested());
                 },
               ),
-            SubscriptionsLoaded(:final subscriptions)
-                when subscriptions.isEmpty =>
-              EmptyState(
-                icon: Icons.confirmation_number_outlined,
-                title: l10n.noSubscriptionsTitle,
-                subtitle: l10n.noSubscriptionsSubtitle,
-                action: PrimaryButton(
-                  label: l10n.activateLicense,
-                  isExpanded: false,
-                  onPressed: () => context.push('/activate-license'),
-                ),
-              ),
             SubscriptionsLoaded(:final subscriptions) => RefreshIndicator(
                 onRefresh: () async {
                   context
                       .read<SubscriptionsBloc>()
                       .add(const SubscriptionsLoadRequested());
+                  await _fetchPendingPayments();
                 },
-                child: ListView.separated(
+                child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),
                   physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: subscriptions.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(height: AppSpacing.md),
-                  itemBuilder: (context, index) {
-                    final sub = subscriptions[index];
-                    return _SubscriptionCard(subscription: sub);
-                  },
+                  children: [
+                    if (_pendingPayments.isNotEmpty) ...[
+                      Text(
+                        l10n.pendingPayments,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      ..._pendingPayments.map(
+                        (payment) => _PendingPaymentCard(payment: payment),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
+                    if (subscriptions.isEmpty) ...[
+                      if (_pendingPayments.isEmpty)
+                        EmptyState(
+                          icon: Icons.confirmation_number_outlined,
+                          title: l10n.noSubscriptionsTitle,
+                          subtitle: l10n.noSubscriptionsSubtitle,
+                          action: PrimaryButton(
+                            label: l10n.activateLicense,
+                            isExpanded: false,
+                            onPressed: () => context.push('/activate-license'),
+                          ),
+                        )
+                      else
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            child: Column(
+                              children: [
+                                Text(
+                                  l10n.noActiveSubscription,
+                                  style: Theme.of(context).textTheme.titleMedium,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                PrimaryButton(
+                                  label: l10n.activateLicense,
+                                  onPressed: () =>
+                                      context.push('/activate-license'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ] else ...[
+                      Text(
+                        l10n.mySubscriptions,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      ...subscriptions.map(
+                        (sub) => Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                          child: _SubscriptionCard(subscription: sub),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
           };
@@ -150,6 +215,36 @@ class _SubscriptionCard extends StatelessWidget {
   const _SubscriptionCard({required this.subscription});
   final Subscription subscription;
 
+  Future<void> _confirmAndCancel(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(l10n.cancelSubscriptionConfirm),
+          content: Text(l10n.cancelSubscriptionConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: TextButton.styleFrom(foregroundColor: AppColors.error),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        );
+      },
+    );
+
+    if ((confirmed ?? false) && context.mounted) {
+      context
+          .read<SubscriptionsBloc>()
+          .add(SubscriptionCancelRequested(subscription.id));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -195,11 +290,7 @@ class _SubscriptionCard extends StatelessWidget {
           children: [
             if (isCancellable)
               SlidableAction(
-                onPressed: (context) {
-                  context
-                      .read<SubscriptionsBloc>()
-                      .add(SubscriptionCancelRequested(subscription.id));
-                },
+                onPressed: _confirmAndCancel,
                 backgroundColor: AppColors.error,
                 foregroundColor: Colors.white,
                 icon: Icons.cancel_outlined,
@@ -267,11 +358,7 @@ class _SubscriptionCard extends StatelessWidget {
               if (isCancellable) ...[
                 const SizedBox(height: AppSpacing.lg),
                 OutlinedButton(
-                  onPressed: () {
-                    context
-                        .read<SubscriptionsBloc>()
-                        .add(SubscriptionCancelRequested(subscription.id));
-                  },
+                  onPressed: () => _confirmAndCancel(context),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.error,
                     side: const BorderSide(color: AppColors.error),
@@ -281,6 +368,64 @@ class _SubscriptionCard extends StatelessWidget {
               ],
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PendingPaymentCard extends StatelessWidget {
+  const _PendingPaymentCard({required this.payment});
+  final PaymentInfo payment;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.pendingPaymentCardTitle('${payment.amount}'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xxs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.warning.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
+                  ),
+                  child: Text(
+                    l10n.subscriptionStatusPending,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.warning,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            PrimaryButton(
+              label: l10n.resumePayment,
+              icon: Icons.play_arrow,
+              onPressed: () {
+                context.push(
+                  '/payment/${payment.routeId}/${payment.amount}?paymentId=${payment.id}&paymentUrl=${Uri.encodeComponent(payment.paymentUrl)}',
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

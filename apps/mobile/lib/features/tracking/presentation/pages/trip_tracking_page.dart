@@ -116,7 +116,10 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
     );
   }
 
-  Future<void> _fetchRoutePathIfNeeded(Trip trip) async {
+  Future<void> _fetchRoutePathIfNeeded(
+    Trip trip, {
+    String? geometry,
+  }) async {
     final start = trip.routeStartLocation;
     final end = trip.routeEndLocation;
     if (start != null && end != null) {
@@ -124,6 +127,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
             start: start,
             end: end,
             routeId: trip.routeId,
+            routeGeometry: geometry,
           );
     }
   }
@@ -166,6 +170,10 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
                 if (trackingState.trip.status == TripStatus.completed) {
                   _checkAndShowRating(context, trackingState.trip);
                 }
+                _fetchRoutePathIfNeeded(
+                  trackingState.trip,
+                  geometry: state.route.geometry,
+                );
               }
             },
           ),

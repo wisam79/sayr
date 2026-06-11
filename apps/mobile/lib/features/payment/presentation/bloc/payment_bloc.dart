@@ -14,6 +14,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   })  : _paymentRepository = paymentRepository,
         super(const PaymentState.initial()) {
     on<PaymentStartZainCash>(_onStartZainCash);
+    on<PaymentResume>(_onResume);
     on<PaymentPollStatus>(_onPollStatus);
     on<PaymentReset>(_onReset);
     on<PaymentStatusChanged>(_onStatusChanged);
@@ -42,6 +43,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       method: 'zaincash',
     );
 
+    if (isClosed) return;
     result.fold(
       (Failure failure) => emit(PaymentState.failed(failure: failure)),
       (PaymentInfo payment) {
@@ -56,6 +58,21 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         add(PaymentPollStatus(paymentId: payment.id));
       },
     );
+  }
+
+  void _onResume(
+    PaymentResume event,
+    Emitter<PaymentState> emit,
+  ) {
+    emit(
+      PaymentState.urlReady(
+        paymentUrl: event.paymentUrl,
+        paymentId: event.paymentId,
+        amount: event.amount,
+        currency: event.currency,
+      ),
+    );
+    add(PaymentPollStatus(paymentId: event.paymentId));
   }
 
   Future<void> _onPollStatus(

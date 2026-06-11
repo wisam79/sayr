@@ -40,6 +40,7 @@ abstract class Route with _$Route {
     String? departureTime,
     String? returnTime,
     @Default(<String>[]) List<String> daysOfWeek,
+    String? geometry,
   }) = _Route;
 
   const Route._();

@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:get_it/get_it.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/theme_cubit.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
@@ -47,6 +49,8 @@ class MockLocaleCubit extends MockCubit<Locale> implements LocaleCubit {}
 
 class MockThemeCubit extends MockCubit<ThemeMode> implements ThemeCubit {}
 
+class MockPaymentRepository extends Mock implements PaymentRepository {}
+
 void main() {
   late MockAuthBloc mockAuthBloc;
   late MockSubscriptionsBloc mockSubsBloc;
@@ -55,6 +59,7 @@ void main() {
   late MockRoutesBloc mockRoutesBloc;
   late MockLocaleCubit mockLocaleCubit;
   late MockThemeCubit mockThemeCubit;
+  late MockPaymentRepository mockPaymentRepo;
 
   const testStudent = User(
     id: UserId('student-1'),
@@ -100,6 +105,12 @@ void main() {
     mockRoutesBloc = MockRoutesBloc();
     mockLocaleCubit = MockLocaleCubit();
     mockThemeCubit = MockThemeCubit();
+    mockPaymentRepo = MockPaymentRepository();
+
+    GetIt.I.registerFactory<PaymentRepository>(() => mockPaymentRepo);
+    when(() => mockPaymentRepo.getPendingPayments()).thenAnswer(
+      (_) async => const Right([]),
+    );
 
     // Default stubbing
     when(() => mockSubsBloc.state)
@@ -109,6 +120,10 @@ void main() {
     when(() => mockRoutesBloc.state).thenReturn(const RoutesLoaded([]));
     when(() => mockLocaleCubit.state).thenReturn(const Locale('ar'));
     when(() => mockThemeCubit.state).thenReturn(ThemeMode.system);
+  });
+
+  tearDown(() async {
+    await GetIt.I.reset();
   });
 
   Widget wrap(Widget child) {

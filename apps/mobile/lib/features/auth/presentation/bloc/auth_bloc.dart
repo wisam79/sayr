@@ -32,6 +32,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (currentUser != null) {
       emit(const AuthLoading());
       final user = await _authRepository.fetchFullProfile();
+      if (isClosed) return;
       if (user != null) {
         final isComplete = user.phone != null && user.institutionId != null;
         if (isComplete) {
@@ -58,6 +59,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       password: event.password,
     );
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthError(failure)),
       (user) => emit(AuthAuthenticated(user)),
@@ -77,6 +79,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       phone: event.phone,
     );
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthError(failure)),
       (user) => emit(AuthAuthenticated(user)),
@@ -90,6 +93,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthLoading());
 
     final result = await _authRepository.signInWithGoogle();
+    if (isClosed) return;
 
     await result.fold(
       (failure) async => emit(AuthError(failure)),
@@ -97,6 +101,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // Fetch full profile from `profiles` table to check completeness.
         // JWT alone doesn't carry phone / institution_id for Google users.
         final user = await _authRepository.fetchFullProfile();
+        if (isClosed) return;
         if (user == null) {
           emit(const AuthUnauthenticated());
           return;
@@ -122,10 +127,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       institutionId: event.institutionId,
     );
 
+    if (isClosed) return;
     await result.fold(
       (failure) async => emit(AuthError(failure)),
       (_) async {
         final user = await _authRepository.fetchFullProfile();
+        if (isClosed) return;
         if (user != null) {
           emit(AuthAuthenticated(user));
         } else {
@@ -140,6 +147,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _authRepository.signOut();
+    if (isClosed) return;
     emit(const AuthUnauthenticated());
   }
 
@@ -153,6 +161,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       event.email.trim(),
     );
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthError(failure)),
       (_) => emit(AuthPasswordResetEmailSent(event.email.trim())),
@@ -167,6 +176,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result = await _authRepository.updatePassword(event.password);
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(AuthError(failure)),
       (_) => emit(const AuthPasswordUpdated()),

@@ -155,19 +155,21 @@ class _CheckmarkPainter extends CustomPainter {
 
     if (progress < 0.4) {
       final p = progress / 0.4;
-      path.moveTo(startX, startY);
-      path.lineTo(
-        startX + (midX - startX) * p,
-        startY + (midY - startY) * p,
-      );
+      path
+        ..moveTo(startX, startY)
+        ..lineTo(
+          startX + (midX - startX) * p,
+          startY + (midY - startY) * p,
+        );
     } else {
       final p = ((progress - 0.4) / 0.6).clamp(0.0, 1.0);
-      path.moveTo(startX, startY);
-      path.lineTo(midX, midY);
-      path.lineTo(
-        midX + (endX - midX) * p,
-        midY + (endY - midY) * p,
-      );
+      path
+        ..moveTo(startX, startY)
+        ..lineTo(midX, midY)
+        ..lineTo(
+          midX + (endX - midX) * p,
+          midY + (endY - midY) * p,
+        );
     }
 
     canvas.drawPath(path, paint);

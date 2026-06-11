@@ -126,4 +126,27 @@ void main() {
       isA<PaymentSuccess>(),
     ],
   );
+
+  blocTest<PaymentBloc, PaymentState>(
+    'emits [urlReady, awaitingCompletion] when PaymentResume is triggered and starts polling',
+    build: () => bloc,
+    act: (bloc) {
+      when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
+        (_) async => Right(testPaymentInfo.copyWith(status: 'pending')),
+      );
+
+      bloc.add(
+        const PaymentResume(
+          paymentId: 'pay-123',
+          paymentUrl: 'https://zaincash.iq/pay',
+          amount: 5000,
+          currency: 'IQD',
+        ),
+      );
+    },
+    expect: () => [
+      isA<PaymentUrlReady>(),
+      isA<PaymentAwaitingCompletion>(),
+    ],
+  );
 }

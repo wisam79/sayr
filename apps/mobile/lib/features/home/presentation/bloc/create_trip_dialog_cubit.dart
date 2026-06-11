@@ -14,6 +14,7 @@ class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
   Future<void> loadRoutes() async {
     emit(state.copyWith(loadingRoutes: true, clearError: true));
     final result = await _routeRepository.getMyDriverRoutes();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(
         state.copyWith(

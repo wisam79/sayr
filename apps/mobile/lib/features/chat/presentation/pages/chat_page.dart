@@ -155,11 +155,13 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isRtl = Directionality.of(context).index == 1;
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(vertical: 4),
       child: Column(
-        crossAxisAlignment:
-            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isMe == isRtl
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.end,
         children: [
           BubbleNormal(
             text: message.body,

@@ -440,6 +440,22 @@
   "phoneLabel": "رقم الهاتف",
   "saveButton": "حفظ التغييرات",
   "syncCompleted": "اكتملت عملية المزامنة بنجاح",
-  "goHome": "العودة للرئيسية"
+  "goHome": "العودة للرئيسية",
+  "paymentHelpTitle": "دعم الدفع",
+  "paymentHelpMessage": "إذا واجهتك مشكلة في الدفع عبر زين كاش، يرجى التواصل مع فريق الدعم لدينا.",
+  "contactWhatsApp": "التواصل عبر واتساب",
+  "contactEmail": "التواصل عبر البريد الإلكتروني",
+  "confirmActivation": "تأكيد التفعيل",
+  "licenseDetails": "تفاصيل الترخيص",
+  "cancelSubscriptionConfirm": "إلغاء الاشتراك؟",
+  "cancelSubscriptionConfirmMessage": "هل أنت متأكد من رغبتك في إلغاء الاشتراك؟ ستفقد مقعدك المحجوز على هذا الخط، وقد لا تتمكن من الاشتراك مجدداً إذا أصبح الخط ممتلئاً.",
+  "pendingPayments": "دفعات بانتظار الإتمام",
+  "resumePayment": "إكمال الدفع",
+  "pendingPaymentCardTitle": "دفعة معلّقة بقيمة {amount} د.ع",
+  "@pendingPaymentCardTitle": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  }
 }
 

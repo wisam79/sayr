@@ -54,6 +54,11 @@ sayr/
 ├── docs/                        # التوثيق
 │   └── adr/                     # Architecture Decision Records
 ├── .github/workflows/           # CI/CD
+├── .opencode/                   # AI agent configs + skills
+│   ├── agents/                  # Custom subagents (PM, Dev, QA)
+│   └── skills/                  # Reusable skill definitions
+├── .agents/                     # Shared agent resources
+│   └── discussions/             # سجل النقاشات الداخلية
 └── tools/                       # Scripts & utilities
 ```
 
@@ -679,6 +684,81 @@ chore: upgrade bloc dependency
 - [Supabase Flutter](https://supabase.com/docs/reference/dart)
 - [Drift Documentation](https://drift.simonbinder.eu/)
 - [Freezed](https://pub.dev/packages/freezed)
+
+---
+
+## 13. نظام النقاش الداخلي (Multi-Agent Discussion System)
+
+> نظام يتيح تحليل المشاكل واقتراح الحلول عبر ثلاثة وكلاء متخصصين يعملون معاً بتناسق.
+
+### 13.1 الوكلاء
+
+| الوكيل | الاستدعاء | الدور | الصلاحيات |
+|--------|-----------|-------|-----------|
+| **Product Manager** | `@product-manager` | يحلل المتطلبات، يحدد المشاكل، يقترح الميزات | قراءة فقط |
+| **Developer** | `@developer` | يكتب/يعدل الكود، يشرح التنفيذ | قراءة + كتابة + bash |
+| **QA / Code Reviewer** | `@qa-reviewer` | يختبر الأفكار، يبحث عن الثغرات والأخطاء المنطقية | قراءة + أوامر محدودة |
+
+### 13.2 آلية العمل
+
+```
+👤 أنت: "حلل مشكلة X"
+        │
+        ▼
+🧠 Orchestrator (أنا)
+   │
+   ├── ① يقرأ السياق والكود
+   ├── ② @product-manager ← تحليل المشكلة والمتطلبات
+   ├── ③ @developer ← اقتراح الحلول البرمجية والتنفيذ
+   ├── ④ @qa-reviewer ← مراجعة واعتراضات وفحص الجودة
+   ├── ⑤ يُجمّع النتائج في تقرير موحّد
+   └── ⑥ يحفظ النقاش في .agents/discussions/
+```
+
+### 13.3 طريقة الاستخدام
+
+**طلب تحليل ميزة أو مشكلة:**
+```
+ناقش هذه الميزة: إضافة نظام تقييم للسائقين بعد كل رحلة
+```
+أو:
+```
+@agent-discussion حلل مشكلة الأداء في شاشة التتبع
+```
+
+**التفاعل مع النقاش:**
+```
+PM، عندك اقتراح إضافي؟
+Developer، رد على اعتراض QA
+عندي تعديل على خطة Developer
+```
+
+### 13.4 هيكل ملفات النظام
+
+```
+.opencode/
+├── agents/
+│   ├── product-manager.md          # تعريف PM Agent
+│   ├── developer.md                # تعريف Developer Agent
+│   └── qa-reviewer.md              # تعريف QA Agent
+└── skills/
+    └── agent-discussion/
+        └── SKILL.md                # Skill لتنسيق النقاش
+
+.agents/
+└── discussions/                    # سجل النقاشات (ADR-lite)
+    ├── 2026-06-10-tracking-performance.md
+    └── ...
+```
+
+### 13.5 قواعد النقاش
+
+- ✅ الأدوار محددة وواضحة — PM يحلل ولا يكتب كود، Developer ينفذ، QA يعترض
+- ✅ النقاش يُحفظ تلقائياً كسجل تاريخي للقرارات
+- ✅ يمكن الرجوع لأي نقاش سابق
+- ✅ المستخدم هو المُحكّم النهائي — يمكنه توجيه أو تصحيح أي وكيل
+- ❌ ممنوع تجاوز الدور المحدد (PM لا يكتب كود، QA لا يقترح ميزات)
+- ❌ ممنوع التكرار — كل وكيل يبني على مخرجات من قبله
 
 ---
 

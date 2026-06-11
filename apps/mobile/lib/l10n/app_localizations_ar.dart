@@ -1005,4 +1005,41 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get goHome => 'العودة للرئيسية';
+
+  @override
+  String get paymentHelpTitle => 'دعم الدفع';
+
+  @override
+  String get paymentHelpMessage =>
+      'إذا واجهتك مشكلة في الدفع عبر زين كاش، يرجى التواصل مع فريق الدعم لدينا.';
+
+  @override
+  String get contactWhatsApp => 'التواصل عبر واتساب';
+
+  @override
+  String get contactEmail => 'التواصل عبر البريد الإلكتروني';
+
+  @override
+  String get confirmActivation => 'تأكيد التفعيل';
+
+  @override
+  String get licenseDetails => 'تفاصيل الترخيص';
+
+  @override
+  String get cancelSubscriptionConfirm => 'إلغاء الاشتراك؟';
+
+  @override
+  String get cancelSubscriptionConfirmMessage =>
+      'هل أنت متأكد من رغبتك في إلغاء الاشتراك؟ ستفقد مقعدك المحجوز على هذا الخط، وقد لا تتمكن من الاشتراك مجدداً إذا أصبح الخط ممتلئاً.';
+
+  @override
+  String get pendingPayments => 'دفعات بانتظار الإتمام';
+
+  @override
+  String get resumePayment => 'إكمال الدفع';
+
+  @override
+  String pendingPaymentCardTitle(String amount) {
+    return 'دفعة معلّقة بقيمة $amount د.ع';
+  }
 }

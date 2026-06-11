@@ -61,7 +61,7 @@ void main() {
 
     expect(find.text('Baghdad - Basra'), findsWidgets);
     expect(find.text('Baghdad → Basra'), findsOneWidget);
-    expect(find.text('5,000 د.ع'), findsOneWidget);
+    expect(find.text(testRoute.price.format()), findsOneWidget);
     expect(find.text('30 / 40'), findsOneWidget);
     expect(find.widgetWithText(PrimaryButton, 'اشترك الآن'), findsOneWidget);
   });

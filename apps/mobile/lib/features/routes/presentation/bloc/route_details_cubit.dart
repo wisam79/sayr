@@ -14,6 +14,7 @@ class RouteDetailsCubit extends Cubit<RouteDetailsState> {
   Future<void> loadRoute(RouteId routeId) async {
     emit(const RouteDetailsLoading());
     final result = await _routeRepository.getById(routeId);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(RouteDetailsError(failure)),
       (route) => emit(RouteDetailsLoaded(route)),

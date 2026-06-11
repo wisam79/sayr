@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/di/di.dart';
@@ -98,6 +100,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
   Future<void> start() async {
     emit(const BoardingQrLoading());
     final result = await _boardingRepository.getActiveTripForSubscription();
+    if (isClosed) return;
     await result.fold(
       (failure) async {
         emit(BoardingQrError(failure: failure));
@@ -116,20 +119,17 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
 
   Future<void> _startBleScanning() async {
     unawaited(_bleSubscription?.cancel());
+
     final started = await _bleBeaconService.startScanning();
+    if (isClosed) return;
     if (!started) {
-      emit(
-        const BoardingQrError(
-          failure: ValidationFailure(message: 'bluetooth_disabled'),
-        ),
-      );
+      debugPrint('BLE scanning not started. Student will use QR code boarding.');
       return;
     }
     _bleSubscription = _bleBeaconService.discoveredTrips.listen((data) {
       final current = state;
       if (current is BoardingQrReady) {
-        // Proximity matches if actual TripId matches or if it is mock mode.
-        if (data.tripId == current.tripId || data.otp == 'MOCK12') {
+        if (data.tripId == current.tripId) {
           emit(current.copyWith(proximityOtp: data.otp));
         }
       }
@@ -149,6 +149,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
       studentLocation: location,
     );
 
+    if (isClosed) return;
     result.fold(
       (failure) {
         emit(
@@ -174,6 +175,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
       return;
     }
     final result = await _boardingRepository.generateBoardingToken(tripId);
+    if (isClosed) return;
     result.fold(
       (failure) => emit(
         BoardingQrError(failure: failure),

@@ -136,7 +136,12 @@ void main() {
         );
         return buildCubit();
       },
-      act: (cubit) => cubit.processToken('raw-token-xyz'),
+      act: (cubit) async {
+        cubit.start();
+        passengerController.add([]);
+        await Future<void>.delayed(Duration.zero);
+        await cubit.processToken('raw-token-xyz');
+      },
       verify: (cubit) {
         final state = cubit.state;
         expect(state, isA<BoardingScannerReady>());
@@ -164,7 +169,12 @@ void main() {
         );
         return buildCubit();
       },
-      act: (cubit) => cubit.processToken('stale-token'),
+      act: (cubit) async {
+        cubit.start();
+        passengerController.add([]);
+        await Future<void>.delayed(Duration.zero);
+        await cubit.processToken('stale-token');
+      },
       verify: (cubit) {
         final state = cubit.state;
         expect(state, isA<BoardingScannerReady>());
@@ -189,7 +199,12 @@ void main() {
         );
         return buildCubit();
       },
-      act: (cubit) => cubit.processToken('bad-token'),
+      act: (cubit) async {
+        cubit.start();
+        passengerController.add([]);
+        await Future<void>.delayed(Duration.zero);
+        await cubit.processToken('bad-token');
+      },
       verify: (cubit) {
         final ready = cubit.state as BoardingScannerReady;
         final failure = ready.lastScan! as BoardingScanFailure;
@@ -211,10 +226,15 @@ void main() {
         );
         return buildCubit();
       },
-      act: (cubit) => cubit.processToken(
-        'token-abc',
-        driverLocation: const Coordinates(latitude: 33.315, longitude: 44.366),
-      ),
+      act: (cubit) async {
+        cubit.start();
+        passengerController.add([]);
+        await Future<void>.delayed(Duration.zero);
+        await cubit.processToken(
+          'token-abc',
+          driverLocation: const Coordinates(latitude: 33.315, longitude: 44.366),
+        );
+      },
       verify: (_) {
         verify(
           () => mockRepo.validateBoarding(

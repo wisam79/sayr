@@ -47,6 +47,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   ) async {
     emit(const TrackingState.loading());
     final result = await _tripRepository.getActiveTrips();
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TrackingState.error(failure: failure)),
       (trips) => emit(TrackingState.activeTripsLoaded(trips: trips)),
@@ -62,6 +63,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       routeId: event.routeId,
       scheduledAt: event.scheduledAt,
     );
+    if (isClosed) return;
     result.fold(
       (failure) => emit(TrackingState.error(failure: failure)),
       (trip) {
@@ -219,6 +221,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       location: location,
     );
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(
         TrackingState.error(
@@ -308,6 +311,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       lng: event.longitude,
     );
 
+    if (isClosed) return;
     result.fold(
       (failure) => Logger().w(
         'TrackingBloc: Failed to update location remotely: ${failure.message}',

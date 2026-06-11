@@ -18,4 +18,7 @@ abstract class PaymentRepository {
   Future<Either<Failure, PaymentInfo>> getPaymentStatus(
     String paymentId,
   );
+
+  /// Get all pending payments for the current user.
+  Future<Either<Failure, List<PaymentInfo>>> getPendingPayments();
 }

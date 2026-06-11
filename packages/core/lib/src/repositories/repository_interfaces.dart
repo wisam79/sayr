@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 
 import 'package:sayr_core/src/entities/boarding_record.dart';
 import 'package:sayr_core/src/entities/emergency_report.dart';
+import 'package:sayr_core/src/entities/license_preview.dart';
 import 'package:sayr_core/src/entities/message.dart';
 import 'package:sayr_core/src/entities/notification.dart';
 import 'package:sayr_core/src/entities/route.dart';
@@ -140,6 +141,9 @@ abstract class SubscriptionRepository {
 
   /// Activate a license code (creates a pending subscription).
   Future<Either<Failure, SubscriptionId>> activateLicense(LicenseCode code);
+
+  /// Preview details of a license code before activating.
+  Future<Either<Failure, LicensePreview>> getLicenseDetails(LicenseCode code);
 }
 
 /// Interface for chat operations repository.

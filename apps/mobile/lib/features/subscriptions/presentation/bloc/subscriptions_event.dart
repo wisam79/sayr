@@ -39,3 +39,21 @@ class LicenseActivateRequested extends SubscriptionsEvent {
   @override
   List<Object?> get props => [code];
 }
+
+/// Event requesting details of a license code to be fetched for preview.
+class LicensePreviewRequested extends SubscriptionsEvent {
+  /// Creates a [LicensePreviewRequested] event.
+  const LicensePreviewRequested(this.code);
+
+  /// The license code string.
+  final String code;
+
+  @override
+  List<Object?> get props => [code];
+}
+
+/// Event requesting to reset the license preview state.
+class LicensePreviewReset extends SubscriptionsEvent {
+  /// Creates a [LicensePreviewReset] event.
+  const LicensePreviewReset();
+}

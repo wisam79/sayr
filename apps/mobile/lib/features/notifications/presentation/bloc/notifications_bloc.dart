@@ -56,6 +56,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     emit(const NotificationsState.loading());
 
     final initial = await _repository.getMyNotifications();
+    if (isClosed) return;
     initial.fold(
       (Failure failure) => emit(NotificationsState.error(failure: failure)),
       (List<AppNotification> list) => emit(
@@ -79,6 +80,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     Emitter<NotificationsState> emit,
   ) async {
     final result = await _repository.getMyNotifications();
+    if (isClosed) return;
     result.fold(
       (Failure failure) => emit(NotificationsState.error(failure: failure)),
       (List<AppNotification> list) => emit(

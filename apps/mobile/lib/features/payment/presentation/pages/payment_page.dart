@@ -16,6 +16,8 @@ class PaymentPage extends StatefulWidget {
   const PaymentPage({
     required this.routeId,
     required this.amount,
+    this.paymentId,
+    this.paymentUrl,
     super.key,
   });
 
@@ -25,6 +27,12 @@ class PaymentPage extends StatefulWidget {
   /// The total payment amount.
   final int amount;
 
+  /// Optional existing payment ID for resuming polling.
+  final String? paymentId;
+
+  /// Optional existing payment URL for resuming.
+  final String? paymentUrl;
+
   @override
   State<PaymentPage> createState() => _PaymentPageState();
 }
@@ -33,13 +41,26 @@ class _PaymentPageState extends State<PaymentPage> {
   @override
   void initState() {
     super.initState();
-    context.read<PaymentBloc>().add(
-          PaymentStartZainCash(
-            routeId: widget.routeId,
-            amount: widget.amount,
-            currency: 'IQD',
-          ),
-        );
+    final paymentId = widget.paymentId;
+    final paymentUrl = widget.paymentUrl;
+    if (paymentId != null && paymentUrl != null) {
+      context.read<PaymentBloc>().add(
+            PaymentResume(
+              paymentId: paymentId,
+              paymentUrl: paymentUrl,
+              amount: widget.amount,
+              currency: 'IQD',
+            ),
+          );
+    } else {
+      context.read<PaymentBloc>().add(
+            PaymentStartZainCash(
+              routeId: widget.routeId,
+              amount: widget.amount,
+              currency: 'IQD',
+            ),
+          );
+    }
   }
 
   @override
@@ -160,6 +181,12 @@ class _PaymentPageState extends State<PaymentPage> {
                           ),
                         ),
                   ),
+                  const SizedBox(height: AppSpacing.md),
+                  SecondaryButton(
+                    label: l10n.help,
+                    icon: Icons.help_outline,
+                    onPressed: () => _launchWhatsAppSupport(context),
+                  ),
                 ],
               ],
             ),
@@ -173,6 +200,22 @@ class _PaymentPageState extends State<PaymentPage> {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _launchWhatsAppSupport(BuildContext context) async {
+    const message =
+        'مرحباً، أواجه مشكلة في تفعيل اشتراكي في تطبيق سير.';
+    final uri = Uri.parse(
+      'https://wa.me/9647800000000?text=${Uri.encodeComponent(message)}',
+    );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (context.mounted) {
+      SayrFlash.error(
+        context,
+        AppLocalizations.of(context).locationUnavailable,
+      );
     }
   }
 }

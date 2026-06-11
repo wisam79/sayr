@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_swipe_button/flutter_swipe_button.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -202,10 +205,35 @@ class _ReadyView extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        onSwipe: () {
-                          context
-                              .read<BoardingQrCubit>()
-                              .submitProximityCheckIn(null);
+                        onSwipe: () async {
+                          try {
+                            // ignore: deprecated_member_use
+                            final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high, timeLimit: const Duration(seconds: 5));
+                            if (context.mounted) {
+                              await context.read<BoardingQrCubit>().submitProximityCheckIn(
+                                    Coordinates(
+                                      latitude: position.latitude,
+                                      longitude: position.longitude,
+                                    ),
+                                  );
+                            }
+                          } on TimeoutException {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.locationUnavailable),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.locationPermissionRequired),
+                                ),
+                              );
+                            }
+                          }
                         },
                       ),
                   ],

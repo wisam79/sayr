@@ -13,6 +13,7 @@ class ThemeCubit extends Cubit<ThemeMode> {
   /// Loads the persisted theme mode from Hive.
   Future<void> load() async {
     final box = await Hive.openBox<String>(_boxName);
+    if (isClosed) return;
     final modeString = box.get(_key);
     if (modeString != null) {
       final mode = ThemeMode.values.firstWhere(
@@ -27,6 +28,7 @@ class ThemeCubit extends Cubit<ThemeMode> {
   Future<void> setThemeMode(ThemeMode themeMode) async {
     final box = await Hive.openBox<String>(_boxName);
     await box.put(_key, themeMode.name);
+    if (isClosed) return;
     emit(themeMode);
   }
 }

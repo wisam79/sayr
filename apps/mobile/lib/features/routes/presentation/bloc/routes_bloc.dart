@@ -31,6 +31,7 @@ class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
 
     final result = await _routeRepository.getActiveRoutes();
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(RoutesError(failure)),
       (routes) => emit(RoutesLoaded(routes)),
@@ -50,6 +51,7 @@ class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
 
     final result = await _routeRepository.search(event.query.trim());
 
+    if (isClosed) return;
     result.fold(
       (failure) => emit(RoutesError(failure)),
       (routes) => emit(RoutesLoaded(routes)),

@@ -7,6 +7,7 @@ export 'src/entities/driver.dart';
 export 'src/entities/emergency_report.dart';
 export 'src/entities/institution.dart';
 export 'src/entities/license.dart';
+export 'src/entities/license_preview.dart';
 export 'src/entities/message.dart';
 export 'src/entities/notification.dart';
 export 'src/entities/payment_info.dart';

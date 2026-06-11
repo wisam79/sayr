@@ -171,6 +171,13 @@ Deno.serve(async (req) => {
         .update({ status: 'failed', updated_at: new Date().toISOString() })
         .eq('id', orderId);
 
+      // Cancel the subscription to release the seat immediately
+      if (existingPayment.subscription_id) {
+        await supabase.rpc('cancel_subscription', {
+          p_subscription_id: existingPayment.subscription_id,
+        });
+      }
+
       return new Response(JSON.stringify({ success: false, orderId }), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

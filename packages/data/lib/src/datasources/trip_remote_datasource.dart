@@ -60,6 +60,9 @@ abstract class TripRemoteDatasource {
   /// Fetches a payment row by id.
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId);
 
+  /// Fetches pending payments for the current user.
+  Future<List<Map<String, dynamic>>> getPendingPayments();
+
   /// Fetches a driver row by id.
   Future<Map<String, dynamic>?> getDriverById(String driverId);
 
@@ -194,6 +197,17 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
   @override
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId) =>
       _client.from('payments').select().eq('id', paymentId).maybeSingle();
+
+  @override
+  Future<List<Map<String, dynamic>>> getPendingPayments() async {
+    final response = await _client
+        .from('payments')
+        .select()
+        .eq('status', 'pending')
+        .eq('method', 'zaincash')
+        .order('created_at', ascending: false);
+    return (response as List).cast<Map<String, dynamic>>();
+  }
 
   @override
   Future<Map<String, dynamic>?> getDriverById(String driverId) =>

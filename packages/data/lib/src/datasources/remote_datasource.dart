@@ -119,6 +119,7 @@ abstract class RemoteDatasource {
   Future<List<Map<String, dynamic>>> getMySubscriptions(String studentId);
   Future<void> cancelSubscription(String subscriptionId);
   Future<String> activateLicense(String code);
+  Future<Map<String, dynamic>> getLicenseDetails(String code);
 
   // Trips
   Future<List<Map<String, dynamic>>> getActiveTrips();
@@ -152,6 +153,7 @@ abstract class RemoteDatasource {
     required String method,
   });
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId);
+  Future<List<Map<String, dynamic>>> getPendingPayments();
   Future<Map<String, dynamic>?> getDriverById(String driverId);
   Future<Map<String, dynamic>> submitRating({
     required String tripId,
@@ -465,6 +467,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   Future<String> activateLicense(String code) =>
       _subscriptions.activateLicense(code);
 
+  @override
+  Future<Map<String, dynamic>> getLicenseDetails(String code) =>
+      _subscriptions.getLicenseDetails(code);
+
   // ---- Trips --------------------------------------------------------------
 
   @override
@@ -547,6 +553,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   @override
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId) =>
       _trips.getPaymentStatus(paymentId);
+
+  @override
+  Future<List<Map<String, dynamic>>> getPendingPayments() =>
+      _trips.getPendingPayments();
 
   @override
   Future<Map<String, dynamic>?> getDriverById(String driverId) =>

@@ -16,6 +16,7 @@ class LocaleCubit extends Cubit<Locale> {
   /// Loads the persisted locale from Hive and emits it if supported.
   Future<void> load() async {
     final box = await Hive.openBox<String>(_boxName);
+    if (isClosed) return;
     final code = box.get(_key);
     if (code != null && supportedLanguageCodes.contains(code)) {
       emit(Locale(code));
@@ -29,6 +30,7 @@ class LocaleCubit extends Cubit<Locale> {
 
     final box = await Hive.openBox<String>(_boxName);
     await box.put(_key, code);
+    if (isClosed) return;
     emit(Locale(code));
   }
 }

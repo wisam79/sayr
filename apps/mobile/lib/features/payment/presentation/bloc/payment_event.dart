@@ -50,3 +50,26 @@ class PaymentStatusChanged extends PaymentEvent {
   /// status details).
   final Either<Failure, PaymentInfo> result;
 }
+
+/// Resume an existing Zain Cash payment.
+class PaymentResume extends PaymentEvent {
+  /// Constructor for [PaymentResume].
+  const PaymentResume({
+    required this.paymentId,
+    required this.paymentUrl,
+    required this.amount,
+    required this.currency,
+  });
+
+  /// The ID of the payment.
+  final String paymentId;
+
+  /// The payment URL.
+  final String paymentUrl;
+
+  /// The payment amount.
+  final int amount;
+
+  /// The currency code.
+  final String currency;
+}

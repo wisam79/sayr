@@ -69,6 +69,7 @@ class _SayrMapState extends State<SayrMap> {
 
   @override
   void dispose() {
+    _controller?.dispose();
     _controller = null;
     super.dispose();
   }

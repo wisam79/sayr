@@ -1,73 +1,55 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:retry/retry.dart';
+import 'package:sayr_data/sayr_data.dart';
 
-/// Service to query project-osrm.org public routing API.
+/// Service to fetch route geometry via Supabase Edge Function proxy.
+///
+/// The Edge Function (`get-route-geometry`) calls OSRM hosted on Hugging Face
+/// with the HF_TOKEN — the client never knows the HF Space URL or token.
 @lazySingleton
 class OsrmService {
-  /// Creates an [OsrmService].
-  OsrmService() : _dio = Dio() {
-    _dio.options.connectTimeout = const Duration(seconds: 5);
-    _dio.options.receiveTimeout = const Duration(seconds: 5);
-    _dio.interceptors.add(
-      LogInterceptor(
-        responseHeader: false,
-        responseBody: true,
-        logPrint: (obj) => debugPrint(obj.toString()),
-      ),
-    );
-  }
+  OsrmService({SayrSupabase? supabase}) : _supabase = supabase ?? SayrSupabase.instance;
 
-  Dio _dio;
+  final SayrSupabase _supabase;
   final Logger _logger = Logger();
 
-  /// Getter/Setter for mock injections in testing.
-  @visibleForTesting
-  Dio get dioInstance => _dio;
-
-  @visibleForTesting
-  set dioInstance(Dio value) => _dio = value;
-
-  static const String _baseUrl =
-      'https://router.project-osrm.org/route/v1/driving';
-
-  /// Queries the OSRM driving route API and returns the geometry as a list of [LatLng].
+  /// Queries route geometry via the Supabase Edge Function proxy.
   ///
   /// Falls back to a straight line [start, end] on failure or timeout.
   Future<List<LatLng>> getRoute(LatLng start, LatLng end) async {
     try {
-      final url =
-          '$_baseUrl/${start.longitude},${start.latitude};${end.longitude},${end.latitude}?overview=full&geometries=geojson';
-
       final response = await retry(
-        () => _dio.get<Map<String, dynamic>>(url),
-        retryIf: (e) => e is DioException && e.type != DioExceptionType.cancel,
-        maxAttempts: 3,
-        delayFactor: const Duration(milliseconds: 10),
+        () => _supabase.client.functions.invoke(
+          'get-route-geometry',
+          body: {
+            'startLng': start.longitude,
+            'startLat': start.latitude,
+            'endLng': end.longitude,
+            'endLat': end.latitude,
+          },
+        ),
+        maxAttempts: 2,
+        retryIf: (_) => true,
       );
 
-      if (response.statusCode == 200 && response.data != null) {
-        final routes = response.data!['routes'] as List<dynamic>;
-        if (routes.isNotEmpty) {
-          final route = routes.first as Map<String, dynamic>;
-          final geometry = route['geometry'] as Map<String, dynamic>;
-          final coordinates = geometry['coordinates'] as List<dynamic>;
+      final data = response.data as Map<String, dynamic>?;
+      if (data == null) return [start, end];
 
-          return coordinates.map((coord) {
-            final point = coord as List<dynamic>;
-            return LatLng(
-              (point[1] as num).toDouble(),
-              (point[0] as num).toDouble(),
-            );
-          }).toList();
-        }
-      }
+      final coordinates = data['coordinates'] as List<dynamic>?;
+      if (coordinates == null || coordinates.isEmpty) return [start, end];
+
+      return coordinates.map((coord) {
+        if (coord is! List<dynamic> || coord.length < 2) return null;
+        final lat = coord[1];
+        final lng = coord[0];
+        if (lat is! num || lng is! num) return null;
+        return LatLng(lat.toDouble(), lng.toDouble());
+      }).whereType<LatLng>().toList();
     } catch (e, st) {
       _logger.w(
-        'OSRM route request failed; falling back to straight line',
+        'Route geometry fetch failed; falling back to straight line',
         error: e,
         stackTrace: st,
       );

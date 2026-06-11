@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
@@ -64,13 +66,34 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
 
   /// Attempts to fetch the driving route between [start] and [end].
   /// Falls back to a straight line on error (OSRM timeout, etc.).
+  ///
+  /// If [routeGeometry] is provided (non-empty JSON string), it is parsed
+  /// and used directly instead of calling OSRM. This avoids redundant OSRM
+  /// calls for routes whose geometry was already calculated and stored.
   Future<void> fetchRoutePath({
     required Coordinates start,
     required Coordinates end,
     required RouteId routeId,
+    String? routeGeometry,
   }) async {
     if (state.routePoints != null && state.loadedRouteId == routeId) return;
     if (state.isFetchingRoute) return;
+
+    // Use stored geometry if available (avoids OSRM call)
+    if (routeGeometry != null && routeGeometry.isNotEmpty) {
+      final points = _parseGeometry(routeGeometry);
+      if (points.isNotEmpty) {
+        emit(
+          state.copyWith(
+            isFetchingRoute: false,
+            routePoints: () => points,
+            loadedRouteId: () => routeId,
+            isApproximate: false,
+          ),
+        );
+        return;
+      }
+    }
 
     emit(state.copyWith(isFetchingRoute: true));
 
@@ -79,6 +102,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
         LatLng(start.latitude, start.longitude),
         LatLng(end.latitude, end.longitude),
       );
+      if (isClosed) return;
       final isApprox = points.length == 2 &&
           points.first.latitude == start.latitude &&
           points.first.longitude == start.longitude &&
@@ -94,6 +118,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
         ),
       );
     } catch (_) {
+      if (isClosed) return;
       emit(
         state.copyWith(
           isFetchingRoute: false,
@@ -105,6 +130,25 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
           isApproximate: true,
         ),
       );
+    }
+  }
+
+  /// Parses geometry JSON string to List<LatLng>.
+  /// Expected format: [[lng, lat], [lng, lat], ...]
+  List<LatLng> _parseGeometry(String geometryJson) {
+    try {
+      final decoded = json.decode(geometryJson);
+      if (decoded is! List) return [];
+      return decoded
+          .where((item) => item is List && item.length >= 2)
+          .map((item) {
+        final listItem = item as List<dynamic>;
+        final lng = (listItem[0] as num).toDouble();
+        final lat = (listItem[1] as num).toDouble();
+        return LatLng(lat, lng);
+      }).toList();
+    } catch (_) {
+      return [];
     }
   }
 

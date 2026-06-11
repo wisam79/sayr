@@ -73,6 +73,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(const ChatState.loading());
 
     final initial = await _chatRepository.getMessages(event.conversationId);
+    if (isClosed) return;
     initial.fold(
       (Failure failure) => emit(ChatState.error(failure: failure)),
       (List<Message> messages) => emit(
@@ -138,6 +139,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final result =
         await _chatRepository.sendMessage(conversationId: id, body: trimmed);
 
+    if (isClosed) return;
     result.fold(
       (Failure failure) {
         emit(ChatState.loaded(conversationId: id, messages: current));

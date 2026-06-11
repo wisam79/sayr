@@ -33,6 +33,7 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
       message: event.message,
     );
 
+    if (isClosed) return;
     result.fold(
       (Failure failure) => emit(EmergencyState.failed(failure: failure)),
       (EmergencyReport report) => emit(EmergencyState.active(report: report)),
@@ -49,6 +50,7 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     emit(const EmergencyState.sending());
     final result = await _repository.resolveReport(stateSnapshot.report.id);
 
+    if (isClosed) return;
     result.fold(
       (Failure failure) => emit(EmergencyState.failed(failure: failure)),
       (Unit _) => emit(const EmergencyState.idle()),

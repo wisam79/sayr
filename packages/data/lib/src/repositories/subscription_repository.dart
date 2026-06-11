@@ -81,4 +81,43 @@ class SubscriptionRepositoryImpl extends BaseRepository
       ),
     );
   }
+
+  @override
+  Future<Either<Failure, LicensePreview>> getLicenseDetails(
+    LicenseCode code,
+  ) async {
+    return guard(() async {
+      final response = await _remoteDatasource.getLicenseDetails(code.value);
+      return LicensePreview.fromJson(response);
+    }).then(
+      (result) => result.fold<Either<Failure, LicensePreview>>(
+        (failure) {
+          final message = failure.message ?? '';
+          if (message.contains('Too many attempts')) {
+            return const Left(RateLimitFailure());
+          }
+          if (message.contains('not active')) {
+            return const Left(
+              BusinessRuleFailure(message: 'license_not_active'),
+            );
+          }
+          if (message.contains('already used')) {
+            return const Left(
+              BusinessRuleFailure(message: 'license_already_used'),
+            );
+          }
+          if (message.contains('not found')) {
+            return const Left(NotFoundFailure(resource: 'license'));
+          }
+          if (message.contains('Invalid license code format')) {
+            return const Left(
+              ValidationFailure(message: 'invalid_license_code'),
+            );
+          }
+          return Left(failure);
+        },
+        (preview) => Right(preview),
+      ),
+    );
+  }
 }

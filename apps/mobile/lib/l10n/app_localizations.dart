@@ -1957,6 +1957,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Home'**
   String get goHome;
+
+  /// No description provided for @paymentHelpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Support'**
+  String get paymentHelpTitle;
+
+  /// No description provided for @paymentHelpMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'If you faced issues with Zain Cash payment, please contact our support team.'**
+  String get paymentHelpMessage;
+
+  /// No description provided for @contactWhatsApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact via WhatsApp'**
+  String get contactWhatsApp;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact via Email'**
+  String get contactEmail;
+
+  /// No description provided for @confirmActivation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Activation'**
+  String get confirmActivation;
+
+  /// No description provided for @licenseDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'License Details'**
+  String get licenseDetails;
+
+  /// No description provided for @cancelSubscriptionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Subscription?'**
+  String get cancelSubscriptionConfirm;
+
+  /// No description provided for @cancelSubscriptionConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel your subscription? You will lose your reserved seat on this route, and you might not be able to subscribe again if the route becomes full.'**
+  String get cancelSubscriptionConfirmMessage;
+
+  /// No description provided for @pendingPayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Payments'**
+  String get pendingPayments;
+
+  /// No description provided for @resumePayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume Payment'**
+  String get resumePayment;
+
+  /// No description provided for @pendingPaymentCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending payment - {amount} IQD'**
+  String pendingPaymentCardTitle(String amount);
 }
 
 class _AppLocalizationsDelegate

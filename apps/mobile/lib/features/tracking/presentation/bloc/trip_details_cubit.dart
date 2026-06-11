@@ -40,6 +40,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
       _driverRepository.getDriverById(driverId),
       _ratingRepository.getTripRating(tripId),
     ]);
+    if (isClosed) return;
 
     final routeResult = results[0] as Either<Failure, Route>;
     final driverResult = results[1] as Either<Failure, Driver>;
@@ -61,6 +62,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
       // Fetch the driver's profile info (avatar, name, phone)
       final profileResult =
           await _driverRepository.getDriverProfile(driver.userId);
+      if (isClosed) return;
       if (profileResult.isRight()) {
         driverProfile =
             profileResult.getOrElse((_) => throw StateError('Unreachable'));
@@ -96,6 +98,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
       comment: comment,
     );
 
+    if (isClosed) return false;
     return result.fold(
       (failure) => false,
       (newRating) {

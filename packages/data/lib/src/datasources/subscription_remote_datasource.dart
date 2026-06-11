@@ -13,6 +13,9 @@ abstract class SubscriptionRemoteDatasource {
   /// Activates a license code via the `activate_license` RPC.
   /// Returns the new subscription id.
   Future<String> activateLicense(String code);
+
+  /// Fetches license details via the `get_license_details` RPC.
+  Future<Map<String, dynamic>> getLicenseDetails(String code);
 }
 
 @LazySingleton(as: SubscriptionRemoteDatasource)
@@ -46,4 +49,16 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
         'activate_license',
         params: {'p_code': code},
       );
+
+  @override
+  Future<Map<String, dynamic>> getLicenseDetails(String code) async {
+    final response = await _client.rpc<List<dynamic>>(
+      'get_license_details',
+      params: {'p_code': code},
+    );
+    if (response.isEmpty) {
+      throw Exception('License details empty');
+    }
+    return response.first as Map<String, dynamic>;
+  }
 }
