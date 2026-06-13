@@ -123,5 +123,6 @@ void main() {
     ).called(1);
 
     verify(() => mockAuthBloc.add(const AuthCheckRequested())).called(1);
+    await tester.pump(const Duration(seconds: 5));
   });
 }

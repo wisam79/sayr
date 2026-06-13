@@ -4,6 +4,8 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import 'package:talker_flutter/talker_flutter.dart';
+
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
 class MockUser extends Mock implements supabase.User {}
@@ -22,6 +24,7 @@ void main() {
 
     repository = SubscriptionRepositoryImpl(
       remoteDatasource: mockRemote,
+      talker: Talker(),
     );
   });
 

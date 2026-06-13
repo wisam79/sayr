@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
@@ -88,11 +89,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         (_) {
           context.read<AuthBloc>().add(const AuthCheckRequested());
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context).editProfileSuccess),
-              backgroundColor: AppColors.success,
-            ),
+          SayrFlash.success(
+            context,
+            AppLocalizations.of(context).editProfileSuccess,
           );
         },
       );

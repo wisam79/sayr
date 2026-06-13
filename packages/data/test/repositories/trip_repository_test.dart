@@ -6,6 +6,8 @@ import 'package:sayr_data/sayr_data.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import 'package:talker_flutter/talker_flutter.dart';
+
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
 class MockLocalDatasource extends Mock implements LocalDatasource {}
@@ -23,6 +25,7 @@ void main() {
     repository = TripRepositoryImpl(
       remoteDatasource: mockRemote,
       localDatasource: mockLocal,
+      talker: Talker(),
     );
   });
 

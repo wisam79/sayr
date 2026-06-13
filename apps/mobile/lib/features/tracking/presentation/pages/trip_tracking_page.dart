@@ -6,6 +6,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/formatting.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
@@ -34,6 +35,7 @@ class TripTrackingPage extends StatelessWidget {
         BlocProvider(
           create: (_) => TrackingBloc(
             tripRepository: sl<TripRepository>(),
+            authRepository: sl<AuthRepository>(),
           ),
         ),
         BlocProvider(
@@ -61,18 +63,20 @@ class _TripTrackingView extends StatefulWidget {
 
 class _TripTrackingViewState extends State<_TripTrackingView> {
   late final TrackingBloc _trackingBloc;
+  late final TrackingUiCubit _uiCubit;
 
   @override
   void initState() {
     super.initState();
     _trackingBloc = context.read<TrackingBloc>();
+    _uiCubit = context.read<TrackingUiCubit>();
     _trackingBloc.add(TrackingWatchTrip(tripId: widget.tripId));
   }
 
   @override
   void dispose() {
     _trackingBloc.add(const TrackingStopWatching());
-    context.read<TrackingUiCubit>().reset();
+    _uiCubit.reset();
     super.dispose();
   }
 
@@ -153,12 +157,7 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
                 }
                 _fetchRoutePathIfNeeded(state.trip);
               } else if (state is TrackingError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.failure.toLocalizedString(context)),
-                    backgroundColor: AppColors.error,
-                  ),
-                );
+                SayrFlash.error(context, state.failure.toLocalizedString(context));
               }
             },
           ),

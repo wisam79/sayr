@@ -1,5 +1,5 @@
 import { createAdminClient } from '../_shared/supabase.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 interface TripWebhookPayload {
   tripId: string;
@@ -15,6 +15,8 @@ interface TripWebhookPayload {
  * then calls the SQL RPC which enforces FSM transitions.
  */
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get('Origin'));
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -26,7 +28,16 @@ Deno.serve(async (req) => {
     const expected = Deno.env.get('DRIVER_WEBHOOK_SECRET');
     const clientSecret = req.headers.get('x-driver-secret');
 
-    if (!expected || expected !== clientSecret) {
+    if (!expected || !clientSecret) {
+      return new Response(JSON.stringify({ error: 'unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const encoder = new TextEncoder();
+    const a = encoder.encode(expected);
+    const b = encoder.encode(clientSecret);
+    if (a.byteLength !== b.byteLength || !crypto.subtle.timingSafeEqual(a, b)) {
       return new Response(JSON.stringify({ error: 'unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

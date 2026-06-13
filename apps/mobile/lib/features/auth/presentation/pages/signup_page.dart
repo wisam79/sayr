@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
@@ -75,12 +76,7 @@ class _SignupViewState extends State<_SignupView> {
         child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.failure.toLocalizedString(context)),
-                  backgroundColor: AppColors.error,
-                ),
-              );
+              SayrFlash.error(context, state.failure.toLocalizedString(context));
             } else if (state is AuthAuthenticated) {
               context.go('/');
             }

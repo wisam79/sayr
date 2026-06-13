@@ -83,6 +83,13 @@ class _SayrMapState extends State<SayrMap> {
     if (oldWidget.routePoints != widget.routePoints) {
       unawaited(_syncRouteLine());
     }
+    if (oldWidget.initialCameraPosition?.target !=
+        widget.initialCameraPosition?.target) {
+      final target = widget.initialCameraPosition?.target;
+      if (target != null && _controller != null) {
+        unawaited(_controller!.animateCamera(CameraUpdate.newLatLng(target)));
+      }
+    }
   }
 
   Future<void> _syncRouteLine() async {

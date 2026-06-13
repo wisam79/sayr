@@ -15,30 +15,17 @@ class CreateTripDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return BlocBuilder<CreateTripDialogCubit, CreateTripDialogState>(
       builder: (context, state) {
-        return AlertDialog(
-          title: Text(l10n.createTrip),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: _buildContent(context, state),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: state.selectedRoute == null || state.isSubmitting
-                  ? null
-                  : () => _createTrip(context, state),
-              child: state.isSubmitting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.create),
-            ),
-          ],
+        return SayrDialog(
+          title: l10n.createTrip,
+          headerIcon: Icons.route_outlined,
+          primaryLabel: l10n.create,
+          onPrimaryPressed: (state.selectedRoute == null || state.isSubmitting || state.loadingRoutes)
+              ? null
+              : () => _createTrip(context, state),
+          isPrimaryLoading: state.isSubmitting,
+          secondaryLabel: l10n.cancel,
+          onSecondaryPressed: () => Navigator.of(context).pop(),
+          content: _buildContent(context, state),
         );
       },
     );
@@ -61,37 +48,60 @@ class CreateTripDialog extends StatelessWidget {
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         DropdownButtonFormField<core.Route>(
           // ignore: deprecated_member_use
           value: state.selectedRoute,
+          isExpanded: true,
           decoration: InputDecoration(
             labelText: l10n.routeTitle,
             border: const OutlineInputBorder(),
           ),
+          selectedItemBuilder: (BuildContext context) {
+            return state.routes.map<Widget>((core.Route route) {
+              return Text(
+                route.title,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              );
+            }).toList();
+          },
           items: [
             for (final route in state.routes)
               DropdownMenuItem(
                 value: route,
-                child: Text(route.title),
+                child: Text(
+                  route.title,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
           ],
           onChanged: (route) =>
               context.read<CreateTripDialogCubit>().selectRoute(route),
         ),
         const SizedBox(height: AppSpacing.md),
-        ListTile(
-          contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.event),
-          title: Text(l10n.tripTime),
-          subtitle: Text(
-            _formatScheduledAt(
-              state.scheduledAt ??
-                  DateTime.now().add(const Duration(minutes: 10)),
+        InkWell(
+          onTap: () => _pickScheduledAt(context, state),
+          borderRadius: BorderRadius.circular(8),
+          child: InputDecorator(
+            decoration: InputDecoration(
+              labelText: l10n.tripTime,
+              prefixIcon: const Icon(Icons.event, color: AppColors.textSecondary),
+              suffixIcon: const Icon(Icons.edit_calendar, color: AppColors.textSecondary),
+              border: const OutlineInputBorder(),
+            ),
+            child: Text(
+              _formatScheduledAt(
+                state.scheduledAt ??
+                    DateTime.now().add(const Duration(minutes: 10)),
+              ),
+              style: Theme.of(context).textTheme.bodyLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          trailing: const Icon(Icons.edit_calendar),
-          onTap: () => _pickScheduledAt(context, state),
         ),
         if (state.failure != null) ...[
           const SizedBox(height: AppSpacing.sm),

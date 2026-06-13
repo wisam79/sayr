@@ -5,11 +5,12 @@ import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/user_model.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
-/// Concrete implementation of [DriverRepository] using the remote datasource.
 @LazySingleton(as: DriverRepository)
 class DriverRepositoryImpl extends BaseRepository implements DriverRepository {
-  DriverRepositoryImpl({required RemoteDatasource remoteDatasource})
-      : _remoteDatasource = remoteDatasource;
+  DriverRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required super.talker,
+  }) : _remoteDatasource = remoteDatasource;
 
   final RemoteDatasource _remoteDatasource;
 

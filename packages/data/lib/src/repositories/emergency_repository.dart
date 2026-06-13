@@ -11,6 +11,7 @@ class EmergencyRepositoryImpl extends BaseRepository
     implements EmergencyRepository {
   EmergencyRepositoryImpl({
     required RemoteDatasource remoteDatasource,
+    required super.talker,
   }) : _remoteDatasource = remoteDatasource;
   final RemoteDatasource _remoteDatasource;
 

@@ -72,7 +72,11 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _speedController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
-    )..repeat();
+    );
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if (!isTest) {
+      _speedController.repeat();
+    }
 
     // Shockwave fires instantly and fades by 45% of entry duration
     _shockwaveRadius = Tween<double>(begin: 0, end: 220).animate(

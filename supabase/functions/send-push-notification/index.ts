@@ -1,5 +1,5 @@
 import { createAdminClient } from '../_shared/supabase.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 interface NotificationPayload {
   userId: string;
@@ -9,15 +9,29 @@ interface NotificationPayload {
 }
 
 /**
+ * Timing-safe comparison of two strings.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const aBuf = encoder.encode(a);
+  const bBuf = encoder.encode(b);
+  if (aBuf.byteLength !== bBuf.byteLength) return false;
+  return crypto.subtle.timingSafeEqual(aBuf, bBuf);
+}
+
+/**
  * Send FCM push notification via Firebase Cloud Messaging HTTP v1 API.
  * Triggered by: Database webhook (when row inserted into notifications table)
  *
  * Security:
  * - Only callable with service_role key (database webhooks use this)
+ * - Timing-safe key comparison prevents side-channel attacks
  * - Never leaks FCM tokens in response
  * - Validates all required fields
  */
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get('Origin'));
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -31,11 +45,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify the request is authenticated with service_role
+    // Verify the request is authenticated with service_role (timing-safe)
     const authHeader = req.headers.get('Authorization');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!authHeader || !serviceRoleKey || authHeader !== `Bearer ${serviceRoleKey}`) {
+    if (!authHeader || !serviceRoleKey || !timingSafeEqual(authHeader, `Bearer ${serviceRoleKey}`)) {
       return new Response(JSON.stringify({ error: 'unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

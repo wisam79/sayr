@@ -11,6 +11,7 @@ class NotificationsRepositoryImpl extends BaseRepository
     implements NotificationsRepository {
   NotificationsRepositoryImpl({
     required RemoteDatasource remoteDatasource,
+    required super.talker,
   }) : _remoteDatasource = remoteDatasource;
   final RemoteDatasource _remoteDatasource;
 

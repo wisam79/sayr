@@ -11,6 +11,7 @@ import 'package:sayr_data/src/repositories/base_repository.dart';
 class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
   ChatRepositoryImpl({
     required RemoteDatasource remoteDatasource,
+    required super.talker,
   }) : _remoteDatasource = remoteDatasource;
   final RemoteDatasource _remoteDatasource;
 

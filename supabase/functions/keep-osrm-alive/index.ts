@@ -1,23 +1,36 @@
-import { corsHeaders } from '../_shared/cors.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
+
+/**
+ * Timing-safe comparison of two strings.
+ */
+function timingSafeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder();
+  const aBuf = encoder.encode(a);
+  const bBuf = encoder.encode(b);
+  if (aBuf.byteLength !== bBuf.byteLength) return false;
+  return crypto.subtle.timingSafeEqual(aBuf, bBuf);
+}
 
 /**
  * Keep-alive ping function for Hugging Face OSRM Space.
  *
  * Can be triggered periodically via pg_cron to ensure the private OSRM Space
  * does not enter sleep mode due to inactivity.
- * Authorization: SUPABASE_SERVICE_ROLE_KEY.
+ * Authorization: SUPABASE_SERVICE_ROLE_KEY (timing-safe comparison).
  */
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get('Origin'));
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // 1. Verify service_role key to prevent public abuse
+    // 1. Verify service_role key to prevent public abuse (timing-safe)
     const authHeader = req.headers.get('Authorization');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    if (!authHeader || !serviceRoleKey || authHeader !== `Bearer ${serviceRoleKey}`) {
+    if (!authHeader || !serviceRoleKey || !timingSafeEqual(authHeader, `Bearer ${serviceRoleKey}`)) {
       console.warn('Unauthorized keep-alive attempt rejected.');
       return new Response(JSON.stringify({ error: 'unauthorized' }), {
         status: 401,

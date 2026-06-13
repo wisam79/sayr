@@ -8,8 +8,10 @@ import 'package:sayr_data/src/repositories/base_repository.dart';
 @LazySingleton(as: PaymentRepository)
 class PaymentRepositoryImpl extends BaseRepository
     implements PaymentRepository {
-  PaymentRepositoryImpl({required RemoteDatasource remoteDatasource})
-      : _remoteDatasource = remoteDatasource;
+  PaymentRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required super.talker,
+  }) : _remoteDatasource = remoteDatasource;
 
   final RemoteDatasource _remoteDatasource;
 

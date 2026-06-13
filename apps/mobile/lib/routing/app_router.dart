@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide Route;
 import 'package:go_router/go_router.dart';
-import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/complete_profile_page.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/login_page.dart';
@@ -52,7 +51,6 @@ CustomTransitionPage<void> _slideTransitionPage({required Widget child}) {
   );
 }
 
-@lazySingleton
 class AppRouter {
   AppRouter();
 
@@ -121,7 +119,7 @@ class AppRouter {
         name: 'route-details',
         pageBuilder: (context, state) => _slideTransitionPage(
           child: RouteDetailsPage(
-            route: state.extra as Route?,
+            route: state.extra is Route ? state.extra! as Route : null,
             routeId: RouteId(state.pathParameters['routeId']!),
           ),
         ),
@@ -168,7 +166,7 @@ class AppRouter {
         pageBuilder: (context, state) => _slideTransitionPage(
           child: PaymentPage(
             routeId: RouteId(state.pathParameters['routeId']!),
-            amount: int.parse(state.pathParameters['amount']!),
+            amount: int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
             paymentId: state.uri.queryParameters['paymentId'],
             paymentUrl: state.uri.queryParameters['paymentUrl'],
           ),

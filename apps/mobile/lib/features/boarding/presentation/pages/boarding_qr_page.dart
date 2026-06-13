@@ -8,6 +8,7 @@ import 'package:lottie/lottie.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/boarding/presentation/bloc/boarding_qr_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
@@ -226,19 +227,13 @@ class _ReadyView extends StatelessWidget {
                             }
                           } on TimeoutException {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.locationUnavailable),
-                                ),
-                              );
+                              SayrFlash.error(context, l10n.locationUnavailable);
                             }
                           } catch (e) {
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text(l10n.locationPermissionRequired),
-                                ),
+                              SayrFlash.error(
+                                context,
+                                l10n.locationPermissionRequired,
                               );
                             }
                           }

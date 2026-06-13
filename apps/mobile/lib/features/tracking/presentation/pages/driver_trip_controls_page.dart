@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart' as geo;
@@ -9,6 +10,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/formatting.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
@@ -52,7 +54,10 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   void initState() {
     super.initState();
     _trackingBloc = widget.trackingBloc ??
-        TrackingBloc(tripRepository: sl<TripRepository>());
+        TrackingBloc(
+          tripRepository: sl<TripRepository>(),
+          authRepository: sl<AuthRepository>(),
+        );
     if (widget.trackingBloc == null) {
       _trackingBloc.add(TrackingWatchTrip(tripId: widget.tripId));
     }
@@ -85,17 +90,34 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
       final requested = await geo.Geolocator.requestPermission();
       if (requested == geo.LocationPermission.denied) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.locationPermissionRequired)),
-          );
+          SayrFlash.warning(context, l10n.locationPermissionRequired);
         }
         return;
       }
     }
 
-    _locationSettings = const geo.LocationSettings(
-      accuracy: geo.LocationAccuracy.high,
-    );
+    if (!mounted) return;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final isAr = Localizations.localeOf(context).languageCode == 'ar';
+      final notificationTitle = isAr ? 'تتبع الرحلة نشط' : 'Trip Tracking Active';
+      final notificationText = isAr
+          ? 'تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.'
+          : 'Sayr is tracking your location in the background for this trip.';
+
+      _locationSettings = geo.AndroidSettings(
+        accuracy: geo.LocationAccuracy.high,
+        foregroundNotificationConfig: geo.ForegroundNotificationConfig(
+          notificationTitle: notificationTitle,
+          notificationText: notificationText,
+          enableWakeLock: true,
+        ),
+      );
+    } else {
+      _locationSettings = const geo.LocationSettings(
+        accuracy: geo.LocationAccuracy.high,
+      );
+    }
 
     _positionSubscription =
         geo.Geolocator.getPositionStream(locationSettings: _locationSettings)
@@ -194,12 +216,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                 _stopBleProximity();
               }
             } else if (state is TrackingError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.failure.toLocalizedString(context)),
-                  backgroundColor: AppColors.error,
-                ),
-              );
+              SayrFlash.error(context, state.failure.toLocalizedString(context));
             } else {
               _stopLocationTracking();
               _stopBleProximity();

@@ -111,11 +111,22 @@ class _HomeViewState extends State<_HomeView> {
       ),
       bottomNavigationBar: BlocBuilder<HomeNavCubit, int>(
         builder: (context, index) {
-          return NavigationBar(
-            selectedIndex: index,
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-            onDestinationSelected: (i) =>
-                context.read<HomeNavCubit>().selectTab(i),
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: isDark ? AppColors.borderDark : AppColors.divider,
+                  width: 0.5,
+                ),
+              ),
+            ),
+            child: NavigationBar(
+              selectedIndex: index,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              surfaceTintColor: Colors.transparent,
+              onDestinationSelected: (i) =>
+                  context.read<HomeNavCubit>().selectTab(i),
             destinations: isDriver
                 ? [
                     NavigationDestination(
@@ -185,6 +196,7 @@ class _HomeViewState extends State<_HomeView> {
                       label: l10n.profile,
                     ),
                   ],
+            ),
           );
         },
       ),
@@ -206,15 +218,12 @@ class _HeaderActions extends StatelessWidget {
           tooltip: l10n.chats,
           onPressed: () => context.push('/chats'),
         ),
-        BlocBuilder<NotificationsBloc, NotificationsState>(
-          buildWhen: (prev, curr) =>
-              prev.maybeWhen(loaded: (a, b) => b, orElse: () => 0) !=
-              curr.maybeWhen(loaded: (a, b) => b, orElse: () => 0),
-          builder: (context, state) {
-            final unread = state.maybeWhen(
-              loaded: (_, count) => count,
-              orElse: () => 0,
-            );
+        BlocSelector<NotificationsBloc, NotificationsState, int>(
+          selector: (state) => state.maybeWhen(
+            loaded: (_, count) => count,
+            orElse: () => 0,
+          ),
+          builder: (context, unread) {
             return Semantics(
               label: unread > 0
                   ? '${l10n.notifications}, $unread ${l10n.unread}'

@@ -31,17 +31,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final currentUser = _authRepository.currentUser;
     if (currentUser != null) {
       emit(const AuthLoading());
-      final user = await _authRepository.fetchFullProfile();
-      if (isClosed) return;
-      if (user != null) {
-        final isComplete = user.phone != null && user.institutionId != null;
-        if (isComplete) {
-          emit(AuthAuthenticated(user));
+      try {
+        final user = await _authRepository.fetchFullProfile();
+        if (isClosed) return;
+        if (user != null) {
+          final isComplete = user.phone != null && user.institutionId != null;
+          if (isComplete) {
+            emit(AuthAuthenticated(user));
+          } else {
+            emit(AuthProfileIncomplete(user));
+          }
         } else {
-          emit(AuthProfileIncomplete(user));
+          emit(const AuthUnauthenticated());
         }
-      } else {
-        emit(const AuthUnauthenticated());
+      } catch (e) {
+        if (isClosed) return;
+        emit(AuthError(ServerFailure(message: e.toString())));
       }
     } else {
       emit(const AuthUnauthenticated());

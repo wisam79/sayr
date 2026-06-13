@@ -7,8 +7,10 @@ import 'package:sayr_data/src/repositories/base_repository.dart';
 /// Concrete implementation of [RatingRepository] using the remote datasource.
 @LazySingleton(as: RatingRepository)
 class RatingRepositoryImpl extends BaseRepository implements RatingRepository {
-  RatingRepositoryImpl({required RemoteDatasource remoteDatasource})
-      : _remoteDatasource = remoteDatasource;
+  RatingRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required super.talker,
+  }) : _remoteDatasource = remoteDatasource;
 
   final RemoteDatasource _remoteDatasource;
 

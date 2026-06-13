@@ -16,5 +16,6 @@ export 'src/widgets/loading_widget.dart';
 export 'src/widgets/primary_button.dart';
 export 'src/widgets/responsive_layout.dart';
 export 'src/widgets/route_card.dart';
+export 'src/widgets/sayr_dialog.dart';
 export 'src/widgets/secondary_button.dart';
 export 'src/widgets/section_header.dart';

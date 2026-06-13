@@ -1,22 +1,23 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/di/di.dart';
-
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// BLoC for trip tracking — student view and driver controls.
 ///
 /// Student: loads active trips on map, watches a specific trip.
 /// Driver: manages trip lifecycle (arrive/start/complete/cancel) and streams location.
 class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
-  /// Creates a [TrackingBloc] with the given [tripRepository].
+  /// Creates a [TrackingBloc] with the given [tripRepository] and [authRepository].
   TrackingBloc({
     required TripRepository tripRepository,
+    required AuthRepository authRepository,
   })  : _tripRepository = tripRepository,
+        _authRepository = authRepository,
         super(const TrackingState.initial()) {
     on<TrackingLoadActiveTrips>(_onLoadActiveTrips);
     on<TrackingWatchTrip>(_onWatchTrip);
@@ -33,6 +34,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   }
 
   final TripRepository _tripRepository;
+  final AuthRepository _authRepository;
   StreamSubscription<Trip>? _tripSubscription;
 
   @override
@@ -148,7 +150,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
         );
 
       case TrackingInitial() || TrackingLoading():
-        final currentUser = sl<AuthRepository>().currentUser;
+        final currentUser = _authRepository.currentUser;
         final isDriver = currentUser != null &&
             currentUser.id.value == event.trip.driverId.value;
 
@@ -222,8 +224,8 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     );
 
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(
+    await result.fold(
+      (failure) async => emit(
         TrackingState.error(
           failure: failure,
           previousState: state,
@@ -313,7 +315,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
 
     if (isClosed) return;
     result.fold(
-      (failure) => Logger().w(
+      (failure) => sl<Talker>().warning(
         'TrackingBloc: Failed to update location remotely: ${failure.message}',
       ),
       (_) => null,

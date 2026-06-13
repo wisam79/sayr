@@ -101,5 +101,6 @@ void main() {
     await tester.pump();
 
     verify(() => mockAuthRepo.updatePassword('newpassword123')).called(1);
+    await tester.pump(const Duration(seconds: 5));
   });
 }

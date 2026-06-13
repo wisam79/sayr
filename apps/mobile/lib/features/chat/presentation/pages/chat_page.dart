@@ -74,6 +74,11 @@ class _ChatPageState extends State<ChatPage> {
           }
           if (state is ChatLoaded) {
             _scrollToBottom();
+            for (final msg in state.messages) {
+              if (msg.senderId.value != _currentUserId && !msg.isRead) {
+                context.read<ChatBloc>().add(ChatMessageRead(msg.id));
+              }
+            }
           }
         },
         builder: (BuildContext context, ChatState state) {

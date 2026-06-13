@@ -1,5 +1,5 @@
 import { createAdminClient } from '../_shared/supabase.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 interface EmergencyPayload {
@@ -20,6 +20,8 @@ interface EmergencyPayload {
  * 5) Notifies all admins via push notification (FCM)
  */
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get('Origin'));
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -162,8 +164,8 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify({
               userId: admin.id,
-              title: 'Emergency Alert!',
-              body: description || 'A student has reported an emergency.',
+              title: 'تنبيه حالة طوارئ! / Emergency Alert!',
+              body: description || 'أبلغ أحد الطلاب عن حالة طوارئ. / A student has reported an emergency.',
               data: {
                 studentId: studentId,
                 routeId: routeId,

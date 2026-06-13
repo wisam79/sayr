@@ -88,6 +88,21 @@ void main() {
         act: (bloc) => bloc.add(const AuthCheckRequested()),
         expect: () => [isA<AuthUnauthenticated>()],
       );
+
+      blocTest<AuthBloc, AuthState>(
+        'emits [AuthLoading, AuthError] when fetchFullProfile throws an exception',
+        build: () {
+          when(() => mockRepo.currentUser).thenReturn(testUser);
+          when(() => mockRepo.fetchFullProfile())
+              .thenThrow(Exception('Profile fetch failed'));
+          return AuthBloc(authRepository: mockRepo);
+        },
+        act: (bloc) => bloc.add(const AuthCheckRequested()),
+        expect: () => [
+          isA<AuthLoading>(),
+          isA<AuthError>(),
+        ],
+      );
     });
 
     group('AuthLoginRequested', () {

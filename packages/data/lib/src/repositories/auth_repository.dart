@@ -13,6 +13,7 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   AuthRepositoryImpl({
     required RemoteDatasource remoteDatasource,
     required LocalDatasource localDatasource,
+    required super.talker,
   })  : _remoteDatasource = remoteDatasource,
         _localDatasource = localDatasource;
   final RemoteDatasource _remoteDatasource;

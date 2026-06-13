@@ -70,6 +70,7 @@ class SayrApp extends StatelessWidget {
         BlocProvider<TrackingBloc>(
           create: (_) => TrackingBloc(
             tripRepository: sl<TripRepository>(),
+            authRepository: sl<AuthRepository>(),
           ),
         ),
         BlocProvider<ChatBloc>(
@@ -113,6 +114,7 @@ class SayrApp extends StatelessWidget {
           final isAuthEntry = AppRouter.authEntryPaths.contains(path);
 
           if (state is AuthAuthenticated) {
+            sl<OfflineSyncService>().start();
             // Register current FCM push token for notifications
             unawaited(
               FcmService.registerDeviceToken(
@@ -124,6 +126,8 @@ class SayrApp extends StatelessWidget {
               router.config.go('/');
             }
           } else if (state is AuthUnauthenticated && !isPublic) {
+            sl<OfflineSyncService>().stop();
+            unawaited(FcmService.dispose());
             router.config.go('/login');
           } else if (state is AuthProfileIncomplete) {
             router.config.go('/complete-profile');
@@ -206,11 +210,16 @@ Future<void> runSayrApp() async {
   // Initialize FCM service (non-blocking)
   unawaited(FcmService.init());
 
-  // Initialize Offline Sync Service
-  OfflineSyncService(
+  // Register Offline Sync Service in Service Locator
+  final offlineSyncService = OfflineSyncService(
     localDatasource: sl<LocalDatasource>(),
     tripRepository: sl<TripRepository>(),
-  ).start();
+    talker: sl<Talker>(),
+  );
+  sl.registerSingleton<OfflineSyncService>(offlineSyncService);
+
+  // Initialize Offline Sync Service
+  offlineSyncService.start();
 
   // Set up bloc observer
   Bloc.observer = TalkerBlocObserver(

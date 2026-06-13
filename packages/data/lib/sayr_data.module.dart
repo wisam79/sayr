@@ -42,16 +42,17 @@ import 'package:sayr_data/src/repositories/subscription_repository.dart'
 import 'package:sayr_data/src/repositories/trip_repository.dart' as _i549;
 import 'package:sayr_data/src/storage/secure_storage.dart' as _i417;
 import 'package:sayr_data/src/supabase/supabase_client.dart' as _i583;
+import 'package:talker_flutter/talker_flutter.dart' as _i207;
 
 class SayrDataPackageModule extends _i526.MicroPackageModule {
 // initializes the registration of main-scope dependencies inside of GetIt
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
     final dataModule = _$DataModule();
-    gh.lazySingleton<_i961.AppDatabase>(() => _i961.AppDatabase());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
         () => dataModule.secureStorage);
     gh.lazySingleton<_i583.SayrSupabase>(() => dataModule.supabase);
+    gh.lazySingleton<_i961.AppDatabase>(() => _i961.AppDatabase());
     gh.lazySingleton<_i368.LocationQueueDao>(
         () => _i368.LocationQueueDao(db: gh<_i961.AppDatabase>()));
     gh.lazySingleton<_i368.TripCacheDao>(
@@ -95,38 +96,57 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
           trips: gh<_i140.TripRemoteDatasource>(),
           boarding: gh<_i94.BoardingRemoteDatasource>(),
         ));
+    gh.lazySingleton<_i385.ChatRepository>(() => _i147.ChatRepositoryImpl(
+          remoteDatasource: gh<_i263.RemoteDatasource>(),
+          talker: gh<_i207.Talker>(),
+        ));
+    gh.lazySingleton<_i385.RatingRepository>(() => _i69.RatingRepositoryImpl(
+          remoteDatasource: gh<_i263.RemoteDatasource>(),
+          talker: gh<_i207.Talker>(),
+        ));
+    gh.lazySingleton<_i385.PaymentRepository>(() => _i929.PaymentRepositoryImpl(
+          remoteDatasource: gh<_i263.RemoteDatasource>(),
+          talker: gh<_i207.Talker>(),
+        ));
+    gh.lazySingleton<_i385.BoardingRepository>(
+        () => _i388.BoardingRepositoryImpl(
+              remoteDatasource: gh<_i263.RemoteDatasource>(),
+              talker: gh<_i207.Talker>(),
+            ));
+    gh.lazySingleton<_i385.EmergencyRepository>(
+        () => _i985.EmergencyRepositoryImpl(
+              remoteDatasource: gh<_i263.RemoteDatasource>(),
+              talker: gh<_i207.Talker>(),
+            ));
     gh.lazySingleton<_i385.AuthRepository>(() => _i479.AuthRepositoryImpl(
           remoteDatasource: gh<_i263.RemoteDatasource>(),
           localDatasource: gh<_i1015.LocalDatasource>(),
+          talker: gh<_i207.Talker>(),
         ));
     gh.lazySingleton<_i385.TripRepository>(() => _i549.TripRepositoryImpl(
           remoteDatasource: gh<_i263.RemoteDatasource>(),
           localDatasource: gh<_i1015.LocalDatasource>(),
+          talker: gh<_i207.Talker>(),
         ));
     gh.lazySingleton<_i385.RouteRepository>(() => _i783.RouteRepositoryImpl(
           remoteDatasource: gh<_i263.RemoteDatasource>(),
           localDatasource: gh<_i1015.LocalDatasource>(),
+          talker: gh<_i207.Talker>(),
         ));
-    gh.lazySingleton<_i385.ChatRepository>(() => _i147.ChatRepositoryImpl(
-        remoteDatasource: gh<_i263.RemoteDatasource>()));
-    gh.lazySingleton<_i385.RatingRepository>(() => _i69.RatingRepositoryImpl(
-        remoteDatasource: gh<_i263.RemoteDatasource>()));
-    gh.lazySingleton<_i385.BoardingRepository>(() =>
-        _i388.BoardingRepositoryImpl(
-            remoteDatasource: gh<_i263.RemoteDatasource>()));
-    gh.lazySingleton<_i385.PaymentRepository>(() => _i929.PaymentRepositoryImpl(
-        remoteDatasource: gh<_i263.RemoteDatasource>()));
-    gh.lazySingleton<_i385.EmergencyRepository>(() =>
-        _i985.EmergencyRepositoryImpl(
-            remoteDatasource: gh<_i263.RemoteDatasource>()));
     gh.lazySingleton<_i385.DriverRepository>(() => _i151.DriverRepositoryImpl(
-        remoteDatasource: gh<_i263.RemoteDatasource>()));
-    gh.lazySingleton<_i385.SubscriptionRepository>(() =>
-        _i896.SubscriptionRepositoryImpl(
-            remoteDatasource: gh<_i263.RemoteDatasource>()));
-    gh.lazySingleton<_i385.NotificationsRepository>(() =>
-        _i57.NotificationsRepositoryImpl(
-            remoteDatasource: gh<_i263.RemoteDatasource>()));
+          remoteDatasource: gh<_i263.RemoteDatasource>(),
+          talker: gh<_i207.Talker>(),
+        ));
+    gh.lazySingleton<_i385.NotificationsRepository>(
+        () => _i57.NotificationsRepositoryImpl(
+              remoteDatasource: gh<_i263.RemoteDatasource>(),
+              talker: gh<_i207.Talker>(),
+            ));
+    gh.lazySingleton<_i385.SubscriptionRepository>(
+        () => _i896.SubscriptionRepositoryImpl(
+              remoteDatasource: gh<_i263.RemoteDatasource>(),
+              talker: gh<_i207.Talker>(),
+            ));
   }
 }
 

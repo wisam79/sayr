@@ -6,6 +6,7 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/features/home/presentation/bloc/home_nav_cubit.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
+import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
@@ -33,6 +34,10 @@ class _ActiveTripsPageState extends State<ActiveTripsPage> {
   void initState() {
     super.initState();
     context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
+    final routesBloc = context.read<RoutesBloc>();
+    if (routesBloc.state is RoutesInitial) {
+      routesBloc.add(const RoutesLoadRequested());
+    }
   }
 
   @override

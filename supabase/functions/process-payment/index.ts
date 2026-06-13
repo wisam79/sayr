@@ -1,5 +1,5 @@
 import { createAdminClient } from '../_shared/supabase.ts';
-import { corsHeaders } from '../_shared/cors.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 interface ZainCashPayload {
   orderId: string;
@@ -30,10 +30,14 @@ async function verifySignature(
     ['sign'],
   );
   const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(body));
-  const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+  const expectedBytes = new Uint8Array(signatureBuffer);
+  const expectedHex = Array.from(expectedBytes)
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
-  return expectedSignature === signature;
+  const a = encoder.encode(expectedHex);
+  const b = encoder.encode(signature);
+  if (a.byteLength !== b.byteLength) return false;
+  return crypto.subtle.timingSafeEqual(a, b);
 }
 
 /**
@@ -46,6 +50,8 @@ async function verifySignature(
  * - Input validation on all required fields
  */
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req.headers.get('Origin'));
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }

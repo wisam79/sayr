@@ -10,8 +10,10 @@ import 'package:sayr_data/src/repositories/base_repository.dart';
 class BoardingRepositoryImpl extends BaseRepository
     implements BoardingRepository {
   /// Creates a [BoardingRepositoryImpl].
-  BoardingRepositoryImpl({required RemoteDatasource remoteDatasource})
-      : _remoteDatasource = remoteDatasource;
+  BoardingRepositoryImpl({
+    required RemoteDatasource remoteDatasource,
+    required super.talker,
+  }) : _remoteDatasource = remoteDatasource;
   final RemoteDatasource _remoteDatasource;
 
   @override

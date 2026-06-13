@@ -11,6 +11,7 @@ class SubscriptionRepositoryImpl extends BaseRepository
     implements SubscriptionRepository {
   SubscriptionRepositoryImpl({
     required RemoteDatasource remoteDatasource,
+    required super.talker,
   }) : _remoteDatasource = remoteDatasource;
   final RemoteDatasource _remoteDatasource;
 

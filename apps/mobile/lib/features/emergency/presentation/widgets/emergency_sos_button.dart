@@ -33,37 +33,49 @@ class EmergencySosButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (BuildContext ctx) => AlertDialog(
-        title: Text(l10n.sendEmergency),
+      builder: (BuildContext ctx) => SayrDialog(
+        title: l10n.sendEmergency,
+        headerIcon: Icons.warning_amber_rounded,
+        headerIconColor: AppColors.error,
+        secondaryLabel: l10n.cancel,
+        onSecondaryPressed: () => Navigator.of(ctx).pop(false),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(l10n.emergencyConfirmMessage),
+            Text(
+              l10n.emergencyConfirmMessage,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.lg),
-            SwipeButton.expand(
-              thumb: const Icon(
-                Icons.double_arrow_rounded,
-                color: Colors.white,
-              ),
-              activeThumbColor: AppColors.error,
-              activeTrackColor: AppColors.error.withValues(alpha: 0.1),
-              child: Text(
-                l10n.sendEmergency,
-                style: const TextStyle(
-                  color: AppColors.error,
-                  fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.xs),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(100),
+                border: Border.all(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  width: 1.5,
                 ),
               ),
-              onSwipe: () => Navigator.of(ctx).pop(true),
+              child: SwipeButton.expand(
+                thumb: const Icon(
+                  Icons.double_arrow_rounded,
+                  color: Colors.white,
+                ),
+                activeThumbColor: AppColors.error,
+                activeTrackColor: Colors.transparent,
+                child: Text(
+                  l10n.sendEmergency,
+                  style: const TextStyle(
+                    color: AppColors.error,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                onSwipe: () => Navigator.of(ctx).pop(true),
+              ),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.cancel),
-          ),
-        ],
       ),
     );
 
@@ -92,32 +104,42 @@ class EmergencySosButton extends StatelessWidget {
       if (permission == geo.LocationPermission.denied) {
         final requested = await geo.Geolocator.requestPermission();
         if (requested == geo.LocationPermission.denied) {
-          return null;
+          return const Coordinates(latitude: 0, longitude: 0);
         }
       }
 
       if (permission == geo.LocationPermission.deniedForever) {
-        return null;
+        return const Coordinates(latitude: 0, longitude: 0);
       }
 
-      final position = await geo.Geolocator.getCurrentPosition(
-        locationSettings: const geo.LocationSettings(
-          accuracy: geo.LocationAccuracy.high,
-          timeLimit: Duration(seconds: 10),
-        ),
-      );
-
-      return Coordinates(
-        latitude: position.latitude,
-        longitude: position.longitude,
-      );
+      try {
+        final position = await geo.Geolocator.getCurrentPosition(
+          locationSettings: const geo.LocationSettings(
+            accuracy: geo.LocationAccuracy.high,
+            timeLimit: Duration(seconds: 5),
+          ),
+        );
+        return Coordinates(
+          latitude: position.latitude,
+          longitude: position.longitude,
+        );
+      } catch (_) {
+        final lastKnown = await geo.Geolocator.getLastKnownPosition();
+        if (lastKnown != null) {
+          return Coordinates(
+            latitude: lastKnown.latitude,
+            longitude: lastKnown.longitude,
+          );
+        }
+        rethrow;
+      }
     } catch (e, st) {
       _emergencyLogger.w(
-        'Failed to capture location for SOS; proceeding without coords',
+        'Failed to capture location for SOS; falling back to 0.0, 0.0',
         error: e,
         stackTrace: st,
       );
-      return null;
+      return const Coordinates(latitude: 0, longitude: 0);
     }
   }
 

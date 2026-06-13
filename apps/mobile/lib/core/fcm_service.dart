@@ -16,6 +16,7 @@ class FcmService {
   FcmService._();
 
   static bool _initialized = false;
+  static StreamSubscription<String>? _tokenRefreshSubscription;
 
   /// Optional navigation callback. The callback receives the FCM `data`
   /// payload (e.g. a `trip_id`, `conversation_id`, or `route_id`). Called
@@ -160,8 +161,10 @@ class FcmService {
         );
       }
 
-      // Also listen to token refresh events.
-      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      // Cancel previous listener to prevent duplicates across login cycles.
+      await _tokenRefreshSubscription?.cancel();
+      _tokenRefreshSubscription =
+          FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
         final platform =
             Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
         bloc.add(
@@ -176,6 +179,12 @@ class FcmService {
         debugPrint('FCM: Failed to retrieve or register token: $e');
       }
     }
+  }
+
+  /// Cancel the token refresh listener (call on logout).
+  static Future<void> dispose() async {
+    await _tokenRefreshSubscription?.cancel();
+    _tokenRefreshSubscription = null;
   }
 }
 

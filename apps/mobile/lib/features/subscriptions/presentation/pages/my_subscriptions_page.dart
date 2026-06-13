@@ -223,20 +223,15 @@ class _SubscriptionCard extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(l10n.cancelSubscriptionConfirm),
-          content: Text(l10n.cancelSubscriptionConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              style: TextButton.styleFrom(foregroundColor: AppColors.error),
-              child: Text(l10n.confirm),
-            ),
-          ],
+        return SayrDialog(
+          title: l10n.cancelSubscriptionConfirm,
+          subtitle: l10n.cancelSubscriptionConfirmMessage,
+          headerIcon: Icons.warning_amber_rounded,
+          headerIconColor: AppColors.error,
+          primaryLabel: l10n.confirm,
+          onPrimaryPressed: () => Navigator.of(dialogContext).pop(true),
+          secondaryLabel: l10n.cancel,
+          onSecondaryPressed: () => Navigator.of(dialogContext).pop(false),
         );
       },
     );

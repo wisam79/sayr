@@ -64,6 +64,21 @@ void main() {
       );
       expect(route.occupancyRatio, closeTo(20 / 30, 0.01));
     });
+
+    test('occupancyRatio is 0 when capacity is 0', () {
+      const route = Route(
+        id: RouteId('r1'),
+        driverId: DriverId('d1'),
+        title: 'Test',
+        startLocation: 'A',
+        endLocation: 'B',
+        price: Money(1000),
+        capacity: 0,
+        availableSeats: 0,
+        isActive: true,
+      );
+      expect(route.occupancyRatio, equals(0));
+    });
   });
 
   group('Subscription', () {
@@ -104,6 +119,18 @@ void main() {
       expect(subscription.isExpired, isFalse);
       expect(subscription.daysRemaining, greaterThanOrEqualTo(364));
     });
+
+    test('isExpired is false when endDate is null', () {
+      final subscription = Subscription(
+        id: const SubscriptionId('s1'),
+        studentId: const UserId('u1'),
+        routeId: const RouteId('r1'),
+        status: SubscriptionStatus.active,
+        startDate: DateTime.now().subtract(const Duration(days: 40)),
+        endDate: null,
+      );
+      expect(subscription.isExpired, isFalse);
+    });
   });
 
   group('Trip', () {
@@ -128,6 +155,77 @@ void main() {
         scheduledAt: DateTime.now().add(const Duration(hours: 2)),
       );
       expect(trip.isUpcoming, isTrue);
+    });
+
+    test('isCancelled when status is cancelled', () {
+      final trip = Trip(
+        id: const TripId('t1'),
+        routeId: const RouteId('r1'),
+        driverId: const DriverId('d1'),
+        status: TripStatus.cancelled,
+        scheduledAt: DateTime.now(),
+      );
+      expect(trip.isCancelled, isTrue);
+      expect(trip.isActive, isFalse);
+    });
+
+    test('isActive when status is driverWaiting or inTransit', () {
+      final tripWaiting = Trip(
+        id: const TripId('t1'),
+        routeId: const RouteId('r1'),
+        driverId: const DriverId('d1'),
+        status: TripStatus.driverWaiting,
+        scheduledAt: DateTime.now(),
+      );
+      expect(tripWaiting.isActive, isTrue);
+
+      final tripTransit = Trip(
+        id: const TripId('t2'),
+        routeId: const RouteId('r1'),
+        driverId: const DriverId('d1'),
+        status: TripStatus.inTransit,
+        scheduledAt: DateTime.now(),
+      );
+      expect(tripTransit.isActive, isTrue);
+    });
+
+    test('duration calculation when startedAt is set', () {
+      final startTime = DateTime.now().subtract(const Duration(minutes: 30));
+      final endTime = startTime.add(const Duration(minutes: 25));
+
+      final tripCompleted = Trip(
+        id: const TripId('t1'),
+        routeId: const RouteId('r1'),
+        driverId: const DriverId('d1'),
+        status: TripStatus.completed,
+        scheduledAt: startTime,
+        startedAt: startTime,
+        endedAt: endTime,
+      );
+      expect(tripCompleted.duration, equals(const Duration(minutes: 25)));
+
+      final tripInProgress = Trip(
+        id: const TripId('t2'),
+        routeId: const RouteId('r1'),
+        driverId: const DriverId('d1'),
+        status: TripStatus.inTransit,
+        scheduledAt: startTime,
+        startedAt: startTime,
+        endedAt: null,
+      );
+      expect(tripInProgress.duration, isNotNull);
+      expect(tripInProgress.duration!.inMinutes, greaterThanOrEqualTo(29));
+    });
+
+    test('duration is null when startedAt is null', () {
+      final trip = Trip(
+        id: const TripId('t1'),
+        routeId: const RouteId('r1'),
+        driverId: const DriverId('d1'),
+        status: TripStatus.scheduled,
+        scheduledAt: DateTime.now(),
+      );
+      expect(trip.duration, isNull);
     });
   });
 
@@ -158,6 +256,19 @@ void main() {
       );
       expect(rating.isNegative, isTrue);
       expect(rating.isPositive, isFalse);
+    });
+
+    test('neutral rating (3 stars) is neither positive nor negative', () {
+      final rating = Rating(
+        id: const RatingId('r1'),
+        tripId: const TripId('t1'),
+        studentId: const UserId('u1'),
+        driverId: const DriverId('d1'),
+        rating: 3,
+        createdAt: DateTime.now(),
+      );
+      expect(rating.isPositive, isFalse);
+      expect(rating.isNegative, isFalse);
     });
   });
 }

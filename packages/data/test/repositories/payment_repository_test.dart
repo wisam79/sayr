@@ -3,6 +3,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 
+import 'package:talker_flutter/talker_flutter.dart';
+
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
 void main() {
@@ -11,7 +13,10 @@ void main() {
 
   setUp(() {
     mockRemote = MockRemoteDatasource();
-    repository = PaymentRepositoryImpl(remoteDatasource: mockRemote);
+    repository = PaymentRepositoryImpl(
+      remoteDatasource: mockRemote,
+      talker: Talker(),
+    );
   });
 
   group('PaymentRepositoryImpl', () {

@@ -122,22 +122,15 @@ class _CancelButton extends StatelessWidget {
     showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext ctx) => AlertDialog(
-        title: Text(l10n.cancelTripConfirm),
-        content: Text(l10n.cancelTripConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(l10n.no),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: Text(l10n.yes),
-          ),
-        ],
+      builder: (BuildContext ctx) => SayrDialog(
+        title: l10n.cancelTripConfirm,
+        subtitle: l10n.cancelTripConfirmMessage,
+        headerIcon: Icons.warning_amber_rounded,
+        headerIconColor: AppColors.error,
+        primaryLabel: l10n.yes,
+        onPrimaryPressed: () => Navigator.of(ctx).pop(true),
+        secondaryLabel: l10n.no,
+        onSecondaryPressed: () => Navigator.of(ctx).pop(false),
       ),
     ).then((confirmed) {
       if (confirmed ?? false) {

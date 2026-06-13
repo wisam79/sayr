@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Route;
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
@@ -97,7 +98,6 @@ class DriverInfoSection extends StatelessWidget {
 
   Future<void> _openChat(BuildContext context) async {
     final chatRepo = sl<ChatRepository>();
-    final messenger = ScaffoldMessenger.of(context);
     final router = GoRouter.of(context);
 
     final conversationResult = await chatRepo.getOrCreateConversation(
@@ -106,12 +106,7 @@ class DriverInfoSection extends StatelessWidget {
     );
     conversationResult.fold(
       (failure) {
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text(failure.toLocalizedString(context)),
-            backgroundColor: AppColors.error,
-          ),
-        );
+        SayrFlash.error(context, failure.toLocalizedString(context));
       },
       (conversation) {
         router.push('/chat/${conversation.id.value}');

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
@@ -50,12 +51,7 @@ class _CompleteProfileViewState extends State<_CompleteProfileView> {
       listenWhen: (_, curr) => curr is AuthAuthenticated || curr is AuthError,
       listener: (context, state) {
         if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.failure.toLocalizedString(context)),
-              backgroundColor: colorScheme.error,
-            ),
-          );
+          SayrFlash.error(context, state.failure.toLocalizedString(context));
         }
       },
       child: Scaffold(

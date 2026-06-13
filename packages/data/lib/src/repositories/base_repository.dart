@@ -1,12 +1,21 @@
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// Base repository class that provides exception-guarding helpers to concrete repositories.
 abstract class BaseRepository {
-  final Logger _baseLogger = Logger();
+  /// Creates a [BaseRepository] with the given [talker] instance for logging.
+  BaseRepository({required Talker talker}) : _talker = talker;
+
+  final Talker _talker;
+
+  /// The logger instance, accessible by subclasses for direct logging.
+  @protected
+  Talker get log => _talker;
 
   /// Executes an operation and catches any database, auth, or network exception,
   /// converting them into appropriate [Failure] instances.
@@ -22,16 +31,16 @@ abstract class BaseRepository {
         return Left(e);
       }
       if (e is SocketException || e is HttpException) {
-        _baseLogger.w(
+        _talker.warning(
           'Network issue caught in repository',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
       } else {
-        _baseLogger.e(
+        _talker.error(
           'Exception caught in repository',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
       }
       if (errorMapper != null) {

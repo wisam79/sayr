@@ -236,4 +236,60 @@ void main() {
       expect(events, isEmpty);
     });
   });
+
+  group('TripStateMachine - validNextStates', () {
+    test('scheduled has 3 valid next states', () {
+      final states = TripStateMachine.validNextStates(TripStatus.scheduled);
+      expect(states, hasLength(3));
+      expect(
+        states,
+        containsAll([
+          TripStatus.driverWaiting,
+          TripStatus.absent,
+          TripStatus.cancelled,
+        ]),
+      );
+    });
+
+    test('driverWaiting has 3 valid next states', () {
+      final states = TripStateMachine.validNextStates(TripStatus.driverWaiting);
+      expect(states, hasLength(3));
+      expect(
+        states,
+        containsAll([
+          TripStatus.inTransit,
+          TripStatus.absent,
+          TripStatus.cancelled,
+        ]),
+      );
+    });
+
+    test('inTransit has 2 valid next states', () {
+      final states = TripStateMachine.validNextStates(TripStatus.inTransit);
+      expect(states, hasLength(2));
+      expect(
+        states,
+        containsAll([
+          TripStatus.completed,
+          TripStatus.cancelled,
+        ]),
+      );
+    });
+
+    test('absent has 1 valid next state', () {
+      final states = TripStateMachine.validNextStates(TripStatus.absent);
+      expect(states, hasLength(1));
+      expect(states, contains(TripStatus.cancelled));
+    });
+
+    test('completed has no valid next states', () {
+      final states = TripStateMachine.validNextStates(TripStatus.completed);
+      expect(states, isEmpty);
+    });
+
+    test('cancelled has no valid next states', () {
+      final states = TripStateMachine.validNextStates(TripStatus.cancelled);
+      expect(states, isEmpty);
+    });
+  });
 }

@@ -1,6 +1,5 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
-import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
@@ -13,11 +12,11 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   RouteRepositoryImpl({
     required RemoteDatasource remoteDatasource,
     required LocalDatasource localDatasource,
+    required super.talker,
   })  : _remoteDatasource = remoteDatasource,
         _localDatasource = localDatasource;
   final RemoteDatasource _remoteDatasource;
   final LocalDatasource _localDatasource;
-  final Logger _logger = Logger();
 
   @override
   Future<Either<Failure, List<Route>>> getActiveRoutes() async {
@@ -28,10 +27,10 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
       try {
         await _localDatasource.cacheRoutes(routes);
       } catch (e, st) {
-        _logger.w(
+        log.warning(
           'Failed to cache active routes; serving from network only',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
       }
       return Right(routes);
@@ -42,10 +41,10 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
           return Right(cached);
         }
       } catch (cacheError, st) {
-        _logger.w(
+        log.warning(
           'Failed to read cached routes during offline fallback',
-          error: cacheError,
-          stackTrace: st,
+          cacheError,
+          st,
         );
       }
       return Left(mapException(e));
@@ -61,10 +60,10 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
       try {
         await _localDatasource.cacheRoutes(routes);
       } catch (e, st) {
-        _logger.w(
+        log.warning(
           'Failed to cache driver routes; serving from network only',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
       }
       return Right(routes);
@@ -75,10 +74,10 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
           return Right(cached);
         }
       } catch (cacheError, st) {
-        _logger.w(
+        log.warning(
           'Failed to read cached driver routes during offline fallback',
-          error: cacheError,
-          stackTrace: st,
+          cacheError,
+          st,
         );
       }
       return Left(mapException(e));
@@ -100,10 +99,10 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
         final route = cached.firstWhere((r) => r.id == id);
         return Right(route);
       } catch (cacheError, st) {
-        _logger.w(
+        log.warning(
           'Failed to read cached route during offline fallback',
-          error: cacheError,
-          stackTrace: st,
+          cacheError,
+          st,
         );
       }
       return Left(mapException(e));

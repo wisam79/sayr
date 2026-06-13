@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
@@ -48,11 +49,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
         }),
         (_) {
           Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context).changePasswordSuccess),
-              backgroundColor: AppColors.success,
-            ),
+          SayrFlash.success(
+            context,
+            AppLocalizations.of(context).changePasswordSuccess,
           );
         },
       );

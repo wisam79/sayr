@@ -112,7 +112,7 @@ class SayrSupabase {
 
       if (idToken == null) {
         throw const supabase.AuthException(
-          'لم يتم استرداد معرف الهوية (ID Token) من Google.',
+          'google_id_token_missing',
         );
       }
 

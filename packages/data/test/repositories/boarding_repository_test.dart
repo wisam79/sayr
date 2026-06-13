@@ -5,6 +5,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 
+import 'package:talker_flutter/talker_flutter.dart';
+
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
 
 void main() {
@@ -13,7 +15,10 @@ void main() {
 
   setUp(() {
     mockRemote = MockRemoteDatasource();
-    repository = BoardingRepositoryImpl(remoteDatasource: mockRemote);
+    repository = BoardingRepositoryImpl(
+      remoteDatasource: mockRemote,
+      talker: Talker(),
+    );
   });
 
   const testTripId = TripId('trip-1');

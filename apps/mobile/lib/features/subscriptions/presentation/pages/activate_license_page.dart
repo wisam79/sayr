@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
@@ -166,19 +167,9 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
             } else if (state is LicensePreviewLoaded) {
               _showPreviewBottomSheet(context, state.preview);
             } else if (state is LicensePreviewError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.failure.toLocalizedString(context)),
-                  backgroundColor: AppColors.error,
-                ),
-              );
+              SayrFlash.error(context, state.failure.toLocalizedString(context));
             } else if (state is SubscriptionsError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.failure.toLocalizedString(context)),
-                  backgroundColor: AppColors.error,
-                ),
-              );
+              SayrFlash.error(context, state.failure.toLocalizedString(context));
             }
           },
           builder: (context, state) {

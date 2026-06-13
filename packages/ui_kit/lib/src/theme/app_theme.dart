@@ -98,11 +98,11 @@ class AppTheme {
         ),
         cardTheme: CardThemeData(
           color: AppColors.surface,
-          elevation: 0,
+          elevation: 0.5,
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-            side: const BorderSide(color: AppColors.border),
+            side: BorderSide.none,
           ),
         ),
         dividerTheme: const DividerThemeData(
@@ -118,9 +118,11 @@ class AppTheme {
           elevation: 8,
         ),
         navigationBarTheme: NavigationBarThemeData(
-          height: 64,
+          height: 72,
+          elevation: 0,
           backgroundColor: AppColors.surface,
-          indicatorColor: Colors.transparent,
+          indicatorColor: AppColors.primary.withValues(alpha: 0.12),
+          surfaceTintColor: Colors.transparent,
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
@@ -236,7 +238,7 @@ class AppTheme {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-            side: const BorderSide(color: AppColors.borderDark),
+            side: BorderSide.none,
           ),
         ),
         dividerTheme: const DividerThemeData(
@@ -252,9 +254,10 @@ class AppTheme {
           elevation: 8,
         ),
         navigationBarTheme: NavigationBarThemeData(
-          height: 64,
+          height: 72,
+          elevation: 0,
           backgroundColor: AppColors.darkSurface,
-          indicatorColor: Colors.transparent,
+          indicatorColor: const Color(0xFF1A3A2A),
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {

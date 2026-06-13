@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_beep/flutter_beep.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/boarding/presentation/bloc/boarding_scanner_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
@@ -85,28 +85,19 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
         listener: (context, state) {
           if (state is BoardingScannerReady && state.lastScan != null) {
             final scan = state.lastScan!;
-            final messenger = ScaffoldMessenger.of(context)..clearSnackBars();
             if (scan is BoardingScanSuccess) {
-              HapticFeedback.successNotification();
-              FlutterBeep.beep();
+              SystemSound.play(SystemSoundType.click);
 
-              messenger.showSnackBar(
-                SnackBar(
-                  backgroundColor: AppColors.success,
-                  content: Text(
-                    l10n.boardingScanSuccess(scan.record.studentName ?? ''),
-                  ),
-                ),
+              SayrFlash.success(
+                context,
+                l10n.boardingScanSuccess(scan.record.studentName ?? ''),
               );
             } else if (scan is BoardingScanFailure) {
-              HapticFeedback.errorNotification();
-              FlutterBeep.beep(false);
+              SystemSound.play(SystemSoundType.click);
 
-              messenger.showSnackBar(
-                SnackBar(
-                  backgroundColor: AppColors.error,
-                  content: Text(scan.failure.toLocalizedString(context)),
-                ),
+              SayrFlash.error(
+                context,
+                scan.failure.toLocalizedString(context),
               );
             }
             Future.delayed(const Duration(seconds: 2), () {

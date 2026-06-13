@@ -137,7 +137,7 @@ class DriverHomeTab extends StatelessWidget {
   }
 }
 
-class DriverStatCard extends StatelessWidget {
+class DriverStatCard extends StatefulWidget {
   const DriverStatCard({
     required this.icon,
     required this.value,
@@ -152,44 +152,129 @@ class DriverStatCard extends StatelessWidget {
   final Color color;
 
   @override
+  State<DriverStatCard> createState() => _DriverStatCardState();
+}
+
+class _DriverStatCardState extends State<DriverStatCard> with SingleTickerProviderStateMixin {
+  late AnimationController _entranceController;
+  late Animation<double> _opacityAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
+    );
+    _slideAnimation = Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+      CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _entranceController.value = 1.0;
+    } else if (!_entranceController.isAnimating && _entranceController.value < 1.0) {
+      _entranceController.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _entranceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Semantics(
-      label: '$label: $value',
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isDark ? AppColors.borderDark : AppColors.border,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                Icon(icon, color: color, size: 24),
-              ],
+    final disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+
+    // Parse the value string as a number
+    final double? parsedVal = double.tryParse(widget.value);
+    final isDouble = widget.value.contains('.');
+
+    Widget buildValue(double val) {
+      String formatted;
+      if (isDouble) {
+        formatted = val.toStringAsFixed(1);
+      } else {
+        formatted = val.toInt().toString();
+      }
+      return Text(
+        formatted,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+      );
+    }
+
+    Widget valueWidget;
+    if (parsedVal == null || disableAnimations) {
+      valueWidget = Text(
+        widget.value,
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-          ],
+      );
+    } else {
+      valueWidget = TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0.0, end: parsedVal),
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeOutCubic,
+        builder: (context, val, child) {
+          return buildValue(val);
+        },
+      );
+    }
+
+    Widget cardContent = Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? AppColors.borderDark : AppColors.border,
         ),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              valueWidget,
+              Icon(widget.icon, color: widget.color, size: 24),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            widget.label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+        ],
+      ),
+    );
+
+    return Semantics(
+      label: '${widget.label}: ${widget.value}',
+      child: disableAnimations
+          ? cardContent
+          : FadeTransition(
+              opacity: _opacityAnimation,
+              child: SlideTransition(
+                position: _slideAnimation,
+                child: cardContent,
+              ),
+            ),
     );
   }
 }

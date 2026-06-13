@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/trip_details_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
@@ -146,7 +147,6 @@ class _RatingSheetState extends State<RatingSheet> {
               onPressed: _selectedRating == 0
                   ? null
                   : () async {
-                      final messenger = ScaffoldMessenger.of(context);
                       final navigator = Navigator.of(context);
                       final rootNavigator =
                           Navigator.of(context, rootNavigator: true);
@@ -219,12 +219,7 @@ class _RatingSheetState extends State<RatingSheet> {
                             }
                           });
                         } else {
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.ratingFailed),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
+                          SayrFlash.error(context, l10n.ratingFailed);
                         }
                       }
                     },

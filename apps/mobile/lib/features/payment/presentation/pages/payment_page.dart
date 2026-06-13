@@ -68,130 +68,137 @@ class _PaymentPageState extends State<PaymentPage> {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(title: Text(l10n.payment)),
-      body: BlocConsumer<PaymentBloc, PaymentState>(
-        listener: (context, state) {
-          if (state is PaymentSuccess) {
-            SayrFlash.success(context, l10n.paymentSuccessSubscription);
-            Navigator.of(context).pop(true);
-          }
-          if (state is PaymentFailed) {
-            SayrFlash.error(
-              context,
-              state.failure.toLocalizedString(context),
-            );
+      body: PopScope(
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) {
+            context.read<PaymentBloc>().add(const PaymentReset());
           }
         },
-        builder: (context, state) {
-          return Padding(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (state is PaymentLoading) ...[
-                  const SizedBox(height: AppSpacing.xl),
-                  const Center(child: CircularProgressIndicator()),
-                  const SizedBox(height: AppSpacing.lg),
-                  Center(
-                    child: Text(
-                      state.message ?? l10n.processing,
-                      style: Theme.of(context).textTheme.bodyLarge,
+        child: BlocConsumer<PaymentBloc, PaymentState>(
+          listener: (context, state) {
+            if (state is PaymentSuccess) {
+              SayrFlash.success(context, l10n.paymentSuccessSubscription);
+              Navigator.of(context).pop(true);
+            }
+            if (state is PaymentFailed) {
+              SayrFlash.error(
+                context,
+                state.failure.toLocalizedString(context),
+              );
+            }
+          },
+          builder: (context, state) {
+            return Padding(
+              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (state is PaymentLoading) ...[
+                    const SizedBox(height: AppSpacing.xl),
+                    const Center(child: CircularProgressIndicator()),
+                    const SizedBox(height: AppSpacing.lg),
+                    Center(
+                      child: Text(
+                        state.message ?? l10n.processing,
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     ),
-                  ),
-                ],
-                if (state is PaymentUrlReady) ...[
-                  const Icon(
-                    Icons.payment,
-                    size: 64,
-                    color: AppColors.primary,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    l10n.paymentViaZainCash,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    l10n.amount('${state.amount}', state.currency),
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  PrimaryButton(
-                    label: l10n.openZainCash,
-                    icon: Icons.open_in_new,
-                    onPressed: () => _launchPaymentUrl(state.paymentUrl),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SecondaryButton(
-                    label: l10n.cancel,
-                    onPressed: () {
-                      context.read<PaymentBloc>().add(const PaymentReset());
-                      Navigator.of(context).pop(false);
-                    },
-                  ),
-                ],
-                if (state is PaymentAwaitingCompletion) ...[
-                  const SizedBox(height: AppSpacing.xl),
-                  const Center(child: CircularProgressIndicator()),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    l10n.awaitingPaymentConfirmation,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    l10n.completePaymentInZainCash,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-                if (state is PaymentFailed) ...[
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    l10n.paymentFailed,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    state.failure.toLocalizedString(context),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  PrimaryButton(
-                    label: l10n.retry,
-                    icon: Icons.refresh,
-                    onPressed: () => context.read<PaymentBloc>().add(
-                          PaymentStartZainCash(
-                            routeId: widget.routeId,
-                            amount: widget.amount,
-                            currency: 'IQD',
+                  ],
+                  if (state is PaymentUrlReady) ...[
+                    const Icon(
+                      Icons.payment,
+                      size: 64,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.paymentViaZainCash,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      l10n.amount('${state.amount}', state.currency),
+                      style: Theme.of(context).textTheme.titleLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    PrimaryButton(
+                      label: l10n.openZainCash,
+                      icon: Icons.open_in_new,
+                      onPressed: () => _launchPaymentUrl(state.paymentUrl),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SecondaryButton(
+                      label: l10n.cancel,
+                      onPressed: () {
+                        context.read<PaymentBloc>().add(const PaymentReset());
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+                  ],
+                  if (state is PaymentAwaitingCompletion) ...[
+                    const SizedBox(height: AppSpacing.xl),
+                    const Center(child: CircularProgressIndicator()),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.awaitingPaymentConfirmation,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      l10n.completePaymentInZainCash,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
                           ),
-                        ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SecondaryButton(
-                    label: l10n.help,
-                    icon: Icons.help_outline,
-                    onPressed: () => _launchWhatsAppSupport(context),
-                  ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                  if (state is PaymentFailed) ...[
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppColors.error,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      l10n.paymentFailed,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      state.failure.toLocalizedString(context),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    PrimaryButton(
+                      label: l10n.retry,
+                      icon: Icons.refresh,
+                      onPressed: () => context.read<PaymentBloc>().add(
+                            PaymentStartZainCash(
+                              routeId: widget.routeId,
+                              amount: widget.amount,
+                              currency: 'IQD',
+                            ),
+                          ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    SecondaryButton(
+                      label: l10n.help,
+                      icon: Icons.help_outline,
+                      onPressed: () => _launchWhatsAppSupport(context),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          );
-        },
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -213,7 +220,7 @@ class _PaymentPageState extends State<PaymentPage> {
     } else if (context.mounted) {
       SayrFlash.error(
         context,
-        AppLocalizations.of(context).locationUnavailable,
+        AppLocalizations.of(context).unexpectedError,
       );
     }
   }
