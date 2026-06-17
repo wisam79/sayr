@@ -169,35 +169,7 @@ CREATE POLICY "conversations_insert_participants"
 
 
 -- ============================================================
--- Fix #6: Tighter geofencing checks for validate_boarding
--- ============================================================
-CREATE OR REPLACE FUNCTION public.validate_boarding(
-  p_token TEXT,
-  p_trip_id UUID,
-  p_lat NUMERIC DEFAULT NULL,
-  p_lng NUMERIC DEFAULT NULL
-)
-RETURNS TABLE (
-  boarding_id UUID,
-  student_id UUID,
-  student_name TEXT,
-  subscription_id UUID,
-  boarded_at TIMESTAMPTZ
-)
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_user_id UUID := auth.uid();
-  v_trip RECORD;
-  v_token_record RECORD;
-  v_token_hash TEXT;
-  v_boarding_id UUID;
-  v_student_name TEXT;
-  v_geo_ok BOOLEAN := true;
-END;
-$$;
+
 
 -- Redefining with actual implementation (with 100m geofence)
 CREATE OR REPLACE FUNCTION public.validate_boarding(
