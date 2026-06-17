@@ -42,6 +42,27 @@ jobs:
       - name: Run tests with coverage
         run: melos run test:coverage
 
+      - name: Merge coverage reports
+        run: |
+          mkdir -p coverage
+          find . -path ./.git -prune -o -name 'lcov.info' -print | while read -r f; do
+            echo "Including $f"
+            if [ -f coverage/lcov.info ]; then
+              # Strip the closing line and append
+              sed -e '$d' "$f" >> coverage/lcov.info
+            else
+              cp "$f" coverage/lcov.info
+            fi
+          done
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/lcov.info
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:

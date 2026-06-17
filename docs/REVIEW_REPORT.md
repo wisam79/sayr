@@ -1,5 +1,18 @@
 # 📋 تقرير المراجعة الشامل لـ Sayr v3
 
+> ⚠️ **تنبيه (2026-06-17): هذا التقرير تاريخي كُتب في 2026-06-08، وأغلب مشاكله الكودية أُصلحت لاحقاً.**
+>
+> من المشاكل التي حُلّت بعده:
+> - **OSRM**: لم يعد يستخدم public server — صار عبر Supabase Edge Function proxy (`get-route-geometry`) مع hosted OSRM + `retry` package.
+> - **Failure**: النصوص العربية hardcoded أُزيلت — `Failure` أصبح sealed نظيف والـ UI يترجمه عبر `failure_extension.toLocalizedString()`.
+> - **BLE mock**: لم يعد يولّد OTP وهمياً — مقيّد بـ `kDebugMode` ويطبع فقط.
+> - **Geo verification**: استُبدل bounding box بـ `ST_DistanceSphere` عبر `postgis_geo_verification` migration.
+> - **try/catch duplication**: أُضيف `BaseRepository.guard()` مع `_mapPostgrestException` (خرائط أكواد 23505/23503/42501/...).
+> - **الصفحات الكبيرة**: `home_page` من 930 → 304 سطر،`driver_trip_controls_page` من 570 → 385 سطر.
+> - **رسائل خطأ مختلطة**: تُترجم الآن عبر `toLocalizedString(context)`.
+>
+> يُحتفظ بهذا الملف **كسجل تاريخي للقرارات فقط**. للوضع الراهن راجع `git log` و `AGENTS.md`.
+
 > مراجعة صارمة لكامل التطبيق — معمارية، كود، أمان، قابلية توسع، ديون تقنية، فرص مفتوحة المصدر.
 > **التاريخ**: 2026-06-08
 

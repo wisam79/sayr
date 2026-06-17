@@ -1,7 +1,5 @@
 name: sayr
 
-repository: https://github.com/your-org/sayr
-
 packages:
   - apps/*
   - packages/*

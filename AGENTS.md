@@ -1,6 +1,6 @@
 # Sayr v3 - دليل المطورين والـ AI Agents
 
-> **آخر تحديث**: 2026-06-09
+> **آخر تحديث**: 2026-06-17
 > **الإصدار**: 3.0.0
 > **الحالة**: ✅ قيد الإنتاج (Production-Ready)
 
@@ -29,9 +29,9 @@
 │                │                                         │
 │                ▼                                         │
 │  ☁️ Supabase Backend (لا تغيير من v1)                    │
-│     ├─ PostgreSQL + 32+ migrations                       │
-│     ├─ 20+ RPCs + 7 Triggers                            │
-│     ├─ Edge Functions (Deno) - 6 functions              │
+│     ├─ PostgreSQL + 43 migrations                        │
+│     ├─ 69 RPCs + 25 Triggers                            │
+│     ├─ Edge Functions (Deno) - 10 functions             │
 │     └─ Auth (JWT + app_metadata)                         │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
@@ -42,12 +42,12 @@
 ```
 sayr/
 ├── apps/
-│   └── mobile/                  # Flutter app (Android أولاً)
+│   ├── mobile/                  # Flutter app (Android أولاً)
+│   └── admin/                   # Admin dashboard (React + Vite, GitHub Pages)
 ├── packages/
 │   ├── core/                    # Domain نقي (Pure Dart)
 │   ├── data/                    # Supabase layer + Repositories
-│   ├── ui_kit/                  # Design system + Material 3
-│   └── features/                # 11 feature modules
+│   └── ui_kit/                  # Design system + Material 3
 ├── supabase/                    # Backend (لا تغيير)
 │   ├── migrations/
 │   └── functions/
@@ -412,44 +412,41 @@ class MyPage extends StatelessWidget {
 
 ## 3. هيكل الـ Feature (Feature Structure)
 
-كل feature يتبع هذا الهيكل **بدون استثناء**:
+> **ملاحظة مهمة**: المشروع يتبع **Clean Architecture موزّعة عبر الحزم**، لا feature-by-feature.
+> - **Domain** (entities, repositories interfaces, failures, FSM) → في `packages/core/`
+> - **Data** (datasources, models, repository implementations, drift) → في `packages/data/`
+> - **Presentation** (bloc, pages, widgets) → في `apps/mobile/lib/features/<feature>/`
+
+كل feature في الموبايل يحتوي على طبقة presentation فقط، ويستهلك domain/data من الحزم المشتركة:
 
 ```
-features/<feature_name>/
-├── lib/
-│   ├── data/
-│   │   ├── datasources/
-│   │   │   ├── <feature>_remote_datasource.dart
-│   │   │   └── <feature>_local_datasource.dart
-│   │   ├── models/
-│   │   │   └── <model_name>_model.dart
-│   │   └── repositories/
-│   │       └── <feature>_repository_impl.dart
-│   ├── domain/
-│   │   ├── entities/
-│   │   │   └── <entity>.dart
-│   │   ├── repositories/
-│   │   │   └── <feature>_repository.dart
-│   │   ├── usecases/
-│   │   │   └── <use_case_name>.dart
-│   │   └── failures/
-│   │       └── <feature>_failure.dart
-│   └── presentation/
-│       ├── bloc/
-│       │   ├── <feature>_bloc.dart
-│       │   ├── <feature>_event.dart
-│       │   └── <feature>_state.dart
-│       ├── pages/
-│       │   └── <feature>_page.dart
-│       └── widgets/
-│           └── <widget_name>.dart
-└── test/
-    ├── domain/
-    │   └── usecases/
-    ├── data/
-    │   └── repositories/
-    └── presentation/
-        └── bloc/
+# طبقة Domain (مشتركة) — packages/core/lib/src/
+├── entities/<entity>.dart
+├── repositories/<feature>_repository.dart      # interface
+├── failures/failure.dart                        # sealed Failure موحّد
+├── fsm/                                         # state machines
+└── value_objects/                               # strongly-typed IDs
+
+# طبقة Data (مشتركة) — packages/data/lib/src/
+├── datasources/<feature>_remote_datasource.dart
+├── models/<model_name>_model.dart               # freezed + json_serializable
+└── repositories/<feature>_repository.dart       # extends BaseRepository (guard helper)
+
+# طبقة Presentation (لكل feature) — apps/mobile/lib/features/<feature>/
+└── presentation/
+    ├── bloc/
+    │   ├── <feature>_bloc.dart
+    │   ├── <feature>_event.dart
+    │   └── <feature>_state.dart
+    ├── pages/
+    │   └── <feature>_page.dart
+    └── widgets/
+        └── <widget_name>.dart
+
+# الاختبارات — موزّعة ب mirror البنية
+├── packages/core/test/              # entities, fsm, value_objects
+├── packages/data/test/              # models, repositories
+└── apps/mobile/test/features/       # blocs, pages (widget tests)
 ```
 
 ---

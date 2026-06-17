@@ -2,10 +2,6 @@
 
 > منصة نقل ذكي متكاملة لطلاب الجامعات في العراق
 
-[![Build Status](https://github.com/your-org/sayr/workflows/CI/badge.svg)](https://github.com/your-org/sayr/actions)
-[![Coverage](https://img.shields.io/badge/coverage-80%25-brightgreen)](https://github.com/your-org/sayr)
-[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-
 ## نظرة عامة
 
 **Sayr** (سير) يربط الطلاب بسائقي حافلات النقل الجامعي عبر نظام تراخيص مسبق الدفع، مع تتبع مباشر للرحلة عبر GPS.
@@ -24,12 +20,12 @@
 ```
 sayr/
 ├── apps/
-│   └── mobile/                  # Flutter app
+│   ├── mobile/                  # Flutter app (Android أولاً)
+│   └── admin/                   # Admin dashboard (React + Vite, GitHub Pages)
 ├── packages/
-│   ├── core/                    # Domain نقي
-│   ├── data/                    # Supabase layer
-│   ├── ui_kit/                  # Design system
-│   └── features/                # 11 feature module
+│   ├── core/                    # Domain نقي (Pure Dart)
+│   ├── data/                    # Supabase layer + Repositories
+│   └── ui_kit/                  # Design system + Material 3
 ├── supabase/                    # Backend
 ├── docs/                        # التوثيق
 │   ├── adr/                     # Architecture Decision Records
@@ -48,8 +44,8 @@ sayr/
 
 ### التثبيت
 ```bash
-# استنساخ المشروع
-git clone https://github.com/your-org/sayr.git
+# استنساخ المستودع
+git clone <repo-url>
 cd sayr
 
 # نسخ env
