@@ -41,18 +41,30 @@ import 'package:sayr_mobile/routing/app_router.dart';
 
 // Mock services
 class MockBleBeaconService extends Mock implements BleBeaconService {}
+
 class MockOsrmService extends Mock implements OsrmService {}
+
 class MockOfflineSyncService extends Mock implements OfflineSyncService {}
 
 // Mock classes using mocktail
 class MockAuthRepository extends Mock implements AuthRepository {}
+
 class MockRouteRepository extends Mock implements RouteRepository {}
-class MockSubscriptionRepository extends Mock implements SubscriptionRepository {}
+
+class MockSubscriptionRepository extends Mock
+    implements SubscriptionRepository {}
+
 class MockTripRepository extends Mock implements TripRepository {}
+
 class MockChatRepository extends Mock implements ChatRepository {}
-class MockNotificationsRepository extends Mock implements NotificationsRepository {}
+
+class MockNotificationsRepository extends Mock
+    implements NotificationsRepository {}
+
 class MockEmergencyRepository extends Mock implements EmergencyRepository {}
+
 class MockPaymentRepository extends Mock implements PaymentRepository {}
+
 class MockBoardingRepository extends Mock implements BoardingRepository {}
 
 class TestLocaleCubit extends LocaleCubit {
@@ -408,15 +420,15 @@ void main() {
       when(() => mockBle.startScanning()).thenAnswer((_) async => true);
       when(() => mockBle.stopScanning()).thenAnswer((_) async {});
       when(() => mockBle.startAdvertising(
-        tripId: any(named: 'tripId'),
-        otp: any(named: 'otp'),
-      )).thenAnswer((_) async {});
+            tripId: any(named: 'tripId'),
+            otp: any(named: 'otp'),
+          )).thenAnswer((_) async {});
       when(() => mockBle.stopAdvertising()).thenAnswer((_) async {});
       when(() => mockBle.startRotatingOtpAdvertising(
-        tripId: any(named: 'tripId'),
-        tripRepository: any(named: 'tripRepository'),
-        logger: any(named: 'logger'),
-      )).thenAnswer((_) {});
+            tripId: any(named: 'tripId'),
+            tripRepository: any(named: 'tripRepository'),
+            logger: any(named: 'logger'),
+          )).thenAnswer((_) {});
       when(() => mockBle.stopRotatingOtpAdvertising()).thenAnswer((_) {});
       when(() => mockBle.discoveredTrips).thenAnswer(
         (_) => const Stream.empty(),
@@ -434,7 +446,8 @@ void main() {
       sl.registerSingleton<SubscriptionRepository>(mockSubscriptionRepository);
       sl.registerSingleton<TripRepository>(mockTripRepository);
       sl.registerSingleton<ChatRepository>(mockChatRepository);
-      sl.registerSingleton<NotificationsRepository>(mockNotificationsRepository);
+      sl.registerSingleton<NotificationsRepository>(
+          mockNotificationsRepository);
       sl.registerSingleton<EmergencyRepository>(mockEmergencyRepository);
       sl.registerSingleton<PaymentRepository>(mockPaymentRepository);
       sl.registerSingleton<BoardingRepository>(mockBoardingRepository);
@@ -445,8 +458,7 @@ void main() {
       expect(true, true);
     });
 
-    testWidgets(
-        'auth flow: onboarding → login validation → successful login',
+    testWidgets('auth flow: onboarding → login validation → successful login',
         (tester) async {
       setupGlobalMocks();
       runApp(buildTestApp(sl<AppRouter>()));
@@ -509,9 +521,7 @@ void main() {
       expect(find.textContaining('مرحباً، محمد'), findsOneWidget);
     });
 
-    testWidgets(
-        'student home: tabs, routes, subscriptions',
-        (tester) async {
+    testWidgets('student home: tabs, routes, subscriptions', (tester) async {
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
       when(() => mockAuthRepository.fetchFullProfile())
           .thenAnswer((_) async => testStudent);
@@ -551,8 +561,7 @@ void main() {
       expect(find.text('test@student.iq'), findsOneWidget);
     });
 
-    testWidgets(
-        'language switch: English ↔ Arabic and Student Logout',
+    testWidgets('language switch: English ↔ Arabic and Student Logout',
         (tester) async {
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
       when(() => mockAuthRepository.fetchFullProfile())
@@ -610,7 +619,8 @@ void main() {
       when(() => mockAuthRepository.fetchFullProfile())
           .thenAnswer((_) async => null);
 
-      final confirmLogoutButton = find.widgetWithText(FilledButton, 'تسجيل الخروج');
+      final confirmLogoutButton =
+          find.widgetWithText(FilledButton, 'تسجيل الخروج');
       expect(confirmLogoutButton, findsOneWidget);
       await tester.tap(confirmLogoutButton);
       await tester.safePumpAndSettle(const Duration(seconds: 1));

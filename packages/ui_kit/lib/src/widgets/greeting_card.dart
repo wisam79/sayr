@@ -30,7 +30,8 @@ class GreetingCard extends StatefulWidget {
   State<GreetingCard> createState() => _GreetingCardState();
 }
 
-class _GreetingCardState extends State<GreetingCard> with SingleTickerProviderStateMixin {
+class _GreetingCardState extends State<GreetingCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _shimmerController;
   late Animation<double> _shimmerAnimation;
 
@@ -51,7 +52,8 @@ class _GreetingCardState extends State<GreetingCard> with SingleTickerProviderSt
     super.didChangeDependencies();
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
       _shimmerController.stop();
-    } else if (!_shimmerController.isAnimating && _shimmerController.value < 1.0) {
+    } else if (!_shimmerController.isAnimating &&
+        _shimmerController.value < 1.0) {
       _shimmerController.forward();
     }
   }
@@ -65,7 +67,8 @@ class _GreetingCardState extends State<GreetingCard> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     final hasSubtitle = widget.subtitle != null && widget.subtitle!.isNotEmpty;
-    final disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     return Container(
       width: double.infinity,
@@ -115,7 +118,8 @@ class _GreetingCardState extends State<GreetingCard> with SingleTickerProviderSt
             const Positioned.fill(
               child: CustomPaint(
                 painter: _UniversityGatePainter(
-                  color: Color(0x12FFFFFF), // Opacity increased from 0x0BFFFFFF to 0x12FFFFFF
+                  color: Color(
+                      0x12FFFFFF), // Opacity increased from 0x0BFFFFFF to 0x12FFFFFF
                 ),
               ),
             ),

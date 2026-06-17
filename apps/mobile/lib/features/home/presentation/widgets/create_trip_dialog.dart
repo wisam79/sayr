@@ -19,7 +19,9 @@ class CreateTripDialog extends StatelessWidget {
           title: l10n.createTrip,
           headerIcon: Icons.route_outlined,
           primaryLabel: l10n.create,
-          onPrimaryPressed: (state.selectedRoute == null || state.isSubmitting || state.loadingRoutes)
+          onPrimaryPressed: (state.selectedRoute == null ||
+                  state.isSubmitting ||
+                  state.loadingRoutes)
               ? null
               : () => _createTrip(context, state),
           isPrimaryLoading: state.isSubmitting,
@@ -88,8 +90,10 @@ class CreateTripDialog extends StatelessWidget {
           child: InputDecorator(
             decoration: InputDecoration(
               labelText: l10n.tripTime,
-              prefixIcon: const Icon(Icons.event, color: AppColors.textSecondary),
-              suffixIcon: const Icon(Icons.edit_calendar, color: AppColors.textSecondary),
+              prefixIcon:
+                  const Icon(Icons.event, color: AppColors.textSecondary),
+              suffixIcon: const Icon(Icons.edit_calendar,
+                  color: AppColors.textSecondary),
               border: const OutlineInputBorder(),
             ),
             child: Text(

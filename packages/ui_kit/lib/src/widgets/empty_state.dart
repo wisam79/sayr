@@ -100,7 +100,8 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
         curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
       ),
     );
-    _subtitleSlide = Tween<Offset>(begin: slideOffset, end: Offset.zero).animate(
+    _subtitleSlide =
+        Tween<Offset>(begin: slideOffset, end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entranceController,
         curve: const Interval(0.3, 0.7, curve: Curves.easeOutCubic),
@@ -119,13 +120,13 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
         curve: const Interval(0.4, 0.8, curve: Curves.easeOutCubic),
       ),
     );
-
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _entranceController.value = 1.0;
       _breathingController.stop();
@@ -148,8 +149,10 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations = isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final disableAnimations =
+        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
     Widget iconWidget = Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -212,7 +215,8 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
           const SizedBox(height: AppSpacing.xs),
           disableAnimations
               ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Text(
                     widget.subtitle!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -227,7 +231,8 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
                   child: SlideTransition(
                     position: _subtitleSlide,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                       child: Text(
                         widget.subtitle!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(

@@ -167,9 +167,11 @@ class _ActivateLicensePageState extends State<ActivateLicensePage> {
             } else if (state is LicensePreviewLoaded) {
               _showPreviewBottomSheet(context, state.preview);
             } else if (state is LicensePreviewError) {
-              SayrFlash.error(context, state.failure.toLocalizedString(context));
+              SayrFlash.error(
+                  context, state.failure.toLocalizedString(context));
             } else if (state is SubscriptionsError) {
-              SayrFlash.error(context, state.failure.toLocalizedString(context));
+              SayrFlash.error(
+                  context, state.failure.toLocalizedString(context));
             }
           },
           builder: (context, state) {

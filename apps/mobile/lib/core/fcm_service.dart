@@ -177,7 +177,8 @@ class FcmService {
         );
       });
     } catch (e, st) {
-      _logger.e('FCM: Failed to retrieve or register token', error: e, stackTrace: st);
+      _logger.e('FCM: Failed to retrieve or register token',
+          error: e, stackTrace: st);
     }
   }
 

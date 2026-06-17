@@ -47,7 +47,8 @@ class _ProfileView extends StatefulWidget {
   State<_ProfileView> createState() => _ProfileViewState();
 }
 
-class _ProfileViewState extends State<_ProfileView> with TickerProviderStateMixin {
+class _ProfileViewState extends State<_ProfileView>
+    with TickerProviderStateMixin {
   bool _bleEnabled = false;
   bool _isLoadingBle = true;
   late final AnimationController _avatarRingController;
@@ -65,7 +66,8 @@ class _ProfileViewState extends State<_ProfileView> with TickerProviderStateMixi
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _avatarRingController.stop();
     } else if (!_avatarRingController.isAnimating) {
@@ -134,8 +136,10 @@ class _ProfileViewState extends State<_ProfileView> with TickerProviderStateMixi
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations = isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final disableAnimations =
+        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -153,14 +157,16 @@ class _ProfileViewState extends State<_ProfileView> with TickerProviderStateMixi
                   if (disableAnimations)
                     CustomPaint(
                       size: const Size(88, 88),
-                      painter: _AvatarRingPainter(primaryColor: AppColors.primary),
+                      painter:
+                          _AvatarRingPainter(primaryColor: AppColors.primary),
                     )
                   else
                     RotationTransition(
                       turns: _avatarRingController,
                       child: CustomPaint(
                         size: const Size(88, 88),
-                        painter: _AvatarRingPainter(primaryColor: AppColors.primary),
+                        painter:
+                            _AvatarRingPainter(primaryColor: AppColors.primary),
                       ),
                     ),
                   Container(

@@ -100,7 +100,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
 
     if (defaultTargetPlatform == TargetPlatform.android) {
       final isAr = Localizations.localeOf(context).languageCode == 'ar';
-      final notificationTitle = isAr ? 'تتبع الرحلة نشط' : 'Trip Tracking Active';
+      final notificationTitle =
+          isAr ? 'تتبع الرحلة نشط' : 'Trip Tracking Active';
       final notificationText = isAr
           ? 'تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.'
           : 'Sayr is tracking your location in the background for this trip.';
@@ -216,7 +217,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
                 _stopBleProximity();
               }
             } else if (state is TrackingError) {
-              SayrFlash.error(context, state.failure.toLocalizedString(context));
+              SayrFlash.error(
+                  context, state.failure.toLocalizedString(context));
             } else {
               _stopLocationTracking();
               _stopBleProximity();

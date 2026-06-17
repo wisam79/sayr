@@ -61,4 +61,3 @@ Future<void> pumpWithBloc<B extends StateStreamableSource<S>, S>(
   );
   await tester.pumpAndSettle();
 }
-

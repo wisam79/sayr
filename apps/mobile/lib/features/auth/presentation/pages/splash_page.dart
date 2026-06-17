@@ -73,7 +73,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 2),
     );
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (!isTest) {
       _speedController.repeat();
     }

@@ -39,7 +39,8 @@ void main() {
   }
 
   testWidgets('renders loader when state is PaymentLoading', (tester) async {
-    when(() => mockPaymentBloc.state).thenReturn(const PaymentLoading(message: 'Generating transaction...'));
+    when(() => mockPaymentBloc.state)
+        .thenReturn(const PaymentLoading(message: 'Generating transaction...'));
 
     await tester.pumpWidget(
       wrap(
@@ -55,7 +56,9 @@ void main() {
     expect(find.text('Generating transaction...'), findsOneWidget);
   });
 
-  testWidgets('renders Zain Cash options and Zain Cash button when state is PaymentUrlReady', (tester) async {
+  testWidgets(
+      'renders Zain Cash options and Zain Cash button when state is PaymentUrlReady',
+      (tester) async {
     when(() => mockPaymentBloc.state).thenReturn(
       const PaymentUrlReady(
         paymentId: 'pay-123',
@@ -82,8 +85,11 @@ void main() {
     expect(find.text('Cancel'), findsOneWidget);
   });
 
-  testWidgets('renders awaiting completion message when state is PaymentAwaitingCompletion', (tester) async {
-    when(() => mockPaymentBloc.state).thenReturn(const PaymentAwaitingCompletion(paymentId: 'pay-123'));
+  testWidgets(
+      'renders awaiting completion message when state is PaymentAwaitingCompletion',
+      (tester) async {
+    when(() => mockPaymentBloc.state)
+        .thenReturn(const PaymentAwaitingCompletion(paymentId: 'pay-123'));
 
     await tester.pumpWidget(
       wrap(
@@ -97,10 +103,13 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('Awaiting payment confirmation...'), findsOneWidget);
-    expect(find.text('Complete the payment in Zain Cash app then return here'), findsOneWidget);
+    expect(find.text('Complete the payment in Zain Cash app then return here'),
+        findsOneWidget);
   });
 
-  testWidgets('renders failure state with retry and help buttons when state is PaymentFailed', (tester) async {
+  testWidgets(
+      'renders failure state with retry and help buttons when state is PaymentFailed',
+      (tester) async {
     when(() => mockPaymentBloc.state).thenReturn(
       const PaymentFailed(
         failure: ServerFailure(message: 'Zain Cash API Error'),

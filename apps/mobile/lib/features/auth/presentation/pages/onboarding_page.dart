@@ -26,7 +26,8 @@ class _OnboardingView extends StatefulWidget {
   State<_OnboardingView> createState() => _OnboardingViewState();
 }
 
-class _OnboardingViewState extends State<_OnboardingView> with TickerProviderStateMixin {
+class _OnboardingViewState extends State<_OnboardingView>
+    with TickerProviderStateMixin {
   final PageController _pageController = PageController();
   List<_OnboardingData>? _pages;
 
@@ -74,7 +75,8 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
         curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
       ),
     );
-    _titleSlide = Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+    _titleSlide =
+        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.2, 0.6, curve: Curves.easeOutCubic),
@@ -87,7 +89,8 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
         curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
       ),
     );
-    _descSlide = Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+    _descSlide =
+        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.3, 0.7, curve: Curves.easeOutCubic),
@@ -100,7 +103,6 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
         curve: Curves.easeInOut,
       ),
     );
-
   }
 
   @override
@@ -108,8 +110,10 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
     super.didChangeDependencies();
     _pages ??= _buildPages(context);
 
-    final isUnderTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    if ((MediaQuery.maybeDisableAnimationsOf(context) ?? false) || isUnderTest) {
+    final isUnderTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if ((MediaQuery.maybeDisableAnimationsOf(context) ?? false) ||
+        isUnderTest) {
       _entryController.value = 1.0;
       _pulseController.stop();
     } else {
@@ -169,8 +173,10 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
   }
 
   Widget _buildIconContainer(_OnboardingData page) {
-    final isUnderTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations = (MediaQuery.maybeDisableAnimationsOf(context) ?? false) || isUnderTest;
+    final isUnderTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final disableAnimations =
+        (MediaQuery.maybeDisableAnimationsOf(context) ?? false) || isUnderTest;
     final innerCircle = Container(
       width: 130,
       height: 130,
@@ -246,7 +252,8 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
                 controller: _pageController,
                 onPageChanged: (index) {
                   context.read<OnboardingCubit>().setPage(index);
-                  if (!(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
+                  if (!(MediaQuery.maybeDisableAnimationsOf(context) ??
+                      false)) {
                     _entryController.forward(from: 0.0);
                   }
                 },
@@ -258,8 +265,13 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
                   return AnimatedBuilder(
                     animation: _entryController,
                     builder: (context, child) {
-                      final isUnderTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-                      final disableAnimations = (MediaQuery.maybeDisableAnimationsOf(context) ?? false) || isUnderTest;
+                      final isUnderTest = WidgetsBinding.instance.runtimeType
+                          .toString()
+                          .contains('Test');
+                      final disableAnimations =
+                          (MediaQuery.maybeDisableAnimationsOf(context) ??
+                                  false) ||
+                              isUnderTest;
                       if (disableAnimations) {
                         return Padding(
                           padding: const EdgeInsets.all(AppSpacing.xl),
@@ -270,7 +282,10 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
                               const SizedBox(height: AppSpacing.xxl),
                               Text(
                                 page.title,
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                                 textAlign: TextAlign.center,
@@ -278,7 +293,10 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
                               const SizedBox(height: AppSpacing.md),
                               Text(
                                 page.description,
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
                                       color: AppColors.textSecondary,
                                     ),
                                 textAlign: TextAlign.center,
@@ -309,7 +327,10 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
                                 position: _titleSlide,
                                 child: Text(
                                   page.title,
-                                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                   textAlign: TextAlign.center,
@@ -324,7 +345,10 @@ class _OnboardingViewState extends State<_OnboardingView> with TickerProviderSta
                                 position: _descSlide,
                                 child: Text(
                                   page.description,
-                                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge
+                                      ?.copyWith(
                                         color: AppColors.textSecondary,
                                       ),
                                   textAlign: TextAlign.center,

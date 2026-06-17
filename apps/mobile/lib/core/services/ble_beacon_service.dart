@@ -38,7 +38,8 @@ class BleBeaconService {
     required TripId tripId,
     required String otp,
   }) async {
-    _logger.w('BLE advertising is temporarily disabled for security reasons (Vulnerability #2)');
+    _logger.w(
+        'BLE advertising is temporarily disabled for security reasons (Vulnerability #2)');
     _isMockMode = true;
     _startMockAdvertising(tripId, otp);
   }
@@ -61,7 +62,8 @@ class BleBeaconService {
 
   /// Starts scanning for nearby Sayr Beacons.
   Future<bool> startScanning() async {
-    _logger.w('BLE scanning is temporarily disabled for security reasons (Vulnerability #2)');
+    _logger.w(
+        'BLE scanning is temporarily disabled for security reasons (Vulnerability #2)');
     _isMockMode = true;
     _startMockScanning();
     return false;

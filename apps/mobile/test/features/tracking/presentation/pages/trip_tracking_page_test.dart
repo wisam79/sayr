@@ -14,10 +14,15 @@ import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 class MockTripRepository extends Mock implements TripRepository {}
+
 class MockAuthRepository extends Mock implements AuthRepository {}
+
 class MockRouteRepository extends Mock implements RouteRepository {}
+
 class MockDriverRepository extends Mock implements DriverRepository {}
+
 class MockRatingRepository extends Mock implements RatingRepository {}
+
 class MockEmergencyBloc extends MockBloc<EmergencyEvent, EmergencyState>
     implements EmergencyBloc {}
 
@@ -66,7 +71,8 @@ void main() {
     scheduledAt: DateTime(2026, 6, 9, 12),
     startedAt: DateTime(2026, 6, 9, 12, 5),
     lastLocation: const Coordinates(latitude: 33.3128, longitude: 44.3615),
-    routeStartLocation: const Coordinates(latitude: 33.3120, longitude: 44.3610),
+    routeStartLocation:
+        const Coordinates(latitude: 33.3120, longitude: 44.3610),
     routeEndLocation: const Coordinates(latitude: 33.3140, longitude: 44.3630),
   );
 
@@ -112,22 +118,32 @@ void main() {
   }
 
   testWidgets('renders loading state initially', (tester) async {
-    when(() => mockTripRepo.watchTrip(any())).thenAnswer((_) => const Stream.empty());
+    when(() => mockTripRepo.watchTrip(any()))
+        .thenAnswer((_) => const Stream.empty());
 
-    await tester.pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
+    await tester
+        .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
     await tester.pump();
 
     expect(find.byType(LoadingWidget), findsOneWidget);
   });
 
-  testWidgets('renders map and route details when trip watches and details load', (tester) async {
-    when(() => mockTripRepo.watchTrip(any())).thenAnswer((_) => Stream.value(testTrip));
-    when(() => mockRouteRepo.getById(any())).thenAnswer((_) async => Right(testRoute));
-    when(() => mockDriverRepo.getDriverById(any())).thenAnswer((_) async => Right(testDriver));
-    when(() => mockDriverRepo.getDriverProfile(any())).thenAnswer((_) async => Right(testDriverProfile));
-    when(() => mockRatingRepo.getTripRating(any())).thenAnswer((_) async => const Right(null));
+  testWidgets(
+      'renders map and route details when trip watches and details load',
+      (tester) async {
+    when(() => mockTripRepo.watchTrip(any()))
+        .thenAnswer((_) => Stream.value(testTrip));
+    when(() => mockRouteRepo.getById(any()))
+        .thenAnswer((_) async => Right(testRoute));
+    when(() => mockDriverRepo.getDriverById(any()))
+        .thenAnswer((_) async => Right(testDriver));
+    when(() => mockDriverRepo.getDriverProfile(any()))
+        .thenAnswer((_) async => Right(testDriverProfile));
+    when(() => mockRatingRepo.getTripRating(any()))
+        .thenAnswer((_) async => const Right(null));
 
-    await tester.pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
+    await tester
+        .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
     await tester.pump();
     await tester.pumpAndSettle();
 
@@ -143,9 +159,11 @@ void main() {
   });
 
   testWidgets('renders error view when trip watching fails', (tester) async {
-    when(() => mockTripRepo.watchTrip(any())).thenAnswer((_) => Stream.error(const ServerFailure(message: 'Connection failed')));
+    when(() => mockTripRepo.watchTrip(any())).thenAnswer(
+        (_) => Stream.error(const ServerFailure(message: 'Connection failed')));
 
-    await tester.pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
+    await tester
+        .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
     await tester.pump();
     await tester.pumpAndSettle();
 

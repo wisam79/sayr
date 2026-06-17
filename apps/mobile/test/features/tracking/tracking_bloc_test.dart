@@ -13,6 +13,7 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.d
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 
 class MockTripRepository extends Mock implements TripRepository {}
+
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
@@ -209,15 +210,17 @@ void main() {
         ),
       ),
       expect: () => [
-        isA<TrackingDriverActive>().having(
-          (s) => s.trip.status,
-          'status',
-          TripStatus.inTransit,
-        ).having(
-          (s) => s.isTrackingLocation,
-          'isTrackingLocation',
-          true,
-        ),
+        isA<TrackingDriverActive>()
+            .having(
+              (s) => s.trip.status,
+              'status',
+              TripStatus.inTransit,
+            )
+            .having(
+              (s) => s.isTrackingLocation,
+              'isTrackingLocation',
+              true,
+            ),
       ],
     );
 

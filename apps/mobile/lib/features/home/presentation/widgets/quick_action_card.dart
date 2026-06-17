@@ -19,7 +19,8 @@ class QuickActionCard extends StatefulWidget {
   State<QuickActionCard> createState() => _QuickActionCardState();
 }
 
-class _QuickActionCardState extends State<QuickActionCard> with TickerProviderStateMixin {
+class _QuickActionCardState extends State<QuickActionCard>
+    with TickerProviderStateMixin {
   late AnimationController _scaleController;
   late AnimationController _bounceController;
 
@@ -43,11 +44,13 @@ class _QuickActionCardState extends State<QuickActionCard> with TickerProviderSt
     );
     _bounceAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: -3.0).chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween<double>(begin: 0.0, end: -3.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
         weight: 33,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: -3.0, end: 0.0).chain(CurveTween(curve: Curves.elasticOut)),
+        tween: Tween<double>(begin: -3.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.elasticOut)),
         weight: 67,
       ),
     ]).animate(_bounceController);
@@ -68,7 +71,9 @@ class _QuickActionCardState extends State<QuickActionCard> with TickerProviderSt
 
   void _handleTapUp(TapUpDetails details) {
     if (!(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
-      _scaleController.animateTo(0.0, duration: const Duration(milliseconds: 200), curve: Curves.elasticOut);
+      _scaleController.animateTo(0.0,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.elasticOut);
       _bounceController.forward(from: 0.0);
     }
     widget.onTap();
@@ -83,7 +88,8 @@ class _QuickActionCardState extends State<QuickActionCard> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     Widget iconContainer = Container(
       width: 44,

@@ -155,7 +155,8 @@ class DriverStatCard extends StatefulWidget {
   State<DriverStatCard> createState() => _DriverStatCardState();
 }
 
-class _DriverStatCardState extends State<DriverStatCard> with SingleTickerProviderStateMixin {
+class _DriverStatCardState extends State<DriverStatCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _entranceController;
   late Animation<double> _opacityAnimation;
   late Animation<Offset> _slideAnimation;
@@ -170,7 +171,8 @@ class _DriverStatCardState extends State<DriverStatCard> with SingleTickerProvid
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOut),
     );
-    _slideAnimation = Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
       CurvedAnimation(parent: _entranceController, curve: Curves.easeOutCubic),
     );
   }
@@ -180,7 +182,8 @@ class _DriverStatCardState extends State<DriverStatCard> with SingleTickerProvid
     super.didChangeDependencies();
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
       _entranceController.value = 1.0;
-    } else if (!_entranceController.isAnimating && _entranceController.value < 1.0) {
+    } else if (!_entranceController.isAnimating &&
+        _entranceController.value < 1.0) {
       _entranceController.forward();
     }
   }
@@ -194,7 +197,8 @@ class _DriverStatCardState extends State<DriverStatCard> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     // Parse the value string as a number
     final double? parsedVal = double.tryParse(widget.value);

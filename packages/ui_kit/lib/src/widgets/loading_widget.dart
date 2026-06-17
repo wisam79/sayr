@@ -14,7 +14,8 @@ class LoadingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -40,7 +41,8 @@ class _BrandedSpinner extends StatefulWidget {
   State<_BrandedSpinner> createState() => _BrandedSpinnerState();
 }
 
-class _BrandedSpinnerState extends State<_BrandedSpinner> with TickerProviderStateMixin {
+class _BrandedSpinnerState extends State<_BrandedSpinner>
+    with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late AnimationController _rotateController;
   late Animation<double> _pulseAnimation;
@@ -55,7 +57,8 @@ class _BrandedSpinnerState extends State<_BrandedSpinner> with TickerProviderSta
     _pulseAnimation = TweenSequence<double>([
       TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.1), weight: 50),
       TweenSequenceItem(tween: Tween<double>(begin: 1.1, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+    ]).animate(
+        CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
 
     _rotateController = AnimationController(
       vsync: this,
@@ -66,7 +69,8 @@ class _BrandedSpinnerState extends State<_BrandedSpinner> with TickerProviderSta
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _pulseController.stop();
       _rotateController.stop();
@@ -85,8 +89,10 @@ class _BrandedSpinnerState extends State<_BrandedSpinner> with TickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations = isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final disableAnimations =
+        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
     Widget innerIcon = Container(
       width: 64,
@@ -120,7 +126,8 @@ class _BrandedSpinnerState extends State<_BrandedSpinner> with TickerProviderSta
             width: 78,
             height: 78,
             child: CustomPaint(
-              painter: _RingPainter(color: AppColors.primary.withValues(alpha: 0.3)),
+              painter:
+                  _RingPainter(color: AppColors.primary.withValues(alpha: 0.3)),
             ),
           ),
         ],
@@ -143,7 +150,8 @@ class _BrandedSpinnerState extends State<_BrandedSpinner> with TickerProviderSta
                     width: 78,
                     height: 78,
                     child: CustomPaint(
-                      painter: _RingPainter(color: AppColors.primary.withValues(alpha: 0.3)),
+                      painter: _RingPainter(
+                          color: AppColors.primary.withValues(alpha: 0.3)),
                     ),
                   ),
                 );
@@ -189,7 +197,8 @@ class _FadeInMessage extends StatefulWidget {
   State<_FadeInMessage> createState() => _FadeInMessageState();
 }
 
-class _FadeInMessageState extends State<_FadeInMessage> with SingleTickerProviderStateMixin {
+class _FadeInMessageState extends State<_FadeInMessage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacity;
 
@@ -208,7 +217,8 @@ class _FadeInMessageState extends State<_FadeInMessage> with SingleTickerProvide
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _controller.value = 1.0;
     } else if (!_controller.isAnimating && _controller.value < 1.0) {

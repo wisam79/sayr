@@ -106,9 +106,8 @@ class SayrDialog extends StatelessWidget {
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
-                textAlign: headerIcon != null
-                    ? TextAlign.center
-                    : TextAlign.start,
+                textAlign:
+                    headerIcon != null ? TextAlign.center : TextAlign.start,
               ),
               if (subtitle != null) ...[
                 const SizedBox(height: AppSpacing.xs),
@@ -117,9 +116,8 @@ class SayrDialog extends StatelessWidget {
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: AppColors.textSecondary,
                   ),
-                  textAlign: headerIcon != null
-                      ? TextAlign.center
-                      : TextAlign.start,
+                  textAlign:
+                      headerIcon != null ? TextAlign.center : TextAlign.start,
                 ),
               ],
               if (content != null) ...[

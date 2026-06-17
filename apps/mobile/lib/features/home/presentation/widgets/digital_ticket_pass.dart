@@ -21,7 +21,8 @@ class DigitalTicketPass extends StatefulWidget {
   State<DigitalTicketPass> createState() => _DigitalTicketPassState();
 }
 
-class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProviderStateMixin {
+class _DigitalTicketPassState extends State<DigitalTicketPass>
+    with TickerProviderStateMixin {
   late AnimationController _shimmerController;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -33,7 +34,7 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
       vsync: this,
       duration: const Duration(milliseconds: 3500),
     );
-    
+
     _pulseController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -46,7 +47,8 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _shimmerController.stop();
       _pulseController.stop();
@@ -73,8 +75,10 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
     final daysLeft = widget.subscription.daysRemaining ?? 0;
     const totalDays = 30.0;
     final progress = (daysLeft / totalDays).clamp(0.0, 1.0);
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations = isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final disableAnimations =
+        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final showGlow = daysLeft < 5;
@@ -143,7 +147,8 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                       return ShaderMask(
                         shaderCallback: (bounds) {
                           return LinearGradient(
-                            begin: Alignment(-2.0 + 4.0 * shimmerPosition, -2.0),
+                            begin:
+                                Alignment(-2.0 + 4.0 * shimmerPosition, -2.0),
                             end: Alignment(-1.0 + 4.0 * shimmerPosition, -1.0),
                             colors: const [
                               Color(0x00FFFFFF),
@@ -183,7 +188,8 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                                       .textTheme
                                       .titleMedium
                                       ?.copyWith(
-                                        color: Colors.white.withValues(alpha: 0.8),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.8),
                                         fontWeight: FontWeight.bold,
                                       ),
                                 ),
@@ -229,7 +235,10 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                         if (widget.user != null) ...[
                           Text(
                             widget.user!.displayName,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -238,14 +247,20 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                           if (widget.user!.phone != null)
                             Text(
                               widget.user!.phone!,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
                                     color: Colors.white.withValues(alpha: 0.8),
                                   ),
                             ),
                         ] else ...[
                           Text(
                             l10n.subscriptionType,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -261,7 +276,10 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                                   .split(' ')
                                   .first,
                             ),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
                                   color: Colors.white.withValues(alpha: 0.8),
                                 ),
                           ),
@@ -312,14 +330,20 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                           children: [
                             Text(
                               l10n.subscriptionDaysLeft(daysLeft),
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
                             Text(
                               '${(progress * 100).round()}%',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -341,7 +365,8 @@ class _DigitalTicketPassState extends State<DigitalTicketPass> with TickerProvid
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.qr_code, color: AppColors.primary),
+                            icon: const Icon(Icons.qr_code,
+                                color: AppColors.primary),
                             label: Text(
                               l10n.scanQrCode,
                               style: const TextStyle(

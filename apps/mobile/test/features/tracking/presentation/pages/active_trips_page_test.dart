@@ -19,8 +19,12 @@ import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
-class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState> implements TrackingBloc {}
-class MockRoutesBloc extends MockBloc<RoutesEvent, RoutesState> implements RoutesBloc {}
+class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState>
+    implements TrackingBloc {}
+
+class MockRoutesBloc extends MockBloc<RoutesEvent, RoutesState>
+    implements RoutesBloc {}
+
 class MockHomeNavCubit extends MockCubit<int> implements HomeNavCubit {}
 
 void main() {
@@ -63,7 +67,8 @@ void main() {
     );
   }
 
-  testWidgets('renders skeleton loading when state is TrackingLoading', (tester) async {
+  testWidgets('renders skeleton loading when state is TrackingLoading',
+      (tester) async {
     when(() => mockTrackingBloc.state).thenReturn(const TrackingLoading());
 
     await tester.pumpWidget(wrap());
@@ -72,9 +77,11 @@ void main() {
     expect(find.byType(ListView), findsOneWidget);
   });
 
-  testWidgets('renders error widget when state is TrackingError', (tester) async {
+  testWidgets('renders error widget when state is TrackingError',
+      (tester) async {
     when(() => mockTrackingBloc.state).thenReturn(
-      const TrackingError(failure: ServerFailure(message: 'خطأ في الاتصال بالخادم')),
+      const TrackingError(
+          failure: ServerFailure(message: 'خطأ في الاتصال بالخادم')),
     );
 
     await tester.pumpWidget(wrap());
@@ -84,7 +91,8 @@ void main() {
     expect(find.text('خطأ في الاتصال بالخادم'), findsOneWidget);
   });
 
-  testWidgets('renders empty state when there are no active trips', (tester) async {
+  testWidgets('renders empty state when there are no active trips',
+      (tester) async {
     final originalOnError = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       if (details.exceptionAsString().contains('overflowed')) {
@@ -107,7 +115,8 @@ void main() {
     expect(find.text('تصفح الخطوط'), findsOneWidget);
   });
 
-  testWidgets('renders list of active trips and maps route titles correctly', (tester) async {
+  testWidgets('renders list of active trips and maps route titles correctly',
+      (tester) async {
     final testTrip1 = Trip(
       id: const TripId('trip-1'),
       routeId: const RouteId('route-1'),

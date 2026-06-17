@@ -70,7 +70,9 @@ class PrimaryButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 20, color: isEnabled ? AppColors.white : theme.disabledColor),
+                Icon(icon,
+                    size: 20,
+                    color: isEnabled ? AppColors.white : theme.disabledColor),
                 const SizedBox(width: AppSpacing.sm),
               ],
               Text(
@@ -133,7 +135,8 @@ class _TapScaleWrapper extends StatefulWidget {
   State<_TapScaleWrapper> createState() => _TapScaleWrapperState();
 }
 
-class _TapScaleWrapperState extends State<_TapScaleWrapper> with SingleTickerProviderStateMixin {
+class _TapScaleWrapperState extends State<_TapScaleWrapper>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 

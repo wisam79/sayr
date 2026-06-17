@@ -50,7 +50,8 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
     if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
       _bgController.stop();
     } else if (!_bgController.isAnimating) {
@@ -79,8 +80,10 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations = isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    final isTest =
+        WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    final disableAnimations =
+        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -115,9 +118,11 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
             BlocConsumer<AuthBloc, AuthState>(
               listener: (context, state) {
                 if (state is AuthError) {
-                  SayrFlash.error(context, state.failure.toLocalizedString(context));
+                  SayrFlash.error(
+                      context, state.failure.toLocalizedString(context));
                 } else if (state is AuthPasswordResetEmailSent) {
-                  SayrFlash.success(context, l10n.passwordResetLinkSent(state.email));
+                  SayrFlash.success(
+                      context, l10n.passwordResetLinkSent(state.email));
                 } else if (state is AuthAuthenticated) {
                   context.go('/');
                 }
@@ -150,7 +155,10 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                         const SizedBox(height: AppSpacing.lg),
                         Text(
                           l10n.loginTitle,
-                          style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
                           textAlign: TextAlign.center,
@@ -158,9 +166,10 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           l10n.loginSubtitle,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.textSecondary,
+                                  ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: AppSpacing.xxxl),
@@ -236,7 +245,8 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                             height: 24,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppColors.primary, width: 1.5),
+                              border: Border.all(
+                                  color: AppColors.primary, width: 1.5),
                             ),
                             child: const Center(
                               child: Text(
@@ -257,7 +267,8 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                             ),
                           ),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.divider, width: 1.5),
+                            side: const BorderSide(
+                                color: AppColors.divider, width: 1.5),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xl),

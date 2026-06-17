@@ -65,7 +65,8 @@ void main() {
     );
   }
 
-  testWidgets('renders scanner page title and empty state initially', (tester) async {
+  testWidgets('renders scanner page title and empty state initially',
+      (tester) async {
     await tester.pumpWidget(wrap());
     await tester.pump();
 
@@ -89,7 +90,8 @@ void main() {
 
     expect(find.text('محمد علي'), findsOneWidget);
     expect(find.text('أحمد سعيد'), findsOneWidget);
-    expect(find.text('الركاب (2)'), findsOneWidget); // l10n.boardingPassengers(2)
+    expect(
+        find.text('الركاب (2)'), findsOneWidget); // l10n.boardingPassengers(2)
   });
 
   testWidgets('renders error message on stream error', (tester) async {
