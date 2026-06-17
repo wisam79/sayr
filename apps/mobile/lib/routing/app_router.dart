@@ -163,14 +163,17 @@ class AppRouter {
       GoRoute(
         path: '/payment/:routeId/:amount',
         name: 'payment',
-        pageBuilder: (context, state) => _slideTransitionPage(
-          child: PaymentPage(
-            routeId: RouteId(state.pathParameters['routeId']!),
-            amount: int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
-            paymentId: state.uri.queryParameters['paymentId'],
-            paymentUrl: state.uri.queryParameters['paymentUrl'],
-          ),
-        ),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return _slideTransitionPage(
+            child: PaymentPage(
+              routeId: RouteId(state.pathParameters['routeId']!),
+              amount: int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
+              paymentId: extra?['paymentId'] as String?,
+              paymentUrl: extra?['paymentUrl'] as String?,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/chat/:conversationId',

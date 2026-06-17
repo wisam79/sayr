@@ -419,7 +419,11 @@ class _PendingPaymentCard extends StatelessWidget {
               icon: Icons.play_arrow,
               onPressed: () {
                 context.push(
-                  '/payment/${payment.routeId}/${payment.amount}?paymentId=${payment.id}&paymentUrl=${Uri.encodeComponent(payment.paymentUrl)}',
+                  '/payment/${payment.routeId}/${payment.amount}',
+                  extra: {
+                    'paymentId': payment.id,
+                    'paymentUrl': payment.paymentUrl,
+                  },
                 );
               },
             ),

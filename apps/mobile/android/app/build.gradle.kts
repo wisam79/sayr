@@ -51,10 +51,10 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
             } else {
-                signingConfigs.getByName("debug")
+                throw GradleException("key.properties file is missing. Release build cannot be signed.")
             }
             isMinifyEnabled = true
             isShrinkResources = true

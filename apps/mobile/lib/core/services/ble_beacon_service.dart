@@ -38,30 +38,9 @@ class BleBeaconService {
     required TripId tripId,
     required String otp,
   }) async {
-    try {
-      final isSupported = await _blePeripheral.isSupported;
-      if (!isSupported) {
-        _logger.w('BLE advertising not supported on this device');
-        _isMockMode = true;
-        _startMockAdvertising(tripId, otp);
-        return;
-      }
-
-      final data = AdvertiseData(
-        serviceUuid: tripId.value,
-        localName: '$localNamePrefix$otp',
-      );
-
-      await _blePeripheral.start(advertiseData: data);
-      _isMockMode = false;
-      if (kDebugMode) {
-        debugPrint('BLE Advertising started for TripId: ${tripId.value}');
-      }
-    } catch (e) {
-      _logger.e('BLE Advertising failed: $e');
-      _isMockMode = true;
-      _startMockAdvertising(tripId, otp);
-    }
+    _logger.w('BLE advertising is temporarily disabled for security reasons (Vulnerability #2)');
+    _isMockMode = true;
+    _startMockAdvertising(tripId, otp);
   }
 
   /// Stops BLE advertising.
@@ -70,7 +49,7 @@ class BleBeaconService {
     if (_isMockMode) return;
     try {
       await _blePeripheral.stop();
-      if (kDebugMode) debugPrint('BLE Advertising stopped');
+      _logger.d('BLE Advertising stopped');
     } catch (e, st) {
       _logger.d(
         'BLE stopAdvertising threw (peripheral may already be stopped)',
@@ -82,69 +61,10 @@ class BleBeaconService {
 
   /// Starts scanning for nearby Sayr Beacons.
   Future<bool> startScanning() async {
-    try {
-      final locationStatus = await Permission.locationWhenInUse.request();
-      if (!locationStatus.isGranted) {
-        if (kDebugMode) debugPrint('BLE Scanning: location permission denied');
-        return false;
-      }
-
-      final isSupported = await FlutterBluePlus.isSupported;
-      if (!isSupported) {
-        _logger.w('BLE scanning not supported on this device');
-        _isMockMode = true;
-        _startMockScanning();
-        return false;
-      }
-
-      // Check if Bluetooth is turned on
-      final state = await FlutterBluePlus.adapterState.first;
-      if (state != BluetoothAdapterState.on) {
-        if (kDebugMode) {
-          debugPrint('Bluetooth is not ON (state: $state). Cannot scan.');
-        }
-        return false;
-      }
-
-      await FlutterBluePlus.startScan(
-        timeout: const Duration(minutes: 5),
-        androidUsesFineLocation: true,
-      );
-
-      await _scanSubscription?.cancel();
-      _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
-        for (final r in results) {
-          final localName = r.advertisementData.advName;
-          if (localName.startsWith(localNamePrefix) &&
-              localName.length == (localNamePrefix.length + 6)) {
-            final otp = localName.substring(localNamePrefix.length);
-            final serviceUuids = r.advertisementData.serviceUuids;
-            if (serviceUuids.isNotEmpty) {
-              final tripIdStr = serviceUuids.first.toString();
-              try {
-                final tripId = TripId(tripIdStr);
-                _discoveredTripsController.add((tripId: tripId, otp: otp));
-              } catch (e, st) {
-                _logger.d(
-                  'Skipping malformed TripId in BLE advertisement: '
-                  '"$tripIdStr"',
-                  error: e,
-                  stackTrace: st,
-                );
-              }
-            }
-          }
-        }
-      });
-      _isMockMode = false;
-      if (kDebugMode) debugPrint('BLE Scanning started');
-      return true;
-    } catch (e) {
-      _logger.e('BLE Scanning failed: $e');
-      _isMockMode = true;
-      _startMockScanning();
-      return false;
-    }
+    _logger.w('BLE scanning is temporarily disabled for security reasons (Vulnerability #2)');
+    _isMockMode = true;
+    _startMockScanning();
+    return false;
   }
 
   /// Stops BLE scanning.
@@ -154,7 +74,7 @@ class BleBeaconService {
     if (_isMockMode) return;
     try {
       await FlutterBluePlus.stopScan();
-      if (kDebugMode) debugPrint('BLE Scanning stopped');
+      _logger.d('BLE Scanning stopped');
     } catch (e, st) {
       _logger.d(
         'BLE stopScan threw (scanner may already be stopped)',
@@ -167,19 +87,19 @@ class BleBeaconService {
   void _startMockAdvertising(TripId tripId, String otp) {
     _mockTimer?.cancel();
     if (!kDebugMode) {
-      debugPrint('Mock advertising is disabled in non-debug mode.');
+      _logger.d('Mock advertising is disabled in non-debug mode.');
       return;
     }
-    debugPrint('Mock BLE Advertising: TripId=${tripId.value}');
+    _logger.d('Mock BLE Advertising: TripId=${tripId.value}');
   }
 
   void _startMockScanning() {
     _mockTimer?.cancel();
     if (!kDebugMode) {
-      debugPrint('Mock scanning is disabled in non-debug mode.');
+      _logger.d('Mock scanning is disabled in non-debug mode.');
       return;
     }
-    debugPrint('Mock BLE scanning started (no proximity data broadcast).');
+    _logger.d('Mock BLE scanning started (no proximity data broadcast).');
   }
 
   /// Starts rotating BLE advertising for the given trip.

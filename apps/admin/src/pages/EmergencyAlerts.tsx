@@ -118,15 +118,11 @@ export const EmergencyAlerts: React.FC = () => {
   const handleUpdateStatus = async (reportId: string, nextStatus: 'acknowledged' | 'resolved') => {
     setActionLoadingId(reportId);
     try {
-      const updateData: any = { status: nextStatus };
-      if (nextStatus === 'resolved') {
-        updateData.resolved_at = new Date().toISOString();
-      }
-
-      const { error } = await supabase
-        .from('emergency_reports')
-        .update(updateData)
-        .eq('id', reportId);
+      const { error } = await supabase.rpc('admin_resolve_emergency', {
+        p_id: reportId,
+        p_status: nextStatus,
+        p_notes: null
+      });
 
       if (error) throw error;
 

@@ -69,19 +69,21 @@ abstract class BaseRepository {
 
   Failure _mapPostgrestException(supabase.PostgrestException e) {
     final code = e.code;
-    final message = e.message;
 
     if (code == null) {
-      return ServerFailure(message: message);
+      return const ServerFailure(message: 'An unexpected database error occurred');
     }
 
     return switch (code) {
       // 23505: unique_violation
-      '23505' => ValidationFailure(message: message, errors: [message]),
+      '23505' => const ValidationFailure(
+          message: 'A duplicate record violation occurred.',
+          errors: ['A duplicate record violation occurred.'],
+        ),
       // 23503: foreign_key_violation
-      '23503' => ValidationFailure(
-          message: 'Reference violation: $message',
-          errors: [message],
+      '23503' => const ValidationFailure(
+          message: 'Reference violation: A related record was not found.',
+          errors: ['Reference violation: A related record was not found.'],
         ),
       // 42P01: undefined_table
       '42P01' => const ServerFailure(
@@ -90,11 +92,11 @@ abstract class BaseRepository {
       // 42501: insufficient_privilege (RLS violation)
       '42501' => const ForbiddenFailure(),
       // 23502: not_null_violation
-      '23502' => ValidationFailure(
-          message: 'Required field missing: $message',
-          errors: [message],
+      '23502' => const ValidationFailure(
+          message: 'A required field is missing.',
+          errors: ['A required field is missing.'],
         ),
-      _ => ServerFailure(message: message),
+      _ => const ServerFailure(message: 'An unexpected database error occurred'),
     };
   }
 }
