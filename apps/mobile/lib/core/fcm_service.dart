@@ -4,7 +4,6 @@ import 'dart:io' show Platform;
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart' show Color;
 import 'package:logger/logger.dart';
 
@@ -14,8 +13,9 @@ import 'package:sayr_mobile/features/notifications/presentation/bloc/notificatio
 /// Firebase Cloud Messaging service using `awesome_notifications` for
 /// cross-platform local notifications (channels, actions, scheduling built-in).
 class FcmService {
-  static final Logger _logger = Logger();
   FcmService._();
+
+  static final Logger _logger = Logger();
 
   static bool _initialized = false;
   static StreamSubscription<String>? _tokenRefreshSubscription;
@@ -177,8 +177,11 @@ class FcmService {
         );
       });
     } catch (e, st) {
-      _logger.e('FCM: Failed to retrieve or register token',
-          error: e, stackTrace: st);
+      _logger.e(
+        'FCM: Failed to retrieve or register token',
+        error: e,
+        stackTrace: st,
+      );
     }
   }
 

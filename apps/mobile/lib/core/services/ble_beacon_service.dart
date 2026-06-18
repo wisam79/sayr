@@ -5,7 +5,6 @@ import 'package:flutter_ble_peripheral/flutter_ble_peripheral.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 /// Service to handle BLE-based proximity boarding.
@@ -39,7 +38,8 @@ class BleBeaconService {
     required String otp,
   }) async {
     _logger.w(
-        'BLE advertising is temporarily disabled for security reasons (Vulnerability #2)');
+      'BLE advertising is temporarily disabled for security reasons (Vulnerability #2)',
+    );
     _isMockMode = true;
     _startMockAdvertising(tripId, otp);
   }
@@ -63,7 +63,8 @@ class BleBeaconService {
   /// Starts scanning for nearby Sayr Beacons.
   Future<bool> startScanning() async {
     _logger.w(
-        'BLE scanning is temporarily disabled for security reasons (Vulnerability #2)');
+      'BLE scanning is temporarily disabled for security reasons (Vulnerability #2)',
+    );
     _isMockMode = true;
     _startMockScanning();
     return false;
