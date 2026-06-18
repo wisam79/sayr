@@ -65,9 +65,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(AuthError(failure)),
-      (user) => emit(AuthAuthenticated(user)),
+    await result.fold(
+      (failure) async => emit(AuthError(failure)),
+      (_) async {
+        // Fetch full profile from `profiles` table to check completeness.
+        // JWT alone doesn't carry phone / institution_id.
+        final user = await _authRepository.fetchFullProfile();
+        if (isClosed) return;
+        if (user == null) {
+          emit(const AuthUnauthenticated());
+          return;
+        }
+        final isComplete = user.phone != null && user.institutionId != null;
+        if (isComplete) {
+          emit(AuthAuthenticated(user));
+        } else {
+          emit(AuthProfileIncomplete(user));
+        }
+      },
     );
   }
 
@@ -85,9 +100,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
 
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(AuthError(failure)),
-      (user) => emit(AuthAuthenticated(user)),
+    await result.fold(
+      (failure) async => emit(AuthError(failure)),
+      (_) async {
+        // Fetch full profile to verify completeness after sign-up.
+        final user = await _authRepository.fetchFullProfile();
+        if (isClosed) return;
+        if (user == null) {
+          emit(const AuthUnauthenticated());
+          return;
+        }
+        final isComplete = user.phone != null && user.institutionId != null;
+        if (isComplete) {
+          emit(AuthAuthenticated(user));
+        } else {
+          emit(AuthProfileIncomplete(user));
+        }
+      },
     );
   }
 

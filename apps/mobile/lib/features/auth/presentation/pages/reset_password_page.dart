@@ -64,7 +64,9 @@ class _ResetPasswordViewState extends State<_ResetPasswordView> {
               context.go('/');
             } else if (state is AuthError) {
               SayrFlash.error(
-                  context, state.failure.toLocalizedString(context));
+                context,
+                state.failure.toLocalizedString(context),
+              );
             }
           },
           builder: (context, state) {

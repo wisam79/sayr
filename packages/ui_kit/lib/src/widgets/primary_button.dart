@@ -47,8 +47,6 @@ class PrimaryButton extends StatelessWidget {
       gradient: isEnabled
           ? const LinearGradient(
               colors: [AppColors.primary, AppColors.primaryContainer],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
             )
           : null,
       color: isEnabled ? null : theme.disabledColor.withValues(alpha: 0.12),
@@ -56,7 +54,7 @@ class PrimaryButton extends StatelessWidget {
       boxShadow: isEnabled ? [glowShadow] : null,
     );
 
-    Widget childWidget = isLoading
+    final Widget childWidget = isLoading
         ? const SizedBox(
             height: 20,
             width: 20,
@@ -70,9 +68,11 @@ class PrimaryButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               if (icon != null) ...[
-                Icon(icon,
-                    size: 20,
-                    color: isEnabled ? AppColors.white : theme.disabledColor),
+                Icon(
+                  icon,
+                  size: 20,
+                  color: isEnabled ? AppColors.white : theme.disabledColor,
+                ),
                 const SizedBox(width: AppSpacing.sm),
               ],
               Text(
@@ -85,7 +85,7 @@ class PrimaryButton extends StatelessWidget {
             ],
           );
 
-    Widget innerButton = Container(
+    final Widget innerButton = Container(
       height: 48,
       decoration: buttonDecoration,
       child: ElevatedButton(
@@ -111,7 +111,7 @@ class PrimaryButton extends StatelessWidget {
       ),
     );
 
-    Widget mainButton = isExpanded
+    final mainButton = isExpanded
         ? SizedBox(width: double.infinity, child: innerButton)
         : innerButton;
 
@@ -147,7 +147,7 @@ class _TapScaleWrapperState extends State<_TapScaleWrapper>
       vsync: this,
       duration: const Duration(milliseconds: 100),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.97).animate(
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.97).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
     );
   }

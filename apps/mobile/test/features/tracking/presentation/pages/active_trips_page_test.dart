@@ -3,21 +3,18 @@ import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/home/presentation/bloc/home_nav_cubit.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_event.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_state.dart';
-import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
+import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
-import 'package:sayr_ui_kit/sayr_ui_kit.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState>
     implements TrackingBloc {}
@@ -81,7 +78,8 @@ void main() {
       (tester) async {
     when(() => mockTrackingBloc.state).thenReturn(
       const TrackingError(
-          failure: ServerFailure(message: 'خطأ في الاتصال بالخادم')),
+        failure: ServerFailure(message: 'خطأ في الاتصال بالخادم'),
+      ),
     );
 
     await tester.pumpWidget(wrap());
@@ -126,13 +124,13 @@ void main() {
       lastLocation: const Coordinates(latitude: 33.3128, longitude: 44.3615),
     );
 
-    final testRoute1 = Route(
-      id: const RouteId('route-1'),
-      driverId: const DriverId('driver-1'),
+    const testRoute1 = Route(
+      id: RouteId('route-1'),
+      driverId: DriverId('driver-1'),
       title: 'خط الكرادة - الجادرية',
       startLocation: 'الكرادة',
       endLocation: 'الجادرية',
-      price: const Money(3000),
+      price: Money(3000),
       capacity: 25,
       availableSeats: 12,
       isActive: true,
@@ -143,7 +141,7 @@ void main() {
     );
 
     when(() => mockRoutesBloc.state).thenReturn(
-      RoutesLoaded([testRoute1]),
+      const RoutesLoaded([testRoute1]),
     );
 
     await tester.pumpWidget(wrap());

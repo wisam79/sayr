@@ -55,10 +55,11 @@ class _BrandedSpinnerState extends State<_BrandedSpinner>
       duration: const Duration(milliseconds: 1200),
     );
     _pulseAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.1), weight: 50),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.1, end: 1.0), weight: 50),
+      TweenSequenceItem(tween: Tween<double>(begin: 1, end: 1.1), weight: 50),
+      TweenSequenceItem(tween: Tween<double>(begin: 1.1, end: 1), weight: 50),
     ]).animate(
-        CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
     _rotateController = AnimationController(
       vsync: this,
@@ -94,7 +95,7 @@ class _BrandedSpinnerState extends State<_BrandedSpinner>
     final disableAnimations =
         isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
-    Widget innerIcon = Container(
+    final Widget innerIcon = Container(
       width: 64,
       height: 64,
       decoration: BoxDecoration(
@@ -151,7 +152,8 @@ class _BrandedSpinnerState extends State<_BrandedSpinner>
                     height: 78,
                     child: CustomPaint(
                       painter: _RingPainter(
-                          color: AppColors.primary.withValues(alpha: 0.3)),
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                      ),
                     ),
                   ),
                 );
@@ -209,7 +211,7 @@ class _FadeInMessageState extends State<_FadeInMessage>
       vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _opacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
   }

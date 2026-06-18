@@ -158,7 +158,9 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
                 _fetchRoutePathIfNeeded(state.trip);
               } else if (state is TrackingError) {
                 SayrFlash.error(
-                    context, state.failure.toLocalizedString(context));
+                  context,
+                  state.failure.toLocalizedString(context),
+                );
               }
             },
           ),

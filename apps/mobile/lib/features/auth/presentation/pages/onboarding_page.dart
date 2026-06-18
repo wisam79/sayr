@@ -56,48 +56,48 @@ class _OnboardingViewState extends State<_OnboardingView>
       duration: const Duration(milliseconds: 2000),
     );
 
-    _iconOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _iconOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entryController,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+        curve: const Interval(0, 0.4, curve: Curves.easeOut),
       ),
     );
-    _iconScale = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _iconScale = Tween<double>(begin: 0.8, end: 1).animate(
       CurvedAnimation(
         parent: _entryController,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeOutBack),
+        curve: const Interval(0, 0.4, curve: Curves.easeOutBack),
       ),
     );
 
-    _titleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _titleOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
       ),
     );
     _titleSlide =
-        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.2, 0.6, curve: Curves.easeOutCubic),
       ),
     );
 
-    _descOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _descOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
       ),
     );
     _descSlide =
-        Tween<Offset>(begin: const Offset(0.0, 0.3), end: Offset.zero).animate(
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entryController,
         curve: const Interval(0.3, 0.7, curve: Curves.easeOutCubic),
       ),
     );
 
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.08).animate(
+    _pulseAnimation = Tween<double>(begin: 1, end: 1.08).animate(
       CurvedAnimation(
         parent: _pulseController,
         curve: Curves.easeInOut,
@@ -254,7 +254,7 @@ class _OnboardingViewState extends State<_OnboardingView>
                   context.read<OnboardingCubit>().setPage(index);
                   if (!(MediaQuery.maybeDisableAnimationsOf(context) ??
                       false)) {
-                    _entryController.forward(from: 0.0);
+                    _entryController.forward(from: 0);
                   }
                 },
                 itemCount: _pages?.length ?? 0,

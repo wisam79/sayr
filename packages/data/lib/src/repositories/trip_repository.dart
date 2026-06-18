@@ -18,17 +18,22 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
   final RemoteDatasource _remoteDatasource;
   final LocalDatasource _localDatasource;
 
-  @override
-  Future<Either<Failure, List<Trip>>> getActiveTrips() async {
+  /// Runs [fetch] against the remote source, caches the result on success, and
+  /// transparently falls back to the local cache when the network call fails.
+  ///
+  /// Mirrors the equivalent helper in `RouteRepositoryImpl`: keeps the offline
+  /// behaviour in one place while routing failures through [mapException].
+  Future<Either<Failure, List<Trip>>> _fetchTripsWithCacheFallback(
+    Future<List<Trip>> Function() fetch, {
+    required String cacheLogLabel,
+  }) async {
     try {
-      final response = await _remoteDatasource.getActiveTrips();
-      final trips =
-          response.map((json) => TripModel.fromJson(json).toEntity()).toList();
+      final trips = await fetch();
       try {
         await _localDatasource.cacheTrips(trips);
       } catch (e, st) {
         log.warning(
-          'Failed to cache active trips; serving from network only',
+          'Failed to cache $cacheLogLabel; serving from network only',
           e,
           st,
         );
@@ -42,13 +47,24 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
         }
       } catch (cacheError, st) {
         log.warning(
-          'Failed to read cached trips during offline fallback',
+          'Failed to read cached $cacheLogLabel during offline fallback',
           cacheError,
           st,
         );
       }
       return Left<Failure, List<Trip>>(mapException(e));
     }
+  }
+
+  @override
+  Future<Either<Failure, List<Trip>>> getActiveTrips() async {
+    return _fetchTripsWithCacheFallback(
+      () async {
+        final response = await _remoteDatasource.getActiveTrips();
+        return response.map((json) => TripModel.fromJson(json).toEntity()).toList();
+      },
+      cacheLogLabel: 'active trips',
+    );
   }
 
   @override
@@ -73,7 +89,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
   Stream<Trip> watchTrip(TripId tripId) {
     return _remoteDatasource.watchTrip(tripId.value).map((rows) {
       if (rows.isEmpty) {
-        throw StateError('Trip $tripId not found');
+        throw const NotFoundFailure(resource: 'trip');
       }
       return TripModel.fromJson(rows.first).toEntity();
     });

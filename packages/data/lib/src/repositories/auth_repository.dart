@@ -125,6 +125,14 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
 
   @override
   Future<void> signOut() async {
+    // Deactivate push tokens on the server while still authenticated, so
+    // the user stops receiving push notifications after logout.
+    try {
+      await _remoteDatasource.deactivatePushTokens();
+    } catch (e) {
+      // Best-effort — don't block logout if this fails.
+      log.warning('Failed to deactivate push tokens during sign-out: $e');
+    }
     await _localDatasource.clearSecureStorage();
     await _localDatasource.clearCachedTrips();
     await _remoteDatasource.signOut();

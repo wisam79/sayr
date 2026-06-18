@@ -137,12 +137,15 @@ void main() {
         await controller.close();
       });
 
-      test('returns empty stream when user is not logged in', () async {
+      test('emits UnauthorizedFailure when user is not logged in', () async {
         when(() => mockRemote.currentUser).thenReturn(null);
 
         final stream = repository.watchMyConversations();
 
-        expect(await stream.first, isEmpty);
+        await expectLater(
+          stream,
+          emitsError(isA<UnauthorizedFailure>()),
+        );
       });
     });
 

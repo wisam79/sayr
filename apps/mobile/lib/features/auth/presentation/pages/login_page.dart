@@ -87,7 +87,7 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    Widget background = AnimatedBuilder(
+    final Widget background = AnimatedBuilder(
       animation: _bgController,
       builder: (context, child) {
         final val = _bgController.value;
@@ -119,10 +119,14 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
               listener: (context, state) {
                 if (state is AuthError) {
                   SayrFlash.error(
-                      context, state.failure.toLocalizedString(context));
+                    context,
+                    state.failure.toLocalizedString(context),
+                  );
                 } else if (state is AuthPasswordResetEmailSent) {
                   SayrFlash.success(
-                      context, l10n.passwordResetLinkSent(state.email));
+                    context,
+                    l10n.passwordResetLinkSent(state.email),
+                  );
                 } else if (state is AuthAuthenticated) {
                   context.go('/');
                 }
@@ -246,7 +250,9 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
-                                  color: AppColors.primary, width: 1.5),
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
                             ),
                             child: const Center(
                               child: Text(
@@ -268,7 +274,9 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                           ),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(
-                                color: AppColors.divider, width: 1.5),
+                              color: AppColors.divider,
+                              width: 1.5,
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
@@ -310,10 +318,10 @@ class _SRoadIconPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
 
-    // Draw S-curve road path centered in the canvas
-    path.moveTo(w * 0.72, h * 0.22);
-    path.cubicTo(w * 0.22, h * 0.15, w * 0.22, h * 0.48, w * 0.5, h * 0.5);
-    path.cubicTo(w * 0.78, h * 0.52, w * 0.78, h * 0.85, w * 0.28, h * 0.78);
+    path
+      ..moveTo(w * 0.72, h * 0.22)
+      ..cubicTo(w * 0.22, h * 0.15, w * 0.22, h * 0.48, w * 0.5, h * 0.5)
+      ..cubicTo(w * 0.78, h * 0.52, w * 0.78, h * 0.85, w * 0.28, h * 0.78);
 
     canvas.drawPath(path, paint);
   }

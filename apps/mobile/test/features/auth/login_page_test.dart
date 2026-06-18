@@ -99,6 +99,9 @@ void main() {
     ).thenAnswer(
       (_) async => const Right<Failure, User>(testUser),
     );
+    when(() => mockRepo.fetchFullProfile()).thenAnswer(
+      (_) async => testUser,
+    );
 
     await tester.pumpWidget(wrap(const LoginPage()));
     await tester.pump();

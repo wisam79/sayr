@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
@@ -16,8 +17,11 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   TrackingBloc({
     required TripRepository tripRepository,
     required AuthRepository authRepository,
+    DriverLocationService? driverLocationService,
   })  : _tripRepository = tripRepository,
         _authRepository = authRepository,
+        _driverLocationService =
+            driverLocationService ?? sl<DriverLocationService>(),
         super(const TrackingState.initial()) {
     on<TrackingLoadActiveTrips>(_onLoadActiveTrips);
     on<TrackingWatchTrip>(_onWatchTrip);
@@ -35,11 +39,15 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
 
   final TripRepository _tripRepository;
   final AuthRepository _authRepository;
+  final DriverLocationService _driverLocationService;
   StreamSubscription<Trip>? _tripSubscription;
 
   @override
   Future<void> close() async {
     await _tripSubscription?.cancel();
+    // Release the GPS stream so the foreground service stops when the bloc
+    // (and therefore the tracking session) is torn down.
+    await _driverLocationService.stopTracking();
     return super.close();
   }
 
@@ -234,6 +242,22 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       (trip) async {
         if (cancelsSubscription) {
           await _tripSubscription?.cancel();
+          // Trip is over — stop streaming the driver's location.
+          await _driverLocationService.stopTracking();
+        }
+        if (activatesTracking) {
+          // Trip is now in progress — start the GPS stream, decoupled from the
+          // page lifecycle so it survives backgrounding the app.
+          try {
+            await _driverLocationService.startTracking(
+              tripId: trip.id,
+              trackingBloc: this,
+            );
+          } catch (e) {
+            sl<Talker>().warning(
+              'TrackingBloc: could not start driver location stream: $e',
+            );
+          }
         }
         final actions = TripStateMachine.validEventsFrom(trip.status);
         emit(

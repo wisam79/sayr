@@ -43,7 +43,10 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
   Stream<List<Conversation>> watchMyConversations() {
     final currentUserId = _remoteDatasource.currentUser?.id;
     if (currentUserId == null) {
-      return Stream.value([]);
+      // Surface the auth failure instead of masquerading as an empty list,
+      // otherwise the UI would render "no conversations" for an unauthenticated
+      // user rather than prompting them to sign in.
+      return Stream.error(const UnauthorizedFailure());
     }
     return _remoteDatasource.watchMyConversations(currentUserId).map((rows) {
       return rows

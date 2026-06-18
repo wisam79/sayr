@@ -72,7 +72,8 @@ abstract class BaseRepository {
 
     if (code == null) {
       return const ServerFailure(
-          message: 'An unexpected database error occurred');
+        message: 'An unexpected database error occurred',
+      );
     }
 
     return switch (code) {

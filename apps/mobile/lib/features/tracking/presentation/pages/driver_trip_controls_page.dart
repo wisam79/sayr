@@ -1,10 +1,7 @@
-import 'dart:async';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart' as geo;
 import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -45,10 +42,6 @@ class DriverTripControlsPage extends StatefulWidget {
 class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   final Logger _logger = Logger();
   late final TrackingBloc _trackingBloc;
-  geo.LocationSettings? _locationSettings;
-  StreamSubscription<geo.Position>? _positionSubscription;
-  geo.Position? _lastSentPosition;
-  DateTime? _lastSentTime;
 
   @override
   void initState() {
@@ -66,7 +59,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   @override
   void dispose() {
     _trackingBloc.close();
-    _stopLocationTracking();
     _stopBleProximity();
     super.dispose();
   }
@@ -81,109 +73,6 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
 
   void _stopBleProximity() {
     sl<BleBeaconService>().stopRotatingOtpAdvertising();
-  }
-
-  Future<void> _startLocationTracking(TripId tripId) async {
-    final l10n = AppLocalizations.of(context);
-    final permission = await geo.Geolocator.checkPermission();
-    if (permission == geo.LocationPermission.denied) {
-      final requested = await geo.Geolocator.requestPermission();
-      if (requested == geo.LocationPermission.denied) {
-        if (mounted) {
-          SayrFlash.warning(context, l10n.locationPermissionRequired);
-        }
-        return;
-      }
-    }
-
-    if (!mounted) return;
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      final isAr = Localizations.localeOf(context).languageCode == 'ar';
-      final notificationTitle =
-          isAr ? 'تتبع الرحلة نشط' : 'Trip Tracking Active';
-      final notificationText = isAr
-          ? 'تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.'
-          : 'Sayr is tracking your location in the background for this trip.';
-
-      _locationSettings = geo.AndroidSettings(
-        accuracy: geo.LocationAccuracy.high,
-        foregroundNotificationConfig: geo.ForegroundNotificationConfig(
-          notificationTitle: notificationTitle,
-          notificationText: notificationText,
-          enableWakeLock: true,
-        ),
-      );
-    } else {
-      _locationSettings = const geo.LocationSettings(
-        accuracy: geo.LocationAccuracy.high,
-      );
-    }
-
-    _positionSubscription =
-        geo.Geolocator.getPositionStream(locationSettings: _locationSettings)
-            .listen(
-      (position) {
-        if (!mounted) return;
-
-        final now = DateTime.now();
-        var shouldUpdate = false;
-
-        if (_lastSentPosition == null || _lastSentTime == null) {
-          shouldUpdate = true;
-        } else {
-          final distance = geo.Geolocator.distanceBetween(
-            _lastSentPosition!.latitude,
-            _lastSentPosition!.longitude,
-            position.latitude,
-            position.longitude,
-          );
-
-          // Update if moved more than 20 meters
-          if (distance >= 20) {
-            shouldUpdate = true;
-          }
-
-          // Update if heading changes by more than 15 degrees
-          // Only evaluate when moving (>1 m/s) to prevent static GPS jitter from triggering updates
-          if (position.heading != 0 &&
-              _lastSentPosition!.heading != 0 &&
-              position.speed > 1) {
-            final hDiff =
-                (position.heading - _lastSentPosition!.heading).abs() % 360;
-            final actualDiff = hDiff > 180 ? 360 - hDiff : hDiff;
-            if (actualDiff >= 15) {
-              shouldUpdate = true;
-            }
-          }
-
-          // Fallback: Send a heartbeat update every 3 minutes if stationary
-          if (now.difference(_lastSentTime!) >= const Duration(minutes: 3)) {
-            shouldUpdate = true;
-          }
-        }
-
-        if (shouldUpdate) {
-          _lastSentPosition = position;
-          _lastSentTime = now;
-          context.read<TrackingBloc>().add(
-                TrackingUpdateLocation(
-                  tripId: tripId,
-                  latitude: position.latitude,
-                  longitude: position.longitude,
-                ),
-              );
-        }
-      },
-    );
-  }
-
-  void _stopLocationTracking() {
-    _positionSubscription?.cancel();
-    _positionSubscription = null;
-    _locationSettings = null;
-    _lastSentPosition = null;
-    _lastSentTime = null;
   }
 
   @override
@@ -204,11 +93,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
         body: BlocConsumer<TrackingBloc, TrackingState>(
           listener: (context, state) {
             if (state is TrackingDriverActive) {
-              if (state.isTrackingLocation) {
-                if (_positionSubscription == null) {
-                  _startLocationTracking(state.trip.id);
-                }
-              }
+              // Location streaming is now owned by DriverLocationService via the
+              // bloc, so this page no longer starts/stops the GPS stream.
               final status = state.trip.status;
               if (status == TripStatus.driverWaiting ||
                   status == TripStatus.inTransit) {
@@ -218,9 +104,10 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
               }
             } else if (state is TrackingError) {
               SayrFlash.error(
-                  context, state.failure.toLocalizedString(context));
+                context,
+                state.failure.toLocalizedString(context),
+              );
             } else {
-              _stopLocationTracking();
               _stopBleProximity();
             }
           },

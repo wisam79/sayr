@@ -103,8 +103,10 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
     expect(find.text('Awaiting payment confirmation...'), findsOneWidget);
-    expect(find.text('Complete the payment in Zain Cash app then return here'),
-        findsOneWidget);
+    expect(
+      find.text('Complete the payment in Zain Cash app then return here'),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

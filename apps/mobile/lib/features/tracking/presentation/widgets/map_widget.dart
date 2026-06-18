@@ -56,6 +56,10 @@ class _SayrMapState extends State<SayrMap> {
   bool _sourceAdded = false;
   final Logger _logger = Logger();
 
+  int _routeSyncRetryCount = 0;
+  int _markerSyncRetryCount = 0;
+  static const int _maxRetries = 5;
+
   @override
   void initState() {
     super.initState();
@@ -92,10 +96,14 @@ class _SayrMapState extends State<SayrMap> {
     }
   }
 
-  Future<void> _syncRouteLine() async {
+  Future<void> _syncRouteLine({bool isRetry = false}) async {
     if (!mounted) return;
     final controller = _controller;
     if (controller == null) return;
+
+    if (!isRetry) {
+      _routeSyncRetryCount = 0;
+    }
 
     try {
       final oldLine = _routeLine;
@@ -117,24 +125,37 @@ class _SayrMapState extends State<SayrMap> {
         );
       }
     } catch (e, st) {
+      if (_routeSyncRetryCount >= _maxRetries) {
+        _logger.e(
+          'Route line sync failed after $_maxRetries retries. Aborting.',
+          error: e,
+          stackTrace: st,
+        );
+        return;
+      }
+      _routeSyncRetryCount++;
       _logger.d(
-        'Route line sync failed; retrying on next frame',
+        'Route line sync failed (attempt $_routeSyncRetryCount/$_maxRetries); retrying in 1s',
         error: e,
         stackTrace: st,
       );
       if (!mounted) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          unawaited(_syncRouteLine());
+          unawaited(_syncRouteLine(isRetry: true));
         }
       });
     }
   }
 
-  Future<void> _syncMarkers() async {
+  Future<void> _syncMarkers({bool isRetry = false}) async {
     if (!mounted) return;
     final controller = _controller;
     if (controller == null) return;
+
+    if (!isRetry) {
+      _markerSyncRetryCount = 0;
+    }
 
     if (widget.useCluster) {
       try {
@@ -225,13 +246,26 @@ class _SayrMapState extends State<SayrMap> {
           if (!mounted) return;
           await controller.setGeoJsonSource('markers-source', geojson);
         }
-      } catch (e) {
-        // The source manager or channel may not be initialized yet.
-        // Retry in the next frame to prevent runtime crashes.
+      } catch (e, st) {
+        _sourceAdded = false;
+        if (_markerSyncRetryCount >= _maxRetries) {
+          _logger.e(
+            'Marker sync (clustered) failed after $_maxRetries retries. Aborting.',
+            error: e,
+            stackTrace: st,
+          );
+          return;
+        }
+        _markerSyncRetryCount++;
+        _logger.d(
+          'Marker sync (clustered) failed (attempt $_markerSyncRetryCount/$_maxRetries); retrying in 1s',
+          error: e,
+          stackTrace: st,
+        );
         if (!mounted) return;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
-            unawaited(_syncMarkers());
+            unawaited(_syncMarkers(isRetry: true));
           }
         });
       }
@@ -282,11 +316,25 @@ class _SayrMapState extends State<SayrMap> {
             await controller.removeSymbol(symbol);
           }
         }
-      } catch (e) {
+      } catch (e, st) {
+        if (_markerSyncRetryCount >= _maxRetries) {
+          _logger.e(
+            'Marker sync (non-clustered) failed after $_maxRetries retries. Aborting.',
+            error: e,
+            stackTrace: st,
+          );
+          return;
+        }
+        _markerSyncRetryCount++;
+        _logger.d(
+          'Marker sync (non-clustered) failed (attempt $_markerSyncRetryCount/$_maxRetries); retrying in 1s',
+          error: e,
+          stackTrace: st,
+        );
         if (!mounted) return;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(seconds: 1), () {
           if (mounted) {
-            unawaited(_syncMarkers());
+            unawaited(_syncMarkers(isRetry: true));
           }
         });
       }

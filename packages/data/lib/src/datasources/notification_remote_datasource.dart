@@ -34,6 +34,9 @@ abstract class NotificationRemoteDatasource {
     required String platform,
     String? deviceId,
   });
+
+  /// Deactivates all push tokens for the current user (called on logout).
+  Future<void> deactivatePushTokens();
 }
 
 @LazySingleton(as: NotificationRemoteDatasource)
@@ -116,4 +119,8 @@ class NotificationRemoteDatasourceImpl implements NotificationRemoteDatasource {
           if (deviceId != null) 'p_device_id': deviceId,
         },
       );
+
+  @override
+  Future<void> deactivatePushTokens() =>
+      _client.rpc<void>('deactivate_push_tokens');
 }

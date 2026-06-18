@@ -1042,4 +1042,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String pendingPaymentCardTitle(String amount) {
     return 'دفعة معلّقة بقيمة $amount د.ع';
   }
+
+  @override
+  String get whatsappSupportMessage =>
+      'مرحباً، أواجه مشكلة في تفعيل اشتراكي في تطبيق سير.';
+
+  @override
+  String get tripTrackingActiveTitle => 'تتبع الرحلة نشط';
+
+  @override
+  String get tripTrackingActiveText =>
+      'تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.';
 }

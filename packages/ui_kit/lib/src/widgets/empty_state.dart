@@ -57,7 +57,7 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 2500),
     );
-    _breathScale = Tween<double>(begin: 1.0, end: 1.06).animate(
+    _breathScale = Tween<double>(begin: 1, end: 1.06).animate(
       CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
     );
 
@@ -66,22 +66,22 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 800),
     );
 
-    const slideOffset = Offset(0.0, 0.25);
+    const slideOffset = Offset(0, 0.25);
 
-    _iconOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _iconOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+        curve: const Interval(0, 0.4, curve: Curves.easeOut),
       ),
     );
     _iconSlide = Tween<Offset>(begin: slideOffset, end: Offset.zero).animate(
       CurvedAnimation(
         parent: _entranceController,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeOutCubic),
+        curve: const Interval(0, 0.4, curve: Curves.easeOutCubic),
       ),
     );
 
-    _titleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _titleOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceController,
         curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
@@ -94,7 +94,7 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
       ),
     );
 
-    _subtitleOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _subtitleOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceController,
         curve: const Interval(0.3, 0.7, curve: Curves.easeOut),
@@ -108,7 +108,7 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
       ),
     );
 
-    _actionOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _actionOpacity = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
         parent: _entranceController,
         curve: const Interval(0.4, 0.8, curve: Curves.easeOut),
@@ -174,47 +174,65 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
       );
     }
 
-    Widget content = Column(
+    final Widget content = Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        disableAnimations
-            ? iconWidget
-            : FadeTransition(
-                opacity: _iconOpacity,
-                child: SlideTransition(
-                  position: _iconSlide,
-                  child: iconWidget,
-                ),
-              ),
+        if (disableAnimations)
+          iconWidget
+        else
+          FadeTransition(
+            opacity: _iconOpacity,
+            child: SlideTransition(
+              position: _iconSlide,
+              child: iconWidget,
+            ),
+          ),
         const SizedBox(height: AppSpacing.lg),
-        disableAnimations
-            ? Text(
+        if (disableAnimations)
+          Text(
+            widget.title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+            textAlign: TextAlign.center,
+          )
+        else
+          FadeTransition(
+            opacity: _titleOpacity,
+            child: SlideTransition(
+              position: _titleSlide,
+              child: Text(
                 widget.title,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
                     ),
                 textAlign: TextAlign.center,
-              )
-            : FadeTransition(
-                opacity: _titleOpacity,
-                child: SlideTransition(
-                  position: _titleSlide,
-                  child: Text(
-                    widget.title,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
               ),
+            ),
+          ),
         if (widget.subtitle != null) ...[
           const SizedBox(height: AppSpacing.xs),
-          disableAnimations
-              ? Padding(
+          if (disableAnimations)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              child: Text(
+                widget.subtitle!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      height: 1.4,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+            )
+          else
+            FadeTransition(
+              opacity: _subtitleOpacity,
+              child: SlideTransition(
+                position: _subtitleSlide,
+                child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Text(
@@ -225,49 +243,34 @@ class _EmptyStateState extends State<EmptyState> with TickerProviderStateMixin {
                         ),
                     textAlign: TextAlign.center,
                   ),
-                )
-              : FadeTransition(
-                  opacity: _subtitleOpacity,
-                  child: SlideTransition(
-                    position: _subtitleSlide,
-                    child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                      child: Text(
-                        widget.subtitle!,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
                 ),
+              ),
+            ),
         ],
         if (widget.action != null) ...[
           const SizedBox(height: AppSpacing.xl),
-          disableAnimations
-              ? ConstrainedBox(
+          if (disableAnimations)
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: 220,
+                minWidth: 140,
+              ),
+              child: widget.action,
+            )
+          else
+            FadeTransition(
+              opacity: _actionOpacity,
+              child: SlideTransition(
+                position: _actionSlide,
+                child: ConstrainedBox(
                   constraints: const BoxConstraints(
                     maxWidth: 220,
                     minWidth: 140,
                   ),
                   child: widget.action,
-                )
-              : FadeTransition(
-                  opacity: _actionOpacity,
-                  child: SlideTransition(
-                    position: _actionSlide,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 220,
-                        minWidth: 140,
-                      ),
-                      child: widget.action,
-                    ),
-                  ),
                 ),
+              ),
+            ),
         ],
       ],
     );

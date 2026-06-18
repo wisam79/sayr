@@ -228,7 +228,9 @@ class _ReadyView extends StatelessWidget {
                           } on TimeoutException {
                             if (context.mounted) {
                               SayrFlash.error(
-                                  context, l10n.locationUnavailable);
+                                context,
+                                l10n.locationUnavailable,
+                              );
                             }
                           } catch (e) {
                             if (context.mounted) {

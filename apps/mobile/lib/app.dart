@@ -218,9 +218,6 @@ Future<void> runSayrApp() async {
   );
   sl.registerSingleton<OfflineSyncService>(offlineSyncService);
 
-  // Initialize Offline Sync Service
-  offlineSyncService.start();
-
   // Set up bloc observer
   Bloc.observer = TalkerBlocObserver(
     talker: sl<Talker>(),

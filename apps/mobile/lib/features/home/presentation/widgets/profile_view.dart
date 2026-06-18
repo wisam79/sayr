@@ -155,16 +155,16 @@ class _ProfileViewState extends State<_ProfileView>
                 alignment: Alignment.center,
                 children: [
                   if (disableAnimations)
-                    CustomPaint(
-                      size: const Size(88, 88),
+                    const CustomPaint(
+                      size: Size(88, 88),
                       painter:
                           _AvatarRingPainter(primaryColor: AppColors.primary),
                     )
                   else
                     RotationTransition(
                       turns: _avatarRingController,
-                      child: CustomPaint(
-                        size: const Size(88, 88),
+                      child: const CustomPaint(
+                        size: Size(88, 88),
                         painter:
                             _AvatarRingPainter(primaryColor: AppColors.primary),
                       ),

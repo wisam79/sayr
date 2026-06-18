@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/driver_model.dart';
 import 'package:sayr_data/src/models/user_model.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
@@ -21,7 +22,7 @@ class DriverRepositoryImpl extends BaseRepository implements DriverRepository {
       if (response == null) {
         throw const NotFoundFailure(resource: 'driver');
       }
-      return _driverFromDb(response);
+      return DriverModel.fromJson(response).toEntity();
     });
   }
 
@@ -35,17 +36,5 @@ class DriverRepositoryImpl extends BaseRepository implements DriverRepository {
       }
       return UserModel.fromJson(response).toEntity();
     });
-  }
-
-  Driver _driverFromDb(Map<String, dynamic> json) {
-    return Driver(
-      id: DriverId(json['id'] as String),
-      userId: UserId(json['user_id'] as String),
-      vehicleModel: json['vehicle_model'] as String,
-      vehiclePlate: json['vehicle_plate'] as String,
-      capacity: (json['capacity'] as num).toInt(),
-      isVerified: json['is_verified'] as bool? ?? false,
-      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-    );
   }
 }

@@ -39,7 +39,7 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _pulseAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+    _pulseAnimation = Tween<double>(begin: 0.3, end: 1).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -79,7 +79,6 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
         WidgetsBinding.instance.runtimeType.toString().contains('Test');
     final disableAnimations =
         isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final showGlow = daysLeft < 5;
 
@@ -147,9 +146,8 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                       return ShaderMask(
                         shaderCallback: (bounds) {
                           return LinearGradient(
-                            begin:
-                                Alignment(-2.0 + 4.0 * shimmerPosition, -2.0),
-                            end: Alignment(-1.0 + 4.0 * shimmerPosition, -1.0),
+                            begin: Alignment(-2.0 + 4.0 * shimmerPosition, -2),
+                            end: Alignment(-1.0 + 4.0 * shimmerPosition, -1),
                             colors: const [
                               Color(0x00FFFFFF),
                               Color(0x14FFFFFF),
@@ -158,7 +156,7 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                             stops: const [0.4, 0.5, 0.6],
                           ).createShader(bounds);
                         },
-                        blendMode: BlendMode.srcATop,
+                        blendMode: BlendMode.srcIn,
                         child: Container(color: Colors.white),
                       );
                     },
@@ -365,8 +363,10 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(Icons.qr_code,
-                                color: AppColors.primary),
+                            icon: const Icon(
+                              Icons.qr_code,
+                              color: AppColors.primary,
+                            ),
                             label: Text(
                               l10n.scanQrCode,
                               style: const TextStyle(

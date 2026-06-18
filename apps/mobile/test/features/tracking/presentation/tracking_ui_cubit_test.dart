@@ -79,10 +79,8 @@ void main() {
       ),
       expect: () => [
         const TrackingUiState(
-          isFetchingRoute: false,
-          routePoints: [LatLng(1.0, 2.0), LatLng(3.0, 4.0)],
+          routePoints: [LatLng(1, 2), LatLng(3, 4)],
           loadedRouteId: RouteId('route-1'),
-          isApproximate: false,
         ),
       ],
     );
@@ -96,17 +94,15 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1.0, longitude: 2.0),
-        end: const Coordinates(latitude: 3.0, longitude: 4.0),
+        start: const Coordinates(latitude: 1, longitude: 2),
+        end: const Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
       ),
       expect: () => [
         const TrackingUiState(isFetchingRoute: true),
         const TrackingUiState(
-          isFetchingRoute: false,
           routePoints: [LatLng(1.1, 2.1), LatLng(3.1, 4.1)],
           loadedRouteId: RouteId('route-1'),
-          isApproximate: false,
         ),
       ],
     );
@@ -120,15 +116,14 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1.0, longitude: 2.0),
-        end: const Coordinates(latitude: 3.0, longitude: 4.0),
+        start: const Coordinates(latitude: 1, longitude: 2),
+        end: const Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
       ),
       expect: () => [
         const TrackingUiState(isFetchingRoute: true),
         const TrackingUiState(
-          isFetchingRoute: false,
-          routePoints: [LatLng(1.0, 2.0), LatLng(3.0, 4.0)],
+          routePoints: [LatLng(1, 2), LatLng(3, 4)],
           loadedRouteId: RouteId('route-1'),
           isApproximate: true,
         ),

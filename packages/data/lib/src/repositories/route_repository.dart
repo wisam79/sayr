@@ -18,17 +18,24 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   final RemoteDatasource _remoteDatasource;
   final LocalDatasource _localDatasource;
 
-  @override
-  Future<Either<Failure, List<Route>>> getActiveRoutes() async {
+  /// Runs [fetch] against the remote source, caches the result on success, and
+  /// transparently falls back to the local cache when the network call fails.
+  ///
+  /// This wraps the offline-fallback behaviour that route reads need (a route
+  /// list may have been cached during a previous session) while still routing
+  /// every failure through the shared [mapException] mapper so callers receive
+  /// a typed [Failure].
+  Future<Either<Failure, List<Route>>> _fetchWithCacheFallback(
+    Future<List<Route>> Function() fetch, {
+    required String cacheLogLabel,
+  }) async {
     try {
-      final response = await _remoteDatasource.getActiveRoutes();
-      final routes =
-          response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
+      final routes = await fetch();
       try {
         await _localDatasource.cacheRoutes(routes);
       } catch (e, st) {
         log.warning(
-          'Failed to cache active routes; serving from network only',
+          'Failed to cache $cacheLogLabel; serving from network only',
           e,
           st,
         );
@@ -42,7 +49,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
         }
       } catch (cacheError, st) {
         log.warning(
-          'Failed to read cached routes during offline fallback',
+          'Failed to read cached $cacheLogLabel during offline fallback',
           cacheError,
           st,
         );
@@ -52,36 +59,25 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   }
 
   @override
+  Future<Either<Failure, List<Route>>> getActiveRoutes() async {
+    return _fetchWithCacheFallback(
+      () async {
+        final response = await _remoteDatasource.getActiveRoutes();
+        return response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
+      },
+      cacheLogLabel: 'active routes',
+    );
+  }
+
+  @override
   Future<Either<Failure, List<Route>>> getMyDriverRoutes() async {
-    try {
-      final response = await _remoteDatasource.getMyDriverRoutes();
-      final routes =
-          response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
-      try {
-        await _localDatasource.cacheRoutes(routes);
-      } catch (e, st) {
-        log.warning(
-          'Failed to cache driver routes; serving from network only',
-          e,
-          st,
-        );
-      }
-      return Right(routes);
-    } catch (e) {
-      try {
-        final cached = await _localDatasource.getCachedRoutes();
-        if (cached.isNotEmpty) {
-          return Right(cached);
-        }
-      } catch (cacheError, st) {
-        log.warning(
-          'Failed to read cached driver routes during offline fallback',
-          cacheError,
-          st,
-        );
-      }
-      return Left(mapException(e));
-    }
+    return _fetchWithCacheFallback(
+      () async {
+        final response = await _remoteDatasource.getMyDriverRoutes();
+        return response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
+      },
+      cacheLogLabel: 'driver routes',
+    );
   }
 
   @override
@@ -94,6 +90,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
       final route = RouteModel.fromJson(response).toEntity();
       return Right(route);
     } catch (e) {
+      // Offline fallback: look the route up in the local cache by id.
       try {
         final cached = await _localDatasource.getCachedRoutes();
         final route = cached.firstWhere((r) => r.id == id);

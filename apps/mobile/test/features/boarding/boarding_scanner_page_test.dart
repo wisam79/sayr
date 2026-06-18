@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -61,7 +60,6 @@ void main() {
       studentId: const UserId('student-1'),
       studentName: studentName,
       boardedAt: boardedAt ?? DateTime(2026, 6, 9, 12),
-      boardingMethod: 'qr_scan',
     );
   }
 
@@ -83,7 +81,7 @@ void main() {
     await tester.pump();
 
     // Emit some passengers
-    final record1 = makeRecord(id: 'rec-1', studentName: 'محمد علي');
+    final record1 = makeRecord();
     final record2 = makeRecord(id: 'rec-2', studentName: 'أحمد سعيد');
     passengerController.add([record1, record2]);
     await tester.pumpAndSettle();
@@ -91,7 +89,9 @@ void main() {
     expect(find.text('محمد علي'), findsOneWidget);
     expect(find.text('أحمد سعيد'), findsOneWidget);
     expect(
-        find.text('الركاب (2)'), findsOneWidget); // l10n.boardingPassengers(2)
+      find.text('الركاب (2)'),
+      findsOneWidget,
+    ); // l10n.boardingPassengers(2)
   });
 
   testWidgets('renders error message on stream error', (tester) async {

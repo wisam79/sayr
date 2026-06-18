@@ -92,14 +92,14 @@ void main() {
         await controller.close();
       });
 
-      test('throws StateError when watch stream is empty', () async {
+      test('throws NotFoundFailure when watch stream is empty', () async {
         final controller = StreamController<List<Map<String, dynamic>>>();
         when(() => mockRemote.watchTrip('trip-123'))
             .thenAnswer((_) => controller.stream);
 
         final stream = repository.watchTrip(const TripId('trip-123'));
 
-        expect(stream, emitsError(isA<StateError>()));
+        expect(stream, emitsError(isA<NotFoundFailure>()));
 
         controller.add([]);
 

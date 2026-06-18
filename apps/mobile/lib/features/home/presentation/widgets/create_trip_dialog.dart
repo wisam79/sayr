@@ -92,8 +92,10 @@ class CreateTripDialog extends StatelessWidget {
               labelText: l10n.tripTime,
               prefixIcon:
                   const Icon(Icons.event, color: AppColors.textSecondary),
-              suffixIcon: const Icon(Icons.edit_calendar,
-                  color: AppColors.textSecondary),
+              suffixIcon: const Icon(
+                Icons.edit_calendar,
+                color: AppColors.textSecondary,
+              ),
               border: const OutlineInputBorder(),
             ),
             child: Text(

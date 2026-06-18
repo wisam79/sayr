@@ -77,7 +77,9 @@ class _SignupViewState extends State<_SignupView> {
           listener: (context, state) {
             if (state is AuthError) {
               SayrFlash.error(
-                  context, state.failure.toLocalizedString(context));
+                context,
+                state.failure.toLocalizedString(context),
+              );
             } else if (state is AuthAuthenticated) {
               context.go('/');
             }

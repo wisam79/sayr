@@ -361,13 +361,14 @@ class MyPage extends StatelessWidget {
 
 ### 2.5 الاختبارات (Testing) - إلزامية
 
-- ✅ كل Use Case له test
+> **ملاحظة معمارية**: المشروع لا يملك طبقة Use Case مستقلة — الـ Blocs تستدعي واجهات الـ Repositories مباشرة. لذلك النقطة الأولى أدناه تُطبّق على المنطق الموجود فعلاً (Blocs/Cubits بدل Use Cases).
+
 - ✅ كل Repository له test (مع mock datasource)
-- ✅ كل Bloc له test (`bloc_test`)
+- ✅ كل Bloc/Cubit له test (`bloc_test`)
 - ✅ كل entity نقي له test (للـ logic مثل FSM)
 - ✅ كل صفحة لها widget test واحد على الأقل
 - ❌ لا feature يُقبل بدون test
-- **التغطية المستهدفة**: ≥ 80% (domain + data)
+- **التغطية المستهدفة**: ≥ 80% (domain + data) — مُطبّقة كـ gate في CI (انظر §9.2)
 
 ### 2.6 لا Dead Code
 
@@ -624,17 +625,19 @@ chore: upgrade bloc dependency
 
 ### 9.1 Workflows
 
-- `ci.yml` - analyze + format + test (كل push)
-- `test-coverage.yml` - coverage report
-- `build-android.yml` - APK + AAB
-- `db-consistency.yml` - اختبار RLS + RPCs
-- `release.yml` - Play Store (عند tag)
+> ملاحظة: الأسماء أدناه هي الملفات الفعلية الموجودة في `.github/workflows/`.
+
+- `ci.yml` - analyze (format + strict analyze) + test (كل push/PR إلى main/develop)
+- `coverage.yml` - تشغيل الاختبارات مع coverage، دمج التقارير، **فرض حدّ أدنى 80% على `packages/core` + `packages/data`**، ثم رفعها إلى Codecov
+- `build-android.yml` - APK + AAB (عند tag `v*`)
+- `database-ci.yml` - `supabase start` + `supabase db lint` + `supabase status` (اختبار الـ migrations محلياً)
+- `deploy-admin.yml` - نشر لوحة الإدارة (React) إلى GitHub Pages
 
 ### 9.2 Pipeline Requirements
 
-- ✅ `flutter analyze` صفر warnings
-- ✅ `flutter test` جميع يجتاز
-- ✅ Coverage ≥ 80%
+- ✅ `flutter analyze` صفر warnings (مفعّل في `ci.yml` عبر `melos run analyze:strict`)
+- ✅ `flutter test` جميع يجتاز (مفعّل في `ci.yml` عبر `melos run test`)
+- ✅ Coverage ≥ 80% على domain + data (مُطبّق فعلياً كـ gate في `coverage.yml` عبر `lcov --fail-under 80`)
 - ✅ Build ينجح
 
 ---

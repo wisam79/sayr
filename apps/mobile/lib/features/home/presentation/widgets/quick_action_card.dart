@@ -34,7 +34,7 @@ class _QuickActionCardState extends State<QuickActionCard>
       vsync: this,
       duration: const Duration(milliseconds: 150),
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.95).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.easeOut),
     );
 
@@ -44,12 +44,12 @@ class _QuickActionCardState extends State<QuickActionCard>
     );
     _bounceAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.0, end: -3.0)
+        tween: Tween<double>(begin: 0, end: -3)
             .chain(CurveTween(curve: Curves.easeOut)),
         weight: 33,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: -3.0, end: 0.0)
+        tween: Tween<double>(begin: -3, end: 0)
             .chain(CurveTween(curve: Curves.elasticOut)),
         weight: 67,
       ),
@@ -71,10 +71,12 @@ class _QuickActionCardState extends State<QuickActionCard>
 
   void _handleTapUp(TapUpDetails details) {
     if (!(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
-      _scaleController.animateTo(0.0,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.elasticOut);
-      _bounceController.forward(from: 0.0);
+      _scaleController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.elasticOut,
+      );
+      _bounceController.forward(from: 0);
     }
     widget.onTap();
   }
@@ -91,7 +93,7 @@ class _QuickActionCardState extends State<QuickActionCard>
     final disableAnimations =
         MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
-    Widget iconContainer = Container(
+    final Widget iconContainer = Container(
       width: 44,
       height: 44,
       decoration: BoxDecoration(
@@ -118,7 +120,7 @@ class _QuickActionCardState extends State<QuickActionCard>
       ),
     );
 
-    Widget actionCard = Container(
+    final Widget actionCard = Container(
       margin: EdgeInsets.zero,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -131,7 +133,6 @@ class _QuickActionCardState extends State<QuickActionCard>
         ],
       ),
       child: GlassCard(
-        onTap: null, // Tap handled by outer GestureDetector to animate scale
         padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.md,
           horizontal: AppSpacing.sm,
@@ -147,18 +148,19 @@ class _QuickActionCardState extends State<QuickActionCard>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              disableAnimations
-                  ? iconContainer
-                  : AnimatedBuilder(
-                      animation: _bounceAnimation,
-                      builder: (context, child) {
-                        return Transform.translate(
-                          offset: Offset(0, _bounceAnimation.value),
-                          child: child,
-                        );
-                      },
-                      child: iconContainer,
-                    ),
+              if (disableAnimations)
+                iconContainer
+              else
+                AnimatedBuilder(
+                  animation: _bounceAnimation,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, _bounceAnimation.value),
+                      child: child,
+                    );
+                  },
+                  child: iconContainer,
+                ),
               const SizedBox(height: AppSpacing.md),
               Text(
                 widget.label,

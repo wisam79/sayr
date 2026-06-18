@@ -2023,6 +2023,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pending payment - {amount} IQD'**
   String pendingPaymentCardTitle(String amount);
+
+  /// No description provided for @whatsappSupportMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, I\'m having an issue activating my subscription in the Sayr app.'**
+  String get whatsappSupportMessage;
+
+  /// No description provided for @tripTrackingActiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trip Tracking Active'**
+  String get tripTrackingActiveTitle;
+
+  /// No description provided for @tripTrackingActiveText.
+  ///
+  /// In en, this message translates to:
+  /// **'Sayr is tracking your location in the background for this trip.'**
+  String get tripTrackingActiveText;
 }
 
 class _AppLocalizationsDelegate

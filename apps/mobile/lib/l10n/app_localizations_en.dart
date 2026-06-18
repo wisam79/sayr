@@ -1049,4 +1049,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String pendingPaymentCardTitle(String amount) {
     return 'Pending payment - $amount IQD';
   }
+
+  @override
+  String get whatsappSupportMessage =>
+      'Hello, I\'m having an issue activating my subscription in the Sayr app.';
+
+  @override
+  String get tripTrackingActiveTitle => 'Trip Tracking Active';
+
+  @override
+  String get tripTrackingActiveText =>
+      'Sayr is tracking your location in the background for this trip.';
 }

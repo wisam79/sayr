@@ -185,14 +185,67 @@ class FcmService {
     }
   }
 
-  /// Cancel the token refresh listener (call on logout).
+  /// Cancel the token refresh listener and delete the FCM token (call on logout)
+  /// to unsubscribe from all topics.
   static Future<void> dispose() async {
     await _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
+    try {
+      await FirebaseMessaging.instance.deleteToken();
+    } catch (e, st) {
+      _logger.e(
+        'FCM: Failed to delete token during dispose',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // background message received
+  final notification = message.notification;
+  final data = message.data;
+
+  var title = notification?.title ?? data['title'] as String?;
+  var body = notification?.body ?? data['body'] as String?;
+
+  // Fallback messages for data-only payloads
+  if (title == null && body == null) {
+    final type = data['type'] as String?;
+    if (type == 'chat') {
+      title = 'رسالة جديدة';
+      body = data['message'] as String? ?? 'لديك رسالة جديدة';
+    } else if (type == 'trip_update') {
+      title = 'تحديث الرحلة';
+      body = data['status_text'] as String? ?? 'تم تحديث حالة الرحلة';
+    }
+  }
+
+  if (title != null || body != null) {
+    // Initialize AwesomeNotifications in the background isolate
+    await AwesomeNotifications().initialize(
+      null,
+      [
+        NotificationChannel(
+          channelKey: 'sayr_default',
+          channelName: 'إشعارات سير',
+          channelDescription: 'إشعارات تطبيق سير للنقل الجامعي',
+          defaultColor: const Color(0xFF1E5BFF),
+          importance: NotificationImportance.High,
+          channelShowBadge: true,
+        ),
+      ],
+    );
+
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: DateTime.now().millisecondsSinceEpoch.remainder(2147483647),
+        channelKey: 'sayr_default',
+        title: title,
+        body: body,
+        payload: data.map((k, v) => MapEntry(k, v.toString())),
+      ),
+    );
+  }
 }

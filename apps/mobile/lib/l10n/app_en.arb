@@ -468,6 +468,12 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
-  }
+  },
+  "whatsappSupportMessage": "Hello, I'm having an issue activating my subscription in the Sayr app.",
+  "@whatsappSupportMessage": {},
+  "tripTrackingActiveTitle": "Trip Tracking Active",
+  "@tripTrackingActiveTitle": {},
+  "tripTrackingActiveText": "Sayr is tracking your location in the background for this trip.",
+  "@tripTrackingActiveText": {}
 }
 

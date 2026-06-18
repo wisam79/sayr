@@ -102,7 +102,6 @@ class AppTheme {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-            side: BorderSide.none,
           ),
         ),
         dividerTheme: const DividerThemeData(
@@ -238,7 +237,6 @@ class AppTheme {
           margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-            side: BorderSide.none,
           ),
         ),
         dividerTheme: const DividerThemeData(

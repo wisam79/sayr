@@ -127,7 +127,6 @@ void main() {
         routeId: const RouteId('r1'),
         status: SubscriptionStatus.active,
         startDate: DateTime.now().subtract(const Duration(days: 40)),
-        endDate: null,
       );
       expect(subscription.isExpired, isFalse);
     });
@@ -211,7 +210,6 @@ void main() {
         status: TripStatus.inTransit,
         scheduledAt: startTime,
         startedAt: startTime,
-        endedAt: null,
       );
       expect(tripInProgress.duration, isNotNull);
       expect(tripInProgress.duration!.inMinutes, greaterThanOrEqualTo(29));

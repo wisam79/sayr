@@ -6,8 +6,10 @@ import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_state.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/trip_tracking_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
@@ -23,6 +25,10 @@ class MockDriverRepository extends Mock implements DriverRepository {}
 
 class MockRatingRepository extends Mock implements RatingRepository {}
 
+class MockDriverLocationService extends Mock implements DriverLocationService {}
+
+class FakeTrackingBloc extends Fake implements TrackingBloc {}
+
 class MockEmergencyBloc extends MockBloc<EmergencyEvent, EmergencyState>
     implements EmergencyBloc {}
 
@@ -32,6 +38,7 @@ void main() {
   late MockRouteRepository mockRouteRepo;
   late MockDriverRepository mockDriverRepo;
   late MockRatingRepository mockRatingRepo;
+  late MockDriverLocationService mockLocationService;
   late MockEmergencyBloc mockEmergencyBloc;
 
   setUpAll(() {
@@ -39,6 +46,7 @@ void main() {
     registerFallbackValue(const TripId('fallback'));
     registerFallbackValue(const DriverId('fallback'));
     registerFallbackValue(const UserId('fallback'));
+    registerFallbackValue(FakeTrackingBloc());
   });
 
   setUp(() {
@@ -47,13 +55,23 @@ void main() {
     mockRouteRepo = MockRouteRepository();
     mockDriverRepo = MockDriverRepository();
     mockRatingRepo = MockRatingRepository();
+    mockLocationService = MockDriverLocationService();
     mockEmergencyBloc = MockEmergencyBloc();
+
+    when(() => mockLocationService.stopTracking()).thenAnswer((_) async {});
+    when(
+      () => mockLocationService.startTracking(
+        tripId: any(named: 'tripId'),
+        trackingBloc: any(named: 'trackingBloc'),
+      ),
+    ).thenAnswer((_) async {});
 
     GetIt.I.registerSingleton<TripRepository>(mockTripRepo);
     GetIt.I.registerSingleton<AuthRepository>(mockAuthRepo);
     GetIt.I.registerSingleton<RouteRepository>(mockRouteRepo);
     GetIt.I.registerSingleton<DriverRepository>(mockDriverRepo);
     GetIt.I.registerSingleton<RatingRepository>(mockRatingRepo);
+    GetIt.I.registerSingleton<DriverLocationService>(mockLocationService);
 
     when(() => mockAuthRepo.currentUser).thenReturn(null);
     when(() => mockEmergencyBloc.state).thenReturn(const EmergencyIdle());

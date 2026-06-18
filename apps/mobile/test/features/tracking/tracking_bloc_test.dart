@@ -5,16 +5,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/di/di.dart';
-import 'package:talker_flutter/talker_flutter.dart';
-
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockTripRepository extends Mock implements TripRepository {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
+
+class MockDriverLocationService extends Mock implements DriverLocationService {}
+
+class FakeTrackingBloc extends Fake implements TrackingBloc {}
 
 void main() {
   setUpAll(() {
@@ -23,15 +27,27 @@ void main() {
     registerFallbackValue(const DriverId('fallback'));
     registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
     registerFallbackValue(TripEvent.start);
+    registerFallbackValue(FakeTrackingBloc());
   });
 
   late MockTripRepository mockRepo;
   late MockAuthRepository mockAuth;
+  late MockDriverLocationService mockLocationService;
   late TrackingBloc bloc;
 
   setUp(() {
     sl.allowReassignment = true;
     sl.registerSingleton<Talker>(Talker());
+
+    mockLocationService = MockDriverLocationService();
+    when(() => mockLocationService.stopTracking()).thenAnswer((_) async {});
+    when(
+      () => mockLocationService.startTracking(
+        tripId: any(named: 'tripId'),
+        trackingBloc: any(named: 'trackingBloc'),
+      ),
+    ).thenAnswer((_) async {});
+    sl.registerSingleton<DriverLocationService>(mockLocationService);
 
     mockRepo = MockTripRepository();
     mockAuth = MockAuthRepository();
@@ -325,7 +341,6 @@ void main() {
           () => mockRepo.updateStatus(
             tripId: any(named: 'tripId'),
             event: TripEvent.markAbsent,
-            location: null,
           ),
         ).thenAnswer(
           (_) async => Right<Failure, Trip>(
@@ -358,7 +373,6 @@ void main() {
           () => mockRepo.updateStatus(
             tripId: any(named: 'tripId'),
             event: TripEvent.markAbsent,
-            location: null,
           ),
         ).thenAnswer(
           (_) async => const Left<Failure, Trip>(
@@ -387,7 +401,6 @@ void main() {
           () => mockRepo.updateStatus(
             tripId: any(named: 'tripId'),
             event: TripEvent.cancel,
-            location: null,
           ),
         ).thenAnswer(
           (_) async => Right<Failure, Trip>(
@@ -420,7 +433,6 @@ void main() {
           () => mockRepo.updateStatus(
             tripId: any(named: 'tripId'),
             event: TripEvent.cancel,
-            location: null,
           ),
         ).thenAnswer(
           (_) async => const Left<Failure, Trip>(

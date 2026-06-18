@@ -109,6 +109,9 @@ abstract class RemoteDatasource {
     String? deviceId,
   });
 
+  /// Deactivate all push tokens for the current user (called on logout).
+  Future<void> deactivatePushTokens();
+
   // Routes
   Future<List<Map<String, dynamic>>> getActiveRoutes();
   Future<List<Map<String, dynamic>>> getMyDriverRoutes();
@@ -434,6 +437,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
         platform: platform,
         deviceId: deviceId,
       );
+
+  @override
+  Future<void> deactivatePushTokens() =>
+      _notifications.deactivatePushTokens();
 
   // ---- Routes -------------------------------------------------------------
 

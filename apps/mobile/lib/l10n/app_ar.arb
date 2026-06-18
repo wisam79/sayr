@@ -456,6 +456,12 @@
     "placeholders": {
       "amount": {"type": "String"}
     }
-  }
+  },
+  "whatsappSupportMessage": "مرحباً، أواجه مشكلة في تفعيل اشتراكي في تطبيق سير.",
+  "@whatsappSupportMessage": {},
+  "tripTrackingActiveTitle": "تتبع الرحلة نشط",
+  "@tripTrackingActiveTitle": {},
+  "tripTrackingActiveText": "تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.",
+  "@tripTrackingActiveText": {}
 }
 

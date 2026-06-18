@@ -55,6 +55,21 @@ jobs:
             fi
           done
 
+      - name: Enforce minimum coverage (80% on domain + data)
+        run: |
+          # Filter to the layers AGENTS.md mandates ≥80% coverage on,
+          # then enforce the threshold. lcov exits non-zero if coverage
+          # falls below --fail-under, which fails this CI job.
+          sudo apt-get install -y lcov
+          lcov \
+            --extract coverage/lcov.info \
+              'packages/core/lib/*' \
+              'packages/data/lib/*' \
+            --output-file coverage/lcov.filtered.info
+          COVERAGE_PCT=$(lcov --summary coverage/lcov.filtered.info | grep -oE 'lines\.\.\.\.\.\. [0-9.]+' | grep -oE '[0-9.]+')
+          echo "Domain + data line coverage: ${COVERAGE_PCT}%"
+          lcov --fail-under 80 --summary coverage/lcov.filtered.info
+
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
@@ -68,5 +83,5 @@ jobs:
         with:
           directory: .
           flags: unittests
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           verbose: true

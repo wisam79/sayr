@@ -34,17 +34,21 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
 
     emit(const TripDetailsLoading());
 
-    // Load route, driver details, and rating in parallel
-    final results = await Future.wait([
-      _routeRepository.getById(routeId),
-      _driverRepository.getDriverById(driverId),
-      _ratingRepository.getTripRating(tripId),
-    ]);
-    if (isClosed) return;
+    // Load route, driver details, and rating in parallel. Each future is
+    // captured into a named variable so we avoid fragile positional casts on
+    // a List<dynamic> returned by Future.wait — a reordering or a different
+    // return type would otherwise throw at runtime.
+    late Future<Either<Failure, Route>> routeFuture;
+    late Future<Either<Failure, Driver>> driverFuture;
+    late Future<Either<Failure, Rating?>> ratingFuture;
+    routeFuture = _routeRepository.getById(routeId);
+    driverFuture = _driverRepository.getDriverById(driverId);
+    ratingFuture = _ratingRepository.getTripRating(tripId);
 
-    final routeResult = results[0] as Either<Failure, Route>;
-    final driverResult = results[1] as Either<Failure, Driver>;
-    final ratingResult = results[2] as Either<Failure, Rating?>;
+    final routeResult = await routeFuture;
+    final driverResult = await driverFuture;
+    final ratingResult = await ratingFuture;
+    if (isClosed) return;
 
     if (routeResult.isLeft()) {
       final msg = routeResult.fold((f) => f.message, (_) => null) ?? '';

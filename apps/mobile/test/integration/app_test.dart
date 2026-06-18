@@ -1,24 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:hive_ce/hive.dart';
-
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:hive_ce/hive.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
+import 'package:logger/logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
-import 'package:logger/logger.dart';
-import 'package:talker_flutter/talker_flutter.dart';
-
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
-import 'package:sayr_ui_kit/sayr_ui_kit.dart';
-
-import 'package:sayr_mobile/app.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
@@ -38,9 +31,17 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_mobile/routing/app_router.dart';
+import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
+
+import 'package:sayr_mobile/core/services/driver_location_service.dart';
 
 // Mock services
 class MockBleBeaconService extends Mock implements BleBeaconService {}
+
+class MockDriverLocationService extends Mock implements DriverLocationService {}
+
+class FakeTrackingBloc extends Fake implements TrackingBloc {}
 
 class MockOsrmService extends Mock implements OsrmService {}
 
@@ -211,6 +212,7 @@ void main() {
       registerFallbackValue(DateTime(2026));
       registerFallbackValue(MockTripRepository());
       registerFallbackValue(Logger());
+      registerFallbackValue(FakeTrackingBloc());
 
       tempDir = Directory.systemTemp.createTempSync('hive_tests');
       Hive.init(tempDir.path);
@@ -410,47 +412,62 @@ void main() {
 
     void setupGlobalMocks() {
       final mockBle = MockBleBeaconService();
+      final mockLocation = MockDriverLocationService();
       final mockOsrm = MockOsrmService();
       final mockOfflineSync = MockOfflineSyncService();
       final talker = Talker();
       final router = AppRouter();
 
-      when(() => mockOfflineSync.start()).thenAnswer((_) {});
-      when(() => mockOfflineSync.stop()).thenAnswer((_) {});
-      when(() => mockBle.startScanning()).thenAnswer((_) async => true);
-      when(() => mockBle.stopScanning()).thenAnswer((_) async {});
-      when(() => mockBle.startAdvertising(
-            tripId: any(named: 'tripId'),
-            otp: any(named: 'otp'),
-          )).thenAnswer((_) async {});
-      when(() => mockBle.stopAdvertising()).thenAnswer((_) async {});
-      when(() => mockBle.startRotatingOtpAdvertising(
-            tripId: any(named: 'tripId'),
-            tripRepository: any(named: 'tripRepository'),
-            logger: any(named: 'logger'),
-          )).thenAnswer((_) {});
-      when(() => mockBle.stopRotatingOtpAdvertising()).thenAnswer((_) {});
+      when(mockOfflineSync.start).thenAnswer((_) {});
+      when(mockOfflineSync.stop).thenAnswer((_) {});
+      when(mockBle.startScanning).thenAnswer((_) async => true);
+      when(mockBle.stopScanning).thenAnswer((_) async {});
+      when(
+        () => mockBle.startAdvertising(
+          tripId: any(named: 'tripId'),
+          otp: any(named: 'otp'),
+        ),
+      ).thenAnswer((_) async {});
+      when(mockBle.stopAdvertising).thenAnswer((_) async {});
+      when(
+        () => mockBle.startRotatingOtpAdvertising(
+          tripId: any(named: 'tripId'),
+          tripRepository: any(named: 'tripRepository'),
+          logger: any(named: 'logger'),
+        ),
+      ).thenAnswer((_) {});
+      when(mockBle.stopRotatingOtpAdvertising).thenAnswer((_) {});
       when(() => mockBle.discoveredTrips).thenAnswer(
         (_) => const Stream.empty(),
       );
 
-      sl.allowReassignment = true;
-      sl.registerSingleton<Talker>(talker);
-      sl.registerSingleton<AppRouter>(router);
-      sl.registerSingleton<BleBeaconService>(mockBle);
-      sl.registerSingleton<OsrmService>(mockOsrm);
-      sl.registerSingleton<OfflineSyncService>(mockOfflineSync);
+      when(() => mockLocation.stopTracking()).thenAnswer((_) async {});
+      when(
+        () => mockLocation.startTracking(
+          tripId: any(named: 'tripId'),
+          trackingBloc: any(named: 'trackingBloc'),
+        ),
+      ).thenAnswer((_) async {});
 
-      sl.registerSingleton<AuthRepository>(mockAuthRepository);
-      sl.registerSingleton<RouteRepository>(mockRouteRepository);
-      sl.registerSingleton<SubscriptionRepository>(mockSubscriptionRepository);
-      sl.registerSingleton<TripRepository>(mockTripRepository);
-      sl.registerSingleton<ChatRepository>(mockChatRepository);
-      sl.registerSingleton<NotificationsRepository>(
-          mockNotificationsRepository);
-      sl.registerSingleton<EmergencyRepository>(mockEmergencyRepository);
-      sl.registerSingleton<PaymentRepository>(mockPaymentRepository);
-      sl.registerSingleton<BoardingRepository>(mockBoardingRepository);
+      sl
+        ..allowReassignment = true
+        ..registerSingleton<Talker>(talker)
+        ..registerSingleton<AppRouter>(router)
+        ..registerSingleton<BleBeaconService>(mockBle)
+        ..registerSingleton<DriverLocationService>(mockLocation)
+        ..registerSingleton<OsrmService>(mockOsrm)
+        ..registerSingleton<OfflineSyncService>(mockOfflineSync)
+        ..registerSingleton<AuthRepository>(mockAuthRepository)
+        ..registerSingleton<RouteRepository>(mockRouteRepository)
+        ..registerSingleton<SubscriptionRepository>(mockSubscriptionRepository)
+        ..registerSingleton<TripRepository>(mockTripRepository)
+        ..registerSingleton<ChatRepository>(mockChatRepository)
+        ..registerSingleton<NotificationsRepository>(
+          mockNotificationsRepository,
+        )
+        ..registerSingleton<EmergencyRepository>(mockEmergencyRepository)
+        ..registerSingleton<PaymentRepository>(mockPaymentRepository)
+        ..registerSingleton<BoardingRepository>(mockBoardingRepository);
     }
 
     testWidgets('simple debug test', (tester) async {
@@ -758,7 +775,7 @@ void main() {
 
 extension SafePumpAndSettle on WidgetTester {
   Future<void> safePumpAndSettle([Duration? duration]) async {
-    for (int i = 0; i < 20; i++) {
+    for (var i = 0; i < 20; i++) {
       await pump(duration ?? const Duration(milliseconds: 100));
     }
   }

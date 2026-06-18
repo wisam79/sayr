@@ -42,7 +42,7 @@ class _GreetingCardState extends State<GreetingCard>
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     );
-    _shimmerAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    _shimmerAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
     );
   }
@@ -119,7 +119,8 @@ class _GreetingCardState extends State<GreetingCard>
               child: CustomPaint(
                 painter: _UniversityGatePainter(
                   color: Color(
-                      0x12FFFFFF), // Opacity increased from 0x0BFFFFFF to 0x12FFFFFF
+                    0x12FFFFFF,
+                  ), // Opacity increased from 0x0BFFFFFF to 0x12FFFFFF
                 ),
               ),
             ),
@@ -142,7 +143,7 @@ class _GreetingCardState extends State<GreetingCard>
                           ],
                         ).createShader(bounds);
                       },
-                      blendMode: BlendMode.srcATop,
+                      blendMode: BlendMode.srcIn,
                       child: Container(color: Colors.white),
                     );
                   },

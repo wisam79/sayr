@@ -115,8 +115,10 @@ void main() {
               password: any(named: 'password'),
             ),
           ).thenAnswer(
-            (_) async => const Right<Failure, User>(testUser),
+            (_) async => const Right<Failure, User>(completeTestUser),
           );
+          when(() => mockRepo.fetchFullProfile())
+              .thenAnswer((_) async => completeTestUser);
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(
@@ -171,8 +173,10 @@ void main() {
               phone: any(named: 'phone'),
             ),
           ).thenAnswer(
-            (_) async => const Right<Failure, User>(testUser),
+            (_) async => const Right<Failure, User>(completeTestUser),
           );
+          when(() => mockRepo.fetchFullProfile())
+              .thenAnswer((_) async => completeTestUser);
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(
