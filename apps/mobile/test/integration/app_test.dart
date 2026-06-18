@@ -15,6 +15,7 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
+import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/core/services/osrm_service.dart';
 import 'package:sayr_mobile/core/theme_cubit.dart';
 import 'package:sayr_mobile/di/di.dart';
@@ -33,8 +34,6 @@ import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_mobile/routing/app_router.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:talker_flutter/talker_flutter.dart';
-
-import 'package:sayr_mobile/core/services/driver_location_service.dart';
 
 // Mock services
 class MockBleBeaconService extends Mock implements BleBeaconService {}
@@ -441,7 +440,7 @@ void main() {
         (_) => const Stream.empty(),
       );
 
-      when(() => mockLocation.stopTracking()).thenAnswer((_) async {});
+      when(mockLocation.stopTracking).thenAnswer((_) async {});
       when(
         () => mockLocation.startTracking(
           tripId: any(named: 'tripId'),

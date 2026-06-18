@@ -145,8 +145,8 @@ class DriverLocationService {
         distanceFilter: 10,
         intervalDuration: const Duration(seconds: 5),
         foregroundNotificationConfig: const geo.ForegroundNotificationConfig(
-          notificationText: "جاري مشاركة موقع الحافلة مع الطلاب",
-          notificationTitle: "سير - تتبع الرحلة النشطة",
+          notificationText: 'جاري مشاركة موقع الحافلة مع الطلاب',
+          notificationTitle: 'سير - تتبع الرحلة النشطة',
           enableWakeLock: true,
         ),
       );

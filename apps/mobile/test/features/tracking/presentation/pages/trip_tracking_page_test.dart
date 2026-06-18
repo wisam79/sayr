@@ -94,29 +94,29 @@ void main() {
     routeEndLocation: const Coordinates(latitude: 33.3140, longitude: 44.3630),
   );
 
-  final testRoute = Route(
-    id: const RouteId('route-1'),
-    driverId: const DriverId('driver-1'),
+  const testRoute = Route(
+    id: RouteId('route-1'),
+    driverId: DriverId('driver-1'),
     title: 'Test Route Title',
     startLocation: 'Start Point',
     endLocation: 'End Point',
-    price: const Money(3000),
+    price: Money(3000),
     capacity: 25,
     availableSeats: 10,
     isActive: true,
   );
 
-  final testDriver = Driver(
-    id: const DriverId('driver-1'),
-    userId: const UserId('user-driver'),
+  const testDriver = Driver(
+    id: DriverId('driver-1'),
+    userId: UserId('user-driver'),
     vehicleModel: 'KIA',
     vehiclePlate: '1234 A',
     capacity: 11,
     rating: 4.9,
   );
 
-  final testDriverProfile = User(
-    id: const UserId('user-driver'),
+  const testDriverProfile = User(
+    id: UserId('user-driver'),
     email: 'driver@sayr.app',
     role: UserRole.driver,
     fullName: 'Ahmed Driver',
@@ -152,11 +152,11 @@ void main() {
     when(() => mockTripRepo.watchTrip(any()))
         .thenAnswer((_) => Stream.value(testTrip));
     when(() => mockRouteRepo.getById(any()))
-        .thenAnswer((_) async => Right(testRoute));
+        .thenAnswer((_) async => const Right(testRoute));
     when(() => mockDriverRepo.getDriverById(any()))
-        .thenAnswer((_) async => Right(testDriver));
+        .thenAnswer((_) async => const Right(testDriver));
     when(() => mockDriverRepo.getDriverProfile(any()))
-        .thenAnswer((_) async => Right(testDriverProfile));
+        .thenAnswer((_) async => const Right(testDriverProfile));
     when(() => mockRatingRepo.getTripRating(any()))
         .thenAnswer((_) async => const Right(null));
 
@@ -178,7 +178,10 @@ void main() {
 
   testWidgets('renders error view when trip watching fails', (tester) async {
     when(() => mockTripRepo.watchTrip(any())).thenAnswer(
-        (_) => Stream.error(const ServerFailure(message: 'Connection failed')));
+      (_) => Stream.error(
+        const ServerFailure(message: 'Connection failed'),
+      ),
+    );
 
     await tester
         .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
