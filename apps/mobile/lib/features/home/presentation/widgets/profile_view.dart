@@ -107,13 +107,16 @@ class _ProfileViewState extends State<_ProfileView>
       showDialog<void>(
         context: context,
         barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          content: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(child: Text(l10n.loading)),
-            ],
+        builder: (context) => PopScope(
+          canPop: false,
+          child: AlertDialog(
+            content: Row(
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(child: Text(l10n.loading)),
+              ],
+            ),
           ),
         ),
       ),
@@ -197,7 +200,8 @@ class _ProfileViewState extends State<_ProfileView>
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
                   child: Column(
                     children: [
                       Container(
@@ -215,8 +219,10 @@ class _ProfileViewState extends State<_ProfileView>
                           ),
                           child: Center(
                             child: Text(
-                              widget.user.displayName.isNotEmpty
-                                  ? widget.user.displayName[0].toUpperCase()
+                              widget.user.displayName.trim().isNotEmpty
+                                  ? widget.user.displayName
+                                      .trim()[0]
+                                      .toUpperCase()
                                   : '?',
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 color: AppColors.primary,
@@ -513,7 +519,8 @@ class _ProfileViewState extends State<_ProfileView>
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: OutlinedButton.icon(
             onPressed: () => _confirmLogout(context),
-            icon: const Icon(LucideIcons.log_out, size: 18, color: AppColors.error),
+            icon: const Icon(LucideIcons.log_out,
+                size: 18, color: AppColors.error),
             label: Text(
               l10n.logout,
               style: const TextStyle(
@@ -648,7 +655,9 @@ class _SettingsTile extends StatelessWidget {
               trailing!
             else
               Icon(
-                isRtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+                isRtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
                 color: AppColors.textMuted,
                 size: 20,
               ),
@@ -658,4 +667,3 @@ class _SettingsTile extends StatelessWidget {
     );
   }
 }
-

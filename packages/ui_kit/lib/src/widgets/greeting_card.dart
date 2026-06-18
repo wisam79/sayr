@@ -168,6 +168,8 @@ class _GreetingCardState extends State<GreetingCard>
                       children: [
                         Text(
                           widget.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: widget.isCompact ? 16 : 20,

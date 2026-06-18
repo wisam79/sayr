@@ -129,7 +129,9 @@ class _RoutesListPageState extends State<RoutesListPage> {
                                 extra: route,
                               );
                               if (context.mounted) {
-                                context.read<RoutesBloc>().add(const RoutesLoadRequested());
+                                context
+                                    .read<RoutesBloc>()
+                                    .add(const RoutesLoadRequested());
                               }
                             },
                           );

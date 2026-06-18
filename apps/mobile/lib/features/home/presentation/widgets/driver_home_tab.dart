@@ -35,8 +35,8 @@ class DriverHomeTab extends StatelessWidget {
                     radius: 28,
                     backgroundColor: Colors.white.withValues(alpha: 0.2),
                     child: Text(
-                      state.user.displayName.isNotEmpty
-                          ? state.user.displayName[0].toUpperCase()
+                      state.user.displayName.trim().isNotEmpty
+                          ? state.user.displayName.trim()[0].toUpperCase()
                           : '?',
                       style: const TextStyle(
                         color: Colors.white,

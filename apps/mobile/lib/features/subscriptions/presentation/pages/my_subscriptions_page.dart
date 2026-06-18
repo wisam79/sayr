@@ -68,7 +68,9 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             onPressed: () async {
               await context.push('/activate-license');
               if (context.mounted) {
-                context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                context
+                    .read<SubscriptionsBloc>()
+                    .add(const SubscriptionsLoadRequested());
                 _fetchPendingPayments();
               }
             },
@@ -135,7 +137,9 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                             onPressed: () async {
                               await context.push('/activate-license');
                               if (context.mounted) {
-                                context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                                context
+                                    .read<SubscriptionsBloc>()
+                                    .add(const SubscriptionsLoadRequested());
                                 _fetchPendingPayments();
                               }
                             },
@@ -158,7 +162,8 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                                   onPressed: () async {
                                     await context.push('/activate-license');
                                     if (context.mounted) {
-                                      context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                                      context.read<SubscriptionsBloc>().add(
+                                          const SubscriptionsLoadRequested());
                                       _fetchPendingPayments();
                                     }
                                   },

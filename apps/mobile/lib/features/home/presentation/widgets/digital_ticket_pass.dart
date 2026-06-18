@@ -237,6 +237,8 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                         if (widget.user != null) ...[
                           Text(
                             widget.user!.displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: Theme.of(context)
                                 .textTheme
                                 .titleLarge
@@ -506,7 +508,9 @@ class EmptyDigitalTicketPass extends StatelessWidget {
                 onPressed: () async {
                   await GoRouter.of(context).push('/activate-license');
                   if (context.mounted) {
-                    context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                    context
+                        .read<SubscriptionsBloc>()
+                        .add(const SubscriptionsLoadRequested());
                   }
                 },
                 icon: Icons.add,

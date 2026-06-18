@@ -172,10 +172,11 @@ class _QuickActionCardState extends State<QuickActionCard>
                     Expanded(
                       child: Text(
                         widget.label,
-                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.1,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.1,
+                                ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),

@@ -139,7 +139,8 @@ class _HomeViewState extends State<_HomeView> {
                     child: NavigationBar(
                       height: 64,
                       selectedIndex: index,
-                      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+                      labelBehavior:
+                          NavigationDestinationLabelBehavior.alwaysHide,
                       surfaceTintColor: Colors.transparent,
                       backgroundColor: Colors.transparent,
                       indicatorColor: Colors.transparent,
