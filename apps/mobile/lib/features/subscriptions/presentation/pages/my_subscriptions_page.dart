@@ -71,7 +71,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                 context
                     .read<SubscriptionsBloc>()
                     .add(const SubscriptionsLoadRequested());
-                _fetchPendingPayments();
+                await _fetchPendingPayments();
               }
             },
             icon: const Icon(Icons.add),
@@ -140,7 +140,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                                 context
                                     .read<SubscriptionsBloc>()
                                     .add(const SubscriptionsLoadRequested());
-                                _fetchPendingPayments();
+                                await _fetchPendingPayments();
                               }
                             },
                           ),
@@ -163,8 +163,9 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                                     await context.push('/activate-license');
                                     if (context.mounted) {
                                       context.read<SubscriptionsBloc>().add(
-                                          const SubscriptionsLoadRequested());
-                                      _fetchPendingPayments();
+                                            const SubscriptionsLoadRequested(),
+                                          );
+                                      await _fetchPendingPayments();
                                     }
                                   },
                                 ),

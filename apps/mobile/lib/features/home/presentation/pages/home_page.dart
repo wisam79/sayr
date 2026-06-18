@@ -117,21 +117,20 @@ class _HomeViewState extends State<_HomeView> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isDark
-                        ? AppColors.darkSurface.withOpacity(0.95)
-                        : AppColors.surface.withOpacity(0.95),
+                        ? AppColors.darkSurface.withValues(alpha: 0.95)
+                        : AppColors.surface.withValues(alpha: 0.95),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),
                     ],
                     border: Border.all(
                       color: isDark
-                          ? AppColors.borderDark.withOpacity(0.5)
-                          : AppColors.divider.withOpacity(0.8),
-                      width: 1,
+                          ? AppColors.borderDark.withValues(alpha: 0.5)
+                          : AppColors.divider.withValues(alpha: 0.8),
                     ),
                   ),
                   child: ClipRRect(

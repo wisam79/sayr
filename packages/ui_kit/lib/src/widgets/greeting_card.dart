@@ -27,7 +27,8 @@ class GreetingCard extends StatefulWidget {
   /// Badge/role widget to display below the user name.
   final Widget badgeWidget;
 
-  /// Whether to render a compact version of the card with reduced padding and font sizes.
+  /// Whether to render a compact version of the card with reduced padding and
+  /// font sizes.
   final bool isCompact;
 
   @override

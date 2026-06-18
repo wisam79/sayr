@@ -165,7 +165,7 @@ class _ProfileViewState extends State<_ProfileView>
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.3 : 0.15),
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.15),
                 blurRadius: 24,
                 offset: const Offset(0, 8),
               ),
@@ -183,7 +183,7 @@ class _ProfileViewState extends State<_ProfileView>
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(isDark ? 0.03 : 0.06),
+                      color: Colors.white.withValues(alpha: isDark ? 0.03 : 0.06),
                     ),
                   ),
                 ),
@@ -195,7 +195,7 @@ class _ProfileViewState extends State<_ProfileView>
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(isDark ? 0.02 : 0.04),
+                      color: Colors.white.withValues(alpha: isDark ? 0.02 : 0.04),
                     ),
                   ),
                 ),
@@ -207,7 +207,7 @@ class _ProfileViewState extends State<_ProfileView>
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
                         child: Container(
@@ -244,7 +244,7 @@ class _ProfileViewState extends State<_ProfileView>
                       Text(
                         widget.user.email,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
+                          color: Colors.white.withValues(alpha: 0.8),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -257,10 +257,10 @@ class _ProfileViewState extends State<_ProfileView>
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                               ),
                             ),
                             child: Row(
@@ -299,7 +299,7 @@ class _ProfileViewState extends State<_ProfileView>
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -350,7 +350,7 @@ class _ProfileViewState extends State<_ProfileView>
               _SettingsTile(
                 icon: LucideIcons.user,
                 iconColor: AppColors.primary,
-                iconBgColor: AppColors.primary.withOpacity(0.08),
+                iconBgColor: AppColors.primary.withValues(alpha: 0.08),
                 title: l10n.editProfile,
                 onTap: () => showDialog<void>(
                   context: context,
@@ -362,13 +362,13 @@ class _ProfileViewState extends State<_ProfileView>
                 indent: 64,
                 endIndent: 16,
                 color: isDark
-                    ? AppColors.borderDark.withOpacity(0.3)
-                    : AppColors.divider.withOpacity(0.5),
+                    ? AppColors.borderDark.withValues(alpha: 0.3)
+                    : AppColors.divider.withValues(alpha: 0.5),
               ),
               _SettingsTile(
                 icon: LucideIcons.lock,
                 iconColor: AppColors.secondary,
-                iconBgColor: AppColors.secondary.withOpacity(0.08),
+                iconBgColor: AppColors.secondary.withValues(alpha: 0.08),
                 title: l10n.changePassword,
                 onTap: () => showDialog<void>(
                   context: context,
@@ -393,7 +393,7 @@ class _ProfileViewState extends State<_ProfileView>
               _SettingsTile(
                 icon: LucideIcons.globe,
                 iconColor: Colors.blue,
-                iconBgColor: Colors.blue.withOpacity(0.08),
+                iconBgColor: Colors.blue.withValues(alpha: 0.08),
                 title: l10n.language,
                 trailing: SegmentedButton<String>(
                   showSelectedIcon: false,
@@ -438,13 +438,13 @@ class _ProfileViewState extends State<_ProfileView>
                 indent: 64,
                 endIndent: 16,
                 color: isDark
-                    ? AppColors.borderDark.withOpacity(0.3)
-                    : AppColors.divider.withOpacity(0.5),
+                    ? AppColors.borderDark.withValues(alpha: 0.3)
+                    : AppColors.divider.withValues(alpha: 0.5),
               ),
               _SettingsTile(
                 icon: LucideIcons.palette,
                 iconColor: Colors.amber[700]!,
-                iconBgColor: Colors.amber.withOpacity(0.08),
+                iconBgColor: Colors.amber.withValues(alpha: 0.08),
                 title: l10n.themeMode,
                 trailing: SegmentedButton<ThemeMode>(
                   showSelectedIcon: false,
@@ -452,18 +452,18 @@ class _ProfileViewState extends State<_ProfileView>
                     visualDensity: VisualDensity.compact,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  segments: <ButtonSegment<ThemeMode>>[
+                  segments: const <ButtonSegment<ThemeMode>>[
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.light,
-                      icon: const Icon(LucideIcons.sun, size: 16),
+                      icon: Icon(LucideIcons.sun, size: 16),
                     ),
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.dark,
-                      icon: const Icon(LucideIcons.moon, size: 16),
+                      icon: Icon(LucideIcons.moon, size: 16),
                     ),
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.system,
-                      icon: const Icon(LucideIcons.laptop, size: 16),
+                      icon: Icon(LucideIcons.laptop, size: 16),
                     ),
                   ],
                   selected: <ThemeMode>{context.watch<ThemeCubit>().state},
@@ -477,18 +477,18 @@ class _ProfileViewState extends State<_ProfileView>
                 indent: 64,
                 endIndent: 16,
                 color: isDark
-                    ? AppColors.borderDark.withOpacity(0.3)
-                    : AppColors.divider.withOpacity(0.5),
+                    ? AppColors.borderDark.withValues(alpha: 0.3)
+                    : AppColors.divider.withValues(alpha: 0.5),
               ),
               _SettingsTile(
                 icon: LucideIcons.bluetooth,
                 iconColor: Colors.teal,
-                iconBgColor: Colors.teal.withOpacity(0.08),
+                iconBgColor: Colors.teal.withValues(alpha: 0.08),
                 title: l10n.bleProximityBoarding,
                 trailing: Switch(
                   value: _bleEnabled,
                   onChanged: _isLoadingBle ? null : _toggleBle,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                 ),
               ),
             ],
@@ -507,7 +507,7 @@ class _ProfileViewState extends State<_ProfileView>
           child: _SettingsTile(
             icon: LucideIcons.refresh_cw,
             iconColor: Colors.purple,
-            iconBgColor: Colors.purple.withOpacity(0.08),
+            iconBgColor: Colors.purple.withValues(alpha: 0.08),
             title: l10n.forceSync,
             onTap: _syncCache,
           ),
@@ -519,8 +519,11 @@ class _ProfileViewState extends State<_ProfileView>
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: OutlinedButton.icon(
             onPressed: () => _confirmLogout(context),
-            icon: const Icon(LucideIcons.log_out,
-                size: 18, color: AppColors.error),
+            icon: const Icon(
+              LucideIcons.log_out,
+              size: 18,
+              color: AppColors.error,
+            ),
             label: Text(
               l10n.logout,
               style: const TextStyle(
