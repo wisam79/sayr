@@ -45,13 +45,17 @@ jobs:
       - name: Merge coverage reports
         run: |
           mkdir -p coverage
+          rm -f coverage/lcov.info
           find . -path ./.git -prune -o -name 'lcov.info' -print | while read -r f; do
-            echo "Including $f"
+            pkg_dir="${f#./}"
+            pkg_dir="${pkg_dir%/coverage/lcov.info}"
+            echo "Including $f with prefix $pkg_dir"
             if [ -f coverage/lcov.info ]; then
-              # Strip the closing line and append
-              sed -e '$d' "$f" >> coverage/lcov.info
+              # Strip the closing line and append with prefixed paths
+              sed -e '$d' "$f" | sed "s|^SF:|SF:$pkg_dir/|" >> coverage/lcov.info
             else
-              cp "$f" coverage/lcov.info
+              # Prefix paths and copy
+              sed "s|^SF:|SF:$pkg_dir/|" "$f" > coverage/lcov.info
             fi
           done
 
