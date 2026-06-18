@@ -122,7 +122,8 @@ class _HomeViewState extends State<_HomeView> {
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
+                        color:
+                            Colors.black.withValues(alpha: isDark ? 0.3 : 0.06),
                         blurRadius: 16,
                         offset: const Offset(0, 4),
                       ),

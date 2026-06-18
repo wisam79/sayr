@@ -183,7 +183,8 @@ class _ProfileViewState extends State<_ProfileView>
                     height: 150,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: isDark ? 0.03 : 0.06),
+                      color:
+                          Colors.white.withValues(alpha: isDark ? 0.03 : 0.06),
                     ),
                   ),
                 ),
@@ -195,7 +196,8 @@ class _ProfileViewState extends State<_ProfileView>
                     height: 120,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: isDark ? 0.02 : 0.04),
+                      color:
+                          Colors.white.withValues(alpha: isDark ? 0.02 : 0.04),
                     ),
                   ),
                 ),
