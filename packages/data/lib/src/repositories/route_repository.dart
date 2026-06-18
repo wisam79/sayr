@@ -63,7 +63,9 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
     return _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveRoutes();
-        return response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
+        return response
+            .map((json) => RouteModel.fromJson(json).toEntity())
+            .toList();
       },
       cacheLogLabel: 'active routes',
     );
@@ -74,7 +76,9 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
     return _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getMyDriverRoutes();
-        return response.map((json) => RouteModel.fromJson(json).toEntity()).toList();
+        return response
+            .map((json) => RouteModel.fromJson(json).toEntity())
+            .toList();
       },
       cacheLogLabel: 'driver routes',
     );

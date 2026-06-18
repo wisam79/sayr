@@ -61,7 +61,9 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
     return _fetchTripsWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveTrips();
-        return response.map((json) => TripModel.fromJson(json).toEntity()).toList();
+        return response
+            .map((json) => TripModel.fromJson(json).toEntity())
+            .toList();
       },
       cacheLogLabel: 'active trips',
     );

@@ -125,8 +125,7 @@ class DriverLocationService {
     if (position.heading != 0 &&
         _lastSentPosition!.heading != 0 &&
         position.speed > 1) {
-      final hDiff =
-          (position.heading - _lastSentPosition!.heading).abs() % 360;
+      final hDiff = (position.heading - _lastSentPosition!.heading).abs() % 360;
       final actualDiff = hDiff > 180 ? 360 - hDiff : hDiff;
       if (actualDiff >= 15) return true;
     }

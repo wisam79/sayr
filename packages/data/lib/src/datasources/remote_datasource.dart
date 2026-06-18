@@ -439,8 +439,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
       );
 
   @override
-  Future<void> deactivatePushTokens() =>
-      _notifications.deactivatePushTokens();
+  Future<void> deactivatePushTokens() => _notifications.deactivatePushTokens();
 
   // ---- Routes -------------------------------------------------------------
 
