@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/features/home/presentation/widgets/ticket_separator.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
+import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
@@ -124,11 +127,9 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF00875A),
-              Color(0xFF006644),
-              Color(0xFF004D33),
+              Color(0xFF1E293B), // Dark slate
+              Color(0xFF0F172A), // Deep charcoal
             ],
-            stops: [0.0, 0.5, 1.0],
           ),
           borderRadius: BorderRadius.circular(24),
         ),
@@ -165,7 +166,10 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
               Column(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -229,7 +233,7 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppSpacing.md),
+                        const SizedBox(height: AppSpacing.sm),
                         if (widget.user != null) ...[
                           Text(
                             widget.user!.displayName,
@@ -320,7 +324,10 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.md,
+                    ),
                     child: Column(
                       children: [
                         Row(
@@ -350,7 +357,7 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         progressWidget,
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: AppSpacing.sm),
                         SizedBox(
                           width: double.infinity,
                           height: 48,
@@ -415,7 +422,10 @@ class EmptyDigitalTicketPass extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
               child: Row(
                 children: [
                   CircleAvatar(
@@ -487,11 +497,17 @@ class EmptyDigitalTicketPass extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
               child: PrimaryButton(
                 label: l10n.activateLicense,
-                onPressed: () {
-                  GoRouter.of(context).push('/activate-license');
+                onPressed: () async {
+                  await GoRouter.of(context).push('/activate-license');
+                  if (context.mounted) {
+                    context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                  }
                 },
                 icon: Icons.add,
               ),

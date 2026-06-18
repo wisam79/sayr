@@ -136,125 +136,234 @@ class _ProfileViewState extends State<_ProfileView>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations =
-        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final verifiedLabel = isAr ? 'حساب موثق' : 'Verified';
 
     return ListView(
-      padding: const EdgeInsets.all(AppSpacing.pagePadding),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.pagePadding,
+        AppSpacing.pagePadding,
+        AppSpacing.pagePadding,
+        100, // Extra padding for the floating navigation bar
+      ),
       children: [
-        GlassCard(
-          margin: EdgeInsets.zero,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          color: AppColors.primary.withValues(alpha: isDark ? 0.05 : 0.02),
-          borderOpacity: isDark ? 0.12 : 0.08,
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (disableAnimations)
-                    const CustomPaint(
-                      size: Size(88, 88),
-                      painter:
-                          _AvatarRingPainter(primaryColor: AppColors.primary),
-                    )
-                  else
-                    RotationTransition(
-                      turns: _avatarRingController,
-                      child: const CustomPaint(
-                        size: Size(88, 88),
-                        painter:
-                            _AvatarRingPainter(primaryColor: AppColors.primary),
-                      ),
-                    ),
-                  Container(
-                    width: 80,
-                    height: 80,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.primary.withValues(alpha: 0.18),
-                          AppColors.primary.withValues(alpha: 0.04),
-                        ],
-                      ),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.22),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.user.displayName.isNotEmpty
-                            ? widget.user.displayName[0].toUpperCase()
-                            : '?',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                widget.user.displayName,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                widget.user.email,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+        // Premium Profile Card
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF1E293B), // Dark slate
+                Color(0xFF0F172A), // Deep charcoal
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.3 : 0.15),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -40,
+                  top: -40,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(isDark ? 0.03 : 0.06),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: -30,
+                  bottom: -30,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(isDark ? 0.02 : 0.04),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Container(
+                          width: 84,
+                          height: 84,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              widget.user.displayName.isNotEmpty
+                                  ? widget.user.displayName[0].toUpperCase()
+                                  : '?',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.user.displayName,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.user.email,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  widget.user.isDriver
+                                      ? Icons.directions_bus_rounded
+                                      : Icons.school_rounded,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  widget.user.isDriver
+                                      ? l10n.driverBadge
+                                      : l10n.studentBadge,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (widget.user.isVerified) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF00C853),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.verified_rounded,
+                                    color: Colors.white,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    verifiedLabel,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        const SizedBox(height: AppSpacing.lg),
+        const SizedBox(height: AppSpacing.xl),
+
+        // Section: Account Settings
         _buildSectionHeader(l10n.accountSettings, theme),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         GlassCard(
           margin: EdgeInsets.zero,
           padding: EdgeInsets.zero,
           borderOpacity: isDark ? 0.12 : 0.08,
+          borderRadius: 24,
           child: Column(
             children: [
-              ListTile(
-                leading: const Icon(
-                  LucideIcons.user,
-                  color: AppColors.primary,
-                ),
-                title: Text(l10n.editProfile),
-                trailing: const Icon(
-                  LucideIcons.chevron_right,
-                  size: 20,
-                  color: AppColors.textMuted,
-                ),
+              _SettingsTile(
+                icon: LucideIcons.user,
+                iconColor: AppColors.primary,
+                iconBgColor: AppColors.primary.withOpacity(0.08),
+                title: l10n.editProfile,
                 onTap: () => showDialog<void>(
                   context: context,
                   builder: (_) => EditProfileDialog(user: widget.user),
                 ),
               ),
-              const Divider(height: 1),
-              ListTile(
-                leading: const Icon(
-                  LucideIcons.lock,
-                  color: AppColors.primary,
-                ),
-                title: Text(l10n.changePassword),
-                trailing: const Icon(
-                  LucideIcons.chevron_right,
-                  size: 20,
-                  color: AppColors.textMuted,
-                ),
+              Divider(
+                height: 1,
+                indent: 64,
+                endIndent: 16,
+                color: isDark
+                    ? AppColors.borderDark.withOpacity(0.3)
+                    : AppColors.divider.withOpacity(0.5),
+              ),
+              _SettingsTile(
+                icon: LucideIcons.lock,
+                iconColor: AppColors.secondary,
+                iconBgColor: AppColors.secondary.withOpacity(0.08),
+                title: l10n.changePassword,
                 onTap: () => showDialog<void>(
                   context: context,
                   builder: (_) => const ChangePasswordDialog(),
@@ -264,18 +373,22 @@ class _ProfileViewState extends State<_ProfileView>
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
+
+        // Section: App Preferences
         _buildSectionHeader(l10n.appPreferences, theme),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         GlassCard(
           margin: EdgeInsets.zero,
           padding: EdgeInsets.zero,
           borderOpacity: isDark ? 0.12 : 0.08,
+          borderRadius: 24,
           child: Column(
             children: [
-              ListTile(
-                leading:
-                    const Icon(LucideIcons.globe, color: AppColors.primary),
-                title: Text(l10n.language),
+              _SettingsTile(
+                icon: LucideIcons.globe,
+                iconColor: Colors.blue,
+                iconBgColor: Colors.blue.withOpacity(0.08),
+                title: l10n.language,
                 trailing: SegmentedButton<String>(
                   showSelectedIcon: false,
                   style: const ButtonStyle(
@@ -285,27 +398,21 @@ class _ProfileViewState extends State<_ProfileView>
                   segments: <ButtonSegment<String>>[
                     ButtonSegment<String>(
                       value: 'ar',
-                      label: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          l10n.arabic,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      label: Text(
+                        l10n.arabic,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     ButtonSegment<String>(
                       value: 'en',
-                      label: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          l10n.english,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      label: Text(
+                        l10n.english,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -320,11 +427,19 @@ class _ProfileViewState extends State<_ProfileView>
                   },
                 ),
               ),
-              const Divider(height: 1),
-              ListTile(
-                leading:
-                    const Icon(LucideIcons.palette, color: AppColors.primary),
-                title: Text(l10n.themeMode),
+              Divider(
+                height: 1,
+                indent: 64,
+                endIndent: 16,
+                color: isDark
+                    ? AppColors.borderDark.withOpacity(0.3)
+                    : AppColors.divider.withOpacity(0.5),
+              ),
+              _SettingsTile(
+                icon: LucideIcons.palette,
+                iconColor: Colors.amber[700]!,
+                iconBgColor: Colors.amber.withOpacity(0.08),
+                title: l10n.themeMode,
                 trailing: SegmentedButton<ThemeMode>(
                   showSelectedIcon: false,
                   style: const ButtonStyle(
@@ -335,17 +450,14 @@ class _ProfileViewState extends State<_ProfileView>
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.light,
                       icon: const Icon(LucideIcons.sun, size: 16),
-                      tooltip: l10n.themeLight,
                     ),
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.dark,
                       icon: const Icon(LucideIcons.moon, size: 16),
-                      tooltip: l10n.themeDark,
                     ),
                     ButtonSegment<ThemeMode>(
                       value: ThemeMode.system,
                       icon: const Icon(LucideIcons.laptop, size: 16),
-                      tooltip: l10n.themeSystem,
                     ),
                   ],
                   selected: <ThemeMode>{context.watch<ThemeCubit>().state},
@@ -354,65 +466,72 @@ class _ProfileViewState extends State<_ProfileView>
                   },
                 ),
               ),
-              const Divider(height: 1),
-              SwitchListTile(
-                secondary:
-                    const Icon(LucideIcons.bluetooth, color: AppColors.primary),
-                title: Text(l10n.bleProximityBoarding),
-                value: _bleEnabled,
-                onChanged: _isLoadingBle ? null : _toggleBle,
+              Divider(
+                height: 1,
+                indent: 64,
+                endIndent: 16,
+                color: isDark
+                    ? AppColors.borderDark.withOpacity(0.3)
+                    : AppColors.divider.withOpacity(0.5),
+              ),
+              _SettingsTile(
+                icon: LucideIcons.bluetooth,
+                iconColor: Colors.teal,
+                iconBgColor: Colors.teal.withOpacity(0.08),
+                title: l10n.bleProximityBoarding,
+                trailing: Switch(
+                  value: _bleEnabled,
+                  onChanged: _isLoadingBle ? null : _toggleBle,
+                  activeColor: AppColors.primary,
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: AppSpacing.lg),
+
+        // Section: Sync & Maintenance
         _buildSectionHeader(l10n.cacheAndSync, theme),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.sm),
         GlassCard(
           margin: EdgeInsets.zero,
           padding: EdgeInsets.zero,
           borderOpacity: isDark ? 0.12 : 0.08,
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(
-                  LucideIcons.refresh_cw,
-                  color: AppColors.primary,
-                ),
-                title: Text(l10n.forceSync),
-                trailing: const Icon(
-                  LucideIcons.chevron_right,
-                  size: 20,
-                  color: AppColors.textMuted,
-                ),
-                onTap: _syncCache,
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        GlassCard(
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          color: AppColors.error.withValues(alpha: isDark ? 0.05 : 0.02),
-          child: ListTile(
-            leading: const Icon(LucideIcons.log_out, color: AppColors.error),
-            title: Text(
-              l10n.logout,
-              style: const TextStyle(
-                color: AppColors.error,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            trailing: const Icon(
-              LucideIcons.chevron_right,
-              size: 20,
-              color: AppColors.error,
-            ),
-            onTap: () => _confirmLogout(context),
+          borderRadius: 24,
+          child: _SettingsTile(
+            icon: LucideIcons.refresh_cw,
+            iconColor: Colors.purple,
+            iconBgColor: Colors.purple.withOpacity(0.08),
+            title: l10n.forceSync,
+            onTap: _syncCache,
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
+
+        // Logout Button
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: OutlinedButton.icon(
+            onPressed: () => _confirmLogout(context),
+            icon: const Icon(LucideIcons.log_out, size: 18, color: AppColors.error),
+            label: Text(
+              l10n.logout,
+              style: const TextStyle(
+                color: AppColors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              side: const BorderSide(color: AppColors.error, width: 1.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.lg),
         Center(
           child: Text(
             l10n.appVersion('1.0.0'),
@@ -473,32 +592,70 @@ class _ProfileViewState extends State<_ProfileView>
   }
 }
 
-class _AvatarRingPainter extends CustomPainter {
-  const _AvatarRingPainter({required this.primaryColor});
+/// A modern, beautiful settings item card.
+class _SettingsTile extends StatelessWidget {
+  const _SettingsTile({
+    required this.icon,
+    required this.iconColor,
+    required this.iconBgColor,
+    required this.title,
+    this.trailing,
+    this.onTap,
+  });
 
-  final Color primaryColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Offset.zero & size;
-    final paint = Paint()
-      ..shader = SweepGradient(
-        colors: [
-          primaryColor,
-          primaryColor.withValues(alpha: 0.1),
-          primaryColor,
-        ],
-      ).createShader(rect)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.5;
-
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = (size.width - paint.strokeWidth) / 2;
-    canvas.drawCircle(center, radius, paint);
-  }
+  final IconData icon;
+  final Color iconColor;
+  final Color iconBgColor;
+  final String title;
+  final Widget? trailing;
+  final VoidCallback? onTap;
 
   @override
-  bool shouldRepaint(covariant _AvatarRingPainter oldDelegate) {
-    return oldDelegate.primaryColor != primaryColor;
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+            if (trailing != null)
+              trailing!
+            else
+              Icon(
+                isRtl ? Icons.chevron_left_rounded : Icons.chevron_right_rounded,
+                color: AppColors.textMuted,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }
+

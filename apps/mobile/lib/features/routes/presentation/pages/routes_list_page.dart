@@ -123,11 +123,14 @@ class _RoutesListPageState extends State<RoutesListPage> {
                             hasSeats: route.hasSeats,
                             availableLabel: l10n.available,
                             completedLabel: l10n.full,
-                            onTap: () {
-                              context.push(
+                            onTap: () async {
+                              await context.push(
                                 '/route/${route.id.value}',
                                 extra: route,
                               );
+                              if (context.mounted) {
+                                context.read<RoutesBloc>().add(const RoutesLoadRequested());
+                              }
                             },
                           );
                         },

@@ -7,6 +7,7 @@ class QuickActionCard extends StatefulWidget {
     required this.label,
     required this.color,
     required this.onTap,
+    this.isHorizontal = true,
     super.key,
   });
 
@@ -14,6 +15,7 @@ class QuickActionCard extends StatefulWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
+  final bool isHorizontal;
 
   @override
   State<QuickActionCard> createState() => _QuickActionCardState();
@@ -94,8 +96,8 @@ class _QuickActionCardState extends State<QuickActionCard>
         MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     final Widget iconContainer = Container(
-      width: 44,
-      height: 44,
+      width: widget.isHorizontal ? 36 : 44,
+      height: widget.isHorizontal ? 36 : 44,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -105,7 +107,7 @@ class _QuickActionCardState extends State<QuickActionCard>
             widget.color.withValues(alpha: 0.04),
           ],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(widget.isHorizontal ? 8 : 12),
         border: Border.all(
           color: widget.color.withValues(alpha: 0.22),
           width: 1.2,
@@ -115,7 +117,7 @@ class _QuickActionCardState extends State<QuickActionCard>
         child: Icon(
           widget.icon,
           color: widget.color,
-          size: 22,
+          size: widget.isHorizontal ? 18 : 22,
         ),
       ),
     );
@@ -133,10 +135,15 @@ class _QuickActionCardState extends State<QuickActionCard>
         ],
       ),
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.md,
-          horizontal: AppSpacing.sm,
-        ),
+        padding: widget.isHorizontal
+            ? const EdgeInsets.symmetric(
+                vertical: AppSpacing.sm,
+                horizontal: AppSpacing.md,
+              )
+            : const EdgeInsets.symmetric(
+                vertical: AppSpacing.md,
+                horizontal: AppSpacing.sm,
+              ),
         margin: EdgeInsets.zero,
         borderRadius: 16,
         color: widget.color.withValues(alpha: isDark ? 0.06 : 0.03),
@@ -144,36 +151,66 @@ class _QuickActionCardState extends State<QuickActionCard>
         shadowOpacity: 0,
         blurSigma: 8,
         child: SizedBox(
-          height: 108,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (disableAnimations)
-                iconContainer
-              else
-                AnimatedBuilder(
-                  animation: _bounceAnimation,
-                  builder: (context, child) {
-                    return Transform.translate(
-                      offset: Offset(0, _bounceAnimation.value),
-                      child: child,
-                    );
-                  },
-                  child: iconContainer,
-                ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                widget.label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.1,
+          height: widget.isHorizontal ? 40 : 108,
+          child: widget.isHorizontal
+              ? Row(
+                  children: [
+                    if (disableAnimations)
+                      iconContainer
+                    else
+                      AnimatedBuilder(
+                        animation: _bounceAnimation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, _bounceAnimation.value),
+                            child: child,
+                          );
+                        },
+                        child: iconContainer,
+                      ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        widget.label,
+                        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.1,
+                            ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
+                  ],
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (disableAnimations)
+                      iconContainer
+                    else
+                      AnimatedBuilder(
+                        animation: _bounceAnimation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, _bounceAnimation.value),
+                            child: child,
+                          );
+                        },
+                        child: iconContainer,
+                      ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      widget.label,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.1,
+                          ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
         ),
       ),
     );

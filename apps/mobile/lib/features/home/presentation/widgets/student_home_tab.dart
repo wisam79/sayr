@@ -26,7 +26,10 @@ class StudentHomeTab extends StatelessWidget {
     });
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.pagePadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.pagePadding,
+        vertical: AppSpacing.sm,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -34,10 +37,11 @@ class StudentHomeTab extends StatelessWidget {
             builder: (context, state) {
               if (state is AuthAuthenticated) {
                 return GreetingCard(
+                  isCompact: true,
                   title: l10n.helloUser(state.user.displayName),
                   subtitle: '',
                   avatarWidget: CircleAvatar(
-                    radius: 28,
+                    radius: 20,
                     backgroundColor: Colors.white.withValues(alpha: 0.2),
                     child: Text(
                       state.user.displayName.isNotEmpty
@@ -45,7 +49,7 @@ class StudentHomeTab extends StatelessWidget {
                           : '?',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 24,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -73,7 +77,7 @@ class StudentHomeTab extends StatelessWidget {
               return const SizedBox.shrink();
             },
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.sm),
           BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
             builder: (context, state) {
               if (state is SubscriptionsLoaded) {
@@ -92,14 +96,14 @@ class StudentHomeTab extends StatelessWidget {
               return const SizedBox.shrink();
             },
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.quickActions,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.xxs),
           Column(
             children: [
               Row(
@@ -112,7 +116,7 @@ class StudentHomeTab extends StatelessWidget {
                       onTap: () => context.read<HomeNavCubit>().selectTab(1),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: QuickActionCard(
                       icon: LucideIcons.map,
@@ -123,7 +127,7 @@ class StudentHomeTab extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 children: [
                   Expanded(
@@ -134,7 +138,7 @@ class StudentHomeTab extends StatelessWidget {
                       onTap: () => context.push('/chats'),
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: QuickActionCard(
                       icon: LucideIcons.shield,

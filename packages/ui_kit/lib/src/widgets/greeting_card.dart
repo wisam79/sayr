@@ -11,6 +11,7 @@ class GreetingCard extends StatefulWidget {
     required this.subtitle,
     required this.avatarWidget,
     required this.badgeWidget,
+    this.isCompact = false,
     super.key,
   });
 
@@ -25,6 +26,9 @@ class GreetingCard extends StatefulWidget {
 
   /// Badge/role widget to display below the user name.
   final Widget badgeWidget;
+
+  /// Whether to render a compact version of the card with reduced padding and font sizes.
+  final bool isCompact;
 
   @override
   State<GreetingCard> createState() => _GreetingCardState();
@@ -77,11 +81,9 @@ class _GreetingCardState extends State<GreetingCard>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF00875A), // AppColors.primary
-            Color(0xFF006644), // Darker forest green
-            Color(0xFF004D33), // Even deeper green
+            Color(0xFF1E293B), // Dark slate
+            Color(0xFF0F172A), // Deep charcoal
           ],
-          stops: [0.0, 0.5, 1.0],
         ),
         borderRadius: BorderRadius.circular(20),
       ),
@@ -151,20 +153,24 @@ class _GreetingCardState extends State<GreetingCard>
               ),
             // Card Content
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.all(
+                widget.isCompact ? AppSpacing.md : AppSpacing.xl,
+              ),
               child: Row(
                 children: [
                   widget.avatarWidget,
-                  const SizedBox(width: AppSpacing.md),
+                  SizedBox(
+                    width: widget.isCompact ? AppSpacing.sm : AppSpacing.md,
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 20,
+                            fontSize: widget.isCompact ? 16 : 20,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -178,7 +184,9 @@ class _GreetingCardState extends State<GreetingCard>
                             ),
                           ),
                         ],
-                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: widget.isCompact ? AppSpacing.xs : 8,
+                        ),
                         widget.badgeWidget,
                       ],
                     ),

@@ -65,7 +65,13 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
           if (!showFab) return const SizedBox.shrink();
 
           return FloatingActionButton.extended(
-            onPressed: () => context.push('/activate-license'),
+            onPressed: () async {
+              await context.push('/activate-license');
+              if (context.mounted) {
+                context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                _fetchPendingPayments();
+              }
+            },
             icon: const Icon(Icons.add),
             label: Text(l10n.activateLicense),
           );
@@ -126,7 +132,13 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                           action: PrimaryButton(
                             label: l10n.activateLicense,
                             isExpanded: false,
-                            onPressed: () => context.push('/activate-license'),
+                            onPressed: () async {
+                              await context.push('/activate-license');
+                              if (context.mounted) {
+                                context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                                _fetchPendingPayments();
+                              }
+                            },
                           ),
                         )
                       else
@@ -143,8 +155,13 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                                 const SizedBox(height: AppSpacing.md),
                                 PrimaryButton(
                                   label: l10n.activateLicense,
-                                  onPressed: () =>
-                                      context.push('/activate-license'),
+                                  onPressed: () async {
+                                    await context.push('/activate-license');
+                                    if (context.mounted) {
+                                      context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
+                                      _fetchPendingPayments();
+                                    }
+                                  },
                                 ),
                               ],
                             ),

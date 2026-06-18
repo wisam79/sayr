@@ -54,152 +54,174 @@ class _HomeViewState extends State<_HomeView> {
           (bloc.state as AuthAuthenticated).user.role.isDriver,
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: BlocBuilder<HomeNavCubit, int>(
-          builder: (context, index) {
-            return Text(
-              isDriver
-                  ? (switch (index) {
-                      0 => l10n.appTitle,
-                      1 => l10n.activeTrips,
-                      2 => l10n.profile,
-                      _ => l10n.appTitle,
-                    })
-                  : (switch (index) {
-                      0 => l10n.appTitle,
-                      1 => l10n.routesTitle,
-                      2 => l10n.activeTrips,
-                      3 => l10n.mySubscriptions,
-                      4 => l10n.profile,
-                      _ => l10n.appTitle,
-                    }),
-            );
+    return BlocBuilder<HomeNavCubit, int>(
+      builder: (context, index) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return PopScope(
+          canPop: index == 0,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            context.read<HomeNavCubit>().selectTab(0);
           },
-        ),
-        actions: [
-          BlocBuilder<HomeNavCubit, int>(
-            builder: (context, index) {
-              if (index != 0) return const SizedBox.shrink();
-              return _HeaderActions(l10n: l10n);
-            },
-          ),
-        ],
-      ),
-      body: BlocBuilder<HomeNavCubit, int>(
-        builder: (context, index) {
-          return IndexedStack(
-            index: index,
-            children: isDriver
-                ? [
-                    DriverHomeTab(
-                      onOpenTrips: () =>
-                          context.read<HomeNavCubit>().selectTab(1),
+          child: Scaffold(
+            extendBody: true,
+            appBar: AppBar(
+              title: Text(
+                isDriver
+                    ? (switch (index) {
+                        0 => l10n.appTitle,
+                        1 => l10n.activeTrips,
+                        2 => l10n.profile,
+                        _ => l10n.appTitle,
+                      })
+                    : (switch (index) {
+                        0 => l10n.appTitle,
+                        1 => l10n.routesTitle,
+                        2 => l10n.activeTrips,
+                        3 => l10n.mySubscriptions,
+                        4 => l10n.profile,
+                        _ => l10n.appTitle,
+                      }),
+              ),
+              actions: [
+                if (index == 0) _HeaderActions(l10n: l10n),
+              ],
+            ),
+            body: IndexedStack(
+              index: index,
+              children: isDriver
+                  ? [
+                      DriverHomeTab(
+                        onOpenTrips: () =>
+                            context.read<HomeNavCubit>().selectTab(1),
+                      ),
+                      const DriverTripsTab(),
+                      const ProfileTab(),
+                    ]
+                  : [
+                      const StudentHomeTab(),
+                      const RoutesListPage(showAppBar: false),
+                      const ActiveTripsPage(showAppBar: false),
+                      const MySubscriptionsPage(showAppBar: false),
+                      const ProfileTab(),
+                    ],
+            ),
+            bottomNavigationBar: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: 8,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.darkSurface.withOpacity(0.95)
+                        : AppColors.surface.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.borderDark.withOpacity(0.5)
+                          : AppColors.divider.withOpacity(0.8),
+                      width: 1,
                     ),
-                    const DriverTripsTab(),
-                    const ProfileTab(),
-                  ]
-                : [
-                    const StudentHomeTab(),
-                    const RoutesListPage(showAppBar: false),
-                    const ActiveTripsPage(showAppBar: false),
-                    const MySubscriptionsPage(showAppBar: false),
-                    const ProfileTab(),
-                  ],
-          );
-        },
-      ),
-      bottomNavigationBar: BlocBuilder<HomeNavCubit, int>(
-        builder: (context, index) {
-          final isDark = Theme.of(context).brightness == Brightness.dark;
-          return Container(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(
-                  color: isDark ? AppColors.borderDark : AppColors.divider,
-                  width: 0.5,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: NavigationBar(
+                      height: 64,
+                      selectedIndex: index,
+                      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+                      surfaceTintColor: Colors.transparent,
+                      backgroundColor: Colors.transparent,
+                      indicatorColor: Colors.transparent,
+                      onDestinationSelected: (i) =>
+                          context.read<HomeNavCubit>().selectTab(i),
+                      destinations: isDriver
+                          ? [
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.home_outlined,
+                                  selectedIcon: Icons.home_rounded,
+                                  isSelected: index == 0,
+                                ),
+                                label: l10n.homeTitle,
+                              ),
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.route_outlined,
+                                  selectedIcon: Icons.route_rounded,
+                                  isSelected: index == 1,
+                                ),
+                                label: l10n.activeTrips,
+                              ),
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.person_outline_rounded,
+                                  selectedIcon: Icons.person_rounded,
+                                  isSelected: index == 2,
+                                ),
+                                label: l10n.profile,
+                              ),
+                            ]
+                          : [
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.home_outlined,
+                                  selectedIcon: Icons.home_rounded,
+                                  isSelected: index == 0,
+                                ),
+                                label: l10n.homeTitle,
+                              ),
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.route_outlined,
+                                  selectedIcon: Icons.route_rounded,
+                                  isSelected: index == 1,
+                                ),
+                                label: l10n.routesTitle,
+                              ),
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.map_outlined,
+                                  selectedIcon: Icons.map_rounded,
+                                  isSelected: index == 2,
+                                ),
+                                label: l10n.activeTrips,
+                              ),
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.local_activity_outlined,
+                                  selectedIcon: Icons.local_activity_rounded,
+                                  isSelected: index == 3,
+                                ),
+                                label: l10n.mySubscriptions,
+                              ),
+                              NavigationDestination(
+                                icon: _AnimatedNavIcon(
+                                  icon: Icons.person_outline_rounded,
+                                  selectedIcon: Icons.person_rounded,
+                                  isSelected: index == 4,
+                                ),
+                                label: l10n.profile,
+                              ),
+                            ],
+                    ),
+                  ),
                 ),
               ),
             ),
-            child: NavigationBar(
-              selectedIndex: index,
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              surfaceTintColor: Colors.transparent,
-              onDestinationSelected: (i) =>
-                  context.read<HomeNavCubit>().selectTab(i),
-              destinations: isDriver
-                  ? [
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.home_outlined,
-                          selectedIcon: Icons.home_rounded,
-                          isSelected: index == 0,
-                        ),
-                        label: l10n.homeTitle,
-                      ),
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.route_outlined,
-                          selectedIcon: Icons.route_rounded,
-                          isSelected: index == 1,
-                        ),
-                        label: l10n.activeTrips,
-                      ),
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.person_outline_rounded,
-                          selectedIcon: Icons.person_rounded,
-                          isSelected: index == 2,
-                        ),
-                        label: l10n.profile,
-                      ),
-                    ]
-                  : [
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.home_outlined,
-                          selectedIcon: Icons.home_rounded,
-                          isSelected: index == 0,
-                        ),
-                        label: l10n.homeTitle,
-                      ),
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.route_outlined,
-                          selectedIcon: Icons.route_rounded,
-                          isSelected: index == 1,
-                        ),
-                        label: l10n.routesTitle,
-                      ),
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.map_outlined,
-                          selectedIcon: Icons.map_rounded,
-                          isSelected: index == 2,
-                        ),
-                        label: l10n.activeTrips,
-                      ),
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.local_activity_outlined,
-                          selectedIcon: Icons.local_activity_rounded,
-                          isSelected: index == 3,
-                        ),
-                        label: l10n.mySubscriptions,
-                      ),
-                      NavigationDestination(
-                        icon: _AnimatedNavIcon(
-                          icon: Icons.person_outline_rounded,
-                          selectedIcon: Icons.person_rounded,
-                          isSelected: index == 4,
-                        ),
-                        label: l10n.profile,
-                      ),
-                    ],
-            ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -289,30 +311,46 @@ class _AnimatedNavIcon extends StatelessWidget {
     final inactiveColor =
         isDark ? AppColors.textMuted : AppColors.textSecondary;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      transitionBuilder: (child, animation) {
-        return ScaleTransition(
-          scale: animation,
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) {
+            return ScaleTransition(
+              scale: animation,
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          child: isSelected
+              ? Icon(
+                  selectedIcon,
+                  key: const ValueKey('selected'),
+                  color: activeColor,
+                  size: 26,
+                )
+              : Icon(
+                  icon,
+                  key: const ValueKey('unselected'),
+                  color: inactiveColor,
+                  size: 24,
+                ),
+        ),
+        const SizedBox(height: 4),
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: isSelected ? 5 : 0,
+          height: isSelected ? 5 : 0,
+          decoration: BoxDecoration(
+            color: activeColor,
+            shape: BoxShape.circle,
           ),
-        );
-      },
-      child: isSelected
-          ? Icon(
-              selectedIcon,
-              key: const ValueKey('selected'),
-              color: activeColor,
-              size: 26,
-            )
-          : Icon(
-              icon,
-              key: const ValueKey('unselected'),
-              color: inactiveColor,
-              size: 24,
-            ),
+        ),
+      ],
     );
   }
 }
