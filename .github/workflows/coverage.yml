@@ -74,8 +74,9 @@ jobs:
               'packages/core/lib/*' \
               'packages/data/lib/*' \
             --output-file coverage/lcov.filtered.info
-          lcov --summary coverage/lcov.filtered.info
-          COVERAGE_PCT=$(lcov --summary coverage/lcov.filtered.info 2>&1 | grep -oE 'lines\.\.\.\.\.\. [0-9.]+' | grep -oE '[0-9.]+')
+          # || true: lcov exits non-zero when functions/branches have no data
+          lcov --summary coverage/lcov.filtered.info || true
+          COVERAGE_PCT=$(lcov --summary coverage/lcov.filtered.info 2>&1 | grep -oE 'lines\.\.\.\.\.\.: [0-9.]+' | grep -oE '[0-9.]+')
           echo "Domain + data line coverage: ${COVERAGE_PCT}%"
           THRESHOLD=25
           if [ -z "$COVERAGE_PCT" ]; then
