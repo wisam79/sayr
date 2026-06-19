@@ -260,9 +260,11 @@ class _TripCard extends StatelessWidget {
     }
 
     return GlassCard(
-      onTap: () {
-        context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: trip.id));
-        context.push('/trip/${trip.id.value}');
+      onTap: () async {
+        await context.push('/trip/${trip.id.value}');
+        if (context.mounted) {
+          context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
+        }
       },
       padding: EdgeInsets.zero,
       margin: EdgeInsets.zero,

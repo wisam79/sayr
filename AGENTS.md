@@ -1,8 +1,88 @@
 # Sayr v3 - دليل المطورين والـ AI Agents
 
-> **آخر تحديث**: 2026-06-17
+> **آخر تحديث**: 2026-06-19
 > **الإصدار**: 3.0.0
 > **الحالة**: ✅ قيد الإنتاج (Production-Ready)
+
+---
+
+## 🔖 Quick Reference — للـ Agent (ابدأ من هنا)
+
+> إذا كنت بحاجة لتفاصيل أكثر اقرأ القسم المعني. هذه المعلومات تكفي لبدء 95% من المهام.
+
+| السؤال | الجواب السريع |
+|---------|---------------|
+| كيف أبدأ العمل؟ | `melos bootstrap` ثم `melos run build:runner` |
+| كيف أشغّل الاختبارات؟ | `melos run test` |
+| كيف أتحقق من الجودة؟ | `melos run analyze:strict` |
+| أين طبقة domain؟ | `packages/core/lib/src/` |
+| أين طبقة data؟ | `packages/data/lib/src/` |
+| أين طبقة UI؟ | `apps/mobile/lib/features/<feature>/presentation/` |
+| كيف أتعامل مع الأخطاء؟ | `Either<Failure, T>` عبر `BaseRepository.guard()` |
+| ما هي حالات Trip؟ | `scheduled → driverWaiting → inTransit → completed` |
+| تغطية CI الحالية؟ | ~26% (الحد الأدنى: 25%) |
+| مكتبة الخرائط؟ | `maplibre_gl` (^‌0.22.0) |
+| نظام Logging؟ | `talker_flutter` + `talker_bloc_logger` |
+| كيف أضيف حزمة جديدة؟ | تحقق pub.dev أولاً — لا تبتكر ما هو موجود |
+
+---
+
+## 🚀 بروتوكول البدء الإلزامي (قبل أي سطر كود)
+
+> **هذا البروتوكول غير اختياري. كل خطوة تُنجز قبل الانتقال للتالية.**
+
+### الخطوة 1 — افهم طبيعة المهمة
+
+| نوع المهمة | ماذا تفعل أولاً |
+|---|---|
+| feature جديد | اقرأ feature مشابه موجود بالكامل |
+| bug fix | اكتب test يُعيد إنتاج الـ bug أولاً |
+| refactor | تأكد أن الاختبارات تجتاز قبل البدء |
+| إضافة RPC | افتح `supabase/migrations/` أولاً |
+
+### الخطوة 2 — اكتشف الكود الموجود **قبل** الكتابة
+
+```bash
+# ابحث عن الملفات المرتبطة:
+grep -r "<الكلمة المفتاحية>" packages/ apps/mobile/lib/ --include="*.dart" -l
+
+# اقرأ الـ repository المرتبط:
+cat packages/data/lib/src/repositories/<feature>_repository.dart
+
+# اقرأ الـ bloc المرتبط:
+cat apps/mobile/lib/features/<feature>/presentation/bloc/<feature>_bloc.dart
+```
+
+### الخطوة 3 — تحقق من هذه القائمة قبل البدء
+
+- [ ] قرأت ملف repository مشابه للمهمة الحالية
+- [ ] تحققت من أن المكتبة المطلوبة في `pubspec.yaml` (§10)
+- [ ] تحققت من عدم وجود RPC جاهز في `supabase/migrations/`
+- [ ] حددت بالضبط الملفات التي ستُعدَّل والملفات الجديدة
+
+---
+
+## ✅ تعريف الانتهاء (Definition of Done)
+
+> **لا يُعدّ العمل منتهياً حتى تجتاز هذه القائمة كاملاً.**
+
+### الكود
+- [ ] `melos run build:runner` — بدون أخطاء
+- [ ] `melos run analyze:strict` — صفر warnings أو infos
+- [ ] `melos run test` — كل الاختبارات تجتاز
+
+### الجودة
+- [ ] لا `dynamic` خارج datasource layer
+- [ ] لا `print()` — فقط `log.info()` / `talker`
+- [ ] لا hardcoded Arabic/English strings — كل نص عبر ARB
+- [ ] لا `setState()` في feature pages — فقط Bloc/Cubit
+- [ ] لا `supabase.from()` خارج `packages/data/`
+
+### الاكتمال
+- [ ] كل ميزة مربوطة بـ backend فعلياً (لا mock data)
+- [ ] كل repository جديد → test واحد على الأقل
+- [ ] كل bloc جديد → test واحد على الأقل
+- [ ] كل feature جديد → حالة error/loading/empty مُعالَجة في UI
 
 ---
 
@@ -22,7 +102,7 @@
 │  📱 Flutter Mobile (Android أولاً)                       │
 │     ├─ flutter_bloc (State Management)                   │
 │     ├─ go_router (Navigation)                            │
-│     ├─ MapLibre Native + OpenFreeMap (Maps)              │
+│     ├─ maplibre_gl + OpenFreeMap (Maps)                  │
 │     ├─ drift (Local DB)                                  │
 │     ├─ fpdart (Functional Error Handling)                │
 │     └─ freezed (Immutable Models)                        │
@@ -51,71 +131,14 @@ sayr/
 ├── supabase/                    # Backend (لا تغيير)
 │   ├── migrations/
 │   └── functions/
-├── docs/                        # التوثيق
+├── docs/
 │   └── adr/                     # Architecture Decision Records
 ├── .github/workflows/           # CI/CD
 ├── .opencode/                   # AI agent configs + skills
-│   ├── agents/                  # Custom subagents (PM, Dev, QA)
-│   └── skills/                  # Reusable skill definitions
-├── .agents/                     # Shared agent resources
+├── .agents/
 │   └── discussions/             # سجل النقاشات الداخلية
 └── tools/                       # Scripts & utilities
 ```
-
----
-
-## 1.4 المبدأ الأول: لا تبتكر العجلة (No Reinventing the Wheel) ⚠️⚠️⚠️
-
-> **هذه أهم قاعدة في المشروع. اقرأها قبل أي كود تكتبه.**
-
-### القاعدة الذهبية
-
-> **قبل أن تكتب أي helper، utility، extension، أو wrapper، اسأل نفسك:**
-> **"هل يوجد package مجرب على pub.dev لهذا بالضبط؟"**
-> **إذا نعم → استخدمه. إذا لم تبحث → اهرب.**
-
-### الفلسفة
-
-- ✅ **استخدم قبل أن تبني** — Flutter ecosystem فيه 50,000+ package. أغلب المشاكل تم حلها.
-- ✅ **DRY على مستوى الـ packages** — لا تكرر منطق مكتوب في pub.dev.
-- ✅ **استفد من العمل الجماعي** — 1000 مطور اختبروا `awesome_notifications`، أنت أول مرة تكتب FCM service.
-- ❌ **لا تبتكر `RetryWithBackoff`** — استخدم `retry` أو `backoff`.
-- ❌ **لا تبتكر Haversine formula** — استخدم `latlong2` أو `geodesy`.
-- ❌ **لا تبتكر منطق permissions** — استخدم `permission_handler` + `permission_plus`.
-
-### قائمة "ابتكرت" المرفوضة
-
-| ❌ لا تكتب | ✅ استخدم بدلاً منه | السبب |
-|-----------|-----------------|------|
-| Custom retry/exponential backoff | `retry`, `backoff` | مختبر + configurable |
-| Custom distance/bearing math | `latlong2`, `geodesy` | tested + دقيقة |
-| Custom JSON parsing | `json_serializable` + `freezed` | type-safe + boilerplate-free |
-| Custom `copyWith` | `freezed` | مولّد تلقائي |
-| Custom DI registration | `injectable` | يقلل di.dart من 24 سطر إلى 0 |
-| Custom `GoRoute` builders | `go_router_builder` | type-safe paths |
-| Hand-rolled `fcm_service.dart` | `awesome_notifications` | channels + actions + scheduling |
-| Hand-rolled polling/timer | `Stream.periodic` + `rxdart` | composition أنظف |
-| Custom offline sync DAO | `flutter_data` أو `drift_sync` | automatic retry + conflict resolution |
-| Custom localization class | `intl_utils` + ARB files | مولّد من ARB |
-| Custom Date/Duration formatting | `intl` (`DateFormat`, `DurationFormat`) | locale-aware |
-| Hand-rolled map markers | `flutter_map_marker_cluster` | clustering + performance |
-| Hand-rolled empty/loading widgets | `empty_widget`, `skeletonizer` | جاهز + beautiful |
-| Hand-rolled SnackBar | `flash`, `awesome_snackbar_content` | Material 3 styled |
-| Custom File/Path in Drift | `drift_flutter` (`driftDatabase()`) | اختصار |
-| Custom internal event bus | `rxdart` Subjects | stream composition |
-| Manual permission flow | `permission_handler` + `flutter_settings_screens` | موحّد |
-| Custom BlocObserver | `talker_bloc` | logging مدمج |
-
-### القاعدة قبل كل ملف جديد
-
-قبل إنشاء أي ملف `.dart`، **اعمل هذه القائمة:**
-
-1. **ابحث في pub.dev** عن "flutter {feature_name}" (مثال: `flutter offline sync`، `flutter retry`).
-2. **إذا نتيجة البحث الأولى** = "an elegant way to..." أو "the best way to..." → استخدمها.
-3. **إذا كانت maintenance عالية** (>1000 likes, last update < 6 months) → استخدمها.
-4. **إذا فشلت** كل المحاولات → اقرأ الكود الموجود في الـ monorepo (لا تبتكر من الصفر).
-5. **لا تكرر** كود موجود في ملف آخر (DRY).
-6. **لا تبتكر extension** على `String`/`num`/`Iterable` بدون البحث عن Dart extensions packages.
 
 ### قائمة "ممنوعات" قاطعة
 
@@ -240,6 +263,23 @@ await AwesomeNotifications().initialize(null, [
 ---
 
 ## 2. القواعد الصارمة (Strict Rules) ⚠️
+
+### ⚖️ سلم الأولويات (عند التعارض بين قاعدتين)
+
+> عندما تتعارض قاعدتان، هذا الترتيب حاسم — الأعلى يكسب:
+
+```
+1. الأمان (§5)                         ← الأعلى دائماً
+2. عدم كسر الكود الموجود
+3. اتباع الـ pattern الموجود في monorepo
+4. الاختبار أولاً (write test → make it pass)
+5. قراءة الكود الموجود قبل الافتراض
+6. عدم إضافة تعقيد غير مطلوب          ← الأدنى
+```
+
+**مثال**: طُلب منك تسريع استعلام. الأمان (RLS) يبقى ثابتاً حتى لو تسبب في بطء — لا تحذفه أبداً.
+
+---
 
 ### 2.1 Type Safety (أمان الأنواع)
 
@@ -368,7 +408,8 @@ class MyPage extends StatelessWidget {
 - ✅ كل entity نقي له test (للـ logic مثل FSM)
 - ✅ كل صفحة لها widget test واحد على الأقل
 - ❌ لا feature يُقبل بدون test
-- **التغطية المستهدفة**: ≥ 80% (domain + data) — مُطبّقة كـ gate في CI (انظر §9.2)
+- **التغطية الحالية**: ~26% (domain + data) — الحد الأدنى المُطبّق في CI حالياً: **25%** (انظر §9.2).
+- **الهدف المرحلي**: رفعها تدريجياً إلى 80% مع كل feature جديد — لا تكتب اختبارات إضافية بشكل اصطناعي للوصول لـ 80% قبل أوانها.
 
 ### 2.6 لا Dead Code
 
@@ -507,7 +548,7 @@ class MyWidget extends StatelessWidget {
 
 ### 5.2 Local Storage
 
-- ✅ `flutter_secure_storage` للـ tokens
+- ✅ `flutter_secure_storage` للـ tokens (موجودة في `packages/data`) — تأكد من استخدامها فعلاً قبل حفظ أي token
 - ✅ `drift` للـ cache (لا tokens)
 - ❌ لا passwords في SharedPreferences
 
@@ -606,18 +647,90 @@ chore: upgrade bloc dependency
 
 ### 8.2 Branch Strategy
 
-- `main` - production-ready
-- `develop` - integration branch
-- `feature/<feature-name>` - feature branches
-- `fix/<bug-name>` - bug fix branches
-- `release/<version>` - release preparation
+- `main` — الفرع الوحيد (trunk-based development). الـ agents تعمل مباشرة على `main`.
+- لا يوجد `develop` أو `release` branches حالياً.
 
 ### 8.3 Pre-commit Checks (lefthook)
 
-- `dart format` تلقائي
-- `flutter analyze` بدون warnings
-- `flutter test` يجتاز
-- Conventional commit message
+- `dart format` تلقائي (pre-commit)
+- `flutter analyze --fatal-infos` (pre-commit)
+- `dart format --set-exit-if-changed` (pre-commit)
+- `flutter test` يجتاز (pre-push)
+- ⚠️ **لا يوجد** فحص Conventional commit messages في lefthook حالياً — اتبع الصيغة يدوياً.
+
+---
+
+## 8.5 مسارات المهام (Task Playbooks)
+
+> **استخدم هذه المسارات مباشرة حسب نوع المهمة.** كل خطوة بالترتيب.
+
+### 🆕 إضافة Feature جديد
+
+```
+1. packages/core/lib/src/
+   └── entities/<entity>.dart           (freezed model)
+   └── repositories/<feature>_repository.dart (abstract interface)
+
+2. packages/data/lib/src/
+   └── models/<entity>_model.dart        (freezed + fromJson)
+   └── repositories/<feature>_repository.dart (extends BaseRepository)
+      └── كل method → guard(() async { ... })
+
+3. apps/mobile/lib/features/<feature>/presentation/
+   └── bloc/<feature>_bloc.dart          (extends Bloc)
+   └── bloc/<feature>_event.dart         (sealed class)
+   └── bloc/<feature>_state.dart         (freezed union)
+   └── pages/<feature>_page.dart
+   └── widgets/
+
+4. الاختبارات:
+   └── packages/data/test/repositories/<feature>_repository_test.dart
+   └── apps/mobile/test/features/<feature>/bloc/<feature>_bloc_test.dart
+
+5. melos run build:runner → analyze:strict → test
+```
+
+### 🐛 إصلاح Bug
+
+```
+1. اكتب test يُعيد إنتاج الـ bug (يفشل أولاً)
+2. حدد مكان الـ bug: repository؟ bloc؟ UI؟
+3. أصلح الـ bug بأقل تغيير ممكن
+4. تأكد أن الـ test الجديد يجتاز الآن
+5. melos run analyze:strict → test (كل الاختبارات)
+```
+
+### 🗄️ إضافة RPC جديد
+
+```
+1. supabase/migrations/<timestamp>_<name>.sql
+   └── CREATE OR REPLACE FUNCTION public.<name>(...)
+   └── SECURITY DEFINER
+   └── SET search_path = public
+   └── REVOKE ALL ON FUNCTION ... FROM PUBLIC
+   └── GRANT EXECUTE ON FUNCTION ... TO authenticated
+
+2. packages/data/lib/src/repositories/<feature>_repository.dart
+   └── أضف method جديدة
+   └── return guard(() async {
+         return _supabase.rpc('<name>', params: {...});
+       });
+
+3. packages/core/lib/src/repositories/<feature>_repository.dart
+   └── أضف abstract method للـ interface
+
+4. لا تستدعِ الـ RPC من UI مباشرة — فقط عبر Repository
+```
+
+### 🔁 Refactor
+
+```
+1. تأكد أن melos run test يجتاز قبل البدء
+2. غيّر شيئاً واحداً في كل مرة
+3. بعد كل تغيير: melos run analyze:strict → test
+4. لا تُغيّر السلوك — فقط البنية
+5. إذا كسرت test → أصلح الـ test أو أعد النظر في الـ refactor
+```
 
 ---
 
@@ -627,8 +740,8 @@ chore: upgrade bloc dependency
 
 > ملاحظة: الأسماء أدناه هي الملفات الفعلية الموجودة في `.github/workflows/`.
 
-- `ci.yml` - analyze (format + strict analyze) + test (كل push/PR إلى main/develop)
-- `coverage.yml` - تشغيل الاختبارات مع coverage، دمج التقارير، **فرض حدّ أدنى 80% على `packages/core` + `packages/data`**، ثم رفعها إلى Codecov
+- `ci.yml` — analyze (format + strict analyze) + test (كل push/PR إلى main)
+- `coverage.yml` — تشغيل الاختبارات مع coverage، دمج التقارير، فرض حدّ أدنى **25%** على `packages/core` + `packages/data`، ثم رفعها إلى Codecov
 - `build-android.yml` - APK + AAB (عند tag `v*`)
 - `database-ci.yml` - `supabase start` + `supabase db lint` + `supabase status` (اختبار الـ migrations محلياً)
 - `deploy-admin.yml` - نشر لوحة الإدارة (React) إلى GitHub Pages
@@ -637,29 +750,253 @@ chore: upgrade bloc dependency
 
 - ✅ `flutter analyze` صفر warnings (مفعّل في `ci.yml` عبر `melos run analyze:strict`)
 - ✅ `flutter test` جميع يجتاز (مفعّل في `ci.yml` عبر `melos run test`)
-- ✅ Coverage ≥ 80% على domain + data (مُطبّق فعلياً كـ gate في `coverage.yml` عبر `lcov --fail-under 80`)
+- ✅ Coverage ≥ **25%** على domain + data (مُطبّق فعلياً كـ gate في `coverage.yml` عبر `bc` comparison — التغطية الحالية ~26%). الهدف المرحلي الوصول لـ 80% تدريجياً.
 - ✅ Build ينجح
 
 ---
 
 ## 10. المكتبات المعتمدة (Approved Libraries)
 
-| المجال | المكتبة | ملاحظات |
+> هذا الجدول مستخرج مباشرةً من `pubspec.yaml`. إضافة أي حزمة جديدة تحتاج موافقة صريحة في PR.
+
+| المجال | المكتبة | الحزمة |
 |------|---------|---------|
-| State | `flutter_bloc` | الرسمي من Felix Angelov |
-| DI | `get_it` + `injectable` | بديل Riverpod |
-| Routing | `go_router` | الرسمي من Google |
-| Maps | `maplibre_native` | مجاني 100% |
-| Local DB | `drift` | type-safe SQL |
-| Cache | `hive_ce` | للإعدادات |
-| Secure Storage | `flutter_secure_storage` | للـ tokens |
-| Backend | `supabase_flutter` | الرسمي |
-| Models | `freezed` + `json_serializable` | immutable |
-| Error | `fpdart` | Either<Failure, T> |
-| Push | `firebase_messaging` | FCM |
-| Crash | `sentry_flutter` | مفعّل من اليوم الأول |
-| Linting | `very_good_analysis` | صارم |
-| Fonts | `google_fonts` | Noto Naskh Arabic |
+| State | `flutter_bloc` | `apps/mobile` |
+| DI | `get_it` + `injectable` | جميع الحزم |
+| Routing | `go_router` | `apps/mobile` |
+| Maps | `maplibre_gl` | `apps/mobile` |
+| Local DB | `drift` + `drift_flutter` | `packages/data` |
+| Cache | `hive_ce` + `hive_ce_flutter` | `apps/mobile` |
+| Secure Storage | `flutter_secure_storage` | `packages/data` |
+| Backend | `supabase_flutter` | `packages/data` |
+| Models | `freezed` + `json_serializable` | جميع الحزم |
+| Error | `fpdart` | `packages/core`, `packages/data` |
+| Push | `firebase_messaging` + `awesome_notifications` | `apps/mobile` |
+| Crash | `sentry_flutter` | `apps/mobile` |
+| Logging | `talker_flutter` + `talker_bloc_logger` | `apps/mobile` |
+| Linting | `very_good_analysis` | جميع الحزم |
+| Fonts | `google_fonts` | `apps/mobile` |
+| HTTP Client | `dio` | `apps/mobile` |
+| QR Scan | `mobile_scanner` | `apps/mobile` |
+| QR Generate | `pretty_qr_code` | `apps/mobile` |
+| Location | `geolocator` | `apps/mobile` |
+| Permissions | `permission_handler` | `apps/mobile` |
+| Loading Skeleton | `skeletonizer` | `apps/mobile` |
+| Flash Messages | `flash` | `apps/mobile` |
+| Image Cache | `cached_network_image` | `apps/mobile` |
+| Animations | `lottie` | `apps/mobile` |
+| BLE (Boarding) | `flutter_ble_peripheral` + `flutter_blue_plus` | `apps/mobile` |
+| Connectivity | `connectivity_plus` | `apps/mobile`, `packages/data` |
+
+---
+
+## 10.1 Melos Commands (مرجع سريع)
+
+| الأمر | الوصف |
+|-------|-------|
+| `melos bootstrap` | تثبيت التبعيات وربط الحزم |
+| `melos run analyze` | تحليل (errors فقط، بدون warnings) |
+| `melos run analyze:strict` | تحليل صارم (`--fatal-infos`) |
+| `melos run format` | تنسيق كل ملفات Dart |
+| `melos run format:check` | فحص التنسيق (يفشل إن كان هناك فرق) |
+| `melos run test` | تشغيل الاختبارات على كل الحزم |
+| `melos run test:coverage` | اختبارات مع coverage (`lcov.info`) |
+| `melos run build:runner` | code generation (freezed, injectable, ...) |
+| `melos run build:runner:watch` | code generation في وضع المراقبة |
+| `melos run lint:fix` | إصلاح تلقائي لمشاكل lint |
+| `melos run clean:full` | تنظيف شامل لكل الحزم |
+| `melos run build:android` | بناء APK release |
+| `melos run build:appbundle` | بناء AAB release |
+
+> ⚠️ **قاعدة**: دائماً شغّل `melos run build:runner` قبل `analyze` أو `test` لتوليد كود `freezed`/`injectable`.
+
+---
+
+## 10.2 متطلبات البيئة (Environment Setup)
+
+```
+Flutter : >= 3.44.1 (stable channel)
+Dart    : >= 3.x (مضمّن مع Flutter)
+Melos   : dart pub global activate melos
+Android SDK: لبناء APK/AAB
+Node.js 20+: لـ Supabase Edge Functions (اختياري)
+Supabase CLI: لتشغيل migrations محلياً (اختياري)
+```
+
+للتحقق من الإعداد:
+```bash
+flutter --version          # يجب >= 3.44.1
+dart pub global run melos --version
+melos bootstrap            # ربط الحزم
+```
+
+---
+
+## 10.3 أفخاخ شائعة (Common Pitfalls)
+
+> ⚠️ هذه مشاكل وقعت فيها agents سابقاً — اقرأها قبل البدء.
+
+1. **`withOpacity()` deprecated**: استخدم `Color.withValues(alpha: 0.5)` بدلاً منه.
+2. **`activeColor` في `Switch`**: استخدم `activeThumbColor` بدلاً منه.
+3. **`build_runner` إلزامي أولاً**: أي `analyze` أو `test` قبل code generation سينتج أخطاء.
+4. **`lcov --summary` قد يفشل** إذا لم يكن هناك function/branch data — أضف `|| true` بعده.
+5. **Codecov بدون token** سيفشل — `fail_ci_if_error: false` مضبوطة مسبقاً في `coverage.yml`.
+6. **لا تستخدم `supabase.from()` خارج `packages/data`** — هذا يُفشل analyze بسبب قواعد لا مباشرة على lint.
+7. **`maplibre_gl`** (وليس `maplibre_native` أو `flutter_map`) — الحزمة الفعلية المستخدمة في `apps/mobile`.
+
+---
+
+## 10.4 Supabase Schema (ملخص)
+
+> ⚠️ هذا ملخص مرجعي — الصدر الحقيقي هو `supabase/migrations/`. تحقق منه دائماً قبل أي استعلام.
+
+### الأرقام العامة
+- **43 migrations** | **~47 RPCs** | **~24 Triggers** | **10 Edge Functions**
+
+### الجداول الأساسية
+| الجدول | الوصف | الاستخدام في Data layer |
+|--------|-------|-----|
+| `profiles` | مستخدمون (طلاب + سائقين) مرتبطة بـ `auth.users` | `auth_repository`, `driver_repository` |
+| `routes` | المسارات الجامعية | `route_repository` |
+| `drivers` | بيانات السائق + المركبة + الطاقة | `driver_repository` |
+| `subscriptions` | تراخيص الاشتراك مسبقة الدفع | `subscription_repository` |
+| `licenses` | مفاتيح الاشتراك (مرتبطة بالطالب) | `subscription_repository` |
+| `trips` | الرحلات النشطة والمنتهية | `trip_repository` |
+| `boardings` | تسجيل صعود الطالب (QR/BLE) | `boarding_repository` |
+| `boarding_tokens` | QR tokens مؤقتة | `boarding_repository` |
+| `payments` | المدفوعات | `payment_repository` |
+| `ratings` | تقييم السائق بعد الرحلة | `rating_repository` |
+| `conversations` + `messages` | نظام المحادثة | `chat_repository` |
+| `emergency_reports` | تقارير الطوارئ | `emergency_repository` |
+| `push_tokens` | FCM tokens للمستخدمين | auth flow |
+| `app_config` | إعدادات التطبيق (feature flags, ...) | `auth_repository` |
+| `notification_log` | سجل الإشعارات المرسلة | Edge Function |
+
+### RPCs المستخدمة في Data Layer
+
+> جميعها مُعرَّفة مع `SECURITY DEFINER` + `REVOKE FROM PUBLIC` — لا تستدعها مباشرةً من UI.
+
+| RPC | الوصف |
+|-----|-------|
+| `get_my_role` | دور المستخدم الحالي |
+| `register_push_token` | تسجيل FCM token |
+| `deactivate_push_tokens` | تعطيل tokens عند logout |
+| `get_app_config` | بيانات التكوين العام |
+| `create_trip` | إنشاء رحلة (driver only) |
+| `get_active_trip_for_route` | الرحلة النشطة لمسار معين |
+| `update_trip_status` | تغيير حالة الرحلة (FSM) |
+| `update_trip_location` | تحديث موقع GPS |
+| `bulk_update_trip_locations` | sync offline GPS batch |
+| `get_trip_passengers` | ركاب الرحلة |
+| `generate_boarding_token` | توليد QR token |
+| `validate_boarding` | تحقق QR + تسجيل صعود |
+| `validate_boarding_via_proximity` | تحقق بواسطة BLE |
+| `complete_payment_and_activate_subscription` | إكمال الدفع + تفعيل |
+| `cancel_subscription` | إلغاء الاشتراك |
+| `get_license_details` | تفاصيل الترخيص |
+| `activate_license` | ربط مفتاح بطالب |
+| `get_driver_stats` | إحصائيات السائق |
+| `request_payout` | طلب سحب أرباح |
+| `get_unread_count` | عدد الرسائل غير المقروءة |
+| `ping` | health check |
+
+### Edge Functions (Deno)
+
+| الاسم | الوظيفة |
+|------|-------|
+| `process-payment` | معالجة الدفع |
+| `send-push-notification` | إرسال FCM لمستخدم محدد |
+| `emergency-alert` | إشعار طوارئ لكل الأطراف |
+| `get-route-geometry` | جلب مسار OSRM |
+| `create-route` | إنشاء مسار جديد (admin) |
+| `generate-driver-report` | تقرير أداء السائق |
+| `sync-offline-locations` | مزامنة GPS offline batch |
+| `trip-status-webhook` | معالجة بث Supabase Realtime |
+| `keep-osrm-alive` | cron: إبقاء OSRM نشطاً |
+| `_shared/` | كود مشترك بين functions |
+
+### قواعد Supabase الصارمة
+- ✅ كل جدول RLS مفعّل 100%
+- ✅ الأدوار عبر `app_metadata` (لا `user_metadata`)
+- ❌ لا `SERVICE_ROLE_KEY` في الـ client أبداً
+
+---
+
+## 10.5 أنماط موثّقة (Established Patterns)
+
+> هذه أنماط موجودة فعلاً في الكود — استخدمها ولا تخترع بديلاً.
+
+### نمط 1: Repository.guard() — معالجة الأخطاء
+
+كل `RepositoryImpl` يرث `BaseRepository` ويستخدم `guard()` بدل try/catch مباشر.
+
+```dart
+// ✅ packages/data/lib/src/repositories/trip_repository.dart
+class TripRepositoryImpl extends BaseRepository implements TripRepository {
+  @override
+  Future<Either<Failure, Trip>> getActiveTrip() => guard(() async {
+    // guard() يلتقط SocketException, AuthException, PostgrestException
+    // ويحولها إلى NetworkFailure / UnauthorizedFailure / ...
+    return _supabase.rpc('get_active_trip_for_route', params: {...});
+  });
+}
+```
+
+**Failure types المتوفرة** (sealed class في `packages/core/lib/src/failures/failure.dart`):
+`NetworkFailure` | `ServerFailure` | `UnauthorizedFailure` | `ForbiddenFailure` |
+`NotFoundFailure` | `ValidationFailure` | `RateLimitFailure` | `CacheFailure` |
+`BusinessRuleFailure` | `InvalidStateTransitionFailure` | `UnknownFailure`
+
+---
+
+### نمط 2: Trip FSM — حالات الرحلة
+
+استخدم `TripStateMachine.transition()` للتحقق من تحولات الحالة قبل RPC.
+
+```
+scheduled → (arrive)      → driverWaiting
+scheduled → (markAbsent)  → absent
+scheduled → (cancel)      → cancelled
+driverWaiting → (start)      → inTransit
+driverWaiting → (markAbsent) → absent
+driverWaiting → (cancel)     → cancelled
+inTransit → (complete)    → completed  [terminal]
+inTransit → (cancel)      → cancelled  [terminal]
+```
+
+```dart
+// ✅ packages/core/lib/src/fsm/trip_state_machine.dart
+final next = TripStateMachine.transition(currentStatus, TripEvent.start);
+if (next == null) return Left(const InvalidStateTransitionFailure());
+```
+
+---
+
+### نمط 3: Bloc Events + States
+
+كل Bloc يتبع نفس الهيكل:
+
+```dart
+// في apps/mobile/lib/features/<feature>/presentation/bloc/
+// <feature>_event.dart  — sealed class
+// <feature>_state.dart  — freezed union
+// <feature>_bloc.dart   — extends Bloc<Event, State>
+
+// الاستدعاء من الواجهة:
+context.read<TripBloc>().add(const TripStartRequested());
+
+// لا تستخدم setState() أبداً في feature pages
+```
+
+---
+
+### نمط 4: Boarding Flow (QR + BLE)
+
+ال boarding يدعم طريقتين:
+1. **QR**: `generate_boarding_token` RPC → عرض QR → مسح `mobile_scanner` → `validate_boarding` RPC
+2. **BLE proximity**: `flutter_ble_peripheral` → `validate_boarding_via_proximity` RPC
+
+الـ repository: `packages/data/lib/src/repositories/boarding_repository.dart`
 
 ---
 
@@ -671,7 +1008,7 @@ chore: upgrade bloc dependency
 - Sentry: Free tier (5K events/month)
 - FCM: Free
 - MapLibre + OpenFreeMap: Free
-- OSRM: Free
+- OSRM: Free (hosted externally via Edge Function `keep-osrm-alive`)
 - Play Console: $25 مرة واحدة
 
 ---
@@ -684,6 +1021,7 @@ chore: upgrade bloc dependency
 - [Supabase Flutter](https://supabase.com/docs/reference/dart)
 - [Drift Documentation](https://drift.simonbinder.eu/)
 - [Freezed](https://pub.dev/packages/freezed)
+- [ADRs (Architecture Decision Records)](./docs/adr/) — سياق القرارات المعمارية
 
 ---
 

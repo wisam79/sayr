@@ -99,8 +99,8 @@ void main() {
     await tester.pumpWidget(wrap(const MySubscriptionsPage()));
     await tester.pump();
 
-    expect(find.text('نشط'), findsOneWidget);
-    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.text('نشط'), findsAtLeastNWidgets(1));
+    expect(find.byIcon(Icons.add), findsOneWidget);
   });
 
   testWidgets('shows error state with retry', (tester) async {

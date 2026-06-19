@@ -56,29 +56,26 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
       appBar: widget.showAppBar
           ? AppBar(
               title: Text(l10n.mySubscriptions),
+              centerTitle: true,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: l10n.activateLicense,
+                  onPressed: () async {
+                    await context.push('/activate-license');
+                    if (context.mounted) {
+                      context
+                          .read<SubscriptionsBloc>()
+                          .add(const SubscriptionsLoadRequested());
+                      await _fetchPendingPayments();
+                    }
+                  },
+                ),
+              ],
             )
           : null,
-      floatingActionButton: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
-        builder: (context, state) {
-          final showFab =
-              state is SubscriptionsLoaded && state.subscriptions.isNotEmpty;
-          if (!showFab) return const SizedBox.shrink();
-
-          return FloatingActionButton.extended(
-            onPressed: () async {
-              await context.push('/activate-license');
-              if (context.mounted) {
-                context
-                    .read<SubscriptionsBloc>()
-                    .add(const SubscriptionsLoadRequested());
-                await _fetchPendingPayments();
-              }
-            },
-            icon: const Icon(Icons.add),
-            label: Text(l10n.activateLicense),
-          );
-        },
-      ),
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
           return switch (state) {
@@ -111,52 +108,95 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
+                    // Premium Dashboard Header
+                    _DashboardHeader(subscriptions: subscriptions),
+                    const SizedBox(height: AppSpacing.lg),
+
                     if (_pendingPayments.isNotEmpty) ...[
-                      Text(
-                        l10n.pendingPayments,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: AppColors.warning,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(
+                            l10n.pendingPayments,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.md),
                       ..._pendingPayments.map(
                         (payment) => _PendingPaymentCard(payment: payment),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                     ],
+
                     if (subscriptions.isEmpty) ...[
                       if (_pendingPayments.isEmpty)
-                        EmptyState(
-                          icon: Icons.confirmation_number_outlined,
-                          title: l10n.noSubscriptionsTitle,
-                          subtitle: l10n.noSubscriptionsSubtitle,
-                          action: PrimaryButton(
-                            label: l10n.activateLicense,
-                            isExpanded: false,
-                            onPressed: () async {
-                              await context.push('/activate-license');
-                              if (context.mounted) {
-                                context
-                                    .read<SubscriptionsBloc>()
-                                    .add(const SubscriptionsLoadRequested());
-                                await _fetchPendingPayments();
-                              }
-                            },
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 40),
+                          child: EmptyState(
+                            icon: Icons.confirmation_number_outlined,
+                            title: l10n.noSubscriptionsTitle,
+                            subtitle: l10n.noSubscriptionsSubtitle,
+                            action: PrimaryButton(
+                              label: l10n.activateLicense,
+                              isExpanded: false,
+                              onPressed: () async {
+                                await context.push('/activate-license');
+                                if (context.mounted) {
+                                  context
+                                      .read<SubscriptionsBloc>()
+                                      .add(const SubscriptionsLoadRequested());
+                                  await _fetchPendingPayments();
+                                }
+                              },
+                            ),
                           ),
                         )
                       else
                         Card(
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: BorderSide(
+                              color: Theme.of(context)
+                                  .dividerColor
+                                  .withValues(alpha: 0.1),
+                            ),
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(AppSpacing.lg),
                             child: Column(
                               children: [
-                                Text(
-                                  l10n.noActiveSubscription,
-                                  style:
-                                      Theme.of(context).textTheme.titleMedium,
+                                const Icon(
+                                  Icons.info_outline,
+                                  size: 48,
+                                  color: AppColors.warning,
                                 ),
                                 const SizedBox(height: AppSpacing.md),
+                                Text(
+                                  l10n.noActiveSubscription,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: AppSpacing.lg),
                                 PrimaryButton(
                                   label: l10n.activateLicense,
                                   onPressed: () async {
@@ -174,14 +214,29 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                           ),
                         ),
                     ] else ...[
-                      Text(
-                        l10n.mySubscriptions,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                      Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 16,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Text(
+                            l10n.mySubscriptions,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.md),
                       ...subscriptions.map(
                         (sub) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -199,6 +254,225 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
   }
 }
 
+/// A premium visual dashboard header summarizing active subscriptions.
+class _DashboardHeader extends StatelessWidget {
+  const _DashboardHeader({required this.subscriptions});
+  final List<Subscription> subscriptions;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final activeSub = subscriptions.cast<Subscription?>().firstWhere(
+          (s) =>
+              s != null &&
+              s.status == SubscriptionStatus.active &&
+              !s.isExpired,
+          orElse: () => null,
+        );
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    if (activeSub != null) {
+      final daysRemaining = activeSub.daysRemaining ?? 30;
+      final progress = (daysRemaining / 30.0).clamp(0.0, 1.0);
+      final endDateStr =
+          activeSub.endDate?.toLocal().toString().split(' ').first ?? '';
+
+      return Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primary,
+              AppColors.primaryContainer,
+            ],
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: isDark ? 0.4 : 0.25),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.verified_user_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        l10n.subscriptionStatusActive,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      l10n.subscriptionDaysLeft(daysRemaining),
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                activeSub.routeId.value.isNotEmpty
+                    ? l10n.subscriptionType
+                    : l10n.subscriptionType,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.subscriptionEndsOn(endDateStr),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.white.withValues(alpha: 0.2),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                  minHeight: 6,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // No active subscription promo card
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            if (isDark) AppColors.darkSurface else Colors.white,
+            if (isDark)
+              AppColors.darkSurface.withValues(alpha: 0.8)
+            else
+              AppColors.background,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.card_membership_outlined,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.noActiveSubscription,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.noSubscriptionsSubtitle,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              label: l10n.activateLicense,
+              icon: Icons.add_moderator_outlined,
+              onPressed: () async {
+                await context.push('/activate-license');
+                if (context.mounted) {
+                  context.read<SubscriptionsBloc>().add(
+                        const SubscriptionsLoadRequested(),
+                      );
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _SkeletonLoading extends StatelessWidget {
   const _SkeletonLoading();
 
@@ -207,31 +481,41 @@ class _SkeletonLoading extends StatelessWidget {
     return Skeletonizer(
       child: ListView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
-        children: List.generate(
-          3,
-          (_) => const Card(
-            margin: EdgeInsets.only(bottom: AppSpacing.md),
-            child: Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Bone.text(width: 160),
-                  SizedBox(height: AppSpacing.md),
-                  Row(
-                    children: [
-                      Bone.circle(size: 16),
-                      SizedBox(width: AppSpacing.xs),
-                      Bone.text(width: 120),
-                    ],
-                  ),
-                  SizedBox(height: AppSpacing.sm),
-                  Bone.text(width: 100),
-                ],
+        children: [
+          Container(
+            height: 150,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ...List.generate(
+            3,
+            (_) => const Card(
+              margin: EdgeInsets.only(bottom: AppSpacing.md),
+              child: Padding(
+                padding: EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Bone.text(width: 160),
+                    SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Bone.circle(size: 16),
+                        SizedBox(width: AppSpacing.xs),
+                        Bone.text(width: 120),
+                      ],
+                    ),
+                    SizedBox(height: AppSpacing.sm),
+                    Bone.text(width: 100),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -273,7 +557,9 @@ class _SubscriptionCard extends StatelessWidget {
             subscription.status == SubscriptionStatus.pending) &&
         !subscription.isExpired;
     final endDateStr =
-        subscription.endDate!.toLocal().toString().split(' ').first;
+        subscription.endDate != null
+            ? subscription.endDate!.toLocal().toString().split(' ').first
+            : '';
 
     final String statusLabel;
     final Color statusColor;
@@ -301,8 +587,10 @@ class _SubscriptionCard extends StatelessWidget {
       }
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(16),
       child: Slidable(
         key: ValueKey(subscription.id.value),
         endActionPane: ActionPane(
@@ -322,69 +610,104 @@ class _SubscriptionCard extends StatelessWidget {
         ),
         child: GlassCard(
           margin: EdgeInsets.zero,
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    l10n.subscriptionType,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: (isCancellable ? AppColors.primary : AppColors.textMuted)
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      Icons.directions_bus,
+                      color: isCancellable ? AppColors.primary : AppColors.textMuted,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.subscriptionType,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        if (subscription.endDate != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.subscriptionEndsOn(endDateStr),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xxs,
+                      horizontal: 10,
+                      vertical: 4,
                     ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppSpacing.inputRadius),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       statusLabel,
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: statusColor,
+                            fontWeight: FontWeight.bold,
                           ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              if (subscription.endDate != null) ...[
+              if (subscription.daysRemaining != null && isCancellable) ...[
+                const SizedBox(height: AppSpacing.md),
+                Divider(
+                  height: 1,
+                  color: (isDark ? Colors.white : Colors.black)
+                      .withValues(alpha: 0.05),
+                ),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(
-                      Icons.calendar_today_outlined,
-                      size: 16,
-                      color: AppColors.textSecondary,
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
                     Text(
-                      l10n.subscriptionEndsOn(endDateStr),
-                      style: Theme.of(context).textTheme.bodySmall,
+                      l10n.subscriptionDaysLeft(subscription.daysRemaining!),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    InkWell(
+                      onTap: () => _confirmAndCancel(context),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          l10n.cancelSubscription,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.error,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                      ),
                     ),
                   ],
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                if (subscription.daysRemaining != null)
-                  Text(
-                    l10n.subscriptionDaysLeft(subscription.daysRemaining!),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-              ],
-              if (isCancellable) ...[
-                const SizedBox(height: AppSpacing.lg),
-                OutlinedButton(
-                  onPressed: () => _confirmAndCancel(context),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
-                  ),
-                  child: Text(l10n.cancelSubscription),
                 ),
               ],
             ],
@@ -402,55 +725,102 @@ class _PendingPaymentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return Card(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.warning.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.warning.withValues(alpha: isDark ? 0.15 : 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              right: BorderSide(
+                color: AppColors.warning,
+                width: 6,
+              ),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: Text(
-                    l10n.pendingPaymentCardTitle('${payment.amount}'),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.warning.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.account_balance_wallet_outlined,
+                        color: AppColors.warning,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.pendingPaymentCardTitle('${payment.amount}'),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            l10n.subscriptionStatusPending,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: AppColors.warning,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xxs,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppSpacing.inputRadius),
-                  ),
-                  child: Text(
-                    l10n.subscriptionStatusPending,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.warning,
-                        ),
-                  ),
+                const SizedBox(height: AppSpacing.lg),
+                PrimaryButton(
+                  label: l10n.resumePayment,
+                  icon: Icons.play_arrow,
+                  onPressed: () {
+                    context.push(
+                      '/payment/${payment.routeId}/${payment.amount}',
+                      extra: {
+                        'paymentId': payment.id,
+                        'paymentUrl': payment.paymentUrl,
+                      },
+                    );
+                  },
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.md),
-            PrimaryButton(
-              label: l10n.resumePayment,
-              icon: Icons.play_arrow,
-              onPressed: () {
-                context.push(
-                  '/payment/${payment.routeId}/${payment.amount}',
-                  extra: {
-                    'paymentId': payment.id,
-                    'paymentUrl': payment.paymentUrl,
-                  },
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );

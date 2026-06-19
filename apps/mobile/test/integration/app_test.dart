@@ -568,7 +568,7 @@ void main() {
       // Navigate to Subscriptions Tab (Index 3)
       await tester.tap(find.byIcon(Icons.local_activity_outlined));
       await tester.safePumpAndSettle();
-      expect(find.textContaining('ينتهي:'), findsOneWidget);
+      expect(find.textContaining('ينتهي:'), findsAtLeastNWidgets(1));
 
       // Navigate to Profile Tab (Index 4)
       await tester.tap(find.byIcon(Icons.person_outline_rounded));
