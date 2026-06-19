@@ -33,8 +33,11 @@ void main() {
         if (route is GoRoute) {
           expect(route.name, isNotNull);
           expect(route.name, isNotEmpty);
-          expect(names.contains(route.name), isFalse,
-              reason: 'Duplicate route name: ${route.name}');
+          expect(
+            names.contains(route.name),
+            isFalse,
+            reason: 'Duplicate route name: ${route.name}',
+          );
           names.add(route.name!);
         }
       }

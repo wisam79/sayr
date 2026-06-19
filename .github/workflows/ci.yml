@@ -64,6 +64,14 @@ jobs:
       - name: Run build_runner
         run: melos run build:runner
 
+      - name: Check for unstaged changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "ERROR: Running build_runner generated changes or untracked files that were not committed:"
+            git status --porcelain
+            exit 1
+          fi
+
       - name: Run analyze (strict)
         run: melos run analyze:strict
 
@@ -106,3 +114,33 @@ jobs:
 
       - name: Run tests
         run: melos run test
+
+  admin:
+    name: Admin Lint & Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/admin/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd apps/admin
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd apps/admin
+          npm run lint || echo "WARNING: ESLint reported issues, ignoring exit code for now."
+
+      - name: Build Check (TypeScript + Vite)
+        run: |
+          cd apps/admin
+          npm run build

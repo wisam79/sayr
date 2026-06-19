@@ -38,8 +38,13 @@ void main() {
 
     when(() => mockTalker.info(any<dynamic>())).thenAnswer((_) {});
     when(() => mockTalker.warning(any<dynamic>())).thenAnswer((_) {});
-    when(() => mockTalker.error(
-        any<dynamic>(), any<Object?>(), any<StackTrace?>())).thenAnswer((_) {});
+    when(
+      () => mockTalker.error(
+        any<dynamic>(),
+        any<Object?>(),
+        any<StackTrace?>(),
+      ),
+    ).thenAnswer((_) {});
 
     service = OfflineSyncService(
       localDatasource: mockLocal,
@@ -77,8 +82,11 @@ void main() {
 
       verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verifyNever(() => mockLocal.getPendingLocations());
-      verifyNever(() => mockTripRepo.bulkUpdateLocations(
-          any<List<({TripId tripId, double lat, double lng})>>()));
+      verifyNever(
+        () => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>(),
+        ),
+      );
     });
 
     test(
@@ -112,8 +120,11 @@ void main() {
           .thenAnswer((_) async {});
       when(() => mockLocal.cleanupOldLocations()).thenAnswer((_) async {});
 
-      when(() => mockTripRepo.bulkUpdateLocations(
-          any<List<({TripId tripId, double lat, double lng})>>())).thenAnswer(
+      when(
+        () => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>(),
+        ),
+      ).thenAnswer(
         (_) async => const Right(unit),
       );
 
@@ -156,8 +167,11 @@ void main() {
           .thenAnswer((_) async => 1);
       when(() => mockLocal.getPendingLocations())
           .thenAnswer((_) async => pendingUpdates);
-      when(() => mockTripRepo.bulkUpdateLocations(
-          any<List<({TripId tripId, double lat, double lng})>>())).thenAnswer(
+      when(
+        () => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>(),
+        ),
+      ).thenAnswer(
         (_) async => const Left(ServerFailure(message: 'Server unreachable')),
       );
 
@@ -168,8 +182,11 @@ void main() {
 
       verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verify(() => mockLocal.getPendingLocations()).called(1);
-      verify(() => mockTripRepo.bulkUpdateLocations(
-          any<List<({TripId tripId, double lat, double lng})>>())).called(1);
+      verify(
+        () => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>(),
+        ),
+      ).called(1);
 
       // Should not mark synced or clean up
       verifyNever(() => mockLocal.markLocationsSynced(any<List<int>>()));

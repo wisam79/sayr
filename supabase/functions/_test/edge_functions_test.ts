@@ -26,8 +26,8 @@ Deno.test("emergency-alert: validates coordinates", () => {
 });
 
 Deno.test("send-push-notification: requires service_role auth", () => {
-  const authHeader = "Bearer invalid-token";
-  const serviceRoleKey = "valid-service-role-key";
+  const authHeader: string = "Bearer invalid-token";
+  const serviceRoleKey: string = "valid-service-role-key";
   
   assertEquals(authHeader === `Bearer ${serviceRoleKey}`, false);
 });
