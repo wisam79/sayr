@@ -120,7 +120,9 @@ void main() {
     );
 
     group('isValid', () {
-      test('returns true when phone >= 11 chars, starts with 07, and institution selected', () {
+      test(
+          'returns true when phone >= 11 chars, starts with 07, and institution selected',
+          () {
         const state = CompleteProfileState(
           phone: '07901234567',
           selectedInstitutionId: 'inst-1',

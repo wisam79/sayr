@@ -323,13 +323,11 @@ class _DashboardHeader extends StatelessWidget {
                       const SizedBox(width: AppSpacing.sm),
                       Text(
                         l10n.subscriptionStatusActive,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ],
                   ),
@@ -437,9 +435,10 @@ class _DashboardHeader extends StatelessWidget {
                     children: [
                       Text(
                         l10n.noActiveSubscription,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -556,10 +555,9 @@ class _SubscriptionCard extends StatelessWidget {
     final isCancellable = (subscription.status == SubscriptionStatus.active ||
             subscription.status == SubscriptionStatus.pending) &&
         !subscription.isExpired;
-    final endDateStr =
-        subscription.endDate != null
-            ? subscription.endDate!.toLocal().toString().split(' ').first
-            : '';
+    final endDateStr = subscription.endDate != null
+        ? subscription.endDate!.toLocal().toString().split(' ').first
+        : '';
 
     final String statusLabel;
     final Color statusColor;
@@ -620,13 +618,17 @@ class _SubscriptionCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: (isCancellable ? AppColors.primary : AppColors.textMuted)
+                      color: (isCancellable
+                              ? AppColors.primary
+                              : AppColors.textMuted)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.directions_bus,
-                      color: isCancellable ? AppColors.primary : AppColors.textMuted,
+                      color: isCancellable
+                          ? AppColors.primary
+                          : AppColors.textMuted,
                       size: 24,
                     ),
                   ),
@@ -637,17 +639,19 @@ class _SubscriptionCard extends StatelessWidget {
                       children: [
                         Text(
                           l10n.subscriptionType,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                         if (subscription.endDate != null) ...[
                           const SizedBox(height: 4),
                           Text(
                             l10n.subscriptionEndsOn(endDateStr),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
                           ),
                         ],
                       ],
@@ -700,10 +704,11 @@ class _SubscriptionCard extends StatelessWidget {
                         ),
                         child: Text(
                           l10n.cancelSubscription,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.error,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.error,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                         ),
                       ),
                     ),
@@ -791,13 +796,11 @@ class _PendingPaymentCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(
                             l10n.subscriptionStatusPending,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: AppColors.warning,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.warning,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                           ),
                         ],
                       ),

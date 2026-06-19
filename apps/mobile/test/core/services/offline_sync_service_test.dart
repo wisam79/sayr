@@ -30,14 +30,16 @@ void main() {
     mockTripRepo = MockTripRepository();
     mockTalker = MockTalker();
     mockConnectivity = MockConnectivity();
-    connectivityController = StreamController<List<ConnectivityResult>>.broadcast();
+    connectivityController =
+        StreamController<List<ConnectivityResult>>.broadcast();
 
     when(() => mockConnectivity.onConnectivityChanged)
         .thenAnswer((_) => connectivityController.stream);
 
     when(() => mockTalker.info(any<dynamic>())).thenAnswer((_) {});
     when(() => mockTalker.warning(any<dynamic>())).thenAnswer((_) {});
-    when(() => mockTalker.error(any<dynamic>(), any<Object?>(), any<StackTrace?>())).thenAnswer((_) {});
+    when(() => mockTalker.error(
+        any<dynamic>(), any<Object?>(), any<StackTrace?>())).thenAnswer((_) {});
 
     service = OfflineSyncService(
       localDatasource: mockLocal,
@@ -53,7 +55,8 @@ void main() {
   });
 
   group('OfflineSyncService', () {
-    test('start listens to connectivity and stop cancels subscription', () async {
+    test('start listens to connectivity and stop cancels subscription',
+        () async {
       service.start();
       expect(connectivityController.hasListener, isTrue);
 
@@ -62,7 +65,8 @@ void main() {
     });
 
     test('does not sync when pending count is 0', () async {
-      when(() => mockLocal.getPendingLocationsCount()).thenAnswer((_) async => 0);
+      when(() => mockLocal.getPendingLocationsCount())
+          .thenAnswer((_) async => 0);
 
       // Trigger sync manually via connectivity update (has connection)
       service.start();
@@ -73,10 +77,13 @@ void main() {
 
       verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verifyNever(() => mockLocal.getPendingLocations());
-      verifyNever(() => mockTripRepo.bulkUpdateLocations(any<List<({TripId tripId, double lat, double lng})>>()));
+      verifyNever(() => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>()));
     });
 
-    test('syncs successfully when pending locations exist and repo returns success', () async {
+    test(
+        'syncs successfully when pending locations exist and repo returns success',
+        () async {
       final now = DateTime.now();
       final pendingUpdates = [
         PendingLocationUpdateData(
@@ -97,12 +104,16 @@ void main() {
         ),
       ];
 
-      when(() => mockLocal.getPendingLocationsCount()).thenAnswer((_) async => 2);
-      when(() => mockLocal.getPendingLocations()).thenAnswer((_) async => pendingUpdates);
-      when(() => mockLocal.markLocationsSynced(any<List<int>>())).thenAnswer((_) async {});
+      when(() => mockLocal.getPendingLocationsCount())
+          .thenAnswer((_) async => 2);
+      when(() => mockLocal.getPendingLocations())
+          .thenAnswer((_) async => pendingUpdates);
+      when(() => mockLocal.markLocationsSynced(any<List<int>>()))
+          .thenAnswer((_) async {});
       when(() => mockLocal.cleanupOldLocations()).thenAnswer((_) async {});
 
-      when(() => mockTripRepo.bulkUpdateLocations(any<List<({TripId tripId, double lat, double lng})>>())).thenAnswer(
+      when(() => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>())).thenAnswer(
         (_) async => const Right(unit),
       );
 
@@ -113,10 +124,12 @@ void main() {
 
       verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verify(() => mockLocal.getPendingLocations()).called(1);
-      
+
       // Capture the argument passed to bulkUpdateLocations
-      final captured = verify(() => mockTripRepo.bulkUpdateLocations(captureAny())).captured;
-      final locations = captured.first as List<({TripId tripId, double lat, double lng})>;
+      final captured =
+          verify(() => mockTripRepo.bulkUpdateLocations(captureAny())).captured;
+      final locations =
+          captured.first as List<({TripId tripId, double lat, double lng})>;
       expect(locations.length, 2);
       expect(locations[0].tripId.value, 'trip-123');
       expect(locations[0].lat, 33.3123);
@@ -139,9 +152,12 @@ void main() {
         ),
       ];
 
-      when(() => mockLocal.getPendingLocationsCount()).thenAnswer((_) async => 1);
-      when(() => mockLocal.getPendingLocations()).thenAnswer((_) async => pendingUpdates);
-      when(() => mockTripRepo.bulkUpdateLocations(any<List<({TripId tripId, double lat, double lng})>>())).thenAnswer(
+      when(() => mockLocal.getPendingLocationsCount())
+          .thenAnswer((_) async => 1);
+      when(() => mockLocal.getPendingLocations())
+          .thenAnswer((_) async => pendingUpdates);
+      when(() => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>())).thenAnswer(
         (_) async => const Left(ServerFailure(message: 'Server unreachable')),
       );
 
@@ -152,8 +168,9 @@ void main() {
 
       verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verify(() => mockLocal.getPendingLocations()).called(1);
-      verify(() => mockTripRepo.bulkUpdateLocations(any<List<({TripId tripId, double lat, double lng})>>())).called(1);
-      
+      verify(() => mockTripRepo.bulkUpdateLocations(
+          any<List<({TripId tripId, double lat, double lng})>>())).called(1);
+
       // Should not mark synced or clean up
       verifyNever(() => mockLocal.markLocationsSynced(any<List<int>>()));
       verifyNever(() => mockLocal.cleanupOldLocations());

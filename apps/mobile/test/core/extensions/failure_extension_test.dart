@@ -7,7 +7,8 @@ import '../../test_helpers.dart';
 
 void main() {
   group('FailureLocalization Extension Tests', () {
-    testWidgets('maps each Failure type to correct localized string', (tester) async {
+    testWidgets('maps each Failure type to correct localized string',
+        (tester) async {
       late BuildContext testContext;
 
       await pumpTestWidget(
@@ -28,7 +29,8 @@ void main() {
         equals(l10n.failureNetwork),
       );
       expect(
-        const NetworkFailure(message: 'Custom network').toLocalizedString(testContext),
+        const NetworkFailure(message: 'Custom network')
+            .toLocalizedString(testContext),
         equals('Custom network'),
       );
 
@@ -38,7 +40,8 @@ void main() {
         equals(l10n.failureServer),
       );
       expect(
-        const ServerFailure(message: 'Custom server').toLocalizedString(testContext),
+        const ServerFailure(message: 'Custom server')
+            .toLocalizedString(testContext),
         equals('Custom server'),
       );
 
@@ -60,7 +63,8 @@ void main() {
         equals(l10n.failureNotFound),
       );
       expect(
-        const NotFoundFailure(resource: 'license').toLocalizedString(testContext),
+        const NotFoundFailure(resource: 'license')
+            .toLocalizedString(testContext),
         equals(l10n.invalidLicenseCode),
       );
 
@@ -70,15 +74,18 @@ void main() {
         equals(l10n.failureValidation),
       );
       expect(
-        const ValidationFailure(message: 'trip_time_must_be_future').toLocalizedString(testContext),
+        const ValidationFailure(message: 'trip_time_must_be_future')
+            .toLocalizedString(testContext),
         equals(l10n.tripTimeMustBeFuture),
       );
       expect(
-        const ValidationFailure(message: 'invalid_license_code').toLocalizedString(testContext),
+        const ValidationFailure(message: 'invalid_license_code')
+            .toLocalizedString(testContext),
         equals(l10n.invalidLicenseCode),
       );
       expect(
-        const ValidationFailure(message: 'bluetooth_disabled').toLocalizedString(testContext),
+        const ValidationFailure(message: 'bluetooth_disabled')
+            .toLocalizedString(testContext),
         equals(l10n.bluetoothRequired),
       );
 
@@ -102,15 +109,18 @@ void main() {
 
       // BusinessRuleFailure
       expect(
-        const BusinessRuleFailure(message: 'already_has_active_subscription').toLocalizedString(testContext),
+        const BusinessRuleFailure(message: 'already_has_active_subscription')
+            .toLocalizedString(testContext),
         equals(l10n.alreadyHasActiveSubscription),
       );
       expect(
-        const BusinessRuleFailure(message: 'license_not_active').toLocalizedString(testContext),
+        const BusinessRuleFailure(message: 'license_not_active')
+            .toLocalizedString(testContext),
         equals(l10n.licenseNotActive),
       );
       expect(
-        const BusinessRuleFailure(message: 'other_business_rule').toLocalizedString(testContext),
+        const BusinessRuleFailure(message: 'other_business_rule')
+            .toLocalizedString(testContext),
         equals('other_business_rule'),
       );
 

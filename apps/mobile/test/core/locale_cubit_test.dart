@@ -10,7 +10,8 @@ void main() {
   late String hivePath;
 
   setUpAll(() async {
-    hivePath = '${Directory.systemTemp.path}/hive_locale_test_${DateTime.now().millisecondsSinceEpoch}';
+    hivePath =
+        '${Directory.systemTemp.path}/hive_locale_test_${DateTime.now().millisecondsSinceEpoch}';
     Hive.init(hivePath);
   });
 
