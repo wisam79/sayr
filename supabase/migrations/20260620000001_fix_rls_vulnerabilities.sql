@@ -2,18 +2,18 @@
 -- Description: Fix RLS policies to prevent drivers from updating sensitive fields (is_verified, rating, total_trips on drivers; institution_id, driver_id on routes).
 --              Drop direct trips UPDATE policy and implement update_trip_ble_otp RPC.
 
--- 1. Tighten public.drivers RLS to prevent updating rating, is_verified, and total_trips
-DROP POLICY IF EXISTS "drivers_update_own" ON public.drivers;
+-- 1. Tighten public.drivers_data RLS to prevent updating rating, is_verified, and total_trips
+DROP POLICY IF EXISTS "drivers_update_own" ON public.drivers_data;
 
 CREATE POLICY "drivers_update_own"
-  ON public.drivers FOR UPDATE
+  ON public.drivers_data FOR UPDATE
   TO authenticated
   USING (user_id = auth.uid())
   WITH CHECK (
     user_id = auth.uid() AND
-    rating = (SELECT d.rating FROM public.drivers d WHERE d.id = drivers.id) AND
-    is_verified = (SELECT d.is_verified FROM public.drivers d WHERE d.id = drivers.id) AND
-    total_trips = (SELECT d.total_trips FROM public.drivers d WHERE d.id = drivers.id)
+    rating = (SELECT d.rating FROM public.drivers_data d WHERE d.user_id = auth.uid()) AND
+    is_verified = (SELECT d.is_verified FROM public.drivers_data d WHERE d.user_id = auth.uid()) AND
+    total_trips = (SELECT d.total_trips FROM public.drivers_data d WHERE d.user_id = auth.uid())
   );
 
 -- 2. Drop direct UPDATE policy on public.trips to prevent bypassing state machine/timestamps/reasons
@@ -34,7 +34,7 @@ BEGIN
   -- Verify the driver owns this trip
   IF NOT EXISTS (
     SELECT 1 FROM public.trips t
-    JOIN public.drivers d ON t.driver_id = d.id
+    JOIN public.drivers_data d ON t.driver_id = d.id
     WHERE t.id = p_trip_id
       AND d.user_id = auth.uid()
   ) THEN
@@ -60,10 +60,10 @@ CREATE POLICY "routes_update_own_driver"
   ON public.routes FOR UPDATE
   TO authenticated
   USING (
-    driver_id IN (SELECT id FROM public.drivers WHERE user_id = auth.uid())
+    driver_id IN (SELECT id FROM public.drivers_data WHERE user_id = auth.uid())
   )
   WITH CHECK (
-    driver_id IN (SELECT id FROM public.drivers WHERE user_id = auth.uid()) AND
+    driver_id IN (SELECT id FROM public.drivers_data WHERE user_id = auth.uid()) AND
     (institution_id IS NOT DISTINCT FROM (SELECT r.institution_id FROM public.routes r WHERE r.id = routes.id)) AND
     driver_id = (SELECT r.driver_id FROM public.routes r WHERE r.id = routes.id)
   );
