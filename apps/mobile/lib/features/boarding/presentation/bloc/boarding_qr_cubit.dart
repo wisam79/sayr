@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/di/di.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// State for the student QR boarding page.
 sealed class BoardingQrState {
@@ -35,6 +34,7 @@ class BoardingQrReady extends BoardingQrState {
     this.proximityOtp,
     this.isSubmittingProximity = false,
     this.proximityRecord,
+    this.refreshFailure,
   });
 
   final TripId tripId;
@@ -44,6 +44,7 @@ class BoardingQrReady extends BoardingQrState {
   final String? proximityOtp;
   final bool isSubmittingProximity;
   final BoardingRecord? proximityRecord;
+  final Failure? refreshFailure;
 
   BoardingQrReady copyWith({
     TripId? tripId,
@@ -54,6 +55,8 @@ class BoardingQrReady extends BoardingQrState {
     bool? isSubmittingProximity,
     BoardingRecord? proximityRecord,
     bool clearProximityOtp = false,
+    Failure? refreshFailure,
+    bool clearRefreshFailure = false,
   }) {
     return BoardingQrReady(
       tripId: tripId ?? this.tripId,
@@ -65,6 +68,8 @@ class BoardingQrReady extends BoardingQrState {
       isSubmittingProximity:
           isSubmittingProximity ?? this.isSubmittingProximity,
       proximityRecord: proximityRecord ?? this.proximityRecord,
+      refreshFailure:
+          clearRefreshFailure ? null : (refreshFailure ?? this.refreshFailure),
     );
   }
 }
@@ -90,11 +95,11 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
   final BoardingRepository _boardingRepository;
   final BleBeaconService _bleBeaconService;
 
-  Timer? _refreshTimer;
-  Timer? _tickerTimer;
+  StreamSubscription<int>? _timerSubscription;
   StreamSubscription<({TripId tripId, String otp})>? _bleSubscription;
   TripId? _activeTripId;
   DateTime? _currentExpiresAt;
+  DateTime? _lastRefreshTime;
 
   /// Begin watching for active trips, generating tokens, and scanning BLE beacons.
   Future<void> start() async {
@@ -123,7 +128,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final started = await _bleBeaconService.startScanning();
     if (isClosed) return;
     if (!started) {
-      debugPrint(
+      sl<Talker>().warning(
         'BLE scanning not started. Student will use QR code boarding.',
       );
       return;
@@ -176,12 +181,20 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     if (tripId == null) {
       return;
     }
+    _lastRefreshTime = DateTime.now();
     final result = await _boardingRepository.generateBoardingToken(tripId);
     if (isClosed) return;
     result.fold(
-      (failure) => emit(
-        BoardingQrError(failure: failure),
-      ),
+      (failure) {
+        final current = state;
+        if (current is BoardingQrReady) {
+          emit(current.copyWith(refreshFailure: failure));
+        } else {
+          _timerSubscription?.cancel();
+          _timerSubscription = null;
+          emit(BoardingQrError(failure: failure));
+        }
+      },
       (tokenResult) {
         _currentExpiresAt = tokenResult.expiresAt;
         final current = state;
@@ -194,6 +207,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
                   .difference(DateTime.now())
                   .inSeconds
                   .clamp(0, 60),
+              clearRefreshFailure: true,
             ),
           );
         } else {
@@ -209,35 +223,36 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
             ),
           );
         }
-        _scheduleNextRefresh();
+        _startTimer();
       },
     );
   }
 
-  void _scheduleNextRefresh() {
-    _refreshTimer?.cancel();
-    _refreshTimer = Timer(const Duration(seconds: 25), _refreshToken);
-    _startTicker();
-  }
-
-  void _startTicker() {
-    _tickerTimer?.cancel();
-    _tickerTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+  void _startTimer() {
+    if (_timerSubscription != null) return;
+    _timerSubscription = Stream.periodic(const Duration(seconds: 1), (tick) => tick).listen((_) {
       final expires = _currentExpiresAt;
       final current = state;
       if (expires == null || current is! BoardingQrReady) return;
-      final remaining =
-          expires.difference(DateTime.now()).inSeconds.clamp(0, 60);
+
+      final now = DateTime.now();
+      final remaining = expires.difference(now).inSeconds.clamp(0, 60);
       if (remaining != current.secondsUntilRefresh) {
         emit(current.copyWith(secondsUntilRefresh: remaining));
+      }
+
+      final lastRefresh = _lastRefreshTime;
+      final hasError = current.refreshFailure != null;
+      final retryInterval = hasError ? 5 : 25;
+      if (lastRefresh == null || now.difference(lastRefresh).inSeconds >= retryInterval) {
+        _refreshToken();
       }
     });
   }
 
   @override
   Future<void> close() async {
-    _refreshTimer?.cancel();
-    _tickerTimer?.cancel();
+    await _timerSubscription?.cancel();
     await _bleSubscription?.cancel();
     await _bleBeaconService.stopScanning();
     return super.close();

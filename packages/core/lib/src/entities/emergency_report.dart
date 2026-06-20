@@ -19,9 +19,12 @@ abstract class EmergencyReport with _$EmergencyReport {
     required UserId userId,
     @JsonKey(fromJson: tripIdFromJson, toJson: tripIdToJson)
     required TripId tripId,
-    @JsonKey(fromJson: coordinatesFromJson, toJson: coordinatesToJson)
-    required Coordinates location,
     required DateTime createdAt,
+    @JsonKey(
+      fromJson: nullableCoordinatesFromJson,
+      toJson: nullableCoordinatesToJson,
+    )
+    Coordinates? location,
     DateTime? resolvedAt,
     String? notes,
   }) = _EmergencyReport;

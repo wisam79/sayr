@@ -11,12 +11,8 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
-import 'package:sayr_data/sayr_data.dart' as _i773;
 import 'package:sayr_data/sayr_data.module.dart' as _i59;
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart' as _i385;
-import 'package:sayr_mobile/core/services/driver_location_service.dart'
-    as _i322;
-import 'package:sayr_mobile/core/services/osrm_service.dart' as _i105;
 import 'package:sayr_mobile/core/talker_service.dart' as _i754;
 import 'package:talker_flutter/talker_flutter.dart' as _i207;
 
@@ -34,11 +30,7 @@ extension GetItInjectableX on _i174.GetIt {
     await _i59.SayrDataPackageModule().init(gh);
     final talkerModule = _$TalkerModule();
     gh.lazySingleton<_i385.BleBeaconService>(() => _i385.BleBeaconService());
-    gh.lazySingleton<_i322.DriverLocationService>(
-        () => _i322.DriverLocationService());
     gh.lazySingleton<_i207.Talker>(() => talkerModule.talker);
-    gh.lazySingleton<_i105.OsrmService>(
-        () => _i105.OsrmService(supabase: gh<_i773.SayrSupabase>()));
     return this;
   }
 }

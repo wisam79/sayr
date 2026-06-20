@@ -33,7 +33,7 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
         .select()
         .eq('is_active', true)
         .order('title');
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -59,7 +59,7 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
         .eq('driver_id', driverId)
         .eq('is_active', true)
         .order('title');
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -76,6 +76,6 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
           'title.ilike.%$query%,start_location.ilike.%$query%,end_location.ilike.%$query%',
         )
         .order('title');
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 }

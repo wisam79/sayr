@@ -4,13 +4,13 @@ library sayr_data;
 import 'package:injectable/injectable.dart';
 
 export 'src/datasources/auth_remote_datasource.dart';
-
 export 'src/datasources/boarding_remote_datasource.dart';
 export 'src/datasources/chat_remote_datasource.dart';
+export 'src/datasources/driver_location_service_impl.dart';
 export 'src/datasources/emergency_remote_datasource.dart';
 export 'src/datasources/local_datasource.dart';
 export 'src/datasources/notification_remote_datasource.dart';
-// Datasources
+export 'src/datasources/osrm_remote_datasource.dart';
 export 'src/datasources/remote_datasource.dart';
 export 'src/datasources/route_remote_datasource.dart';
 export 'src/datasources/subscription_remote_datasource.dart';
@@ -37,6 +37,7 @@ export 'src/repositories/notifications_repository.dart';
 export 'src/repositories/payment_repository.dart';
 export 'src/repositories/rating_repository.dart';
 export 'src/repositories/route_repository.dart';
+export 'src/repositories/routing_service_impl.dart';
 export 'src/repositories/subscription_repository.dart';
 export 'src/repositories/trip_repository.dart';
 // Secure storage

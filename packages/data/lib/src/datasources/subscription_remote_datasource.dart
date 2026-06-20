@@ -35,7 +35,7 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
         .select()
         .eq('student_id', studentId)
         .order('start_date', ascending: false);
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -57,7 +57,7 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
       params: {'p_code': code},
     );
     if (response.isEmpty) {
-      throw Exception('License details empty');
+      throw const FormatException('license_not_found');
     }
     return response.first as Map<String, dynamic>;
   }

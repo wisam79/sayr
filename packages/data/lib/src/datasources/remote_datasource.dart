@@ -37,7 +37,6 @@ abstract class RemoteDatasource {
   Future<void> signOut();
   Future<Map<String, dynamic>?> fetchCurrentProfile(String userId);
   Future<void> updateProfile({
-    required String userId,
     required String phone,
     required String institutionId,
   });
@@ -78,9 +77,9 @@ abstract class RemoteDatasource {
     required String tripId,
     required String routeId,
     required String studentId,
-    required double lat,
-    required double lng,
     required String description,
+    double? lat,
+    double? lng,
   });
   Future<Map<String, dynamic>?> getActiveEmergencyReport(String userId);
   Future<void> resolveEmergencyReport({
@@ -272,12 +271,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
 
   @override
   Future<void> updateProfile({
-    required String userId,
     required String phone,
     required String institutionId,
   }) =>
       _auth.updateProfile(
-        userId: userId,
         phone: phone,
         institutionId: institutionId,
       );
@@ -368,9 +365,9 @@ class RemoteDatasourceImpl implements RemoteDatasource {
     required String tripId,
     required String routeId,
     required String studentId,
-    required double lat,
-    required double lng,
     required String description,
+    double? lat,
+    double? lng,
   }) =>
       _emergency.triggerEmergency(
         tripId: tripId,

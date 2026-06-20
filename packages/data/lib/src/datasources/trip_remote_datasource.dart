@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injectable/injectable.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
@@ -96,8 +98,9 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
       'scheduled',
       'driver_waiting',
       'in_transit',
-    ]).order('scheduled_at', ascending: true);
-    return (response as List).cast<Map<String, dynamic>>();
+    ]).order('scheduled_at', ascending: true)
+      .timeout(const Duration(seconds: 15));
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -111,7 +114,7 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
           'p_route_id': routeId,
           'p_scheduled_at': scheduledAt.toUtc().toIso8601String(),
         },
-      );
+      ).timeout(const Duration(seconds: 15));
 
   @override
   Stream<List<Map<String, dynamic>>> watchTrip(String tripId) => _client
@@ -122,7 +125,8 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
 
   @override
   Future<Map<String, dynamic>?> getTripById(String id) =>
-      _client.from('trips').select().eq('id', id).maybeSingle();
+      _client.from('trips').select().eq('id', id).maybeSingle()
+        .timeout(const Duration(seconds: 15));
 
   @override
   Future<Map<String, dynamic>> updateTripStatus({
@@ -139,7 +143,7 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
           'p_lat': lat,
           'p_lng': lng,
         },
-      );
+      ).timeout(const Duration(seconds: 15));
 
   @override
   Future<void> updateTripLocation({
@@ -154,7 +158,7 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
           'p_lat': lat,
           'p_lng': lng,
         },
-      );
+      ).timeout(const Duration(seconds: 15));
 
   @override
   Future<void> updateTripBleOtp({
@@ -162,10 +166,14 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
     required String otp,
     required String expiresAt,
   }) async {
-    await _client.from('trips').update({
-      'ble_otp': otp,
-      'ble_otp_expires_at': expiresAt,
-    }).eq('id', tripId);
+    await _client.rpc<void>(
+      'update_trip_ble_otp',
+      params: {
+        'p_trip_id': tripId,
+        'p_otp': otp,
+        'p_expires_at': expiresAt,
+      },
+    ).timeout(const Duration(seconds: 15));
   }
 
   @override
@@ -175,7 +183,7 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
       _client.rpc<void>(
         'bulk_update_trip_locations',
         params: {'p_locations': locations},
-      );
+      ).timeout(const Duration(seconds: 15));
 
   @override
   Future<Map<String, dynamic>> createPayment({
@@ -192,11 +200,12 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
           'p_currency': currency,
           'p_method': method,
         },
-      );
+      ).timeout(const Duration(seconds: 15));
 
   @override
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId) =>
-      _client.from('payments').select().eq('id', paymentId).maybeSingle();
+      _client.from('payments').select().eq('id', paymentId).maybeSingle()
+        .timeout(const Duration(seconds: 15));
 
   @override
   Future<List<Map<String, dynamic>>> getPendingPayments() async {
@@ -205,13 +214,15 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
         .select()
         .eq('status', 'pending')
         .eq('method', 'zaincash')
-        .order('created_at', ascending: false);
-    return (response as List).cast<Map<String, dynamic>>();
+        .order('created_at', ascending: false)
+        .timeout(const Duration(seconds: 15));
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
   Future<Map<String, dynamic>?> getDriverById(String driverId) =>
-      _client.from('drivers').select().eq('id', driverId).maybeSingle();
+      _client.from('drivers').select().eq('id', driverId).maybeSingle()
+        .timeout(const Duration(seconds: 15));
 
   @override
   Future<Map<String, dynamic>> submitRating({
@@ -231,7 +242,8 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
           if (comment != null) 'comment': comment,
         })
         .select()
-        .single();
+        .single()
+        .timeout(const Duration(seconds: 15));
     return response;
   }
 
@@ -245,5 +257,6 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
           .select()
           .eq('trip_id', tripId)
           .eq('student_id', studentId)
-          .maybeSingle();
+          .maybeSingle()
+          .timeout(const Duration(seconds: 15));
 }

@@ -1,5 +1,4 @@
 import 'package:fpdart/fpdart.dart';
-
 import 'package:sayr_core/src/entities/boarding_record.dart';
 import 'package:sayr_core/src/entities/emergency_report.dart';
 import 'package:sayr_core/src/entities/license_preview.dart';
@@ -9,6 +8,7 @@ import 'package:sayr_core/src/entities/route.dart';
 import 'package:sayr_core/src/entities/subscription.dart';
 import 'package:sayr_core/src/entities/trip.dart';
 import 'package:sayr_core/src/entities/user.dart';
+import 'package:sayr_core/src/enums/auth_status.dart';
 import 'package:sayr_core/src/failures/failure.dart';
 import 'package:sayr_core/src/fsm/trip_event.dart';
 import 'package:sayr_core/src/value_objects/coordinates.dart';
@@ -56,8 +56,8 @@ abstract class AuthRepository {
   /// Sign out.
   Future<void> signOut();
 
-  /// Stream of auth state changes (un-typed to avoid dependency on database client).
-  Stream<dynamic> get authStateChanges;
+  /// Stream of auth state changes.
+  Stream<AuthStatus> get authStateChanges;
 
   /// Fetches the full profile from data storage.
   Future<User?> fetchFullProfile();
@@ -117,7 +117,12 @@ abstract class TripRepository {
   });
 
   /// Bulk update locations.
-  Future<Either<Failure, Unit>> bulkUpdateLocations(
+  Future<Either<Failure, List<
+            ({
+              TripId tripId,
+              double lat,
+              double lng,
+            })>>> bulkUpdateLocations(
     List<
             ({
               TripId tripId,
@@ -126,6 +131,9 @@ abstract class TripRepository {
             })>
         locations,
   );
+
+  /// Sync any pending (offline) trip status updates.
+  Future<Either<Failure, Unit>> syncPendingStatuses();
 }
 
 /// Interface for subscription operations repository.
@@ -214,7 +222,7 @@ abstract class EmergencyRepository {
   Future<Either<Failure, EmergencyReport>> triggerEmergency({
     required TripId tripId,
     required RouteId routeId,
-    required Coordinates location,
+    Coordinates? location,
     String? message,
   });
 

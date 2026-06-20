@@ -1,10 +1,14 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:retry/retry.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/models/trip_model.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
+
+/// Callback type for triggering background synchronization.
+typedef BackgroundSyncTrigger = void Function();
 
 /// Concrete implementation of TripRepository using Remote and Local data sources.
 @LazySingleton(as: TripRepository)
@@ -17,6 +21,9 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
         _localDatasource = localDatasource;
   final RemoteDatasource _remoteDatasource;
   final LocalDatasource _localDatasource;
+
+  /// Global trigger for background sync, set by the application.
+  static BackgroundSyncTrigger? syncTrigger;
 
   /// Runs [fetch] against the remote source, caches the result on success, and
   /// transparently falls back to the local cache when the network call fails.
@@ -141,13 +148,85 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           );
         }
         return guard(() async {
-          final response = await _remoteDatasource.updateTripStatus(
-            tripId: tripId.value,
-            newStatus: _statusToDb(newStatus),
-            lat: location?.latitude,
-            lng: location?.longitude,
-          );
-          return TripModel.fromJson(response).toEntity();
+          Trip updatedTrip;
+          try {
+            final response = await retry(
+              () => _remoteDatasource.updateTripStatus(
+                tripId: tripId.value,
+                newStatus: _statusToDb(newStatus),
+                lat: location?.latitude,
+                lng: location?.longitude,
+              ),
+              maxAttempts: 3,
+            );
+            updatedTrip = TripModel.fromJson(response).toEntity();
+            try {
+              final cached = await _localDatasource.getCachedTrips();
+              final index = cached.indexWhere((t) => t.id == tripId);
+              if (index != -1) {
+                cached[index] = updatedTrip;
+              } else {
+                cached.add(updatedTrip);
+              }
+              await _localDatasource.cacheTrips(cached);
+            } catch (cacheErr, st) {
+              log.warning(
+                  'Failed to update local cache on status change success',
+                  cacheErr,
+                  st);
+            }
+          } catch (remoteErr) {
+            try {
+              await _localDatasource.enqueueTripStatus(
+                tripId: tripId.value,
+                status: _statusToDb(newStatus),
+                latitude: location?.latitude,
+                longitude: location?.longitude,
+              );
+              final cached = await _localDatasource.getCachedTrips();
+              final index = cached.indexWhere((t) => t.id == tripId);
+              if (index != -1) {
+                final oldTrip = cached[index];
+                updatedTrip = oldTrip.copyWith(
+                  status: newStatus,
+                  lastLocation: location ?? oldTrip.lastLocation,
+                  startedAt: newStatus == TripStatus.inTransit
+                      ? DateTime.now()
+                      : oldTrip.startedAt,
+                  endedAt: (newStatus == TripStatus.completed ||
+                          newStatus == TripStatus.cancelled)
+                      ? DateTime.now()
+                      : oldTrip.endedAt,
+                );
+                cached[index] = updatedTrip;
+                await _localDatasource.cacheTrips(cached);
+              } else {
+                updatedTrip = trip.copyWith(
+                  status: newStatus,
+                  lastLocation: location ?? trip.lastLocation,
+                  startedAt: newStatus == TripStatus.inTransit
+                      ? DateTime.now()
+                      : trip.startedAt,
+                  endedAt: (newStatus == TripStatus.completed ||
+                          newStatus == TripStatus.cancelled)
+                      ? DateTime.now()
+                      : trip.endedAt,
+                );
+                await _localDatasource.cacheTrips([...cached, updatedTrip]);
+              }
+              syncTrigger?.call();
+            } catch (cacheErr, st) {
+              log.warning(
+                  'Failed to update local cache during offline fallback',
+                  cacheErr,
+                  st);
+              updatedTrip = trip.copyWith(
+                status: newStatus,
+                lastLocation: location ?? trip.lastLocation,
+              );
+            }
+          }
+          return updatedTrip;
         });
       },
     );
@@ -173,6 +252,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           latitude: lat,
           longitude: lng,
         );
+        syncTrigger?.call();
         return const Right<Failure, Unit>(unit);
       } catch (dbErr) {
         return Left<Failure, Unit>(mapException(dbErr));
@@ -197,7 +277,12 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> bulkUpdateLocations(
+  Future<Either<Failure, List<
+            ({
+              TripId tripId,
+              double lat,
+              double lng,
+            })>>> bulkUpdateLocations(
     List<
             ({
               TripId tripId,
@@ -217,8 +302,41 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           )
           .toList();
 
-      await _remoteDatasource.bulkUpdateTripLocations(locationsJson);
-      return unit;
+      try {
+        await _remoteDatasource.bulkUpdateTripLocations(locationsJson);
+        return locations;
+      } catch (e) {
+        final successful = <({TripId tripId, double lat, double lng})>[];
+        Object? lastError;
+        for (final loc in locations) {
+          try {
+            await _remoteDatasource.updateTripLocation(
+              tripId: loc.tripId.value,
+              lat: loc.lat,
+              lng: loc.lng,
+            );
+            successful.add(loc);
+          } catch (individualErr) {
+            log.warning(
+              'Failed to sync location for trip ${loc.tripId.value} during fallback: $individualErr',
+            );
+            lastError = individualErr;
+          }
+        }
+        if (successful.isNotEmpty) {
+          return successful;
+        }
+        if (lastError != null) {
+          if (lastError is Exception) {
+            throw lastError;
+          }
+          if (lastError is Error) {
+            throw lastError;
+          }
+          throw Exception(lastError.toString());
+        }
+        rethrow;
+      }
     });
   }
 
@@ -237,5 +355,38 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
       case TripStatus.cancelled:
         return 'cancelled';
     }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> syncPendingStatuses() async {
+    return guard(() async {
+      final pending = await _localDatasource.getPendingTripStatuses();
+      if (pending.isEmpty) {
+        return unit;
+      }
+
+      final syncedIds = <int>[];
+      try {
+        for (final statusUpdate in pending) {
+          await _remoteDatasource.updateTripStatus(
+            tripId: statusUpdate.tripId,
+            newStatus: statusUpdate.status,
+            lat: statusUpdate.latitude,
+            lng: statusUpdate.longitude,
+          );
+          syncedIds.add(statusUpdate.id);
+        }
+      } catch (e) {
+        if (syncedIds.isNotEmpty) {
+          await _localDatasource.markTripStatusesSynced(syncedIds);
+        }
+        rethrow;
+      }
+
+      if (syncedIds.isNotEmpty) {
+        await _localDatasource.markTripStatusesSynced(syncedIds);
+      }
+      return unit;
+    });
   }
 }

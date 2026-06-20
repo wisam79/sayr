@@ -49,6 +49,30 @@ class OfflineSyncService {
     _isSyncing = true;
 
     try {
+      // 1. Sync pending trip statuses first
+      final pendingStatuses = await _localDatasource.getPendingTripStatuses();
+      if (pendingStatuses.isNotEmpty) {
+        _talker.info(
+          'OfflineSyncService: Found ${pendingStatuses.length} pending trip statuses. '
+          'Syncing...',
+        );
+        final syncStatusesResult = await _tripRepository.syncPendingStatuses();
+        await syncStatusesResult.fold(
+          (failure) async {
+            _talker.warning(
+              'OfflineSyncService: Failed to sync pending trip statuses: '
+              '${failure.message}',
+            );
+          },
+          (_) async {
+            _talker.info(
+              'OfflineSyncService: Successfully synced pending trip statuses.',
+            );
+          },
+        );
+      }
+
+      // 2. Sync pending locations
       final pendingCount = await _localDatasource.getPendingLocationsCount();
       if (pendingCount == 0) {
         _isSyncing = false;
@@ -80,14 +104,30 @@ class OfflineSyncService {
             '${failure.message}',
           );
         },
-        (_) async {
-          final ids = pending.map((p) => p.id).toList();
-          await _localDatasource.markLocationsSynced(ids);
-          await _localDatasource.cleanupOldLocations();
-          _talker.info(
-            'OfflineSyncService: Successfully synced $pendingCount '
-            'location updates.',
-          );
+        (syncedLocations) async {
+          final successfulIds = <int>[];
+          final pendingCopy = List<PendingLocationUpdateData>.from(pending);
+          for (final loc in syncedLocations) {
+            final matchIndex = pendingCopy.indexWhere(
+              (p) =>
+                  p.tripId == loc.tripId.value &&
+                  p.latitude == loc.lat &&
+                  p.longitude == loc.lng,
+            );
+            if (matchIndex != -1) {
+              successfulIds.add(pendingCopy[matchIndex].id);
+              pendingCopy.removeAt(matchIndex);
+            }
+          }
+
+          if (successfulIds.isNotEmpty) {
+            await _localDatasource.markLocationsSynced(successfulIds);
+            await _localDatasource.cleanupOldLocations();
+            _talker.info(
+              'OfflineSyncService: Successfully synced ${successfulIds.length} '
+              'of $pendingCount location updates.',
+            );
+          }
         },
       );
     } catch (e, st) {

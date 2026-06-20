@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -30,7 +31,7 @@ abstract class BaseRepository {
       if (e is Failure) {
         return Left(e);
       }
-      if (e is SocketException || e is HttpException) {
+      if (e is SocketException || e is HttpException || e is TimeoutException) {
         _talker.warning(
           'Network issue caught in repository',
           e,
@@ -58,7 +59,10 @@ abstract class BaseRepository {
     if (e is supabase.PostgrestException) {
       return _mapPostgrestException(e);
     }
-    if (e is SocketException || e is HttpException) {
+    if (e is FormatException && e.message == 'license_not_found') {
+      return const NotFoundFailure(message: 'license_not_found');
+    }
+    if (e is SocketException || e is HttpException || e is TimeoutException) {
       return const NetworkFailure();
     }
     if (e is Failure) {

@@ -46,6 +46,11 @@ void main() {
       ),
     ).thenAnswer((_) {});
 
+    when(() => mockLocal.getPendingTripStatuses())
+        .thenAnswer((_) async => const []);
+    when(() => mockTripRepo.syncPendingStatuses())
+        .thenAnswer((_) async => const Right(unit));
+
     service = OfflineSyncService(
       localDatasource: mockLocal,
       tripRepository: mockTripRepo,
@@ -122,10 +127,13 @@ void main() {
 
       when(
         () => mockTripRepo.bulkUpdateLocations(
-          any<List<({TripId tripId, double lat, double lng})>>(),
+          any<List<({TripId tripId, double lat, double lng,})>>(),
         ),
       ).thenAnswer(
-        (_) async => const Right(unit),
+        (invocation) async => Right(
+          invocation.positionalArguments[0]
+              as List<({TripId tripId, double lat, double lng,})>,
+        ),
       );
 
       service.start();

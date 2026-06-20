@@ -12,7 +12,9 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_mobile/core/fcm_service.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
+import 'package:sayr_mobile/core/models/fcm_payload.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
+import 'package:sayr_mobile/core/services/background_sync_service.dart';
 import 'package:sayr_mobile/core/theme_cubit.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
@@ -22,7 +24,6 @@ import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
-import 'package:sayr_mobile/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
@@ -36,10 +37,17 @@ import 'package:talker_flutter/talker_flutter.dart';
 /// Root widget of the Sayr application.
 class SayrApp extends StatelessWidget {
   /// Creates a [SayrApp].
-  const SayrApp({required this.router, super.key});
+  const SayrApp({
+    required this.router,
+    required this.authBloc,
+    super.key,
+  });
 
   /// The router configurations.
   final AppRouter router;
+
+  /// The global auth bloc.
+  final AuthBloc authBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +60,8 @@ class SayrApp extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(
-          create: (_) => AuthBloc(
-            authRepository: sl<AuthRepository>(),
-          )..add(const AuthCheckRequested()),
+        BlocProvider<AuthBloc>.value(
+          value: authBloc,
         ),
         BlocProvider<RoutesBloc>(
           create: (_) => RoutesBloc(
@@ -65,6 +71,7 @@ class SayrApp extends StatelessWidget {
         BlocProvider<SubscriptionsBloc>(
           create: (_) => SubscriptionsBloc(
             subscriptionRepository: sl<SubscriptionRepository>(),
+            paymentRepository: sl<PaymentRepository>(),
           ),
         ),
         BlocProvider<TrackingBloc>(
@@ -93,11 +100,6 @@ class SayrApp extends StatelessWidget {
             emergencyRepository: sl<EmergencyRepository>(),
           ),
         ),
-        BlocProvider<PaymentBloc>(
-          create: (_) => PaymentBloc(
-            paymentRepository: sl<PaymentRepository>(),
-          ),
-        ),
         BlocProvider<LocaleCubit>(
           create: (_) => LocaleCubit()..load(),
         ),
@@ -108,11 +110,6 @@ class SayrApp extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
         listener: (context, state) {
-          final uri = router.config.routerDelegate.currentConfiguration.uri;
-          final path = uri.path;
-          final isPublic = AppRouter.publicPaths.contains(path);
-          final isAuthEntry = AppRouter.authEntryPaths.contains(path);
-
           if (state is AuthAuthenticated) {
             sl<OfflineSyncService>().start();
             // Register current FCM push token for notifications
@@ -121,16 +118,9 @@ class SayrApp extends StatelessWidget {
                 context.read<NotificationsBloc>(),
               ),
             );
-
-            if (isAuthEntry) {
-              router.config.go('/');
-            }
-          } else if (state is AuthUnauthenticated && !isPublic) {
+          } else if (state is AuthUnauthenticated) {
             sl<OfflineSyncService>().stop();
             unawaited(FcmService.dispose());
-            router.config.go('/login');
-          } else if (state is AuthProfileIncomplete) {
-            router.config.go('/complete-profile');
           }
         },
         child: BlocBuilder<LocaleCubit, Locale>(
@@ -207,6 +197,12 @@ Future<void> runSayrApp() async {
   // Initialize GetIt service locator
   await initDependencies();
 
+  // Initialize Background Sync
+  await BackgroundSyncService.initialize();
+  TripRepositoryImpl.syncTrigger = () {
+    unawaited(BackgroundSyncService.triggerOneOffSync());
+  };
+
   // Initialize FCM service (non-blocking)
   unawaited(FcmService.init());
 
@@ -223,31 +219,25 @@ Future<void> runSayrApp() async {
     talker: sl<Talker>(),
   );
 
+  // Set up auth bloc
+  final authBloc = AuthBloc(
+    authRepository: sl<AuthRepository>(),
+  )..add(const AuthCheckRequested());
+
   // Set up router
-  final router = AppRouter();
+  final router = AppRouter(authBloc: authBloc);
 
   // Wire FCM notification taps to in-app navigation.
-  FcmService.navigationHandler = (data) {
-    final tripId = data['trip_id'] as String?;
-    if (tripId != null) {
-      router.config.go('/trip/$tripId');
-      return;
-    }
-    final conversationId = data['conversation_id'] as String?;
-    if (conversationId != null) {
-      router.config.go('/chat/$conversationId');
-      return;
-    }
-    final routeId = data['route_id'] as String?;
-    if (routeId != null) {
-      router.config.go('/routes');
-      return;
-    }
-    // Default destination for taps without a deep-link target.
-    router.config.go('/notifications');
+  FcmService.navigationHandler = (payload) {
+    payload.when(
+      trip: (tripId) => router.config.go('/trip/$tripId'),
+      chat: (conversationId) => router.config.go('/chat/$conversationId'),
+      route: (routeId) => router.config.go('/routes'),
+      unknown: () => router.config.go('/notifications'),
+    );
   };
 
-  runApp(SayrApp(router: router));
+  runApp(SayrApp(router: router, authBloc: authBloc));
 }
 
 /// A wrapper widget that listens to network connectivity changes and displays

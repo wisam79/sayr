@@ -25,13 +25,19 @@ class SubscriptionsLoading extends SubscriptionsState {
 /// State when subscriptions have successfully loaded.
 class SubscriptionsLoaded extends SubscriptionsState {
   /// Constructor for [SubscriptionsLoaded].
-  const SubscriptionsLoaded(this.subscriptions);
+  const SubscriptionsLoaded(
+    this.subscriptions, [
+    this.pendingPayments = const [],
+  ]);
 
   /// List of loaded subscriptions.
   final List<Subscription> subscriptions;
 
+  /// List of pending payments.
+  final List<PaymentInfo> pendingPayments;
+
   @override
-  List<Object?> get props => [subscriptions];
+  List<Object?> get props => [subscriptions, pendingPayments];
 }
 
 /// State when a subscription operation fails.

@@ -19,7 +19,7 @@ class EmergencyRepositoryImpl extends BaseRepository
   Future<Either<Failure, EmergencyReport>> triggerEmergency({
     required TripId tripId,
     required RouteId routeId,
-    required Coordinates location,
+    Coordinates? location,
     String? message,
   }) async {
     return guard(() async {
@@ -32,8 +32,8 @@ class EmergencyRepositoryImpl extends BaseRepository
         tripId: tripId.value,
         routeId: routeId.value,
         studentId: currentUserId,
-        lat: location.latitude,
-        lng: location.longitude,
+        lat: location?.latitude,
+        lng: location?.longitude,
         description: message ?? '',
       );
 
@@ -41,8 +41,8 @@ class EmergencyRepositoryImpl extends BaseRepository
         id: reportId,
         userId: currentUserId,
         tripId: tripId.value,
-        latitude: location.latitude,
-        longitude: location.longitude,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
         createdAt: DateTime.now().toUtc(),
       );
 

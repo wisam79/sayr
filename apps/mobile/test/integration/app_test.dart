@@ -12,16 +12,15 @@ import 'package:logger/logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/core/global_keys.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
-import 'package:sayr_mobile/core/services/driver_location_service.dart';
-import 'package:sayr_mobile/core/services/osrm_service.dart';
 import 'package:sayr_mobile/core/theme_cubit.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
-import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
+
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
@@ -38,11 +37,11 @@ import 'package:talker_flutter/talker_flutter.dart';
 // Mock services
 class MockBleBeaconService extends Mock implements BleBeaconService {}
 
-class MockDriverLocationService extends Mock implements DriverLocationService {}
+class MockDriverLocationService extends Mock implements LocationService {}
 
 class FakeTrackingBloc extends Fake implements TrackingBloc {}
 
-class MockOsrmService extends Mock implements OsrmService {}
+class MockOsrmService extends Mock implements RoutingService {}
 
 class MockOfflineSyncService extends Mock implements OfflineSyncService {}
 
@@ -89,13 +88,11 @@ class TestThemeCubit extends ThemeCubit {
   }
 }
 
-Widget buildTestApp(AppRouter router) {
+Widget buildTestApp(AppRouter router, AuthBloc authBloc) {
   return MultiBlocProvider(
     providers: [
-      BlocProvider<AuthBloc>(
-        create: (_) => AuthBloc(
-          authRepository: sl<AuthRepository>(),
-        )..add(const AuthCheckRequested()),
+      BlocProvider<AuthBloc>.value(
+        value: authBloc,
       ),
       BlocProvider<RoutesBloc>(
         create: (_) => RoutesBloc(
@@ -105,6 +102,7 @@ Widget buildTestApp(AppRouter router) {
       BlocProvider<SubscriptionsBloc>(
         create: (_) => SubscriptionsBloc(
           subscriptionRepository: sl<SubscriptionRepository>(),
+          paymentRepository: sl<PaymentRepository>(),
         ),
       ),
       BlocProvider<TrackingBloc>(
@@ -145,54 +143,38 @@ Widget buildTestApp(AppRouter router) {
         create: (_) => TestThemeCubit()..load(),
       ),
     ],
-    child: BlocListener<AuthBloc, AuthState>(
-      listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
-      listener: (context, state) {
-        final uri = router.config.routerDelegate.currentConfiguration.uri;
-        final path = uri.path;
-        final isPublic = AppRouter.publicPaths.contains(path);
-        final isAuthEntry = AppRouter.authEntryPaths.contains(path);
-
-        if (state is AuthAuthenticated) {
-          if (isAuthEntry) {
-            router.config.go('/');
-          }
-        } else if (state is AuthUnauthenticated && !isPublic) {
-          router.config.go('/login');
-        } else if (state is AuthProfileIncomplete) {
-          router.config.go('/complete-profile');
-        }
-      },
-      child: BlocBuilder<LocaleCubit, Locale>(
-        builder: (context, locale) {
-          final isRtl = locale.languageCode == 'ar';
-          return MaterialApp.router(
-            title: 'Sayr',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
-            darkTheme: AppTheme.dark,
-            themeMode: ThemeMode.light,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: const [
-              Locale('ar'),
-              Locale('en'),
-            ],
-            locale: locale,
-            builder: (context, child) {
-              return Directionality(
+    child: BlocBuilder<LocaleCubit, Locale>(
+      builder: (context, locale) {
+        final isRtl = locale.languageCode == 'ar';
+        return MaterialApp.router(
+          title: 'Sayr',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.light,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('ar'),
+            Locale('en'),
+          ],
+          locale: locale,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: Directionality(
                 textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
                 child: child ?? const SizedBox.shrink(),
-              );
-            },
-            routerConfig: router.config,
-          );
-        },
-      ),
+              ),
+            );
+          },
+          routerConfig: router.config,
+        );
+      },
     ),
   );
 }
@@ -304,6 +286,8 @@ void main() {
       mockPaymentRepository = MockPaymentRepository();
       mockBoardingRepository = MockBoardingRepository();
 
+      GlobalKeys.scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
       // Configure default stubs for startup
       when(() => mockAuthRepository.currentUser).thenReturn(null);
       when(() => mockAuthRepository.fetchFullProfile())
@@ -406,6 +390,10 @@ void main() {
     });
 
     tearDown(() async {
+      final authBloc = sl.isRegistered<AuthBloc>() ? sl<AuthBloc>() : null;
+      final router = sl.isRegistered<AppRouter>() ? sl<AppRouter>() : null;
+      router?.dispose();
+      await authBloc?.close();
       await sl.reset();
     });
 
@@ -415,7 +403,9 @@ void main() {
       final mockOsrm = MockOsrmService();
       final mockOfflineSync = MockOfflineSyncService();
       final talker = Talker();
-      final router = AppRouter();
+      final authBloc = AuthBloc(authRepository: mockAuthRepository)
+        ..add(const AuthCheckRequested());
+      final router = AppRouter(authBloc: authBloc);
 
       when(mockOfflineSync.start).thenAnswer((_) {});
       when(mockOfflineSync.stop).thenAnswer((_) {});
@@ -441,20 +431,28 @@ void main() {
       );
 
       when(mockLocation.stopTracking).thenAnswer((_) async {});
+      when(() => mockLocation.locationStream)
+          .thenAnswer((_) => const Stream.empty());
+      when(() => mockLocation.isTracking).thenReturn(false);
       when(
         () => mockLocation.startTracking(
-          tripId: any(named: 'tripId'),
-          trackingBloc: any(named: 'trackingBloc'),
+          any(),
+          notificationTitle: any(named: 'notificationTitle'),
+          notificationText: any(named: 'notificationText'),
         ),
-      ).thenAnswer((_) async {});
+      ).thenAnswer((_) async => const Right(unit));
+
+      when(() => mockOsrm.getRoute(any(), any()))
+          .thenAnswer((_) async => const Right(<Coordinates>[]));
 
       sl
         ..allowReassignment = true
         ..registerSingleton<Talker>(talker)
+        ..registerSingleton<AuthBloc>(authBloc)
         ..registerSingleton<AppRouter>(router)
         ..registerSingleton<BleBeaconService>(mockBle)
-        ..registerSingleton<DriverLocationService>(mockLocation)
-        ..registerSingleton<OsrmService>(mockOsrm)
+        ..registerSingleton<LocationService>(mockLocation)
+        ..registerSingleton<RoutingService>(mockOsrm)
         ..registerSingleton<OfflineSyncService>(mockOfflineSync)
         ..registerSingleton<AuthRepository>(mockAuthRepository)
         ..registerSingleton<RouteRepository>(mockRouteRepository)
@@ -477,9 +475,9 @@ void main() {
     testWidgets('auth flow: onboarding → login validation → successful login',
         (tester) async {
       setupGlobalMocks();
-      runApp(buildTestApp(sl<AppRouter>()));
+      await tester.pumpWidget(buildTestApp(sl<AppRouter>(), sl<AuthBloc>()));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 2));
+
       await tester.safePumpAndSettle();
 
       // Skip onboarding
@@ -543,9 +541,9 @@ void main() {
           .thenAnswer((_) async => testStudent);
 
       setupGlobalMocks();
-      runApp(buildTestApp(sl<AppRouter>()));
+      await tester.pumpWidget(buildTestApp(sl<AppRouter>(), sl<AuthBloc>()));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 2));
+
       await tester.safePumpAndSettle();
 
       expect(find.textContaining('مرحباً، محمد'), findsOneWidget);
@@ -584,9 +582,9 @@ void main() {
           .thenAnswer((_) async => testStudent);
 
       setupGlobalMocks();
-      runApp(buildTestApp(sl<AppRouter>()));
+      await tester.pumpWidget(buildTestApp(sl<AppRouter>(), sl<AuthBloc>()));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 2));
+
       await tester.safePumpAndSettle();
 
       // Navigate to Profile tab
@@ -651,9 +649,9 @@ void main() {
         'driver flow: login → create trip → boarding scanner → student boarding QR → driver logout',
         (tester) async {
       setupGlobalMocks();
-      runApp(buildTestApp(sl<AppRouter>()));
+      await tester.pumpWidget(buildTestApp(sl<AppRouter>(), sl<AuthBloc>()));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 2));
+
       await tester.safePumpAndSettle();
 
       // Skip onboarding

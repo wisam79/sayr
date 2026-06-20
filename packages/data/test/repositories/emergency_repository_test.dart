@@ -56,8 +56,8 @@ void main() {
             expect(report.id, const EmergencyReportId('report-999'));
             expect(report.userId, const UserId('student-123'));
             expect(report.tripId, const TripId('trip-1'));
-            expect(report.location.latitude, 33);
-            expect(report.location.longitude, 44);
+            expect(report.location?.latitude, 33);
+            expect(report.location?.longitude, 44);
           },
         );
       });

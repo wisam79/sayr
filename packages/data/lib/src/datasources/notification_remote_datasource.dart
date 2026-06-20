@@ -58,7 +58,7 @@ class NotificationRemoteDatasourceImpl implements NotificationRemoteDatasource {
         .eq('user_id', userId)
         .order('created_at', ascending: false)
         .limit(limit);
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override

@@ -78,7 +78,7 @@ jobs:
           lcov --summary coverage/lcov.filtered.info || true
           COVERAGE_PCT=$(lcov --summary coverage/lcov.filtered.info 2>&1 | grep -oE 'lines\.\.\.\.\.\.: [0-9.]+' | grep -oE '[0-9.]+')
           echo "Domain + data line coverage: ${COVERAGE_PCT}%"
-          THRESHOLD=25
+          THRESHOLD=50
           if [ -z "$COVERAGE_PCT" ]; then
             echo "Could not determine coverage percentage, skipping threshold check"
           elif (( $(echo "$COVERAGE_PCT < $THRESHOLD" | bc -l) )); then

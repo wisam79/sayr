@@ -72,6 +72,9 @@
   "logoutConfirm": "هل أنت متأكد من تسجيل الخروج؟",
 
   "loading": "جاري التحميل...",
+  "loadingRouteTitle": "جاري تحميل الخط...",
+  "loadingStartLocation": "جاري تحميل نقطة البداية...",
+  "loadingEndLocation": "جاري تحميل نقطة النهاية...",
   "error": "خطأ",
   "retry": "إعادة المحاولة",
   "cancel": "إلغاء",
@@ -397,6 +400,7 @@
   "themeSystem": "حسب النظام",
   "studentBadge": "طالب",
   "driverBadge": "سائق",
+  "verified": "حساب موثق",
   "scanQrCode": "مسح الرمز",
   "myDigitalPass": "بطاقتي الرقمية",
   "daysRemainingShort": "متبقي {days} يوم",

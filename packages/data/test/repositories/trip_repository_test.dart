@@ -274,10 +274,13 @@ void main() {
         );
       });
 
-      test('returns ServerFailure when updateTripStatus throws exception',
+      test(
+          'falls back offline and returns Right(trip) when updateTripStatus throws exception',
           () async {
         when(() => mockRemote.getTripById('trip-123'))
             .thenAnswer((_) async => mockTripJson);
+        when(() => mockLocal.getCachedTrips()).thenAnswer((_) async => []);
+        when(() => mockLocal.cacheTrips(any())).thenAnswer((_) async {});
 
         when(
           () => mockRemote.updateTripStatus(
@@ -293,16 +296,18 @@ void main() {
           event: TripEvent.arrive,
         );
 
-        expect(result.isLeft(), true);
+        expect(result.isRight(), true);
         result.fold(
-          (failure) => expect(failure, isA<ServerFailure>()),
-          (_) => fail('should fail'),
+          (failure) => fail('should succeed offline'),
+          (trip) => expect(trip.status, TripStatus.driverWaiting),
         );
       });
     });
 
     group('updateLocation', () {
-      test('calls updateTripLocation on remote datasource', () async {
+      test(
+          'calls updateTripLocation on remote datasource and does not enqueue locally on success',
+          () async {
         when(
           () => mockRemote.updateTripLocation(
             tripId: 'trip-123',
@@ -325,9 +330,18 @@ void main() {
             lng: 44.456,
           ),
         ).called(1);
+        verifyNever(
+          () => mockLocal.enqueueLocation(
+            tripId: any(named: 'tripId'),
+            latitude: any(named: 'latitude'),
+            longitude: any(named: 'longitude'),
+          ),
+        );
       });
 
-      test('returns ServerFailure when remote throws exception', () async {
+      test(
+          'enqueues location locally and returns Right(unit) when remote throws exception and local enqueue succeeds',
+          () async {
         when(
           () => mockRemote.updateTripLocation(
             tripId: 'trip-123',
@@ -335,6 +349,56 @@ void main() {
             lng: 44.456,
           ),
         ).thenThrow(Exception('Update location failed'));
+
+        when(
+          () => mockLocal.enqueueLocation(
+            tripId: 'trip-123',
+            latitude: 33.123,
+            longitude: 44.456,
+          ),
+        ).thenAnswer((_) async {});
+
+        final result = await repository.updateLocation(
+          tripId: const TripId('trip-123'),
+          lat: 33.123,
+          lng: 44.456,
+        );
+
+        expect(result.isRight(), true);
+        verify(
+          () => mockRemote.updateTripLocation(
+            tripId: 'trip-123',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).called(1);
+        verify(
+          () => mockLocal.enqueueLocation(
+            tripId: 'trip-123',
+            latitude: 33.123,
+            longitude: 44.456,
+          ),
+        ).called(1);
+      });
+
+      test(
+          'returns Left(Failure) when remote throws exception and local enqueue also fails',
+          () async {
+        when(
+          () => mockRemote.updateTripLocation(
+            tripId: 'trip-123',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).thenThrow(Exception('Update location failed'));
+
+        when(
+          () => mockLocal.enqueueLocation(
+            tripId: 'trip-123',
+            latitude: 33.123,
+            longitude: 44.456,
+          ),
+        ).thenThrow(Exception('Database write failed'));
 
         final result = await repository.updateLocation(
           tripId: const TripId('trip-123'),
@@ -347,6 +411,20 @@ void main() {
           (failure) => expect(failure, isA<ServerFailure>()),
           (_) => fail('should fail'),
         );
+        verify(
+          () => mockRemote.updateTripLocation(
+            tripId: 'trip-123',
+            lat: 33.123,
+            lng: 44.456,
+          ),
+        ).called(1);
+        verify(
+          () => mockLocal.enqueueLocation(
+            tripId: 'trip-123',
+            latitude: 33.123,
+            longitude: 44.456,
+          ),
+        ).called(1);
       });
     });
 

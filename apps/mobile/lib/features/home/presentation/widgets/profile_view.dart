@@ -47,10 +47,16 @@ class _ProfileView extends StatefulWidget {
   State<_ProfileView> createState() => _ProfileViewState();
 }
 
+class _BleSettingsState {
+  const _BleSettingsState({required this.enabled, required this.loading});
+  final bool enabled;
+  final bool loading;
+}
+
 class _ProfileViewState extends State<_ProfileView>
     with TickerProviderStateMixin {
-  bool _bleEnabled = false;
-  bool _isLoadingBle = true;
+  final ValueNotifier<_BleSettingsState> _bleSettingsNotifier =
+      ValueNotifier(const _BleSettingsState(enabled: false, loading: true));
   late final AnimationController _avatarRingController;
 
   @override
@@ -78,16 +84,17 @@ class _ProfileViewState extends State<_ProfileView>
   @override
   void dispose() {
     _avatarRingController.dispose();
+    _bleSettingsNotifier.dispose();
     super.dispose();
   }
 
   Future<void> _loadBlePreference() async {
     final box = await Hive.openBox<String>('settings_box');
     if (mounted) {
-      setState(() {
-        _bleEnabled = box.get('ble_proximity_enabled') == 'true';
-        _isLoadingBle = false;
-      });
+      _bleSettingsNotifier.value = _BleSettingsState(
+        enabled: box.get('ble_proximity_enabled') == 'true',
+        loading: false,
+      );
     }
   }
 
@@ -95,9 +102,10 @@ class _ProfileViewState extends State<_ProfileView>
     final box = await Hive.openBox<String>('settings_box');
     await box.put('ble_proximity_enabled', value.toString());
     if (mounted) {
-      setState(() {
-        _bleEnabled = value;
-      });
+      _bleSettingsNotifier.value = _BleSettingsState(
+        enabled: value,
+        loading: false,
+      );
     }
   }
 
@@ -139,8 +147,7 @@ class _ProfileViewState extends State<_ProfileView>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final verifiedLabel = isAr ? 'حساب موثق' : 'Verified';
+    final verifiedLabel = l10n.verified;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -482,16 +489,21 @@ class _ProfileViewState extends State<_ProfileView>
                     ? AppColors.borderDark.withValues(alpha: 0.3)
                     : AppColors.divider.withValues(alpha: 0.5),
               ),
-              _SettingsTile(
-                icon: LucideIcons.bluetooth,
-                iconColor: Colors.teal,
-                iconBgColor: Colors.teal.withValues(alpha: 0.08),
-                title: l10n.bleProximityBoarding,
-                trailing: Switch(
-                  value: _bleEnabled,
-                  onChanged: _isLoadingBle ? null : _toggleBle,
-                  activeThumbColor: AppColors.primary,
-                ),
+              ValueListenableBuilder<_BleSettingsState>(
+                valueListenable: _bleSettingsNotifier,
+                builder: (context, bleState, _) {
+                  return _SettingsTile(
+                    icon: LucideIcons.bluetooth,
+                    iconColor: Colors.teal,
+                    iconBgColor: Colors.teal.withValues(alpha: 0.08),
+                    title: l10n.bleProximityBoarding,
+                    trailing: Switch(
+                      value: bleState.enabled,
+                      onChanged: bleState.loading ? null : _toggleBle,
+                      activeThumbColor: AppColors.primary,
+                    ),
+                  );
+                },
               ),
             ],
           ),

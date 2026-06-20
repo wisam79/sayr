@@ -57,7 +57,7 @@ void main() {
 
     await tester.pumpWidget(wrap(const RoutesListPage()));
     // Skeletonizer is active during RoutesLoading.
-    expect(find.text('Baghdad University Campus Route'), findsWidgets);
+    expect(find.text('جاري تحميل الخط...'), findsWidgets);
   });
 
   testWidgets('RoutesListPage shows routes list on load success',

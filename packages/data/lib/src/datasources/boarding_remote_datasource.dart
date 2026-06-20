@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injectable/injectable.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
@@ -60,13 +62,14 @@ class BoardingRemoteDatasourceImpl implements BoardingRemoteDatasource {
         .eq('status', 'active')
         .order('start_date', ascending: false)
         .limit(1)
-        .maybeSingle();
+        .maybeSingle()
+        .timeout(const Duration(seconds: 15));
     final routeId = sub?['route_id'] as String?;
     if (routeId == null) return null;
     return _client.rpc<String?>(
       'get_active_trip_for_route',
       params: {'p_route_id': routeId},
-    );
+    ).timeout(const Duration(seconds: 15));
   }
 
   @override
@@ -76,7 +79,7 @@ class BoardingRemoteDatasourceImpl implements BoardingRemoteDatasource {
     final response = await _client.rpc<List<dynamic>>(
       'generate_boarding_token',
       params: {'p_trip_id': tripId},
-    );
+    ).timeout(const Duration(seconds: 15));
     if (response.isEmpty) {
       throw const supabase.PostgrestException(
         message: 'Empty response from generate_boarding_token',
@@ -104,7 +107,7 @@ class BoardingRemoteDatasourceImpl implements BoardingRemoteDatasource {
         'p_lat': lat,
         'p_lng': lng,
       },
-    );
+    ).timeout(const Duration(seconds: 15));
     if (response.isEmpty) {
       throw const supabase.PostgrestException(
         message: 'Empty response from validate_boarding',
@@ -118,7 +121,7 @@ class BoardingRemoteDatasourceImpl implements BoardingRemoteDatasource {
     final response = await _client.rpc<List<dynamic>>(
       'get_trip_passengers',
       params: {'p_trip_id': tripId},
-    );
+    ).timeout(const Duration(seconds: 15));
     return response.map((r) => (r as Map).cast<String, dynamic>()).toList();
   }
 
@@ -129,7 +132,7 @@ class BoardingRemoteDatasourceImpl implements BoardingRemoteDatasource {
           .stream(primaryKey: ['id'])
           .eq('trip_id', tripId)
           .order('boarded_at')
-          .map((rows) => rows.cast<Map<String, dynamic>>());
+          .map((rows) => List<Map<String, dynamic>>.from(rows));
 
   @override
   Future<Map<String, dynamic>> validateBoardingViaProximity({
@@ -146,7 +149,7 @@ class BoardingRemoteDatasourceImpl implements BoardingRemoteDatasource {
         if (lat != null) 'p_student_lat': lat,
         if (lng != null) 'p_student_lng': lng,
       },
-    );
+    ).timeout(const Duration(seconds: 15));
     if (response.isEmpty) {
       throw const supabase.PostgrestException(
         message: 'Empty response from validate_boarding_via_proximity',

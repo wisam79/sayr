@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 import 'package:sayr_mobile/features/payment/presentation/bloc/payment_event.dart';
@@ -21,14 +22,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   }
 
   final PaymentRepository _paymentRepository;
-  StreamSubscription<dynamic>? _pollSubscription;
-  bool _isPollingCanceled = false;
-
-  @override
-  Future<void> close() async {
-    await _pollSubscription?.cancel();
-    return super.close();
-  }
+  int _currentPollSession = 0;
 
   Future<void> _onStartZainCash(
     PaymentStartZainCash event,
@@ -81,28 +75,42 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   ) async {
     emit(PaymentState.awaitingCompletion(paymentId: event.paymentId));
 
-    await _pollSubscription?.cancel();
-    _isPollingCanceled = false;
+    _currentPollSession++;
+    final session = _currentPollSession;
 
     // Perform initial check synchronously
     final initialResult =
         await _paymentRepository.getPaymentStatus(event.paymentId);
-    if (!isClosed) {
-      add(PaymentStatusChanged(result: initialResult));
-    }
+    if (isClosed || session != _currentPollSession) return;
+    add(PaymentStatusChanged(result: initialResult));
 
-    if (_isPollingCanceled || isClosed) return;
+    // Start periodic polling in the background without overlapping requests
+    unawaited(_startPolling(event.paymentId, session));
+  }
 
-    // Set up periodic polling
-    _pollSubscription = Stream.periodic(
-      const Duration(seconds: 3),
-      (_) => _paymentRepository.getPaymentStatus(event.paymentId),
-    ).takeWhile((_) => !_isPollingCanceled && !isClosed).listen((result) async {
-      final r = await result;
-      if (!isClosed && !_isPollingCanceled) {
-        add(PaymentStatusChanged(result: r));
+  Future<void> _startPolling(String paymentId, int session) async {
+    var iterations = 0;
+    while (session == _currentPollSession && !isClosed) {
+      await Future<void>.delayed(const Duration(seconds: 3));
+      if (session != _currentPollSession || isClosed) return;
+
+      iterations++;
+      if (iterations >= 100) {
+        add(
+          const PaymentStatusChanged(
+            result: Left(
+              BusinessRuleFailure(message: 'payment_timeout'),
+            ),
+          ),
+        );
+        return;
       }
-    });
+
+      final result = await _paymentRepository.getPaymentStatus(paymentId);
+      if (session != _currentPollSession || isClosed) return;
+
+      add(PaymentStatusChanged(result: result));
+    }
   }
 
   void _onStatusChanged(
@@ -113,8 +121,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
       (Failure failure) {
         if (failure is! NetworkFailure) {
           emit(PaymentState.failed(failure: failure));
-          _isPollingCanceled = true;
-          unawaited(_pollSubscription?.cancel());
+          _currentPollSession++;
         }
       },
       (PaymentInfo payment) {
@@ -124,8 +131,7 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
               subscriptionId: SubscriptionId(payment.subscriptionId),
             ),
           );
-          _isPollingCanceled = true;
-          unawaited(_pollSubscription?.cancel());
+          _currentPollSession++;
         } else if (payment.status == 'failed' || payment.status == 'expired') {
           emit(
             PaymentState.failed(
@@ -134,16 +140,14 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
               ),
             ),
           );
-          _isPollingCanceled = true;
-          unawaited(_pollSubscription?.cancel());
+          _currentPollSession++;
         }
       },
     );
   }
 
   void _onReset(PaymentReset event, Emitter<PaymentState> emit) {
-    unawaited(_pollSubscription?.cancel());
-    _isPollingCanceled = true;
+    _currentPollSession++;
     emit(const PaymentState.initial());
   }
 }

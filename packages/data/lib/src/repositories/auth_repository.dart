@@ -139,7 +139,14 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   }
 
   @override
-  Stream<dynamic> get authStateChanges => _remoteDatasource.authStateChanges;
+  Stream<AuthStatus> get authStateChanges {
+    return _remoteDatasource.authStateChanges.map((state) {
+      if (state.session != null) {
+        return AuthStatus.authenticated;
+      }
+      return AuthStatus.unauthenticated;
+    });
+  }
 
   @override
   Future<Either<Failure, Unit>> updateProfile({
@@ -152,7 +159,6 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
         throw const UnauthorizedFailure(message: 'user_not_logged_in');
       }
       await _remoteDatasource.updateProfile(
-        userId: authUser.id,
         phone: phone,
         institutionId: institutionId,
       );

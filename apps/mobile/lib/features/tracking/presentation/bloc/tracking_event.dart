@@ -42,13 +42,24 @@ class TrackingDriverArrive extends TrackingEvent {
 /// Driver: Begin the trip (transition driverWaiting -> inTransit).
 class TrackingDriverStart extends TrackingEvent {
   /// Creates a [TrackingDriverStart] event.
-  const TrackingDriverStart({required this.tripId, this.location});
+  const TrackingDriverStart({
+    required this.tripId,
+    required this.notificationTitle,
+    required this.notificationText,
+    this.location,
+  });
 
   /// The ID of the trip.
   final TripId tripId;
 
   /// Optional coordinates when driver started the trip.
   final Coordinates? location;
+
+  /// Localized title for background notification.
+  final String notificationTitle;
+
+  /// Localized text/body for background notification.
+  final String notificationText;
 }
 
 /// Driver: Complete the trip (transition inTransit -> completed).
@@ -66,10 +77,13 @@ class TrackingDriverComplete extends TrackingEvent {
 /// Driver: Mark trip as absent.
 class TrackingDriverMarkAbsent extends TrackingEvent {
   /// Creates a [TrackingDriverMarkAbsent] event.
-  const TrackingDriverMarkAbsent({required this.tripId});
+  const TrackingDriverMarkAbsent({required this.tripId, required this.location});
 
   /// The ID of the trip.
   final TripId tripId;
+
+  /// Current location when marking absent.
+  final Coordinates location;
 }
 
 /// Driver: Cancel the trip.

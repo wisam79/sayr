@@ -18,12 +18,13 @@ export 'src/entities/subscription.dart';
 export 'src/entities/trip.dart';
 // Entities
 export 'src/entities/user.dart';
+// Enums
+export 'src/enums/auth_status.dart';
 export 'src/enums/license_status.dart';
 export 'src/enums/payout_status.dart';
 export 'src/enums/subscription_status.dart';
 export 'src/enums/support_status.dart';
 export 'src/enums/trip_status.dart';
-// Enums
 export 'src/enums/user_role.dart';
 // Failures
 export 'src/failures/failure.dart';
@@ -32,9 +33,11 @@ export 'src/fsm/trip_event.dart';
 export 'src/fsm/trip_state_machine.dart';
 // Repositories
 export 'src/repositories/driver_repository.dart';
+export 'src/repositories/location_service.dart';
 export 'src/repositories/payment_repository.dart';
 export 'src/repositories/rating_repository.dart';
 export 'src/repositories/repository_interfaces.dart';
+export 'src/repositories/routing_service.dart';
 // Utils
 export 'src/utils/string_utils.dart';
 export 'src/value_objects/coordinates.dart';

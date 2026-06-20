@@ -168,16 +168,17 @@ class _PassengerList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final textTheme = Theme.of(context).textTheme;
-    if (state is BoardingScannerError) {
+    final currentState = state;
+    if (currentState is BoardingScannerError) {
       return Center(
         child: Text(
-          (state as BoardingScannerError).failure.toLocalizedString(context),
+          currentState.failure.toLocalizedString(context),
           style: textTheme.bodyMedium?.copyWith(color: AppColors.error),
         ),
       );
     }
-    final passengers = state is BoardingScannerReady
-        ? (state as BoardingScannerReady).passengers
+    final passengers = currentState is BoardingScannerReady
+        ? currentState.passengers
         : <BoardingRecord>[];
     return Container(
       width: double.infinity,

@@ -35,6 +35,17 @@ abstract class LocalDatasource {
   Future<void> cacheRoutes(List<Route> routes);
   Future<List<Route>> getCachedRoutes();
   Future<void> clearCachedRoutes();
+
+  // Status Queue
+  Future<void> enqueueTripStatus({
+    required String tripId,
+    required String status,
+    double? latitude,
+    double? longitude,
+  });
+  Future<List<TripStatusQueueData>> getPendingTripStatuses();
+  Future<void> markTripStatusesSynced(List<int> ids);
+  Future<void> cleanupOldTripStatuses({int daysOld = 7});
 }
 
 @LazySingleton(as: LocalDatasource)
@@ -44,14 +55,17 @@ class LocalDatasourceImpl implements LocalDatasource {
     LocationQueueDao? locationQueueDao,
     TripCacheDao? tripCacheDao,
     RouteCacheDao? routeCacheDao,
+    TripStatusQueueDao? tripStatusQueueDao,
   })  : _secureStorage = secureStorage ?? SecureStorageService(),
         _locationQueueDao = locationQueueDao ?? LocationQueueDao(),
         _tripCacheDao = tripCacheDao ?? TripCacheDao(),
-        _routeCacheDao = routeCacheDao ?? RouteCacheDao();
+        _routeCacheDao = routeCacheDao ?? RouteCacheDao(),
+        _tripStatusQueueDao = tripStatusQueueDao ?? TripStatusQueueDao();
   final SecureStorageService _secureStorage;
   final LocationQueueDao _locationQueueDao;
   final TripCacheDao _tripCacheDao;
   final RouteCacheDao _routeCacheDao;
+  final TripStatusQueueDao _tripStatusQueueDao;
 
   // Secure Storage
   @override
@@ -82,8 +96,8 @@ class LocalDatasourceImpl implements LocalDatasource {
     required String tripId,
     required double latitude,
     required double longitude,
-  }) {
-    return _locationQueueDao.enqueue(
+  }) async {
+    await _locationQueueDao.enqueue(
       tripId: tripId,
       latitude: latitude,
       longitude: longitude,
@@ -125,4 +139,32 @@ class LocalDatasourceImpl implements LocalDatasource {
 
   @override
   Future<void> clearCachedRoutes() => _routeCacheDao.clear();
+
+  // Status Queue
+  @override
+  Future<void> enqueueTripStatus({
+    required String tripId,
+    required String status,
+    double? latitude,
+    double? longitude,
+  }) async {
+    await _tripStatusQueueDao.enqueue(
+      tripId: tripId,
+      status: status,
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
+
+  @override
+  Future<List<TripStatusQueueData>> getPendingTripStatuses() =>
+      _tripStatusQueueDao.getPending();
+
+  @override
+  Future<void> markTripStatusesSynced(List<int> ids) =>
+      _tripStatusQueueDao.markSynced(ids);
+
+  @override
+  Future<void> cleanupOldTripStatuses({int daysOld = 7}) =>
+      _tripStatusQueueDao.cleanupOld(daysOld: daysOld);
 }

@@ -1,26 +1,27 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/core/services/osrm_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_ui_cubit.dart';
 
-class MockOsrmService extends Mock implements OsrmService {}
+class MockRoutingService extends Mock implements RoutingService {}
 
 void main() {
   setUpAll(() {
     registerFallbackValue(const LatLng(0, 0));
+    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
   });
 
-  late MockOsrmService mockOsrm;
+  late MockRoutingService mockRouting;
   late TrackingUiCubit cubit;
 
   setUp(() {
     sl.allowReassignment = true;
-    mockOsrm = MockOsrmService();
-    sl.registerSingleton<OsrmService>(mockOsrm);
+    mockRouting = MockRoutingService();
+    sl.registerSingleton<RoutingService>(mockRouting);
     cubit = TrackingUiCubit();
   });
 
@@ -86,10 +87,13 @@ void main() {
     );
 
     blocTest<TrackingUiCubit, TrackingUiState>(
-      'fetchRoutePath calls OSRM and emits points on success',
+      'fetchRoutePath calls RoutingService and emits points on success',
       build: () {
-        when(() => mockOsrm.getRoute(any(), any())).thenAnswer(
-          (_) async => const [LatLng(1.1, 2.1), LatLng(3.1, 4.1)],
+        when(() => mockRouting.getRoute(any(), any())).thenAnswer(
+          (_) async => const Right([
+            Coordinates(latitude: 1.1, longitude: 2.1),
+            Coordinates(latitude: 3.1, longitude: 4.1),
+          ]),
         );
         return cubit;
       },
@@ -108,10 +112,33 @@ void main() {
     );
 
     blocTest<TrackingUiCubit, TrackingUiState>(
-      'fetchRoutePath falls back to straight line on OSRM error',
+      'fetchRoutePath falls back to straight line on RoutingService failure',
       build: () {
-        when(() => mockOsrm.getRoute(any(), any())).thenThrow(
-          Exception('OSRM error'),
+        when(() => mockRouting.getRoute(any(), any())).thenAnswer(
+          (_) async => const Left(NetworkFailure(message: 'Routing failure')),
+        );
+        return cubit;
+      },
+      act: (cubit) => cubit.fetchRoutePath(
+        start: const Coordinates(latitude: 1, longitude: 2),
+        end: const Coordinates(latitude: 3, longitude: 4),
+        routeId: const RouteId('route-1'),
+      ),
+      expect: () => [
+        const TrackingUiState(isFetchingRoute: true),
+        const TrackingUiState(
+          routePoints: [LatLng(1, 2), LatLng(3, 4)],
+          loadedRouteId: RouteId('route-1'),
+          isApproximate: true,
+        ),
+      ],
+    );
+
+    blocTest<TrackingUiCubit, TrackingUiState>(
+      'fetchRoutePath falls back to straight line on RoutingService exception',
+      build: () {
+        when(() => mockRouting.getRoute(any(), any())).thenThrow(
+          Exception('Routing exception'),
         );
         return cubit;
       },

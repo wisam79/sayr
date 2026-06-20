@@ -41,7 +41,6 @@ abstract class AuthRemoteDatasource {
 
   /// Updates the current user's profile phone and institution.
   Future<void> updateProfile({
-    required String userId,
     required String phone,
     required String institutionId,
   });
@@ -105,14 +104,17 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
   @override
   Future<void> updateProfile({
-    required String userId,
     required String phone,
     required String institutionId,
   }) async {
+    final currentUserId = _client.auth.currentUser?.id;
+    if (currentUserId == null) {
+      throw const supabase.AuthException('User not authenticated');
+    }
     await _client.from('profiles').update({
       'phone': phone,
       'institution_id': institutionId,
-    }).eq('id', userId);
+    }).eq('id', currentUserId);
   }
 
   @override
@@ -122,6 +124,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         .select('id, name, city')
         .eq('is_active', true)
         .order('name');
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 }

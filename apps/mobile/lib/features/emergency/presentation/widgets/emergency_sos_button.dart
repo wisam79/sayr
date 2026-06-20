@@ -82,11 +82,6 @@ class EmergencySosButton extends StatelessWidget {
     if (confirmed != true || !context.mounted) return;
 
     final location = await _captureLocation();
-    if (location == null) {
-      if (!context.mounted) return;
-      SayrFlash.error(context, l10n.locationUnavailable);
-      return;
-    }
 
     if (!context.mounted) return;
     context.read<EmergencyBloc>().add(
@@ -103,13 +98,14 @@ class EmergencySosButton extends StatelessWidget {
       final permission = await geo.Geolocator.checkPermission();
       if (permission == geo.LocationPermission.denied) {
         final requested = await geo.Geolocator.requestPermission();
-        if (requested == geo.LocationPermission.denied) {
-          return const Coordinates(latitude: 0, longitude: 0);
+        if (requested == geo.LocationPermission.denied ||
+            requested == geo.LocationPermission.deniedForever) {
+          return null;
         }
       }
 
       if (permission == geo.LocationPermission.deniedForever) {
-        return const Coordinates(latitude: 0, longitude: 0);
+        return null;
       }
 
       try {
@@ -135,11 +131,11 @@ class EmergencySosButton extends StatelessWidget {
       }
     } catch (e, st) {
       _emergencyLogger.w(
-        'Failed to capture location for SOS; falling back to 0.0, 0.0',
+        'Failed to capture location for SOS; sending alert with null coordinates',
         error: e,
         stackTrace: st,
       );
-      return const Coordinates(latitude: 0, longitude: 0);
+      return null;
     }
   }
 

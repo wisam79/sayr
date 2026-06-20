@@ -50,3 +50,14 @@ class CachedRoute extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+/// Queued trip status updates to be synced when back online.
+class TripStatusQueue extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get tripId => text()();
+  TextColumn get status => text()();
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get synced => boolean().withDefault(const Constant(false))();
+}

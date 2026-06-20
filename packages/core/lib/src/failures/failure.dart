@@ -110,6 +110,19 @@ class InvalidStateTransitionFailure extends Failure {
   List<Object?> get props => [message, from, event];
 }
 
+/// Location services or permission error.
+class LocationFailure extends Failure {
+  const LocationFailure({
+    super.message,
+    this.isPermissionDenied = false,
+  });
+
+  final bool isPermissionDenied;
+
+  @override
+  List<Object?> get props => [message, isPermissionDenied];
+}
+
 /// Unknown error (catch-all).
 class UnknownFailure extends Failure {
   const UnknownFailure({super.message});

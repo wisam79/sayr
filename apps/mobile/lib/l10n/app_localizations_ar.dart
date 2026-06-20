@@ -194,6 +194,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loading => 'جاري التحميل...';
 
   @override
+  String get loadingRouteTitle => 'جاري تحميل الخط...';
+
+  @override
+  String get loadingStartLocation => 'جاري تحميل نقطة البداية...';
+
+  @override
+  String get loadingEndLocation => 'جاري تحميل نقطة النهاية...';
+
+  @override
   String get error => 'خطأ';
 
   @override
@@ -894,6 +903,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get driverBadge => 'سائق';
+
+  @override
+  String get verified => 'حساب موثق';
 
   @override
   String get scanQrCode => 'مسح الرمز';

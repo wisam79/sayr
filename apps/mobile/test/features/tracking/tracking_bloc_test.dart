@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
@@ -16,7 +15,7 @@ class MockTripRepository extends Mock implements TripRepository {}
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
-class MockDriverLocationService extends Mock implements DriverLocationService {}
+class MockDriverLocationService extends Mock implements LocationService {}
 
 class FakeTrackingBloc extends Fake implements TrackingBloc {}
 
@@ -41,13 +40,17 @@ void main() {
 
     mockLocationService = MockDriverLocationService();
     when(() => mockLocationService.stopTracking()).thenAnswer((_) async {});
+    when(() => mockLocationService.locationStream)
+        .thenAnswer((_) => const Stream.empty());
+    when(() => mockLocationService.isTracking).thenReturn(false);
     when(
       () => mockLocationService.startTracking(
-        tripId: any(named: 'tripId'),
-        trackingBloc: any(named: 'trackingBloc'),
+        any(),
+        notificationTitle: any(named: 'notificationTitle'),
+        notificationText: any(named: 'notificationText'),
       ),
-    ).thenAnswer((_) async {});
-    sl.registerSingleton<DriverLocationService>(mockLocationService);
+    ).thenAnswer((_) async => const Right(unit));
+    sl.registerSingleton<LocationService>(mockLocationService);
 
     mockRepo = MockTripRepository();
     mockAuth = MockAuthRepository();
@@ -158,6 +161,7 @@ void main() {
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingDriverActive>().having(
           (s) => s.trip.status,
@@ -192,6 +196,7 @@ void main() {
           scheduledAt: DateTime.now().add(const Duration(hours: 1)),
         ),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingLoading>(),
         isA<TrackingDriverActive>(),
@@ -223,8 +228,11 @@ void main() {
         const TrackingDriverStart(
           tripId: TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
+          notificationTitle: 'Title',
+          notificationText: 'Text',
         ),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingDriverActive>()
             .having(
@@ -263,8 +271,55 @@ void main() {
         const TrackingDriverStart(
           tripId: TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
+          notificationTitle: 'Title',
+          notificationText: 'Text',
         ),
       ),
+      expect: () => [
+        isA<TrackingError>(),
+      ],
+    );
+
+    blocTest<TrackingBloc, TrackingState>(
+      'emits Error when GPS tracking fails to start',
+      build: () {
+        when(
+          () => mockRepo.updateStatus(
+            tripId: any(named: 'tripId'),
+            event: TripEvent.start,
+            location: any(named: 'location'),
+          ),
+        ).thenAnswer(
+          (_) async => Right<Failure, Trip>(
+            testTrip.copyWith(status: TripStatus.inTransit),
+          ),
+        );
+        when(
+          () => mockLocationService.startTracking(
+            any(),
+            notificationTitle: any(named: 'notificationTitle'),
+            notificationText: any(named: 'notificationText'),
+          ),
+        ).thenAnswer(
+          (_) async => const Left<Failure, Unit>(
+            LocationFailure(message: 'GPS disabled'),
+          ),
+        );
+        return TrackingBloc(
+          tripRepository: mockRepo,
+          authRepository: mockAuth,
+          driverLocationService: mockLocationService,
+        );
+      },
+      act: (bloc) => bloc.add(
+        const TrackingDriverStart(
+          tripId: TripId('trip-1'),
+          location: Coordinates(latitude: 33.3, longitude: 44.3),
+          notificationTitle: 'Title',
+          notificationText: 'Text',
+        ),
+      ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingError>(),
       ],
@@ -295,6 +350,7 @@ void main() {
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingDriverActive>().having(
           (s) => s.trip.status,
@@ -341,6 +397,7 @@ void main() {
           () => mockRepo.updateStatus(
             tripId: any(named: 'tripId'),
             event: TripEvent.markAbsent,
+            location: any(named: 'location'),
           ),
         ).thenAnswer(
           (_) async => Right<Failure, Trip>(
@@ -355,8 +412,10 @@ void main() {
       act: (bloc) => bloc.add(
         const TrackingDriverMarkAbsent(
           tripId: TripId('trip-1'),
+          location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingDriverActive>().having(
           (s) => s.trip.status,
@@ -373,6 +432,7 @@ void main() {
           () => mockRepo.updateStatus(
             tripId: any(named: 'tripId'),
             event: TripEvent.markAbsent,
+            location: any(named: 'location'),
           ),
         ).thenAnswer(
           (_) async => const Left<Failure, Trip>(
@@ -387,6 +447,7 @@ void main() {
       act: (bloc) => bloc.add(
         const TrackingDriverMarkAbsent(
           tripId: TripId('trip-1'),
+          location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
       expect: () => [
@@ -417,6 +478,7 @@ void main() {
           tripId: TripId('trip-1'),
         ),
       ),
+      wait: const Duration(milliseconds: 100),
       expect: () => [
         isA<TrackingDriverActive>().having(
           (s) => s.trip.status,
@@ -521,7 +583,7 @@ void main() {
     );
 
     blocTest<TrackingBloc, TrackingState>(
-      'emits updated location and logs warning when updateLocation fails',
+      'does not emit updated location when updateLocation fails',
       build: () {
         when(
           () => mockRepo.updateLocation(
@@ -551,13 +613,7 @@ void main() {
           longitude: 56.78,
         ),
       ),
-      expect: () => [
-        isA<TrackingDriverActive>().having(
-          (s) => s.currentLocation,
-          'currentLocation',
-          const Coordinates(latitude: 12.34, longitude: 56.78),
-        ),
-      ],
+      expect: () => <TrackingState>[],
     );
 
     blocTest<TrackingBloc, TrackingState>(

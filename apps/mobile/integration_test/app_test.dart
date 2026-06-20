@@ -12,6 +12,7 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_mobile/app.dart';
 import 'package:sayr_mobile/di/di.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/routing/app_router.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
@@ -264,8 +265,11 @@ void main() {
         ..registerSingleton<PaymentRepository>(mockPaymentRepository)
         ..registerSingleton<BoardingRepository>(mockBoardingRepository);
 
+      final authBloc = AuthBloc(authRepository: mockAuthRepository);
+      final appRouter = AppRouter(authBloc: authBloc);
+
       // Launch the Application
-      runApp(SayrApp(router: sl<AppRouter>()));
+      runApp(SayrApp(router: appRouter, authBloc: authBloc));
       await tester.pump();
 
       // ─── 1. Splash Screen ───

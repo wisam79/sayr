@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
 
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
@@ -6,10 +7,12 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 
 /// Bloc for managing subscriptions.
 class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
-  /// Creates a [SubscriptionsBloc] with the given [subscriptionRepository].
+  /// Creates a [SubscriptionsBloc] with the given repositories.
   SubscriptionsBloc({
     required SubscriptionRepository subscriptionRepository,
+    required PaymentRepository paymentRepository,
   })  : _subscriptionRepository = subscriptionRepository,
+        _paymentRepository = paymentRepository,
         super(const SubscriptionsInitial()) {
     on<SubscriptionsLoadRequested>(_onLoadRequested);
     on<SubscriptionCancelRequested>(_onCancelRequested);
@@ -19,6 +22,7 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   }
 
   final SubscriptionRepository _subscriptionRepository;
+  final PaymentRepository _paymentRepository;
 
   Future<void> _onLoadRequested(
     SubscriptionsLoadRequested event,
@@ -26,12 +30,25 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   ) async {
     emit(const SubscriptionsLoading());
 
-    final result = await _subscriptionRepository.getMySubscriptions();
+    final results = await Future.wait([
+      _subscriptionRepository.getMySubscriptions(),
+      _paymentRepository.getPendingPayments(),
+    ]);
 
     if (isClosed) return;
-    result.fold(
-      (failure) => emit(SubscriptionsError(failure)),
-      (subs) => emit(SubscriptionsLoaded(subs)),
+
+    final subsResult = results[0] as Either<Failure, List<Subscription>>;
+    final paymentsResult = results[1] as Either<Failure, List<PaymentInfo>>;
+
+    subsResult.fold(
+      (Failure failure) => emit(SubscriptionsError(failure)),
+      (List<Subscription> subs) {
+        final pendingPayments = paymentsResult.fold(
+          (Failure _) => <PaymentInfo>[], // Fallback to empty if payments fail
+          (List<PaymentInfo> payments) => payments,
+        );
+        emit(SubscriptionsLoaded(subs, pendingPayments));
+      },
     );
   }
 

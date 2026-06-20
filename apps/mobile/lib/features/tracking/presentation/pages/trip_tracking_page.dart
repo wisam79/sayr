@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:latlong2/latlong.dart' as geo;
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
@@ -156,6 +155,10 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
                   _checkAndShowRating(context, state.trip);
                 }
                 _fetchRoutePathIfNeeded(state.trip);
+                context.read<TrackingUiCubit>().updateEta(
+                      driverLocation: state.driverLocation,
+                      trip: state.trip,
+                    );
               } else if (state is TrackingError) {
                 SayrFlash.error(
                   context,
@@ -280,30 +283,16 @@ class _TrackingView extends StatelessWidget {
         ),
     ];
 
-    String? etaText;
-    if (hasLocation) {
-      final targetLoc = (trip.status == TripStatus.inTransit)
-          ? trip.routeEndLocation
-          : trip.routeStartLocation;
-
-      if (targetLoc != null) {
-        final driverLoc = state.driverLocation!;
-
-        final distance = const geo.Distance().as(
-          geo.LengthUnit.Meter,
-          geo.LatLng(targetLoc.latitude, targetLoc.longitude),
-          geo.LatLng(driverLoc.latitude, driverLoc.longitude),
-        );
-
-        final distanceKm = (distance / 1000).toStringAsFixed(1);
-        final minutes = (distance / 500).round();
-
-        etaText = l10n.etaDistance(distanceKm, '$minutes');
-      }
-    }
-
     return BlocBuilder<TrackingUiCubit, TrackingUiState>(
       builder: (context, uiState) {
+        String? etaText;
+        if (uiState.distanceKm != null && uiState.etaMinutes != null) {
+          etaText = l10n.etaDistance(
+            uiState.distanceKm!.toStringAsFixed(1),
+            '${uiState.etaMinutes}',
+          );
+        }
+
         return Stack(
           children: [
             Positioned.fill(

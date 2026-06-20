@@ -194,6 +194,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loading => 'Loading...';
 
   @override
+  String get loadingRouteTitle => 'Loading route...';
+
+  @override
+  String get loadingStartLocation => 'Loading start location...';
+
+  @override
+  String get loadingEndLocation => 'Loading end location...';
+
+  @override
   String get error => 'Error';
 
   @override
@@ -901,6 +910,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get driverBadge => 'Driver';
+
+  @override
+  String get verified => 'Verified';
 
   @override
   String get scanQrCode => 'Scan QR Code';

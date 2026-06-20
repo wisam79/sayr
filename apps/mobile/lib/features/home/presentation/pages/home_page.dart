@@ -48,11 +48,10 @@ class _HomeViewState extends State<_HomeView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isDriver = context.select<AuthBloc, bool>(
-      (bloc) =>
-          bloc.state is AuthAuthenticated &&
-          (bloc.state as AuthAuthenticated).user.role.isDriver,
-    );
+    final isDriver = context.select<AuthBloc, bool>((bloc) {
+      final state = bloc.state;
+      return state is AuthAuthenticated && state.user.role.isDriver;
+    });
 
     return BlocBuilder<HomeNavCubit, int>(
       builder: (context, index) {

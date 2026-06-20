@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
@@ -149,4 +150,51 @@ void main() {
       isA<PaymentAwaitingCompletion>(),
     ],
   );
+
+  test('emits PaymentFailed with payment_timeout when polling times out after 100 iterations', () {
+    fakeAsync((async) {
+      final localMockRepo = MockPaymentRepository();
+      final localBloc = PaymentBloc(paymentRepository: localMockRepo);
+      final subscription = localBloc.stream.listen((_) {});
+
+      when(
+        () => localMockRepo.createPayment(
+          routeId: any(named: 'routeId'),
+          amount: any(named: 'amount'),
+          currency: any(named: 'currency'),
+          method: any(named: 'method'),
+        ),
+      ).thenAnswer((_) => Future.value(const Right(testPaymentInfo)));
+
+      when(() => localMockRepo.getPaymentStatus(any())).thenAnswer(
+        (_) => Future.value(Right(testPaymentInfo.copyWith(status: 'pending'))),
+      );
+
+      localBloc.add(
+        const PaymentStartZainCash(
+          routeId: RouteId('route-123'),
+          amount: 5000,
+          currency: 'IQD',
+        ),
+      );
+
+      async
+        ..flushMicrotasks()
+        ..elapse(const Duration(milliseconds: 10))
+        ..flushMicrotasks()
+        ..elapse(const Duration(seconds: 300))
+        ..flushMicrotasks();
+
+      subscription.cancel();
+
+      expect(
+        localBloc.state,
+        const PaymentState.failed(
+          failure: BusinessRuleFailure(message: 'payment_timeout'),
+        ),
+      );
+
+      localBloc.close();
+    });
+  });
 }

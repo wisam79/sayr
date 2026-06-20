@@ -9,9 +9,9 @@ abstract class EmergencyRemoteDatasource {
     required String tripId,
     required String routeId,
     required String studentId,
-    required double lat,
-    required double lng,
     required String description,
+    double? lat,
+    double? lng,
   });
 
   /// Returns the user's currently unresolved emergency report, or `null`.
@@ -37,9 +37,9 @@ class EmergencyRemoteDatasourceImpl implements EmergencyRemoteDatasource {
     required String tripId,
     required String routeId,
     required String studentId,
-    required double lat,
-    required double lng,
     required String description,
+    double? lat,
+    double? lng,
   }) async {
     final response = await _client.functions.invoke(
       'emergency-alert',

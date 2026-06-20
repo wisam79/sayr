@@ -138,7 +138,7 @@ jobs:
       - name: Run ESLint
         run: |
           cd apps/admin
-          npm run lint || echo "WARNING: ESLint reported issues, ignoring exit code for now."
+          npm run lint
 
       - name: Build Check (TypeScript + Vite)
         run: |

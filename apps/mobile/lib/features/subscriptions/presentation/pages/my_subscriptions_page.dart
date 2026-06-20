@@ -4,7 +4,6 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
-import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
@@ -25,27 +24,10 @@ class MySubscriptionsPage extends StatefulWidget {
 }
 
 class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
-  List<PaymentInfo> _pendingPayments = [];
-
   @override
   void initState() {
     super.initState();
     context.read<SubscriptionsBloc>().add(const SubscriptionsLoadRequested());
-    _fetchPendingPayments();
-  }
-
-  Future<void> _fetchPendingPayments() async {
-    if (!mounted) return;
-    final result = await sl<PaymentRepository>().getPendingPayments();
-    if (!mounted) return;
-    result.fold(
-      (failure) {},
-      (payments) {
-        setState(() {
-          _pendingPayments = payments;
-        });
-      },
-    );
   }
 
   @override
@@ -69,7 +51,6 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                       context
                           .read<SubscriptionsBloc>()
                           .add(const SubscriptionsLoadRequested());
-                      await _fetchPendingPayments();
                     }
                   },
                 ),
@@ -78,6 +59,11 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
           : null,
       body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
         builder: (context, state) {
+          final pendingPayments = switch (state) {
+            SubscriptionsLoaded(:final pendingPayments) => pendingPayments,
+            _ => const <PaymentInfo>[],
+          };
+
           return switch (state) {
             SubscriptionsInitial() ||
             SubscriptionsLoading() ||
@@ -102,7 +88,6 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                   context
                       .read<SubscriptionsBloc>()
                       .add(const SubscriptionsLoadRequested());
-                  await _fetchPendingPayments();
                 },
                 child: ListView(
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -112,7 +97,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                     _DashboardHeader(subscriptions: subscriptions),
                     const SizedBox(height: AppSpacing.lg),
 
-                    if (_pendingPayments.isNotEmpty) ...[
+                    if (pendingPayments.isNotEmpty) ...[
                       Row(
                         children: [
                           Container(
@@ -136,14 +121,14 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      ..._pendingPayments.map(
+                      ...pendingPayments.map(
                         (payment) => _PendingPaymentCard(payment: payment),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                     ],
 
                     if (subscriptions.isEmpty) ...[
-                      if (_pendingPayments.isEmpty)
+                      if (pendingPayments.isEmpty)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 40),
                           child: EmptyState(
@@ -159,7 +144,6 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                                   context
                                       .read<SubscriptionsBloc>()
                                       .add(const SubscriptionsLoadRequested());
-                                  await _fetchPendingPayments();
                                 }
                               },
                             ),
@@ -205,7 +189,6 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                                       context.read<SubscriptionsBloc>().add(
                                             const SubscriptionsLoadRequested(),
                                           );
-                                      await _fetchPendingPayments();
                                     }
                                   },
                                 ),
@@ -812,13 +795,14 @@ class _PendingPaymentCard extends StatelessWidget {
                   label: l10n.resumePayment,
                   icon: Icons.play_arrow,
                   onPressed: () {
-                    context.push(
-                      '/payment/${payment.routeId}/${payment.amount}',
-                      extra: {
+                    final uri = Uri(
+                      path: '/payment/${payment.routeId}/${payment.amount}',
+                      queryParameters: {
                         'paymentId': payment.id,
                         'paymentUrl': payment.paymentUrl,
                       },
                     );
+                    context.push(uri.toString());
                   },
                 ),
               ],

@@ -83,7 +83,7 @@ class ChatRemoteDatasourceImpl implements ChatRemoteDatasource {
         .or('student_id.eq.$currentUserId,driver_user_id.eq.$currentUserId')
         .order('updated_at', ascending: false);
 
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -94,7 +94,7 @@ class ChatRemoteDatasourceImpl implements ChatRemoteDatasource {
           .from('conversations')
           .stream(primaryKey: ['id'])
           .order('updated_at')
-          .map((rows) => rows.cast<Map<String, dynamic>>());
+          .map((rows) => List<Map<String, dynamic>>.from(rows));
 
   @override
   Future<Map<String, dynamic>?> getConversation({
@@ -134,7 +134,7 @@ class ChatRemoteDatasourceImpl implements ChatRemoteDatasource {
         .eq('conversation_id', conversationId)
         .order('created_at', ascending: true)
         .limit(50);
-    return (response as List).cast<Map<String, dynamic>>();
+    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -143,7 +143,7 @@ class ChatRemoteDatasourceImpl implements ChatRemoteDatasource {
           .from('messages')
           .stream(primaryKey: ['id'])
           .eq('conversation_id', conversationId)
-          .map((rows) => rows.cast<Map<String, dynamic>>());
+          .map((rows) => List<Map<String, dynamic>>.from(rows));
 
   @override
   Future<Map<String, dynamic>> sendMessage({

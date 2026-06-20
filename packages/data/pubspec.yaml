@@ -17,6 +17,7 @@ dependencies:
   flutter_secure_storage: ^9.2.0
   fpdart: ^1.1.0
   freezed_annotation: ^3.0.0
+  geolocator: ^13.0.0
   get_it: ^7.7.0
   google_sign_in: ^6.2.1
   injectable: ^2.4.4

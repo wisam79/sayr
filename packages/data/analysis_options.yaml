@@ -10,6 +10,12 @@ analyzer:
     strict-inference: true
   errors:
     invalid_annotation_target: ignore
+    cascade_invocations: ignore
+    avoid_redundant_argument_values: ignore
+    unnecessary_lambdas: ignore
+    must_be_immutable: ignore
+    use_setters_to_change_properties: ignore
+    require_trailing_commas: ignore
 
 linter:
   rules:

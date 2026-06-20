@@ -1,6 +1,12 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart' hide Route;
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:sayr_mobile/di/di.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/complete_profile_page.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:sayr_mobile/features/auth/presentation/pages/onboarding_page.dart';
@@ -13,6 +19,7 @@ import 'package:sayr_mobile/features/chat/presentation/pages/chat_list_page.dart
 import 'package:sayr_mobile/features/chat/presentation/pages/chat_page.dart';
 import 'package:sayr_mobile/features/home/presentation/pages/home_page.dart';
 import 'package:sayr_mobile/features/notifications/presentation/pages/notifications_page.dart';
+import 'package:sayr_mobile/features/payment/presentation/bloc/payment_bloc.dart';
 import 'package:sayr_mobile/features/payment/presentation/pages/payment_page.dart';
 import 'package:sayr_mobile/features/routes/presentation/pages/route_details_page.dart';
 import 'package:sayr_mobile/features/routes/presentation/pages/routes_list_page.dart';
@@ -22,12 +29,18 @@ import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_pa
 import 'package:sayr_mobile/features/tracking/presentation/pages/driver_trip_controls_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/trip_tracking_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:sayr_mobile/routing/go_router_refresh_stream.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 CustomTransitionPage<void> _slideTransitionPage({required Widget child}) {
   return CustomTransitionPage<void>(
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      if (!const bool.fromEnvironment('dart.vm.product') &&
+          Platform.environment.containsKey('FLUTTER_TEST')) {
+        return child;
+      }
       return SlideTransition(
         position: Tween<Offset>(
           begin: const Offset(0, 0.05),
@@ -52,7 +65,16 @@ CustomTransitionPage<void> _slideTransitionPage({required Widget child}) {
 }
 
 class AppRouter {
-  AppRouter();
+  AppRouter({required AuthBloc authBloc})
+      : _authBloc = authBloc,
+        _refreshListenable = GoRouterRefreshStream(authBloc.stream);
+
+  final AuthBloc _authBloc;
+  final GoRouterRefreshStream _refreshListenable;
+
+  void dispose() {
+    _refreshListenable.dispose();
+  }
 
   static const publicPaths = <String>{
     '/splash',
@@ -72,6 +94,54 @@ class AppRouter {
 
   late final GoRouter config = GoRouter(
     initialLocation: '/splash',
+    refreshListenable: _refreshListenable,
+    redirect: (context, state) {
+      final authState = _authBloc.state;
+      final isPublic = publicPaths.contains(state.matchedLocation);
+      final isAuthEntry = authEntryPaths.contains(state.matchedLocation);
+
+      if (authState is AuthInitial || authState is AuthLoading) {
+        // App is still checking auth status; keep them on splash unless they are somehow navigating elsewhere
+        if (state.matchedLocation != '/splash') {
+          sl<Talker>().info('Redirecting to /splash because auth is loading');
+          return '/splash';
+        }
+        return null;
+      }
+
+      if (authState is AuthAuthenticated) {
+        if (isAuthEntry || state.matchedLocation == '/splash') {
+          sl<Talker>().info('Redirecting to / because auth is authenticated');
+          return '/';
+        }
+        return null;
+      }
+
+      if (authState is AuthUnauthenticated) {
+        if (!isPublic) {
+          sl<Talker>().info(
+            'Redirecting to /login because auth is unauthenticated and path is not public',
+          );
+          return '/login';
+        }
+        if (state.matchedLocation == '/splash') {
+          sl<Talker>().info(
+            'Redirecting to /onboarding because auth is unauthenticated and path is /splash',
+          );
+          return '/onboarding';
+        }
+        return null;
+      }
+
+      if (authState is AuthProfileIncomplete) {
+        if (state.matchedLocation != '/complete-profile') {
+          return '/complete-profile';
+        }
+        return null;
+      }
+
+      return null;
+    },
     routes: [
       GoRoute(
         path: '/splash',
@@ -164,13 +234,19 @@ class AppRouter {
         path: '/payment/:routeId/:amount',
         name: 'payment',
         pageBuilder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
+          final paymentId = state.uri.queryParameters['paymentId'];
+          final paymentUrl = state.uri.queryParameters['paymentUrl'];
           return _slideTransitionPage(
-            child: PaymentPage(
-              routeId: RouteId(state.pathParameters['routeId']!),
-              amount: int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
-              paymentId: extra?['paymentId'] as String?,
-              paymentUrl: extra?['paymentUrl'] as String?,
+            child: BlocProvider<PaymentBloc>(
+              create: (_) => PaymentBloc(
+                paymentRepository: sl<PaymentRepository>(),
+              ),
+              child: PaymentPage(
+                routeId: RouteId(state.pathParameters['routeId']!),
+                amount: int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
+                paymentId: paymentId,
+                paymentUrl: paymentUrl,
+              ),
             ),
           );
         },

@@ -6,7 +6,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
@@ -25,7 +24,7 @@ class MockDriverRepository extends Mock implements DriverRepository {}
 
 class MockRatingRepository extends Mock implements RatingRepository {}
 
-class MockDriverLocationService extends Mock implements DriverLocationService {}
+class MockDriverLocationService extends Mock implements LocationService {}
 
 class FakeTrackingBloc extends Fake implements TrackingBloc {}
 
@@ -58,20 +57,22 @@ void main() {
     mockLocationService = MockDriverLocationService();
     mockEmergencyBloc = MockEmergencyBloc();
 
-    when(() => mockLocationService.stopTracking()).thenAnswer((_) async {});
+    when(() => mockLocationService.locationStream)
+        .thenAnswer((_) => const Stream.empty());
     when(
       () => mockLocationService.startTracking(
-        tripId: any(named: 'tripId'),
-        trackingBloc: any(named: 'trackingBloc'),
+        any(),
+        notificationTitle: any(named: 'notificationTitle'),
+        notificationText: any(named: 'notificationText'),
       ),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => const Right(unit));
 
     GetIt.I.registerSingleton<TripRepository>(mockTripRepo);
     GetIt.I.registerSingleton<AuthRepository>(mockAuthRepo);
     GetIt.I.registerSingleton<RouteRepository>(mockRouteRepo);
     GetIt.I.registerSingleton<DriverRepository>(mockDriverRepo);
     GetIt.I.registerSingleton<RatingRepository>(mockRatingRepo);
-    GetIt.I.registerSingleton<DriverLocationService>(mockLocationService);
+    GetIt.I.registerSingleton<LocationService>(mockLocationService);
 
     when(() => mockAuthRepo.currentUser).thenReturn(null);
     when(() => mockEmergencyBloc.state).thenReturn(const EmergencyIdle());

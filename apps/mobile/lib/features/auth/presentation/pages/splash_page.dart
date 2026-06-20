@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
 
 /// Splash screen showing static app icon and routing instantly.
 class SplashPage extends StatefulWidget {
@@ -14,24 +10,6 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _navigateToNext();
-    });
-  }
-
-  void _navigateToNext() {
-    if (!mounted) return;
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      context.go('/');
-    } else {
-      context.go('/onboarding');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

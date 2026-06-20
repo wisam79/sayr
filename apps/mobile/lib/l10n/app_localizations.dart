@@ -458,6 +458,24 @@ abstract class AppLocalizations {
   /// **'Loading...'**
   String get loading;
 
+  /// No description provided for @loadingRouteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading route...'**
+  String get loadingRouteTitle;
+
+  /// No description provided for @loadingStartLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading start location...'**
+  String get loadingStartLocation;
+
+  /// No description provided for @loadingEndLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading end location...'**
+  String get loadingEndLocation;
+
   /// No description provided for @error.
   ///
   /// In en, this message translates to:
@@ -1753,6 +1771,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Driver'**
   String get driverBadge;
+
+  /// No description provided for @verified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verified;
 
   /// No description provided for @scanQrCode.
   ///

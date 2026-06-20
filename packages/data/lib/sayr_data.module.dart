@@ -13,11 +13,14 @@ import 'package:sayr_data/src/datasources/auth_remote_datasource.dart' as _i826;
 import 'package:sayr_data/src/datasources/boarding_remote_datasource.dart'
     as _i94;
 import 'package:sayr_data/src/datasources/chat_remote_datasource.dart' as _i355;
+import 'package:sayr_data/src/datasources/driver_location_service_impl.dart'
+    as _i896;
 import 'package:sayr_data/src/datasources/emergency_remote_datasource.dart'
     as _i1068;
 import 'package:sayr_data/src/datasources/local_datasource.dart' as _i1015;
 import 'package:sayr_data/src/datasources/notification_remote_datasource.dart'
     as _i328;
+import 'package:sayr_data/src/datasources/osrm_remote_datasource.dart' as _i161;
 import 'package:sayr_data/src/datasources/remote_datasource.dart' as _i263;
 import 'package:sayr_data/src/datasources/route_remote_datasource.dart'
     as _i675;
@@ -37,6 +40,7 @@ import 'package:sayr_data/src/repositories/notifications_repository.dart'
 import 'package:sayr_data/src/repositories/payment_repository.dart' as _i929;
 import 'package:sayr_data/src/repositories/rating_repository.dart' as _i69;
 import 'package:sayr_data/src/repositories/route_repository.dart' as _i783;
+import 'package:sayr_data/src/repositories/routing_service_impl.dart' as _i434;
 import 'package:sayr_data/src/repositories/subscription_repository.dart'
     as _i896;
 import 'package:sayr_data/src/repositories/trip_repository.dart' as _i549;
@@ -49,22 +53,20 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
   @override
   _i687.FutureOr<void> init(_i526.GetItHelper gh) {
     final dataModule = _$DataModule();
+    gh.lazySingleton<_i961.AppDatabase>(() => _i961.AppDatabase());
     gh.lazySingleton<_i558.FlutterSecureStorage>(
         () => dataModule.secureStorage);
     gh.lazySingleton<_i583.SayrSupabase>(() => dataModule.supabase);
-    gh.lazySingleton<_i961.AppDatabase>(() => _i961.AppDatabase());
+    gh.lazySingleton<_i385.LocationService>(
+        () => _i896.DriverLocationServiceImpl());
     gh.lazySingleton<_i368.LocationQueueDao>(
         () => _i368.LocationQueueDao(db: gh<_i961.AppDatabase>()));
     gh.lazySingleton<_i368.TripCacheDao>(
         () => _i368.TripCacheDao(db: gh<_i961.AppDatabase>()));
     gh.lazySingleton<_i368.RouteCacheDao>(
         () => _i368.RouteCacheDao(db: gh<_i961.AppDatabase>()));
-    gh.lazySingleton<_i1015.LocalDatasource>(() => _i1015.LocalDatasourceImpl(
-          secureStorage: gh<_i417.SecureStorageService>(),
-          locationQueueDao: gh<_i368.LocationQueueDao>(),
-          tripCacheDao: gh<_i368.TripCacheDao>(),
-          routeCacheDao: gh<_i368.RouteCacheDao>(),
-        ));
+    gh.lazySingleton<_i368.TripStatusQueueDao>(
+        () => _i368.TripStatusQueueDao(db: gh<_i961.AppDatabase>()));
     gh.lazySingleton<_i355.ChatRemoteDatasource>(() =>
         _i355.ChatRemoteDatasourceImpl(supabase: gh<_i583.SayrSupabase>()));
     gh.lazySingleton<_i94.BoardingRemoteDatasource>(() =>
@@ -84,8 +86,21 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
     gh.lazySingleton<_i635.SubscriptionRemoteDatasource>(() =>
         _i635.SubscriptionRemoteDatasourceImpl(
             supabase: gh<_i583.SayrSupabase>()));
+    gh.lazySingleton<_i161.OsrmRemoteDatasource>(
+        () => _i161.OsrmRemoteDatasource(supabase: gh<_i583.SayrSupabase>()));
     gh.lazySingleton<_i417.SecureStorageService>(() =>
         _i417.SecureStorageService(storage: gh<_i558.FlutterSecureStorage>()));
+    gh.lazySingleton<_i1015.LocalDatasource>(() => _i1015.LocalDatasourceImpl(
+          secureStorage: gh<_i417.SecureStorageService>(),
+          locationQueueDao: gh<_i368.LocationQueueDao>(),
+          tripCacheDao: gh<_i368.TripCacheDao>(),
+          routeCacheDao: gh<_i368.RouteCacheDao>(),
+          tripStatusQueueDao: gh<_i368.TripStatusQueueDao>(),
+        ));
+    gh.lazySingleton<_i385.RoutingService>(() => _i434.RoutingServiceImpl(
+          datasource: gh<_i161.OsrmRemoteDatasource>(),
+          talker: gh<_i207.Talker>(),
+        ));
     gh.lazySingleton<_i263.RemoteDatasource>(() => _i263.RemoteDatasourceImpl(
           auth: gh<_i826.AuthRemoteDatasource>(),
           chat: gh<_i355.ChatRemoteDatasource>(),

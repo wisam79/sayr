@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/core/services/driver_location_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
@@ -17,11 +17,11 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   TrackingBloc({
     required TripRepository tripRepository,
     required AuthRepository authRepository,
-    DriverLocationService? driverLocationService,
+    LocationService? driverLocationService,
   })  : _tripRepository = tripRepository,
         _authRepository = authRepository,
         _driverLocationService =
-            driverLocationService ?? sl<DriverLocationService>(),
+            driverLocationService ?? sl<LocationService>(),
         super(const TrackingState.initial()) {
     on<TrackingLoadActiveTrips>(_onLoadActiveTrips);
     on<TrackingWatchTrip>(_onWatchTrip);
@@ -39,12 +39,14 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
 
   final TripRepository _tripRepository;
   final AuthRepository _authRepository;
-  final DriverLocationService _driverLocationService;
+  final LocationService _driverLocationService;
   StreamSubscription<Trip>? _tripSubscription;
+  StreamSubscription<Either<Failure, Coordinates>>? _locationSubscription;
 
   @override
   Future<void> close() async {
     await _tripSubscription?.cancel();
+    await _locationSubscription?.cancel();
     // Release the GPS stream so the foreground service stops when the bloc
     // (and therefore the tracking session) is torn down.
     await _driverLocationService.stopTracking();
@@ -191,7 +193,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     Emitter<TrackingState> emit,
     Trip trip, {
     Coordinates? currentLocation,
-    bool isTrackingLocation = false,
+    bool? isTrackingLocation,
   }) {
     final actions = TripStateMachine.validEventsFrom(trip.status);
     emit(
@@ -199,7 +201,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
         trip: trip,
         validActions: actions,
         currentLocation: currentLocation,
-        isTrackingLocation: isTrackingLocation,
+        isTrackingLocation: isTrackingLocation ?? (_driverLocationService.isTracking == true),
         lastUpdated: DateTime.now(),
       ),
     );
@@ -224,40 +226,77 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     Emitter<TrackingState> emit, {
     bool cancelsSubscription = false,
     bool activatesTracking = false,
+    String? notificationTitle,
+    String? notificationText,
   }) async {
+    if (activatesTracking) {
+      try {
+        final trackResult = await _driverLocationService.startTracking(
+          tripId,
+          notificationTitle: notificationTitle ?? '',
+          notificationText: notificationText ?? '',
+        );
+        final trackSuccess = await trackResult.fold(
+          (failure) async {
+            emit(
+              TrackingState.error(
+                failure: failure,
+                previousState: state,
+              ),
+            );
+            return false;
+          },
+          (_) async => true,
+        );
+        if (!trackSuccess) return;
+      } catch (e) {
+        emit(
+          TrackingState.error(
+            failure: UnknownFailure(message: e.toString()),
+            previousState: state,
+          ),
+        );
+        return;
+      }
+    }
+
     final result = await _tripRepository.updateStatus(
       tripId: tripId,
       event: action,
       location: location,
     );
 
-    if (isClosed) return;
+    if (isClosed) {
+      if (activatesTracking) {
+        unawaited(_driverLocationService.stopTracking());
+      }
+      return;
+    }
+
     await result.fold(
-      (failure) async => emit(
-        TrackingState.error(
-          failure: failure,
-          previousState: state,
-        ),
-      ),
+      (failure) async {
+        if (activatesTracking) {
+          await _driverLocationService.stopTracking();
+        }
+        emit(
+          TrackingState.error(
+            failure: failure,
+            previousState: state,
+          ),
+        );
+      },
       (trip) async {
         if (cancelsSubscription) {
-          await _tripSubscription?.cancel();
+          unawaited(_tripSubscription?.cancel());
+          unawaited(_locationSubscription?.cancel());
+          _locationSubscription = null;
           // Trip is over — stop streaming the driver's location.
           await _driverLocationService.stopTracking();
         }
+        var actualTrackingActive = false;
         if (activatesTracking) {
-          // Trip is now in progress — start the GPS stream, decoupled from the
-          // page lifecycle so it survives backgrounding the app.
-          try {
-            await _driverLocationService.startTracking(
-              tripId: trip.id,
-              trackingBloc: this,
-            );
-          } catch (e) {
-            sl<Talker>().warning(
-              'TrackingBloc: could not start driver location stream: $e',
-            );
-          }
+          _startLocationSubscription();
+          actualTrackingActive = true;
         }
         final actions = TripStateMachine.validEventsFrom(trip.status);
         emit(
@@ -265,9 +304,38 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
             trip: trip,
             validActions: actions,
             currentLocation: location ?? trip.lastLocation,
-            isTrackingLocation: activatesTracking,
+            isTrackingLocation: activatesTracking
+                ? actualTrackingActive
+                : (_driverLocationService.isTracking == true),
             lastUpdated: DateTime.now(),
           ),
+        );
+      },
+    );
+  }
+
+  void _startLocationSubscription() {
+    _locationSubscription?.cancel();
+    _locationSubscription = _driverLocationService.locationStream.listen(
+      (result) {
+        result.fold(
+          (failure) {
+            sl<Talker>().warning(
+              'TrackingBloc: location stream failure: $failure',
+            );
+          },
+          (coordinates) {
+            final current = state;
+            if (current is TrackingDriverActive) {
+              add(
+                TrackingUpdateLocation(
+                  tripId: current.trip.id,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude,
+                ),
+              );
+            }
+          },
         );
       },
     );
@@ -289,6 +357,8 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
         event.location,
         emit,
         activatesTracking: true,
+        notificationTitle: event.notificationTitle,
+        notificationText: event.notificationText,
       );
 
   Future<void> _onDriverComplete(
@@ -310,7 +380,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       _onDriverAction(
         TripEvent.markAbsent,
         event.tripId,
-        null,
+        event.location,
         emit,
         cancelsSubscription: true,
       );
@@ -342,22 +412,21 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       (failure) => sl<Talker>().warning(
         'TrackingBloc: Failed to update location remotely: ${failure.message}',
       ),
-      (_) => null,
+      (_) {
+        final current = state;
+        if (current is TrackingDriverActive) {
+          emit(
+            current.copyWith(
+              currentLocation: Coordinates(
+                latitude: event.latitude,
+                longitude: event.longitude,
+              ),
+              lastUpdated: DateTime.now(),
+            ),
+          );
+        }
+      },
     );
-
-    final current = state;
-    if (current is TrackingDriverActive) {
-      // copyWith is auto-generated by freezed.
-      emit(
-        current.copyWith(
-          currentLocation: Coordinates(
-            latitude: event.latitude,
-            longitude: event.longitude,
-          ),
-          lastUpdated: DateTime.now(),
-        ),
-      );
-    }
   }
 }
 

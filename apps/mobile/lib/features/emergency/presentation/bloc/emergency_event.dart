@@ -15,7 +15,7 @@ class EmergencyTriggered extends EmergencyEvent {
   const EmergencyTriggered({
     required this.tripId,
     required this.routeId,
-    required this.location,
+    this.location,
     this.message,
   });
 
@@ -26,7 +26,7 @@ class EmergencyTriggered extends EmergencyEvent {
   final RouteId routeId;
 
   /// Current GPS coordinates.
-  final Coordinates location;
+  final Coordinates? location;
 
   /// Optional detail message.
   final String? message;

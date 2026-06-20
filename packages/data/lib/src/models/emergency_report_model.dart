@@ -10,9 +10,9 @@ abstract class EmergencyReportModel with _$EmergencyReportModel {
     required String id,
     @JsonKey(name: 'user_id') required String userId,
     @JsonKey(name: 'trip_id') required String tripId,
-    required double latitude,
-    required double longitude,
     @JsonKey(name: 'created_at') required DateTime createdAt,
+    double? latitude,
+    double? longitude,
     @JsonKey(name: 'resolved_at') DateTime? resolvedAt,
     String? notes,
   }) = _EmergencyReportModel;
@@ -26,7 +26,9 @@ abstract class EmergencyReportModel with _$EmergencyReportModel {
         id: EmergencyReportId(id),
         userId: UserId(userId),
         tripId: TripId(tripId),
-        location: Coordinates(latitude: latitude, longitude: longitude),
+        location: (latitude != null && longitude != null)
+            ? Coordinates(latitude: latitude!, longitude: longitude!)
+            : null,
         createdAt: createdAt,
         resolvedAt: resolvedAt,
         notes: notes,

@@ -33,6 +33,9 @@ extension FailureLocalization on Failure {
           'license_not_active' => l10n.licenseNotActive,
           _ => message ?? l10n.failureUnknown,
         },
+      LocationFailure(:final isPermissionDenied) => isPermissionDenied
+          ? l10n.locationPermissionRequired
+          : message ?? l10n.locationUnavailable,
       UnknownFailure() => message ?? l10n.failureUnknown,
     };
   }

@@ -11,6 +11,8 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 class MockSubscriptionRepository extends Mock
     implements SubscriptionRepository {}
 
+class MockPaymentRepository extends Mock implements PaymentRepository {}
+
 void main() {
   setUpAll(() {
     registerFallbackValue(const SubscriptionId('fallback'));
@@ -18,11 +20,19 @@ void main() {
   });
 
   late MockSubscriptionRepository mockRepo;
+  late MockPaymentRepository mockPaymentRepo;
   late SubscriptionsBloc bloc;
 
   setUp(() {
     mockRepo = MockSubscriptionRepository();
-    bloc = SubscriptionsBloc(subscriptionRepository: mockRepo);
+    mockPaymentRepo = MockPaymentRepository();
+    when(() => mockPaymentRepo.getPendingPayments()).thenAnswer(
+      (_) async => const Right<Failure, List<PaymentInfo>>([]),
+    );
+    bloc = SubscriptionsBloc(
+      subscriptionRepository: mockRepo,
+      paymentRepository: mockPaymentRepo,
+    );
   });
 
   tearDown(() => bloc.close());
@@ -49,7 +59,10 @@ void main() {
         when(() => mockRepo.getMySubscriptions()).thenAnswer(
           (_) async => Right<Failure, List<Subscription>>(testSubscriptions),
         );
-        return SubscriptionsBloc(subscriptionRepository: mockRepo);
+        return SubscriptionsBloc(
+          subscriptionRepository: mockRepo,
+          paymentRepository: mockPaymentRepo,
+        );
       },
       act: (bloc) => bloc.add(const SubscriptionsLoadRequested()),
       expect: () => [
@@ -70,7 +83,10 @@ void main() {
             ServerFailure(message: 'Server error'),
           ),
         );
-        return SubscriptionsBloc(subscriptionRepository: mockRepo);
+        return SubscriptionsBloc(
+          subscriptionRepository: mockRepo,
+          paymentRepository: mockPaymentRepo,
+        );
       },
       act: (bloc) => bloc.add(const SubscriptionsLoadRequested()),
       expect: () => [
@@ -88,7 +104,10 @@ void main() {
         when(() => mockRepo.getMySubscriptions()).thenAnswer(
           (_) async => Right<Failure, List<Subscription>>(testSubscriptions),
         );
-        return SubscriptionsBloc(subscriptionRepository: mockRepo);
+        return SubscriptionsBloc(
+          subscriptionRepository: mockRepo,
+          paymentRepository: mockPaymentRepo,
+        );
       },
       act: (bloc) => bloc.add(
         const SubscriptionCancelRequested(SubscriptionId('sub-1')),
@@ -107,7 +126,10 @@ void main() {
             ServerFailure(message: 'Cancel failed'),
           ),
         );
-        return SubscriptionsBloc(subscriptionRepository: mockRepo);
+        return SubscriptionsBloc(
+          subscriptionRepository: mockRepo,
+          paymentRepository: mockPaymentRepo,
+        );
       },
       act: (bloc) => bloc.add(
         const SubscriptionCancelRequested(SubscriptionId('sub-1')),
@@ -117,7 +139,10 @@ void main() {
 
     blocTest<SubscriptionsBloc, SubscriptionsState>(
       'emits SubscriptionsError when code is invalid',
-      build: () => SubscriptionsBloc(subscriptionRepository: mockRepo),
+      build: () => SubscriptionsBloc(
+        subscriptionRepository: mockRepo,
+        paymentRepository: mockPaymentRepo,
+      ),
       act: (bloc) => bloc.add(const LicenseActivateRequested('invalid')),
       expect: () => [isA<SubscriptionsError>()],
     );
@@ -133,7 +158,10 @@ void main() {
         when(() => mockRepo.getMySubscriptions()).thenAnswer(
           (_) async => Right<Failure, List<Subscription>>(testSubscriptions),
         );
-        return SubscriptionsBloc(subscriptionRepository: mockRepo);
+        return SubscriptionsBloc(
+          subscriptionRepository: mockRepo,
+          paymentRepository: mockPaymentRepo,
+        );
       },
       act: (bloc) => bloc.add(const LicenseActivateRequested('A1B2C3D4')),
       expect: () => [
@@ -152,7 +180,10 @@ void main() {
             BusinessRuleFailure(message: 'Already have active subscription'),
           ),
         );
-        return SubscriptionsBloc(subscriptionRepository: mockRepo);
+        return SubscriptionsBloc(
+          subscriptionRepository: mockRepo,
+          paymentRepository: mockPaymentRepo,
+        );
       },
       act: (bloc) => bloc.add(const LicenseActivateRequested('A1B2C3D4')),
       expect: () => [

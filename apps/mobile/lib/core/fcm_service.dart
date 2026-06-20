@@ -5,25 +5,25 @@ import 'dart:io' show Platform;
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart' show Color;
-import 'package:logger/logger.dart';
-
 import 'package:sayr_mobile/core/firebase_config.dart';
+import 'package:sayr_mobile/core/models/fcm_payload.dart';
+import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// Firebase Cloud Messaging service using `awesome_notifications` for
 /// cross-platform local notifications (channels, actions, scheduling built-in).
 class FcmService {
   FcmService._();
 
-  static final Logger _logger = Logger();
+  static Talker get _talker => sl<Talker>();
 
   static bool _initialized = false;
   static StreamSubscription<String>? _tokenRefreshSubscription;
 
-  /// Optional navigation callback. The callback receives the FCM `data`
-  /// payload (e.g. a `trip_id`, `conversation_id`, or `route_id`). Called
-  /// from the app shell after the router is ready.
-  static void Function(Map<String, dynamic> data)? navigationHandler;
+  /// Optional navigation callback. The callback receives the parsed type-safe
+  /// [FcmPayload]. Called from the app shell after the router is ready.
+  static void Function(FcmPayload payload)? navigationHandler;
 
   /// Initialize FCM + awesome_notifications.
   static Future<void> init() async {
@@ -136,7 +136,7 @@ class FcmService {
     await showLocal(
       title: notification.title ?? '',
       body: notification.body ?? '',
-      tripId: message.data['trip_id'] as String?,
+      tripId: message.data['trip_id']?.toString(),
     );
   }
 
@@ -145,7 +145,7 @@ class FcmService {
     if (handler == null) {
       return;
     }
-    handler(Map<String, dynamic>.from(message.data));
+    handler(FcmPayload.fromMap(message.data));
   }
 
   /// Fetches the current FCM token and registers it using the [NotificationsBloc].
@@ -177,10 +177,10 @@ class FcmService {
         );
       });
     } catch (e, st) {
-      _logger.e(
+      _talker.error(
         'FCM: Failed to retrieve or register token',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
     }
   }
@@ -193,10 +193,10 @@ class FcmService {
     try {
       await FirebaseMessaging.instance.deleteToken();
     } catch (e, st) {
-      _logger.e(
+      _talker.error(
         'FCM: Failed to delete token during dispose',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
     }
   }
@@ -207,18 +207,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final notification = message.notification;
   final data = message.data;
 
-  var title = notification?.title ?? data['title'] as String?;
-  var body = notification?.body ?? data['body'] as String?;
+  var title = notification?.title ?? data['title']?.toString();
+  var body = notification?.body ?? data['body']?.toString();
 
   // Fallback messages for data-only payloads
   if (title == null && body == null) {
-    final type = data['type'] as String?;
+    final type = data['type']?.toString();
     if (type == 'chat') {
       title = 'رسالة جديدة';
-      body = data['message'] as String? ?? 'لديك رسالة جديدة';
+      body = data['message']?.toString() ?? 'لديك رسالة جديدة';
     } else if (type == 'trip_update') {
       title = 'تحديث الرحلة';
-      body = data['status_text'] as String? ?? 'تم تحديث حالة الرحلة';
+      body = data['status_text']?.toString() ?? 'تم تحديث حالة الرحلة';
     }
   }
 

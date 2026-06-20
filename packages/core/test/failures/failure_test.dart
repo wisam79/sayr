@@ -146,6 +146,22 @@ void main() {
       });
     });
 
+    group('LocationFailure', () {
+      test('preserves isPermissionDenied in props', () {
+        const failure = LocationFailure(
+          message: 'permission denied',
+          isPermissionDenied: true,
+        );
+        expect(failure.isPermissionDenied, isTrue);
+        expect(failure.props, ['permission denied', true]);
+      });
+
+      test('isPermissionDenied defaults to false', () {
+        const failure = LocationFailure(message: 'gps off');
+        expect(failure.isPermissionDenied, isFalse);
+      });
+    });
+
     group('UnknownFailure', () {
       test('has correct props', () {
         const failure = UnknownFailure(message: 'unexpected');
@@ -181,6 +197,7 @@ void main() {
         CacheFailure(),
         BusinessRuleFailure(message: 'x'),
         InvalidStateTransitionFailure(),
+        LocationFailure(),
         UnknownFailure(),
       ];
 

@@ -144,6 +144,38 @@ class _ReadyView extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
+            if (state.refreshFailure != null) ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: AppColors.error,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        state.refreshFailure!.toLocalizedString(context),
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: AppColors.error,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (state.proximityOtp != null) ...[
               Container(
                 padding: const EdgeInsets.all(AppSpacing.lg),

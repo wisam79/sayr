@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/core/services/osrm_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 
 /// UI-only state for the trip tracking view.
@@ -15,12 +14,14 @@ class TrackingUiState extends Equatable {
     this.routePoints,
     this.loadedRouteId,
     this.isApproximate = false,
+    this.distanceKm,
+    this.etaMinutes,
   });
 
   /// Whether the rating sheet has already been shown.
   final bool ratingShown;
 
-  /// Whether the OSRM route is currently being fetched.
+  /// Whether the route is currently being fetched.
   final bool isFetchingRoute;
 
   /// The decoded route polyline points (or straight-line fallback).
@@ -32,9 +33,22 @@ class TrackingUiState extends Equatable {
   /// Whether the current route points are a fallback straight-line approximation.
   final bool isApproximate;
 
+  /// Calculated distance in kilometers to the target.
+  final double? distanceKm;
+
+  /// Calculated ETA in minutes to the target.
+  final int? etaMinutes;
+
   @override
-  List<Object?> get props =>
-      [ratingShown, isFetchingRoute, routePoints, loadedRouteId, isApproximate];
+  List<Object?> get props => [
+        ratingShown,
+        isFetchingRoute,
+        routePoints,
+        loadedRouteId,
+        isApproximate,
+        distanceKm,
+        etaMinutes,
+      ];
 
   TrackingUiState copyWith({
     bool? ratingShown,
@@ -42,6 +56,8 @@ class TrackingUiState extends Equatable {
     List<LatLng>? Function()? routePoints,
     RouteId? Function()? loadedRouteId,
     bool? isApproximate,
+    double? Function()? distanceKm,
+    int? Function()? etaMinutes,
   }) {
     return TrackingUiState(
       ratingShown: ratingShown ?? this.ratingShown,
@@ -50,6 +66,8 @@ class TrackingUiState extends Equatable {
       loadedRouteId:
           loadedRouteId != null ? loadedRouteId() : this.loadedRouteId,
       isApproximate: isApproximate ?? this.isApproximate,
+      distanceKm: distanceKm != null ? distanceKm() : this.distanceKm,
+      etaMinutes: etaMinutes != null ? etaMinutes() : this.etaMinutes,
     );
   }
 
@@ -58,11 +76,50 @@ class TrackingUiState extends Equatable {
 
 /// Manages ephemeral UI state for the trip tracking view.
 ///
-/// Holds the OSRM route path, rating-guard flag, and trip details loading
-/// in a single [TrackingUiState]. This replaces the `setState` + raw
-/// field pattern that previously lived in `_TripTrackingViewState`.
+/// Holds the OSRM route path, rating-guard flag, and computed ETA/distance.
 class TrackingUiCubit extends Cubit<TrackingUiState> {
   TrackingUiCubit() : super(TrackingUiState.initial);
+
+  /// Updates the computed ETA and distance using coordinates distance logic.
+  void updateEta({
+    required Coordinates? driverLocation,
+    required Trip trip,
+  }) {
+    if (driverLocation == null) {
+      emit(
+        state.copyWith(
+          distanceKm: () => null,
+          etaMinutes: () => null,
+        ),
+      );
+      return;
+    }
+
+    final targetLoc = (trip.status == TripStatus.inTransit)
+        ? trip.routeEndLocation
+        : trip.routeStartLocation;
+
+    if (targetLoc == null) {
+      emit(
+        state.copyWith(
+          distanceKm: () => null,
+          etaMinutes: () => null,
+        ),
+      );
+      return;
+    }
+
+    final distance = driverLocation.distanceToMeters(targetLoc);
+    final distanceKm = distance / 1000;
+    final minutes = (distance / 500).round();
+
+    emit(
+      state.copyWith(
+        distanceKm: () => distanceKm,
+        etaMinutes: () => minutes,
+      ),
+    );
+  }
 
   /// Attempts to fetch the driving route between [start] and [end].
   /// Falls back to a straight line on error (OSRM timeout, etc.).
@@ -98,24 +155,42 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
     emit(state.copyWith(isFetchingRoute: true));
 
     try {
-      final points = await sl<OsrmService>().getRoute(
-        LatLng(start.latitude, start.longitude),
-        LatLng(end.latitude, end.longitude),
-      );
+      final result = await sl<RoutingService>().getRoute(start, end);
       if (isClosed) return;
-      final isApprox = points.length == 2 &&
-          points.first.latitude == start.latitude &&
-          points.first.longitude == start.longitude &&
-          points.last.latitude == end.latitude &&
-          points.last.longitude == end.longitude;
 
-      emit(
-        state.copyWith(
-          isFetchingRoute: false,
-          routePoints: () => points,
-          loadedRouteId: () => routeId,
-          isApproximate: isApprox,
-        ),
+      result.fold(
+        (failure) {
+          emit(
+            state.copyWith(
+              isFetchingRoute: false,
+              routePoints: () => [
+                LatLng(start.latitude, start.longitude),
+                LatLng(end.latitude, end.longitude),
+              ],
+              loadedRouteId: () => routeId,
+              isApproximate: true,
+            ),
+          );
+        },
+        (coords) {
+          final points = coords
+              .map((c) => LatLng(c.latitude, c.longitude))
+              .toList();
+          final isApprox = points.length == 2 &&
+              points.first.latitude == start.latitude &&
+              points.first.longitude == start.longitude &&
+              points.last.latitude == end.latitude &&
+              points.last.longitude == end.longitude;
+
+          emit(
+            state.copyWith(
+              isFetchingRoute: false,
+              routePoints: () => points,
+              loadedRouteId: () => routeId,
+              isApproximate: isApprox,
+            ),
+          );
+        },
       );
     } catch (_) {
       if (isClosed) return;
@@ -140,13 +215,16 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
       final decoded = json.decode(geometryJson);
       if (decoded is! List) return [];
       return decoded
-          .where((item) => item is List && item.length >= 2)
-          .map((item) {
-        final listItem = item as List<dynamic>;
-        final lng = (listItem[0] as num).toDouble();
-        final lat = (listItem[1] as num).toDouble();
-        return LatLng(lat, lng);
-      }).toList();
+          .whereType<List<dynamic>>()
+          .map((list) {
+            if (list.length < 2) return null;
+            final first = list[0];
+            final second = list[1];
+            if (first is! num || second is! num) return null;
+            return LatLng(second.toDouble(), first.toDouble());
+          })
+          .whereType<LatLng>()
+          .toList();
     } catch (_) {
       return [];
     }

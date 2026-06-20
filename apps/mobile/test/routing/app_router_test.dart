@@ -1,13 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
 import 'package:sayr_mobile/routing/app_router.dart';
+
+class MockAuthBloc extends Mock implements AuthBloc {}
 
 void main() {
   group('AppRouter Configuration', () {
     late AppRouter router;
+    late MockAuthBloc mockAuthBloc;
 
     setUp(() {
-      router = AppRouter();
+      mockAuthBloc = MockAuthBloc();
+      when(() => mockAuthBloc.stream).thenAnswer((_) => const Stream.empty());
+      when(() => mockAuthBloc.state).thenReturn(const AuthInitial());
+      when(() => mockAuthBloc.close()).thenAnswer((_) async {});
+      router = AppRouter(authBloc: mockAuthBloc);
+    });
+
+    tearDown(() {
+      router.dispose();
+      mockAuthBloc.close();
     });
 
     test('publicPaths contains expected authentication and entry paths', () {

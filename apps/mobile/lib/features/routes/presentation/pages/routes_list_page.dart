@@ -71,9 +71,9 @@ class _RoutesListPageState extends State<RoutesListPage> {
                             const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, index) {
                           return RouteCard(
-                            title: 'Baghdad University Campus Route',
-                            startLocation: 'Karrada District Baghdad',
-                            endLocation: 'Al-Jadriya Campus University',
+                            title: l10n.loadingRouteTitle,
+                            startLocation: l10n.loadingStartLocation,
+                            endLocation: l10n.loadingEndLocation,
                             availableSeats: 10,
                             capacity: 25,
                             formattedPrice: '---',

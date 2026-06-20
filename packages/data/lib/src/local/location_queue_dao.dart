@@ -199,3 +199,54 @@ class RouteCacheDao {
     );
   }
 }
+
+/// DAO for offline trip status queue operations.
+@lazySingleton
+class TripStatusQueueDao {
+  /// Creates a [TripStatusQueueDao].
+  TripStatusQueueDao({AppDatabase? db}) : _db = db ?? AppDatabase();
+
+  final AppDatabase _db;
+
+  /// Insert a trip status update into the pending queue.
+  Future<void> enqueue({
+    required String tripId,
+    required String status,
+    double? latitude,
+    double? longitude,
+  }) async {
+    await _db.into(_db.tripStatusQueue).insert(
+          TripStatusQueueCompanion.insert(
+            tripId: tripId,
+            status: status,
+            latitude: Value(latitude),
+            longitude: Value(longitude),
+          ),
+        );
+  }
+
+  /// Get all unsynced trip status updates.
+  Future<List<TripStatusQueueData>> getPending() async {
+    return (_db.select(_db.tripStatusQueue)
+          ..where((t) => t.synced.equals(false))
+          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+        .get();
+  }
+
+  /// Mark status updates as synced.
+  Future<void> markSynced(List<int> ids) async {
+    await (_db.update(_db.tripStatusQueue)..where((t) => t.id.isIn(ids)))
+        .write(const TripStatusQueueCompanion(synced: Value(true)));
+  }
+
+  /// Delete old synced entries (older than [daysOld]).
+  Future<void> cleanupOld({int daysOld = 7}) async {
+    final cutoff = DateTime.now().subtract(Duration(days: daysOld));
+    await (_db.delete(_db.tripStatusQueue)
+          ..where(
+            (t) =>
+                t.synced.equals(true) & t.createdAt.isSmallerThanValue(cutoff),
+          ))
+        .go();
+  }
+}
