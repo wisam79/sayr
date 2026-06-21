@@ -155,8 +155,12 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final current = state;
     if (current is! BoardingQrReady || current.proximityOtp == null) return;
 
-    emit(current.copyWith(
-        isSubmittingProximity: true, clearProximityFailure: true));
+    emit(
+      current.copyWith(
+        isSubmittingProximity: true,
+        clearProximityFailure: true,
+      ),
+    );
 
     final result = await _boardingRepository.validateBoardingViaProximity(
       tripId: current.tripId,

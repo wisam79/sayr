@@ -35,7 +35,9 @@ void main() {
     mockRepo = MockRouteRepository();
     mockTripRepo = MockTripRepository();
     cubit = CreateTripDialogCubit(
-        routeRepository: mockRepo, tripRepository: mockTripRepo);
+      routeRepository: mockRepo,
+      tripRepository: mockTripRepo,
+    );
   });
 
   tearDown(() => cubit.close());
@@ -58,7 +60,9 @@ void main() {
           (_) async => const Right<Failure, List<Route>>([testRoute]),
         );
         return CreateTripDialogCubit(
-            routeRepository: mockRepo, tripRepository: mockTripRepo);
+          routeRepository: mockRepo,
+          tripRepository: mockTripRepo,
+        );
       },
       act: (cubit) => cubit.loadRoutes(),
       verify: (cubit) {
@@ -78,7 +82,9 @@ void main() {
           ),
         );
         return CreateTripDialogCubit(
-            routeRepository: mockRepo, tripRepository: mockTripRepo);
+          routeRepository: mockRepo,
+          tripRepository: mockTripRepo,
+        );
       },
       act: (cubit) => cubit.loadRoutes(),
       verify: (cubit) {
@@ -96,7 +102,9 @@ void main() {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'updates selectedRoute',
       build: () => CreateTripDialogCubit(
-          routeRepository: mockRepo, tripRepository: mockTripRepo),
+        routeRepository: mockRepo,
+        tripRepository: mockTripRepo,
+      ),
       seed: () => const CreateTripDialogState(routes: [testRoute]),
       act: (cubit) => cubit.selectRoute(testRoute),
       verify: (cubit) {
@@ -109,7 +117,9 @@ void main() {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'updates scheduledAt and clears error',
       build: () => CreateTripDialogCubit(
-          routeRepository: mockRepo, tripRepository: mockTripRepo),
+        routeRepository: mockRepo,
+        tripRepository: mockTripRepo,
+      ),
       seed: () => const CreateTripDialogState(
         failure: ServerFailure(message: 'old error'),
       ),
@@ -125,7 +135,9 @@ void main() {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'setError sets error message and stops submitting',
       build: () => CreateTripDialogCubit(
-          routeRepository: mockRepo, tripRepository: mockTripRepo),
+        routeRepository: mockRepo,
+        tripRepository: mockTripRepo,
+      ),
       seed: () => const CreateTripDialogState(isSubmitting: true),
       act: (cubit) => cubit.setError(const ServerFailure(message: 'boom')),
       verify: (cubit) {
