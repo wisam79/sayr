@@ -65,8 +65,9 @@ abstract class BoardingRecord with _$BoardingRecord {
     required UserId studentId,
     required DateTime boardedAt,
     @JsonKey(
-        fromJson: nullableSubscriptionIdFromJson,
-        toJson: nullableSubscriptionIdToJson)
+      fromJson: nullableSubscriptionIdFromJson,
+      toJson: nullableSubscriptionIdToJson,
+    )
     SubscriptionId? subscriptionId,
     String? studentName,
     @Default('qr_scan') String boardingMethod,
