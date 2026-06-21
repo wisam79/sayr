@@ -7,7 +7,7 @@ import 'package:sayr_data/src/local/tables.dart';
 part 'app_database.g.dart';
 
 /// Local SQLite database via Drift for offline location queue + caching.
-@lazySingleton
+@LazySingleton(order: -1)
 @DriftDatabase(
     tables: [PendingLocationUpdate, CachedTrip, CachedRoute, TripStatusQueue])
 class AppDatabase extends _$AppDatabase {
