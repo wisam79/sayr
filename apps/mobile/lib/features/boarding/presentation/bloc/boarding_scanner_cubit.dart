@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_data/sayr_data.dart';
 
 /// State for the driver-side boarding scanner.
 sealed class BoardingScannerState {
@@ -80,10 +79,7 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
         );
       },
       onError: (Object error) {
-        final failure = _boardingRepository is BaseRepository
-            ? (_boardingRepository as BaseRepository).mapException(error)
-            : UnknownFailure(message: error.toString());
-        emit(BoardingScannerError(failure: failure));
+        emit(BoardingScannerError(failure: UnknownFailure(message: error.toString())));
       },
     );
   }
@@ -97,7 +93,6 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
       BoardingScannerReady(
         tripId: _tripId,
         passengers: current.passengers,
-        lastScan: current.lastScan,
         isProcessing: true,
       ),
     );
@@ -143,19 +138,6 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
     );
   }
 
-  /// Clear the last scan feedback (e.g. after showing a toast).
-  void clearLastScan() {
-    final current = state;
-    if (current is BoardingScannerReady) {
-      emit(
-        BoardingScannerReady(
-          tripId: current.tripId,
-          passengers: current.passengers,
-          isProcessing: current.isProcessing,
-        ),
-      );
-    }
-  }
 
   @override
   Future<void> close() async {

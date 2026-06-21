@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_data/src/models/driver_model.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 class MockRemoteDatasource extends Mock implements RemoteDatasource {}
@@ -26,7 +27,7 @@ void main() {
     group('getDriverById', () {
       test('returns Driver on success', () async {
         when(() => mockRemote.getDriverById('driver-1')).thenAnswer(
-          (_) async => {
+          (_) async => DriverModel.fromJson(const {
             'id': 'driver-1',
             'user_id': 'user-1',
             'vehicle_model': 'Toyota HiAce',
@@ -34,7 +35,7 @@ void main() {
             'capacity': 14,
             'is_verified': true,
             'rating': 4.5,
-          },
+          }),
         );
 
         final result = await repository.getDriverById(driverId);
@@ -78,13 +79,13 @@ void main() {
 
       test('uses defaults for missing optional fields', () async {
         when(() => mockRemote.getDriverById('driver-1')).thenAnswer(
-          (_) async => {
+          (_) async => DriverModel.fromJson(const {
             'id': 'driver-1',
             'user_id': 'user-1',
             'vehicle_model': 'Bus',
             'vehicle_plate': 'X 1',
             'capacity': 10,
-          },
+          }),
         );
 
         final result = await repository.getDriverById(driverId);
@@ -102,15 +103,15 @@ void main() {
 
     group('getDriverProfile', () {
       test('returns User on success', () async {
-        when(() => mockRemote.fetchCurrentProfile('user-1')).thenAnswer(
-          (_) async => {
+        when(() => mockRemote.fetchPublicProfile('user-1')).thenAnswer(
+          (_) async => UserModel.fromJson(const {
             'id': 'user-1',
             'email': 'driver@example.com',
             'full_name': 'Ahmed Driver',
             'phone': '07700000000',
             'role': 'driver',
             'created_at': '2026-06-01T00:00:00Z',
-          },
+          }),
         );
 
         final result =
@@ -127,7 +128,7 @@ void main() {
       });
 
       test('returns NotFoundFailure when profile is null', () async {
-        when(() => mockRemote.fetchCurrentProfile('user-1'))
+        when(() => mockRemote.fetchPublicProfile('user-1'))
             .thenAnswer((_) async => null);
 
         final result =

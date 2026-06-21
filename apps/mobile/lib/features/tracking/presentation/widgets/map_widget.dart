@@ -341,7 +341,7 @@ class _SayrMapState extends State<SayrMap> {
     }
   }
 
-  Map<String, dynamic> _buildGeoJson(List<SayrMarker> markers) {
+  Map<String, Object?> _buildGeoJson(List<SayrMarker> markers) {
     return {
       'type': 'FeatureCollection',
       'features': markers.map((marker) {

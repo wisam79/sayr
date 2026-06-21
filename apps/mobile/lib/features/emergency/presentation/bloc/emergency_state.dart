@@ -20,6 +20,8 @@ sealed class EmergencyState with _$EmergencyState {
   }) = EmergencyActive;
 
   /// The last operation failed.
-  const factory EmergencyState.failed({required Failure failure}) =
-      EmergencyFailed;
+  const factory EmergencyState.failed({
+    required Failure failure,
+    EmergencyReport? activeReport,
+  }) = EmergencyFailed;
 }

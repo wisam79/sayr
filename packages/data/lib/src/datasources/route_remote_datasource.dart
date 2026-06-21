@@ -1,20 +1,21 @@
 import 'package:injectable/injectable.dart';
+import 'package:sayr_data/src/models/route_model.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 /// Bus route CRUD + search + driver route list.
 abstract class RouteRemoteDatasource {
   /// Returns all active routes.
-  Future<List<Map<String, dynamic>>> getActiveRoutes();
+  Future<List<RouteModel>> getActiveRoutes();
 
   /// Returns the active routes owned by the current driver.
-  Future<List<Map<String, dynamic>>> getMyDriverRoutes();
+  Future<List<RouteModel>> getMyDriverRoutes();
 
   /// Fetches a single route by id.
-  Future<Map<String, dynamic>?> getRouteById(String id);
+  Future<RouteModel?> getRouteById(String id);
 
   /// Searches active routes by title/start/end location substring.
-  Future<List<Map<String, dynamic>>> searchRoutes(String query);
+  Future<List<RouteModel>> searchRoutes(String query);
 }
 
 @LazySingleton(as: RouteRemoteDatasource)
@@ -27,17 +28,17 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
   supabase.User? get _currentUser => _supabase.currentUser;
 
   @override
-  Future<List<Map<String, dynamic>>> getActiveRoutes() async {
-    final response = await _client
+  Future<List<RouteModel>> getActiveRoutes() async {
+    return await _client
         .from('routes')
         .select()
         .eq('is_active', true)
-        .order('title');
-    return List<Map<String, dynamic>>.from(response as Iterable);
+        .order('title')
+        .withConverter((data) => data.map((e) => RouteModel.fromJson(e)).toList());
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getMyDriverRoutes() async {
+  Future<List<RouteModel>> getMyDriverRoutes() async {
     final userId = _currentUser?.id;
     if (userId == null) {
       throw const supabase.AuthException('Not authenticated');
@@ -50,32 +51,34 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
         .maybeSingle();
     final driverId = driver?['id'] as String?;
     if (driverId == null) {
-      return <Map<String, dynamic>>[];
+      return <RouteModel>[];
     }
 
-    final response = await _client
+    return await _client
         .from('routes')
         .select()
         .eq('driver_id', driverId)
         .eq('is_active', true)
-        .order('title');
-    return List<Map<String, dynamic>>.from(response as Iterable);
+        .order('title')
+        .withConverter((data) => data.map((e) => RouteModel.fromJson(e)).toList());
   }
 
   @override
-  Future<Map<String, dynamic>?> getRouteById(String id) =>
-      _client.from('routes').select().eq('id', id).maybeSingle();
+  Future<RouteModel?> getRouteById(String id) async {
+    final data = await _client.from('routes').select().eq('id', id).maybeSingle();
+    return data != null ? RouteModel.fromJson(data) : null;
+  }
 
   @override
-  Future<List<Map<String, dynamic>>> searchRoutes(String query) async {
-    final response = await _client
+  Future<List<RouteModel>> searchRoutes(String query) async {
+    return await _client
         .from('routes')
         .select()
         .eq('is_active', true)
         .or(
           'title.ilike.%$query%,start_location.ilike.%$query%,end_location.ilike.%$query%',
         )
-        .order('title');
-    return List<Map<String, dynamic>>.from(response as Iterable);
+        .order('title')
+        .withConverter((data) => data.map((e) => RouteModel.fromJson(e)).toList());
   }
 }

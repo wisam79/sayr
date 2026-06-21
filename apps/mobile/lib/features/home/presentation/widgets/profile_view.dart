@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/locale_cubit.dart';
@@ -19,6 +20,8 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+
+part 'profile_view.freezed.dart';
 
 /// Tab displaying user profile and application settings.
 class ProfileTab extends StatelessWidget {
@@ -47,16 +50,18 @@ class _ProfileView extends StatefulWidget {
   State<_ProfileView> createState() => _ProfileViewState();
 }
 
-class _BleSettingsState {
-  const _BleSettingsState({required this.enabled, required this.loading});
-  final bool enabled;
-  final bool loading;
+@freezed
+abstract class BleSettingsState with _$BleSettingsState {
+  const factory BleSettingsState({
+    required bool enabled,
+    required bool loading,
+  }) = _BleSettingsState;
 }
 
 class _ProfileViewState extends State<_ProfileView>
     with TickerProviderStateMixin {
-  final ValueNotifier<_BleSettingsState> _bleSettingsNotifier =
-      ValueNotifier(const _BleSettingsState(enabled: false, loading: true));
+  final ValueNotifier<BleSettingsState> _bleSettingsNotifier =
+      ValueNotifier(const BleSettingsState(enabled: false, loading: true));
   late final AnimationController _avatarRingController;
 
   @override
@@ -91,7 +96,7 @@ class _ProfileViewState extends State<_ProfileView>
   Future<void> _loadBlePreference() async {
     final box = await Hive.openBox<String>('settings_box');
     if (mounted) {
-      _bleSettingsNotifier.value = _BleSettingsState(
+      _bleSettingsNotifier.value = BleSettingsState(
         enabled: box.get('ble_proximity_enabled') == 'true',
         loading: false,
       );
@@ -102,7 +107,7 @@ class _ProfileViewState extends State<_ProfileView>
     final box = await Hive.openBox<String>('settings_box');
     await box.put('ble_proximity_enabled', value.toString());
     if (mounted) {
-      _bleSettingsNotifier.value = _BleSettingsState(
+      _bleSettingsNotifier.value = BleSettingsState(
         enabled: value,
         loading: false,
       );
@@ -489,7 +494,7 @@ class _ProfileViewState extends State<_ProfileView>
                     ? AppColors.borderDark.withValues(alpha: 0.3)
                     : AppColors.divider.withValues(alpha: 0.5),
               ),
-              ValueListenableBuilder<_BleSettingsState>(
+              ValueListenableBuilder<BleSettingsState>(
                 valueListenable: _bleSettingsNotifier,
                 builder: (context, bleState, _) {
                   return _SettingsTile(

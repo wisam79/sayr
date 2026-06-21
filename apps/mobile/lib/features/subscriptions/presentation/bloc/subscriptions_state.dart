@@ -43,13 +43,23 @@ class SubscriptionsLoaded extends SubscriptionsState {
 /// State when a subscription operation fails.
 class SubscriptionsError extends SubscriptionsState {
   /// Constructor for [SubscriptionsError].
-  const SubscriptionsError(this.failure);
+  const SubscriptionsError(
+    this.failure, [
+    this.subscriptions = const [],
+    this.pendingPayments = const [],
+  ]);
 
   /// The failure details.
   final Failure failure;
 
+  /// The cached/loaded subscriptions.
+  final List<Subscription> subscriptions;
+
+  /// The cached/loaded pending payments.
+  final List<PaymentInfo> pendingPayments;
+
   @override
-  List<Object?> get props => [failure];
+  List<Object?> get props => [failure, subscriptions, pendingPayments];
 }
 
 /// State when a license code activation is in progress.

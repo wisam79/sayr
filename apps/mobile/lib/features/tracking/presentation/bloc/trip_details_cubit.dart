@@ -28,7 +28,7 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
     final current = state;
     if (current is TripDetailsLoaded &&
         current.route.id == routeId &&
-        current.tripRating != null) {
+        current.driver?.id == driverId) {
       return;
     }
 
@@ -51,8 +51,10 @@ class TripDetailsCubit extends Cubit<TripDetailsState> {
     if (isClosed) return;
 
     if (routeResult.isLeft()) {
-      final msg = routeResult.fold((f) => f.message, (_) => null) ?? '';
-      emit(TripDetailsError(msg));
+      routeResult.fold(
+        (failure) => emit(TripDetailsError(failure)),
+        (_) {},
+      );
       return;
     }
 
@@ -172,8 +174,8 @@ class TripDetailsLoaded extends TripDetailsState {
 /// State when loading trip details fails.
 class TripDetailsError extends TripDetailsState {
   /// Constructor for [TripDetailsError].
-  const TripDetailsError(this.message);
+  const TripDetailsError(this.failure);
 
-  /// The error message.
-  final String message;
+  /// The failure object.
+  final Failure failure;
 }

@@ -50,9 +50,10 @@ export const AppConfig: React.FC = () => {
         setTermsUrl(data.terms_url || '');
         setPrivacyUrl(data.privacy_url || '');
       }
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'فشل في تحميل إعدادات التطبيق العامة.';
       showToast('فشل في تحميل إعدادات التطبيق العامة', 'error');
-      setError('فشل في تحميل إعدادات التطبيق العامة.');
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -81,8 +82,9 @@ export const AppConfig: React.FC = () => {
 
       if (updateError) throw updateError;
       showToast('تم حفظ إعدادات النظام وتحديثها بنجاح!', 'success');
-    } catch (err: any) {
-      showToast(err.message || 'فشل في حفظ إعدادات المنصة', 'error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'فشل في حفظ إعدادات المنصة';
+      showToast(message, 'error');
     } finally {
       setSaving(false);
     }

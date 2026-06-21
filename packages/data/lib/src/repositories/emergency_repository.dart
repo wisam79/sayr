@@ -67,8 +67,12 @@ class EmergencyRepositoryImpl extends BaseRepository
       // Map latitude and longitude properly for DTO
       final map = {
         ...response,
-        'latitude': (response['latitude'] as num).toDouble(),
-        'longitude': (response['longitude'] as num).toDouble(),
+        'latitude': response['latitude'] != null
+            ? (response['latitude'] as num).toDouble()
+            : null,
+        'longitude': response['longitude'] != null
+            ? (response['longitude'] as num).toDouble()
+            : null,
       };
 
       return EmergencyReportModel.fromJson(map).toEntity();

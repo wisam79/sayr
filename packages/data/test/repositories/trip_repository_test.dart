@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_data/src/models/trip_model.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -37,11 +38,12 @@ void main() {
       'status': 'scheduled',
       'scheduled_at': '2026-06-04T08:00:00Z',
     };
+    final mockTrip = TripModel.fromJson(mockTripJson);
 
     group('getActiveTrips', () {
       test('returns List<Trip> on success', () async {
         when(() => mockRemote.getActiveTrips())
-            .thenAnswer((_) async => [mockTripJson]);
+            .thenAnswer((_) async => [mockTrip]);
 
         final result = await repository.getActiveTrips();
 
@@ -72,7 +74,7 @@ void main() {
 
     group('watchTrip', () {
       test('returns Stream of Trip', () async {
-        final controller = StreamController<List<Map<String, dynamic>>>();
+        final controller = StreamController<List<TripModel>>();
         when(() => mockRemote.watchTrip('trip-123'))
             .thenAnswer((_) => controller.stream);
 
@@ -87,13 +89,13 @@ void main() {
           ]),
         );
 
-        controller.add([mockTripJson]);
+        controller.add([mockTrip]);
 
         await controller.close();
       });
 
       test('throws NotFoundFailure when watch stream is empty', () async {
-        final controller = StreamController<List<Map<String, dynamic>>>();
+        final controller = StreamController<List<TripModel>>();
         when(() => mockRemote.watchTrip('trip-123'))
             .thenAnswer((_) => controller.stream);
 
@@ -116,7 +118,7 @@ void main() {
           ),
         ).thenAnswer((_) async => 'trip-123');
         when(() => mockRemote.getTripById('trip-123'))
-            .thenAnswer((_) async => mockTripJson);
+            .thenAnswer((_) async => mockTrip);
 
         final result = await repository.createTrip(
           routeId: const RouteId('route-456'),
@@ -157,7 +159,7 @@ void main() {
     group('getById', () {
       test('returns Trip when found', () async {
         when(() => mockRemote.getTripById('trip-123'))
-            .thenAnswer((_) async => mockTripJson);
+            .thenAnswer((_) async => mockTrip);
 
         final result = await repository.getById(const TripId('trip-123'));
 
@@ -200,7 +202,7 @@ void main() {
           () async {
         // 1. Mock getById to return current trip in 'scheduled' state
         when(() => mockRemote.getTripById('trip-123'))
-            .thenAnswer((_) async => mockTripJson);
+            .thenAnswer((_) async => mockTrip);
 
         // 2. Mock updateTripStatus to transition from scheduled -> driver_waiting via startWaiting event
         final updatedTripJson = {
@@ -215,7 +217,7 @@ void main() {
             lat: any(named: 'lat'),
             lng: any(named: 'lng'),
           ),
-        ).thenAnswer((_) async => updatedTripJson);
+        ).thenAnswer((_) async => TripModel.fromJson(updatedTripJson));
 
         final result = await repository.updateStatus(
           tripId: const TripId('trip-123'),
@@ -243,7 +245,7 @@ void main() {
           () async {
         // scheduled -> complete is invalid (can't go scheduled to completed directly)
         when(() => mockRemote.getTripById('trip-123'))
-            .thenAnswer((_) async => mockTripJson);
+            .thenAnswer((_) async => mockTrip);
 
         final result = await repository.updateStatus(
           tripId: const TripId('trip-123'),
@@ -278,7 +280,7 @@ void main() {
           'falls back offline and returns Right(trip) when updateTripStatus throws exception',
           () async {
         when(() => mockRemote.getTripById('trip-123'))
-            .thenAnswer((_) async => mockTripJson);
+            .thenAnswer((_) async => mockTrip);
         when(() => mockLocal.getCachedTrips()).thenAnswer((_) async => []);
         when(() => mockLocal.cacheTrips(any())).thenAnswer((_) async {});
 

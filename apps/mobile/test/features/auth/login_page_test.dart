@@ -24,6 +24,8 @@ void main() {
 
   setUp(() {
     mockRepo = MockAuthRepository();
+    when(() => mockRepo.authStateChanges)
+        .thenAnswer((_) => const Stream<AuthStatus>.empty());
     authBloc = AuthBloc(authRepository: mockRepo);
   });
 

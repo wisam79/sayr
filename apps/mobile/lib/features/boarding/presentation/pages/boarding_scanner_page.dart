@@ -82,6 +82,11 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
         ],
       ),
       body: BlocConsumer<BoardingScannerCubit, BoardingScannerState>(
+        listenWhen: (prev, curr) {
+          final prevScan = prev is BoardingScannerReady ? prev.lastScan : null;
+          final currScan = curr is BoardingScannerReady ? curr.lastScan : null;
+          return prevScan != currScan && currScan != null;
+        },
         listener: (context, state) {
           if (state is BoardingScannerReady && state.lastScan != null) {
             final scan = state.lastScan!;
@@ -100,11 +105,6 @@ class _BoardingScannerViewState extends State<_BoardingScannerView> {
                 scan.failure.toLocalizedString(context),
               );
             }
-            Future.delayed(const Duration(seconds: 2), () {
-              if (context.mounted) {
-                context.read<BoardingScannerCubit>().clearLastScan();
-              }
-            });
           }
         },
         builder: (context, state) {

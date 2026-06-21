@@ -44,8 +44,8 @@ class ResponsiveLayout extends StatelessWidget {
     T? tablet,
     T? desktop,
   }) {
-    if (isDesktop(context) && desktop != null) return desktop;
-    if (isTablet(context) && tablet != null) return tablet;
+    if (isDesktop(context)) return desktop ?? tablet ?? mobile;
+    if (isTablet(context)) return tablet ?? mobile;
     return mobile;
   }
 

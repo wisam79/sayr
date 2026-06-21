@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
 
@@ -20,9 +22,25 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthPasswordUpdateRequested>(_onPasswordUpdateRequested);
     on<AuthLogoutRequested>(_onLogoutRequested);
     on<AuthUserChanged>(_onUserChanged);
+
+    _authStateSubscription = _authRepository.authStateChanges.listen((status) {
+      if (status == AuthStatus.unauthenticated) {
+        add(const AuthUserChanged(null));
+      } else if (status == AuthStatus.authenticated) {
+        // If authenticated externally, trigger check to load profile correctly
+        add(const AuthCheckRequested());
+      }
+    });
   }
 
   final AuthRepository _authRepository;
+  late final StreamSubscription<AuthStatus> _authStateSubscription;
+
+  @override
+  Future<void> close() {
+    _authStateSubscription.cancel();
+    return super.close();
+  }
 
   Future<void> _onCheckRequested(
     AuthCheckRequested event,

@@ -117,7 +117,7 @@ export const ActiveTripsTracker: React.FC = () => {
       });
 
       setTrips(formatted);
-    } catch (err: any) {
+    } catch (err) {
       showToast('فشل في جلب الرحلات النشطة', 'error');
     } finally {
       setLoading(false);
@@ -389,8 +389,9 @@ export const ActiveTripsTracker: React.FC = () => {
       // Remove trip locally
       setTrips(prev => prev.filter(t => t.id !== cancelingTripId));
       setCancelOpen(false);
-    } catch (err: any) {
-      showToast('فشل في إلغاء الرحلة: ' + err.message, 'error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'فشل غير معروف';
+      showToast('فشل في إلغاء الرحلة: ' + message, 'error');
     } finally {
       setCancelLoading(false);
     }

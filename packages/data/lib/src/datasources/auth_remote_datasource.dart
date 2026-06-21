@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:sayr_data/src/models/user_model.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -37,7 +38,13 @@ abstract class AuthRemoteDatasource {
   Future<void> signOut();
 
   /// Fetches the current user's profile row.
-  Future<Map<String, dynamic>?> fetchCurrentProfile(String userId);
+  Future<UserModel?> fetchCurrentProfile(String userId);
+
+  /// Fetches a user's safe/public profile details from the profiles_public view.
+  Future<UserModel?> fetchPublicProfile(String userId);
+
+  /// Fetches multiple users' safe/public profiles from the profiles_public view.
+  Future<List<UserModel>> getPublicProfiles(List<String> userIds);
 
   /// Updates the current user's profile phone and institution.
   Future<void> updateProfile({
@@ -99,8 +106,26 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<void> signOut() => _supabase.signOut();
 
   @override
-  Future<Map<String, dynamic>?> fetchCurrentProfile(String userId) =>
-      _client.from('profiles').select().eq('id', userId).maybeSingle();
+  Future<UserModel?> fetchCurrentProfile(String userId) async {
+    final data = await _client.from('profiles').select().eq('id', userId).maybeSingle();
+    return data != null ? UserModel.fromJson(data) : null;
+  }
+
+  @override
+  Future<UserModel?> fetchPublicProfile(String userId) async {
+    final data = await _client.from('profiles_public').select().eq('id', userId).maybeSingle();
+    return data != null ? UserModel.fromJson(data) : null;
+  }
+
+  @override
+  Future<List<UserModel>> getPublicProfiles(List<String> userIds) async {
+    if (userIds.isEmpty) return const [];
+    return await _client
+        .from('profiles_public')
+        .select('id, full_name, avatar_url')
+        .inFilter('id', userIds)
+        .withConverter((data) => data.map((e) => UserModel.fromJson(e)).toList());
+  }
 
   @override
   Future<void> updateProfile({

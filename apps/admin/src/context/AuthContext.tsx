@@ -28,9 +28,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           setLoading(false);
         }
-      } catch (err: any) {
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'فشل الاتصال بخدمة التحقق';
         console.error('Error initializing auth session:', err);
-        setError(err.message || 'فشل الاتصال بخدمة التحقق');
+        setError(message);
         setLoading(false);
       }
     };
@@ -75,9 +76,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setUser(currentUser);
       setRole(profile.role);
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'فشل التحقق من صلاحيات الحساب';
       console.error('RBAC validation failed:', err);
-      setError(err.message || 'فشل التحقق من صلاحيات الحساب');
+      setError(message);
       setUser(null);
       setRole(null);
     } finally {

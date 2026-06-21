@@ -35,6 +35,7 @@ class BoardingQrReady extends BoardingQrState {
     this.isSubmittingProximity = false,
     this.proximityRecord,
     this.refreshFailure,
+    this.proximityFailure,
   });
 
   final TripId tripId;
@@ -45,6 +46,7 @@ class BoardingQrReady extends BoardingQrState {
   final bool isSubmittingProximity;
   final BoardingRecord? proximityRecord;
   final Failure? refreshFailure;
+  final Failure? proximityFailure;
 
   BoardingQrReady copyWith({
     TripId? tripId,
@@ -57,6 +59,8 @@ class BoardingQrReady extends BoardingQrState {
     bool clearProximityOtp = false,
     Failure? refreshFailure,
     bool clearRefreshFailure = false,
+    Failure? proximityFailure,
+    bool clearProximityFailure = false,
   }) {
     return BoardingQrReady(
       tripId: tripId ?? this.tripId,
@@ -70,6 +74,7 @@ class BoardingQrReady extends BoardingQrState {
       proximityRecord: proximityRecord ?? this.proximityRecord,
       refreshFailure:
           clearRefreshFailure ? null : (refreshFailure ?? this.refreshFailure),
+      proximityFailure: clearProximityFailure ? null : (proximityFailure ?? this.proximityFailure),
     );
   }
 }
@@ -148,7 +153,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final current = state;
     if (current is! BoardingQrReady || current.proximityOtp == null) return;
 
-    emit(current.copyWith(isSubmittingProximity: true));
+    emit(current.copyWith(isSubmittingProximity: true, clearProximityFailure: true));
 
     final result = await _boardingRepository.validateBoardingViaProximity(
       tripId: current.tripId,
@@ -157,17 +162,21 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     );
 
     if (isClosed) return;
+    final latestState = state;
+    if (latestState is! BoardingQrReady) return;
+
     result.fold(
       (failure) {
         emit(
-          current.copyWith(
+          latestState.copyWith(
             isSubmittingProximity: false,
+            proximityFailure: failure,
           ),
         );
       },
       (record) {
         emit(
-          current.copyWith(
+          latestState.copyWith(
             isSubmittingProximity: false,
             proximityRecord: record,
           ),

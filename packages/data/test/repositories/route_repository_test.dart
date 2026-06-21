@@ -17,6 +17,8 @@ void main() {
   setUp(() {
     mockRemote = MockRemoteDatasource();
     mockLocal = MockLocalDatasource();
+    when(() => mockLocal.cacheRoutes(any())).thenAnswer((_) async => {});
+    when(() => mockLocal.getCachedRoutes()).thenAnswer((_) async => <Route>[]);
     repository = RouteRepositoryImpl(
       remoteDatasource: mockRemote,
       localDatasource: mockLocal,
@@ -36,11 +38,12 @@ void main() {
       'available_seats': 10,
       'is_active': true,
     };
+    final mockRoute = RouteModel.fromJson(mockRouteJson);
 
     group('getActiveRoutes', () {
       test('returns List<Route> on success', () async {
         when(() => mockRemote.getActiveRoutes())
-            .thenAnswer((_) async => [mockRouteJson]);
+            .thenAnswer((_) async => [mockRoute]);
 
         final result = await repository.getActiveRoutes();
 
@@ -72,7 +75,7 @@ void main() {
     group('getById', () {
       test('returns Route when found', () async {
         when(() => mockRemote.getRouteById('route-123'))
-            .thenAnswer((_) async => mockRouteJson);
+            .thenAnswer((_) async => mockRoute);
 
         final result = await repository.getById(const RouteId('route-123'));
 
@@ -116,7 +119,7 @@ void main() {
     group('search', () {
       test('returns List<Route> matching query', () async {
         when(() => mockRemote.searchRoutes('Baghdad'))
-            .thenAnswer((_) async => [mockRouteJson]);
+            .thenAnswer((_) async => [mockRoute]);
 
         final result = await repository.search('Baghdad');
 

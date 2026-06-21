@@ -144,15 +144,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     final current = _currentList();
     final updated = current
         .map(
-          (n) => AppNotification(
-            id: n.id,
-            userId: n.userId,
-            title: n.title,
-            body: n.body,
-            isRead: true,
-            createdAt: n.createdAt,
-            data: n.data,
-          ),
+          (n) => n.copyWith(isRead: true),
         )
         .toList();
 

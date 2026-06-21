@@ -153,8 +153,9 @@ export const PayoutsManager: React.FC = () => {
       );
       // Close modal
       closeModal();
-    } catch (err: any) {
-      showToast(err.message || 'حدث خطأ أثناء معالجة الطلب', 'error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ أثناء معالجة الطلب';
+      showToast(message, 'error');
     } finally {
       setActionLoadingId(null);
     }

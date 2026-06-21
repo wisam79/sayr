@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_data/src/models/subscription_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import 'package:talker_flutter/talker_flutter.dart';
@@ -39,11 +40,12 @@ void main() {
       'payment_method': 'zaincash',
       'status': 'active',
     };
+    final mockSub = SubscriptionModel.fromJson(mockSubJson);
 
     group('getMySubscriptions', () {
       test('returns List<Subscription> on success', () async {
         when(() => mockRemote.getMySubscriptions('student-123'))
-            .thenAnswer((_) async => [mockSubJson]);
+            .thenAnswer((_) async => [mockSub]);
 
         final result = await repository.getMySubscriptions();
 
@@ -87,17 +89,27 @@ void main() {
     group('getActiveSubscriptions', () {
       test('returns active subscriptions that are not expired', () async {
         final mockSubsList = [
-          mockSubJson,
-          {
-            ...mockSubJson,
+          mockSub,
+          SubscriptionModel.fromJson(const {
             'id': 'sub-expired',
+            'student_id': 'student-123',
+            'route_id': 'route-456',
+            'start_date': '2026-06-01T00:00:00Z',
             'end_date': '2026-05-01T00:00:00Z', // Expired
-          },
-          {
-            ...mockSubJson,
+            'is_active': true,
+            'payment_method': 'zaincash',
+            'status': 'active',
+          }),
+          SubscriptionModel.fromJson(const {
             'id': 'sub-inactive',
+            'student_id': 'student-123',
+            'route_id': 'route-456',
+            'start_date': '2026-06-01T00:00:00Z',
+            'end_date': '2026-06-30T00:00:00Z',
+            'is_active': true,
+            'payment_method': 'zaincash',
             'status': 'cancelled', // Inactive
-          }
+          }),
         ];
 
         when(() => mockRemote.getMySubscriptions('student-123'))

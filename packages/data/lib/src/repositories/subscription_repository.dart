@@ -2,7 +2,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
-import 'package:sayr_data/src/models/subscription_model.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of SubscriptionRepository using Remote data source.
@@ -24,9 +23,7 @@ class SubscriptionRepositoryImpl extends BaseRepository
       }
 
       final response = await _remoteDatasource.getMySubscriptions(user.id);
-      return response
-          .map((json) => SubscriptionModel.fromJson(json).toEntity())
-          .toList();
+      return response.map((model) => model.toEntity()).toList();
     });
   }
 

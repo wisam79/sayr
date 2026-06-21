@@ -75,8 +75,8 @@ abstract class BaseRepository {
     final code = e.code;
 
     if (code == null) {
-      return const ServerFailure(
-        message: 'An unexpected database error occurred',
+      return ServerFailure(
+        message: e.message,
       );
     }
 
@@ -103,7 +103,7 @@ abstract class BaseRepository {
           errors: ['A required field is missing.'],
         ),
       _ =>
-        const ServerFailure(message: 'An unexpected database error occurred'),
+        ServerFailure(message: e.message),
     };
   }
 }

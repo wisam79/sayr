@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/auth_remote_datasource.dart';
+import 'package:sayr_data/src/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../helpers/mock_supabase.dart';
@@ -130,8 +132,17 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<Map<String, dynamic>?>();
 
-      mockTransformBuilder
-          .completeWith(Future.value({'id': 'user1', 'phone': '123'}));
+      const expectedUser = UserModel(
+        id: 'user1',
+        role: UserRole.student,
+        phone: '123',
+      );
+
+      mockTransformBuilder.completeWith(Future.value({
+        'id': 'user1',
+        'role': 'student',
+        'phone': '123',
+      }));
 
       when(() => mockClient.from('profiles'))
           .thenAnswer((_) => mockQueryBuilder);
@@ -143,7 +154,7 @@ void main() {
 
       final result = await datasource.fetchCurrentProfile('user1');
 
-      expect(result, equals({'id': 'user1', 'phone': '123'}));
+      expect(result, equals(expectedUser));
     });
 
     test('updateProfile executes correct supabase query', () async {

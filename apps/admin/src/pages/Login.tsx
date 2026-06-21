@@ -52,9 +52,10 @@ export const Login: React.FC = () => {
 
       // Redirect to Dashboard on success
       navigate('/');
-    } catch (err: any) {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع أثناء تسجيل الدخول';
       console.error('Login error:', err);
-      setErrorMessage(err.message || 'حدث خطأ غير متوقع أثناء تسجيل الدخول');
+      setErrorMessage(message);
     } finally {
       setLoading(false);
     }

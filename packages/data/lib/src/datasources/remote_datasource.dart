@@ -9,6 +9,12 @@ import 'package:sayr_data/src/datasources/notification_remote_datasource.dart';
 import 'package:sayr_data/src/datasources/route_remote_datasource.dart';
 import 'package:sayr_data/src/datasources/subscription_remote_datasource.dart';
 import 'package:sayr_data/src/datasources/trip_remote_datasource.dart';
+import 'package:sayr_data/src/models/driver_model.dart';
+import 'package:sayr_data/src/models/rating_model.dart';
+import 'package:sayr_data/src/models/route_model.dart';
+import 'package:sayr_data/src/models/subscription_model.dart';
+import 'package:sayr_data/src/models/trip_model.dart';
+import 'package:sayr_data/src/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 /// Aggregate remote datasource facade.
@@ -35,7 +41,10 @@ abstract class RemoteDatasource {
   Future<void> sendPasswordResetEmail(String email);
   Future<void> updatePassword(String password);
   Future<void> signOut();
-  Future<Map<String, dynamic>?> fetchCurrentProfile(String userId);
+  // Profiles & Users
+  Future<UserModel?> fetchCurrentProfile(String userId);
+  Future<UserModel?> fetchPublicProfile(String userId);
+  Future<List<UserModel>> getPublicProfiles(List<String> userIds);
   Future<void> updateProfile({
     required String phone,
     required String institutionId,
@@ -112,26 +121,26 @@ abstract class RemoteDatasource {
   Future<void> deactivatePushTokens();
 
   // Routes
-  Future<List<Map<String, dynamic>>> getActiveRoutes();
-  Future<List<Map<String, dynamic>>> getMyDriverRoutes();
-  Future<Map<String, dynamic>?> getRouteById(String id);
-  Future<List<Map<String, dynamic>>> searchRoutes(String query);
+  Future<List<RouteModel>> getActiveRoutes();
+  Future<List<RouteModel>> getMyDriverRoutes();
+  Future<RouteModel?> getRouteById(String id);
+  Future<List<RouteModel>> searchRoutes(String query);
 
   // Subscriptions
-  Future<List<Map<String, dynamic>>> getMySubscriptions(String studentId);
+  Future<List<SubscriptionModel>> getMySubscriptions(String studentId);
   Future<void> cancelSubscription(String subscriptionId);
   Future<String> activateLicense(String code);
   Future<Map<String, dynamic>> getLicenseDetails(String code);
 
   // Trips
-  Future<List<Map<String, dynamic>>> getActiveTrips();
+  Future<List<TripModel>> getActiveTrips();
   Future<String> createTrip({
     required String routeId,
     required DateTime scheduledAt,
   });
-  Stream<List<Map<String, dynamic>>> watchTrip(String tripId);
-  Future<Map<String, dynamic>?> getTripById(String id);
-  Future<Map<String, dynamic>> updateTripStatus({
+  Stream<List<TripModel>> watchTrip(String tripId);
+  Future<TripModel?> getTripById(String id);
+  Future<TripModel> updateTripStatus({
     required String tripId,
     required String newStatus,
     double? lat,
@@ -156,15 +165,15 @@ abstract class RemoteDatasource {
   });
   Future<Map<String, dynamic>?> getPaymentStatus(String paymentId);
   Future<List<Map<String, dynamic>>> getPendingPayments();
-  Future<Map<String, dynamic>?> getDriverById(String driverId);
-  Future<Map<String, dynamic>> submitRating({
+  Future<DriverModel?> getDriverById(String driverId);
+  Future<RatingModel> submitRating({
     required String tripId,
     required String driverId,
     required String studentId,
     required int rating,
     String? comment,
   });
-  Future<Map<String, dynamic>?> getTripRating({
+  Future<RatingModel?> getTripRating({
     required String tripId,
     required String studentId,
   });
@@ -222,7 +231,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   final TripRemoteDatasource _trips;
   final BoardingRemoteDatasource _boarding;
 
-  // ---- Auth ---------------------------------------------------------------
+  // ---- Auth & Profiles ----------------------------------------------------
 
   @override
   supabase.User? get currentUser => _auth.currentUser;
@@ -266,8 +275,16 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   Future<void> signOut() => _auth.signOut();
 
   @override
-  Future<Map<String, dynamic>?> fetchCurrentProfile(String userId) =>
+  Future<UserModel?> fetchCurrentProfile(String userId) =>
       _auth.fetchCurrentProfile(userId);
+
+  @override
+  Future<UserModel?> fetchPublicProfile(String userId) =>
+      _auth.fetchPublicProfile(userId);
+
+  @override
+  Future<List<UserModel>> getPublicProfiles(List<String> userIds) =>
+      _auth.getPublicProfiles(userIds);
 
   @override
   Future<void> updateProfile({
@@ -441,25 +458,25 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   // ---- Routes -------------------------------------------------------------
 
   @override
-  Future<List<Map<String, dynamic>>> getActiveRoutes() =>
+  Future<List<RouteModel>> getActiveRoutes() =>
       _routes.getActiveRoutes();
 
   @override
-  Future<List<Map<String, dynamic>>> getMyDriverRoutes() =>
+  Future<List<RouteModel>> getMyDriverRoutes() =>
       _routes.getMyDriverRoutes();
 
   @override
-  Future<Map<String, dynamic>?> getRouteById(String id) =>
+  Future<RouteModel?> getRouteById(String id) =>
       _routes.getRouteById(id);
 
   @override
-  Future<List<Map<String, dynamic>>> searchRoutes(String query) =>
+  Future<List<RouteModel>> searchRoutes(String query) =>
       _routes.searchRoutes(query);
 
   // ---- Subscriptions ------------------------------------------------------
 
   @override
-  Future<List<Map<String, dynamic>>> getMySubscriptions(String studentId) =>
+  Future<List<SubscriptionModel>> getMySubscriptions(String studentId) =>
       _subscriptions.getMySubscriptions(studentId);
 
   @override
@@ -477,7 +494,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   // ---- Trips --------------------------------------------------------------
 
   @override
-  Future<List<Map<String, dynamic>>> getActiveTrips() =>
+  Future<List<TripModel>> getActiveTrips() =>
       _trips.getActiveTrips();
 
   @override
@@ -488,15 +505,15 @@ class RemoteDatasourceImpl implements RemoteDatasource {
       _trips.createTrip(routeId: routeId, scheduledAt: scheduledAt);
 
   @override
-  Stream<List<Map<String, dynamic>>> watchTrip(String tripId) =>
+  Stream<List<TripModel>> watchTrip(String tripId) =>
       _trips.watchTrip(tripId);
 
   @override
-  Future<Map<String, dynamic>?> getTripById(String id) =>
+  Future<TripModel?> getTripById(String id) =>
       _trips.getTripById(id);
 
   @override
-  Future<Map<String, dynamic>> updateTripStatus({
+  Future<TripModel> updateTripStatus({
     required String tripId,
     required String newStatus,
     double? lat,
@@ -562,11 +579,11 @@ class RemoteDatasourceImpl implements RemoteDatasource {
       _trips.getPendingPayments();
 
   @override
-  Future<Map<String, dynamic>?> getDriverById(String driverId) =>
+  Future<DriverModel?> getDriverById(String driverId) =>
       _trips.getDriverById(driverId);
 
   @override
-  Future<Map<String, dynamic>> submitRating({
+  Future<RatingModel> submitRating({
     required String tripId,
     required String driverId,
     required String studentId,
@@ -582,7 +599,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
       );
 
   @override
-  Future<Map<String, dynamic>?> getTripRating({
+  Future<RatingModel?> getTripRating({
     required String tripId,
     required String studentId,
   }) =>

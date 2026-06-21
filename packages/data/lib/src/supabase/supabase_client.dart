@@ -1,7 +1,41 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logger/logger.dart';
 import 'package:sayr_data/src/supabase/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+
+/// Secure local storage adapter for Supabase.
+class SecureSupabaseStorage extends supabase.LocalStorage {
+  const SecureSupabaseStorage();
+
+  static const _storage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+  static const _kSupabaseSessionKey = 'supabase_session';
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<bool> hasAccessToken() async {
+    return await _storage.read(key: _kSupabaseSessionKey) != null;
+  }
+
+  @override
+  Future<String?> accessToken() async {
+    return _storage.read(key: _kSupabaseSessionKey);
+  }
+
+  @override
+  Future<void> persistSession(String persistSessionString) async {
+    await _storage.write(key: _kSupabaseSessionKey, value: persistSessionString);
+  }
+
+  @override
+  Future<void> removePersistedSession() async {
+    await _storage.delete(key: _kSupabaseSessionKey);
+  }
+}
 
 /// Wraps the Supabase client with Sayr-specific configuration.
 ///
@@ -42,6 +76,9 @@ class SayrSupabase {
       url: cfg.url,
       // ignore: deprecated_member_use
       anonKey: cfg.anonKey,
+      authOptions: const supabase.FlutterAuthClientOptions(
+        localStorage: SecureSupabaseStorage(),
+      ),
     );
 
     _client = supabase.Supabase.instance.client;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
@@ -8,6 +9,8 @@ import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+
+part 'edit_profile_dialog.freezed.dart';
 
 /// Dialog to edit user profile (phone + institution).
 class EditProfileDialog extends StatefulWidget {
@@ -21,27 +24,22 @@ class EditProfileDialog extends StatefulWidget {
   State<EditProfileDialog> createState() => _EditProfileDialogState();
 }
 
-class _EditProfileState {
-  const _EditProfileState({
-    required this.selectedInstitutionId,
-    required this.institutions,
-    required this.isLoading,
-    required this.isSaving,
-    this.errorMessage,
-  });
-  final String? selectedInstitutionId;
-  final List<({String id, String name, String city})> institutions;
-  final bool isLoading;
-  final bool isSaving;
-  final String? errorMessage;
+@freezed
+abstract class EditProfileState with _$EditProfileState {
+  const factory EditProfileState({
+    required List<({String id, String name, String city})> institutions,
+    required bool isLoading,
+    required bool isSaving,
+    String? selectedInstitutionId,
+    String? errorMessage,
+  }) = _EditProfileState;
 }
 
 class _EditProfileDialogState extends State<EditProfileDialog> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _phoneController;
-  final ValueNotifier<_EditProfileState> _stateNotifier = ValueNotifier(
-    const _EditProfileState(
-      selectedInstitutionId: null,
+  final ValueNotifier<EditProfileState> _stateNotifier = ValueNotifier(
+    const EditProfileState(
       institutions: [],
       isLoading: true,
       isSaving: false,
@@ -52,9 +50,9 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   void initState() {
     super.initState();
     _phoneController = TextEditingController(text: widget.user.phone ?? '');
-    _stateNotifier.value = _EditProfileState(
+    _stateNotifier.value = EditProfileState(
       selectedInstitutionId: widget.user.institutionId?.value,
-      institutions: [],
+      institutions: const [],
       isLoading: true,
       isSaving: false,
     );
@@ -72,7 +70,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     final result = await sl<core.AuthRepository>().getInstitutions();
     if (mounted) {
       result.fold(
-        (failure) => _stateNotifier.value = _EditProfileState(
+        (failure) => _stateNotifier.value = EditProfileState(
           selectedInstitutionId: _stateNotifier.value.selectedInstitutionId,
           institutions: const [],
           isLoading: false,
@@ -86,7 +84,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
           final selId = exists
               ? _stateNotifier.value.selectedInstitutionId
               : (list.isNotEmpty ? list.first.id : null);
-          _stateNotifier.value = _EditProfileState(
+          _stateNotifier.value = EditProfileState(
             selectedInstitutionId: selId,
             institutions: list,
             isLoading: false,
@@ -102,7 +100,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     final selectedId = _stateNotifier.value.selectedInstitutionId;
     if (selectedId == null) return;
 
-    _stateNotifier.value = _EditProfileState(
+    _stateNotifier.value = EditProfileState(
       selectedInstitutionId: selectedId,
       institutions: _stateNotifier.value.institutions,
       isLoading: false,
@@ -116,7 +114,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
     if (mounted) {
       result.fold(
-        (failure) => _stateNotifier.value = _EditProfileState(
+        (failure) => _stateNotifier.value = EditProfileState(
           selectedInstitutionId: selectedId,
           institutions: _stateNotifier.value.institutions,
           isLoading: false,
@@ -138,7 +136,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ValueListenableBuilder<_EditProfileState>(
+    return ValueListenableBuilder<EditProfileState>(
       valueListenable: _stateNotifier,
       builder: (context, state, _) {
         return AlertDialog(
@@ -185,7 +183,7 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                               )
                               .toList(),
                           onChanged: (val) {
-                            _stateNotifier.value = _EditProfileState(
+                            _stateNotifier.value = EditProfileState(
                               selectedInstitutionId: val,
                               institutions: _stateNotifier.value.institutions,
                               isLoading: false,

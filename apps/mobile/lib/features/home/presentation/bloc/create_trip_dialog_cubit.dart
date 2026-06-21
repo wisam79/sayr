@@ -1,30 +1,39 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart';
+
+part 'create_trip_dialog_cubit.freezed.dart';
 
 /// Manages the state of the create-trip dialog (form).
 class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
   /// Constructor for [CreateTripDialogCubit].
-  CreateTripDialogCubit({required RouteRepository routeRepository})
-      : _routeRepository = routeRepository,
+  CreateTripDialogCubit({
+    required RouteRepository routeRepository,
+    required TripRepository tripRepository,
+  })  : _routeRepository = routeRepository,
+        _tripRepository = tripRepository,
         super(const CreateTripDialogState());
 
   final RouteRepository _routeRepository;
+  final TripRepository _tripRepository;
 
   /// Loads the routes associated with the current driver.
   Future<void> loadRoutes() async {
-    emit(state.copyWith(loadingRoutes: true, clearError: true));
+    emit(state.copyWith(loadingRoutes: true, failure: null));
     final result = await _routeRepository.getMyDriverRoutes();
     if (isClosed) return;
     result.fold(
       (failure) => emit(
         state.copyWith(
           failure: failure,
+          loadingRoutes: false,
         ),
       ),
       (routes) => emit(
         state.copyWith(
           routes: routes,
           selectedRoute: routes.isNotEmpty ? routes.first : null,
+          loadingRoutes: false,
         ),
       ),
     );
@@ -40,17 +49,7 @@ class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
     emit(
       state.copyWith(
         scheduledAt: dateTime,
-        clearError: true,
-      ),
-    );
-  }
-
-  /// Sets the submission loading state.
-  void setSubmitting({required bool isSubmitting}) {
-    emit(
-      state.copyWith(
-        isSubmitting: isSubmitting,
-        clearError: true,
+        failure: null,
       ),
     );
   }
@@ -60,60 +59,62 @@ class CreateTripDialogCubit extends Cubit<CreateTripDialogState> {
     emit(
       state.copyWith(
         failure: failure,
+        isSubmitting: false,
       ),
+    );
+  }
+
+  /// Creates the trip using the repository.
+  Future<Trip?> createTrip() async {
+    final route = state.selectedRoute;
+    if (route == null) return null;
+
+    final scheduledAt =
+        state.scheduledAt ?? DateTime.now().add(const Duration(minutes: 10));
+
+    if (!scheduledAt.isAfter(DateTime.now())) {
+      setError(const ValidationFailure(message: 'trip_time_must_be_future'));
+      return null;
+    }
+
+    emit(state.copyWith(isSubmitting: true, failure: null));
+
+    final result = await _tripRepository.createTrip(
+      routeId: route.id,
+      scheduledAt: scheduledAt,
+    );
+
+    if (isClosed) return null;
+
+    return result.fold(
+      (failure) {
+        setError(failure);
+        return null;
+      },
+      (trip) {
+        emit(state.copyWith(isSubmitting: false));
+        return trip;
+      },
     );
   }
 }
 
 /// State for the [CreateTripDialogCubit].
-class CreateTripDialogState {
+@freezed
+abstract class CreateTripDialogState with _$CreateTripDialogState {
   /// Constructor for [CreateTripDialogState].
-  const CreateTripDialogState({
-    this.routes = const [],
-    this.selectedRoute,
-    this.scheduledAt,
-    this.isSubmitting = false,
-    this.loadingRoutes = true,
-    this.failure,
-  });
-
-  /// The list of available routes.
-  final List<Route> routes;
-
-  /// The currently selected route for the trip.
-  final Route? selectedRoute;
-
-  /// The scheduled date and time for the trip.
-  final DateTime? scheduledAt;
-
-  /// Whether the trip is currently being submitted to the server.
-  final bool isSubmitting;
-
-  /// Whether the routes are currently loading.
-  final bool loadingRoutes;
-
-  /// The failure if any occurred during the process.
-  final Failure? failure;
-
-  /// Creates a copy of the state with modified fields.
-  CreateTripDialogState copyWith({
-    List<Route>? routes,
+  const factory CreateTripDialogState({
+    /// The list of available routes.
+    @Default([]) List<Route> routes,
+    /// The currently selected route for the trip.
     Route? selectedRoute,
-    bool clearSelectedRoute = false,
+    /// The scheduled date and time for the trip.
     DateTime? scheduledAt,
-    bool isSubmitting = false,
-    bool loadingRoutes = false,
+    /// Whether the trip is currently being submitted to the server.
+    @Default(false) bool isSubmitting,
+    /// Whether the routes are currently loading.
+    @Default(true) bool loadingRoutes,
+    /// The failure if any occurred during the process.
     Failure? failure,
-    bool clearError = false,
-  }) {
-    return CreateTripDialogState(
-      routes: routes ?? this.routes,
-      selectedRoute:
-          clearSelectedRoute ? null : (selectedRoute ?? this.selectedRoute),
-      scheduledAt: scheduledAt ?? this.scheduledAt,
-      isSubmitting: isSubmitting,
-      loadingRoutes: loadingRoutes,
-      failure: clearError ? null : (failure ?? this.failure),
-    );
-  }
+  }) = _CreateTripDialogState;
 }

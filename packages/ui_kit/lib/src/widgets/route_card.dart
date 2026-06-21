@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:sayr_ui_kit/src/theme/app_colors.dart';
+import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
+import 'package:sayr_ui_kit/src/widgets/glass_card.dart';
 
 /// A card displaying bus route details.
 class RouteCard extends StatelessWidget {

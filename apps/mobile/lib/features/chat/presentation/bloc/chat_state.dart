@@ -20,6 +20,7 @@ sealed class ChatState with _$ChatState {
     required ConversationId conversationId,
     required List<Message> messages,
     @Default(false) bool isSending,
+    Failure? sendError,
   }) = ChatLoaded;
 
   const factory ChatState.error({required Failure failure}) = ChatError;

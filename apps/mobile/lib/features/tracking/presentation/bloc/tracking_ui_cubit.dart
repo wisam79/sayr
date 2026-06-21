@@ -215,7 +215,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
       final decoded = json.decode(geometryJson);
       if (decoded is! List) return [];
       return decoded
-          .whereType<List<dynamic>>()
+          .whereType<List<Object?>>()
           .map((list) {
             if (list.length < 2) return null;
             final first = list[0];

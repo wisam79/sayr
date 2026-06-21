@@ -155,7 +155,8 @@ class EmergencySosButton extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        final isActive = state is EmergencyActive;
+        final isActive = state is EmergencyActive ||
+            (state is EmergencyFailed && state.activeReport != null);
         final isSending = state is EmergencySending;
         return FloatingActionButton.extended(
           backgroundColor: AppColors.error,

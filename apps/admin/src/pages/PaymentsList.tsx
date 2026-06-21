@@ -117,8 +117,9 @@ export const PaymentsList: React.FC = () => {
       }));
 
       showToast('تم تأكيد الدفع وتفعيل ترخيص اشتراك الطالب بنجاح', 'success');
-    } catch (err: any) {
-      showToast(err.message || 'فشل في إتمام تأكيد الدفع', 'error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'فشل في إتمام تأكيد الدفع';
+      showToast(message, 'error');
     } finally {
       setActionLoadingId(null);
       setViewingPayment(null);

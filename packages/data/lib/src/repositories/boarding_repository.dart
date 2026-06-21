@@ -90,20 +90,49 @@ class BoardingRepositoryImpl extends BaseRepository
 
   @override
   Stream<List<BoardingRecord>> watchTripPassengers(TripId tripId) {
-    return _remoteDatasource.watchTripPassengers(tripId.value).map(
-          (rows) => rows
-              .map(
-                (r) => BoardingRecordModel(
-                  id: r['id'] as String,
-                  tripId: tripId.value,
-                  subscriptionId: r['subscription_id'] as String? ?? '',
-                  studentId: r['student_id'] as String,
-                  boardedAt: DateTime.parse(r['boarded_at'] as String),
-                  boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
-                ).toEntity(),
-              )
-              .toList(),
-        );
+    return _remoteDatasource.watchTripPassengers(tripId.value).asyncMap(
+      (rows) async {
+        if (rows.isEmpty) return const <BoardingRecord>[];
+
+        final studentIds =
+            rows.map((r) => r['student_id'] as String).toSet().toList();
+
+        try {
+          final profiles = await _remoteDatasource.getPublicProfiles(studentIds);
+          final nameMap = {
+            for (final p in profiles)
+              p.id: p.fullName,
+          };
+
+          return rows.map((r) {
+            final studentId = r['student_id'] as String;
+            return BoardingRecordModel(
+              id: r['id'] as String,
+              tripId: tripId.value,
+              subscriptionId: r['subscription_id'] as String? ?? '',
+              studentId: studentId,
+              studentName: nameMap[studentId],
+              boardedAt: DateTime.parse(r['boarded_at'] as String),
+              boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
+            ).toEntity();
+          }).toList();
+        } catch (e, st) {
+          log.warning('Failed to resolve student names in watchTripPassengers', e, st);
+          return rows.map((r) {
+            final studentId = r['student_id'] as String;
+            return BoardingRecordModel(
+              id: r['id'] as String,
+              tripId: tripId.value,
+              subscriptionId: r['subscription_id'] as String? ?? '',
+              studentId: studentId,
+              studentName: null,
+              boardedAt: DateTime.parse(r['boarded_at'] as String),
+              boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
+            ).toEntity();
+          }).toList();
+        }
+      },
+    );
   }
 
   @override

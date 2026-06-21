@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_data/src/datasources/trip_remote_datasource.dart';
+import 'package:sayr_data/src/models/rating_model.dart';
+import 'package:sayr_data/src/models/trip_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../helpers/mock_supabase.dart';
@@ -37,9 +39,15 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<List<Map<String, dynamic>>>();
 
-      mockTransformBuilder.completeWith(Future.value([
-        {'id': 'trip1'}
-      ]));
+      final tripJson = {
+        'id': 'trip1',
+        'route_id': 'route1',
+        'driver_id': 'driver1',
+        'status': 'scheduled',
+        'scheduled_at': '2026-06-21T00:00:00Z',
+      };
+
+      mockTransformBuilder.completeWith(Future.value([tripJson]));
 
       when(() => mockClient.from('trips')).thenAnswer((_) => mockQueryBuilder);
       when(mockQueryBuilder.select).thenAnswer((_) => mockFilterBuilder1);
@@ -58,7 +66,7 @@ void main() {
       expect(
           result,
           equals([
-            {'id': 'trip1'}
+            TripModel.fromJson(tripJson),
           ]));
     });
 
@@ -95,11 +103,21 @@ void main() {
       when(() => mockStreamFilterBuilder.eq('id', 'trip1'))
           .thenAnswer((_) => mockStreamBuilder);
 
-      when(() => mockStreamBuilder.map<List<Map<String, dynamic>>>(any()))
+      final tripJson = {
+        'id': 'trip1',
+        'route_id': 'route1',
+        'driver_id': 'driver1',
+        'status': 'scheduled',
+        'scheduled_at': '2026-06-21T00:00:00Z',
+      };
+      final expectedTrip = TripModel.fromJson(tripJson);
+
+      when(() => mockStreamBuilder.map<List<TripModel>>(any()))
           .thenAnswer(
-        (_) => Stream.value([
-          {'id': 'trip1'},
-        ]),
+        (invocation) {
+          final callback = invocation.positionalArguments[0] as List<TripModel> Function(List<Map<String, dynamic>>);
+          return Stream.value(callback([tripJson]));
+        },
       );
 
       final result = datasource.watchTrip('trip1');
@@ -107,7 +125,7 @@ void main() {
       expect(
           result,
           emits([
-            {'id': 'trip1'}
+            expectedTrip,
           ]));
     });
 
@@ -118,7 +136,14 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<Map<String, dynamic>?>();
 
-      mockTransformBuilder.completeWith(Future.value({'id': 'trip1'}));
+      final tripJson = {
+        'id': 'trip1',
+        'route_id': 'route1',
+        'driver_id': 'driver1',
+        'status': 'scheduled',
+        'scheduled_at': '2026-06-21T00:00:00Z',
+      };
+      mockTransformBuilder.completeWith(Future.value(tripJson));
 
       when(() => mockClient.from('trips')).thenAnswer((_) => mockQueryBuilder);
       when(mockQueryBuilder.select).thenAnswer((_) => mockFilterBuilder);
@@ -129,13 +154,20 @@ void main() {
 
       final result = await datasource.getTripById('trip1');
 
-      expect(result, equals({'id': 'trip1'}));
+      expect(result, equals(TripModel.fromJson(tripJson)));
     });
 
     test('updateTripStatus calls rpc', () async {
       final mockRpcFilterBuilder =
           MockPostgrestFilterBuilder<Map<String, dynamic>>();
-      mockRpcFilterBuilder.completeWith(Future.value({'status': 'in_transit'}));
+      final tripJson = {
+        'id': 'trip1',
+        'route_id': 'route1',
+        'driver_id': 'driver1',
+        'status': 'in_transit',
+        'scheduled_at': '2026-06-21T00:00:00Z',
+      };
+      mockRpcFilterBuilder.completeWith(Future.value(tripJson));
 
       when(
         () => mockClient.rpc<Map<String, dynamic>>(
@@ -152,7 +184,7 @@ void main() {
       final result = await datasource.updateTripStatus(
           tripId: 'trip1', newStatus: 'in_transit');
 
-      expect(result, equals({'status': 'in_transit'}));
+      expect(result, equals(TripModel.fromJson(tripJson)));
     });
 
     test('updateTripBleOtp calls rpc', () async {
@@ -192,7 +224,25 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<Map<String, dynamic>>();
 
-      mockTransformBuilder.completeWith(Future.value({'id': 'rating1'}));
+      const expectedRating = RatingModel(
+        id: 'rating1',
+        tripId: 'trip1',
+        studentId: 'student1',
+        driverId: 'driver1',
+        rating: 5,
+        createdAt: '2026-06-21T00:00:00Z',
+        comment: 'Good',
+      );
+
+      mockTransformBuilder.completeWith(Future.value({
+        'id': 'rating1',
+        'trip_id': 'trip1',
+        'student_id': 'student1',
+        'driver_id': 'driver1',
+        'rating': 5,
+        'created_at': '2026-06-21T00:00:00Z',
+        'comment': 'Good',
+      }));
 
       when(() => mockClient.from('ratings'))
           .thenAnswer((_) => mockQueryBuilder);
@@ -216,7 +266,7 @@ void main() {
         comment: 'Good',
       );
 
-      expect(result, equals({'id': 'rating1'}));
+      expect(result, equals(expectedRating));
     });
   });
 }

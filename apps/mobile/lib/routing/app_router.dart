@@ -140,6 +140,16 @@ class AppRouter {
         return null;
       }
 
+      if (authState is AuthError) {
+        if (!isPublic || state.matchedLocation == '/splash') {
+          sl<Talker>().info(
+            'Redirecting to /login because auth state is AuthError',
+          );
+          return '/login';
+        }
+        return null;
+      }
+
       return null;
     },
     routes: [

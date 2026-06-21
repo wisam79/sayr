@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+
+part 'change_password_dialog.freezed.dart';
 
 /// Dialog to change the user's password.
 class ChangePasswordDialog extends StatefulWidget {
@@ -15,18 +18,20 @@ class ChangePasswordDialog extends StatefulWidget {
   State<ChangePasswordDialog> createState() => _ChangePasswordDialogState();
 }
 
-class _ChangePasswordState {
-  const _ChangePasswordState({required this.isSaving, this.errorMessage});
-  final bool isSaving;
-  final String? errorMessage;
+@freezed
+abstract class ChangePasswordState with _$ChangePasswordState {
+  const factory ChangePasswordState({
+    required bool isSaving,
+    String? errorMessage,
+  }) = _ChangePasswordState;
 }
 
 class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
-  final ValueNotifier<_ChangePasswordState> _stateNotifier =
-      ValueNotifier(const _ChangePasswordState(isSaving: false));
+  final ValueNotifier<ChangePasswordState> _stateNotifier =
+      ValueNotifier(const ChangePasswordState(isSaving: false));
 
   @override
   void dispose() {
@@ -39,7 +44,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    _stateNotifier.value = const _ChangePasswordState(
+    _stateNotifier.value = const ChangePasswordState(
       isSaving: true,
     );
 
@@ -49,7 +54,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
     if (mounted) {
       result.fold(
-        (failure) => _stateNotifier.value = _ChangePasswordState(
+        (failure) => _stateNotifier.value = ChangePasswordState(
           errorMessage: failure.toLocalizedString(context),
           isSaving: false,
         ),
@@ -67,7 +72,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    return ValueListenableBuilder<_ChangePasswordState>(
+    return ValueListenableBuilder<ChangePasswordState>(
       valueListenable: _stateNotifier,
       builder: (context, state, _) {
         return AlertDialog(

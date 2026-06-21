@@ -89,39 +89,33 @@ export const DashboardOverview: React.FC = () => {
       if (paymentsError) throw paymentsError;
 
       const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-      const monthlyRevenueMap: { [key: number]: number } = {};
+      const formattedRevenue: { year: number; month: number; name: string; revenue: number }[] = [];
+      const currentDate = new Date();
       
-      for (let i = 0; i < 12; i++) {
-        monthlyRevenueMap[i] = 0;
-      }
-
-      const currentYear = new Date().getFullYear();
-
-      (paymentsData || []).forEach((p: any) => {
-        const payDate = new Date(p.created_at);
-        if (payDate.getFullYear() === currentYear) {
-          const monthIdx = payDate.getMonth();
-          monthlyRevenueMap[monthIdx] = (monthlyRevenueMap[monthIdx] || 0) + Number(p.amount);
-        }
-      });
-
-      const currentMonthIndex = new Date().getMonth();
-      const formattedRevenue = [];
-      
-      // Get last 6 months up to current month
-      const startMonth = Math.max(0, currentMonthIndex - 5);
-      for (let i = startMonth; i <= currentMonthIndex; i++) {
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
         formattedRevenue.push({
-          name: monthNames[i],
-          revenue: monthlyRevenueMap[i]
+          year: d.getFullYear(),
+          month: d.getMonth(),
+          name: monthNames[d.getMonth()],
+          revenue: 0
         });
       }
 
-      setRevenueHistory(formattedRevenue);
+      (paymentsData || []).forEach((p: any) => {
+        const payDate = new Date(p.created_at);
+        const item = formattedRevenue.find(r => r.year === payDate.getFullYear() && r.month === payDate.getMonth());
+        if (item) {
+          item.revenue += Number(p.amount);
+        }
+      });
 
-    } catch (err: any) {
-      showToast('فشل في جلب إحصائيات النظام. تأكد من امتلاك صلاحيات المشرف.', 'error');
-      setError('فشل في جلب إحصائيات النظام. تأكد من امتلاك صلاحيات المشرف.');
+      setRevenueHistory(formattedRevenue.map(r => ({ name: r.name, revenue: r.revenue })));
+
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'فشل في جلب إحصائيات النظام. تأكد من امتلاك صلاحيات المشرف.';
+      showToast(errorMessage, 'error');
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

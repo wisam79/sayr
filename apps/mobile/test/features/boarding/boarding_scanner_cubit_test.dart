@@ -248,44 +248,6 @@ void main() {
       },
     );
 
-    test('clearLastScan removes lastScan but keeps passengers', () async {
-      when(
-        () => mockRepo.validateBoarding(
-          token: any(named: 'token'),
-          tripId: any(named: 'tripId'),
-          driverLocation: any(named: 'driverLocation'),
-        ),
-      ).thenAnswer(
-        (_) async => Right<Failure, BoardingRecord>(makeRecord()),
-      );
-
-      final cubit = buildCubit()..start();
-      await Future<void>.delayed(Duration.zero);
-      passengerController.add([makeRecord(id: 'rec-existing')]);
-      await Future<void>.delayed(const Duration(milliseconds: 30));
-
-      await cubit.processToken('raw-token-xyz');
-      expect(
-        (cubit.state as BoardingScannerReady).lastScan,
-        isA<BoardingScanSuccess>(),
-      );
-
-      cubit.clearLastScan();
-
-      final cleared = cubit.state as BoardingScannerReady;
-      expect(cleared.lastScan, isNull);
-      expect(cleared.passengers, hasLength(1));
-      expect(cleared.passengers.first.id, const BoardingId('rec-existing'));
-
-      await cubit.close();
-    });
-
-    test('clearLastScan is a no-op when not in Ready state', () {
-      final cubit = buildCubit()..clearLastScan();
-      expect(cubit.state, isA<BoardingScannerInitial>());
-      cubit.close();
-    });
-
     test('start() called twice replaces the previous subscription', () async {
       final cubit = buildCubit()
         ..start()

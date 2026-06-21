@@ -135,8 +135,9 @@ export const LicenseBatches: React.FC = () => {
       
       // Reload batches
       fetchBatches();
-    } catch (err: any) {
-      showToast(err.message || 'فشل في توليد رموز الاشتراك', 'error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'فشل في توليد رموز الاشتراك';
+      showToast(message, 'error');
     } finally {
       setActionLoading(false);
     }

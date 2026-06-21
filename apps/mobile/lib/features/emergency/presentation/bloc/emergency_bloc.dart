@@ -45,14 +45,27 @@ class EmergencyBloc extends Bloc<EmergencyEvent, EmergencyState> {
     Emitter<EmergencyState> emit,
   ) async {
     final stateSnapshot = state;
-    if (stateSnapshot is! EmergencyActive) return;
+    final EmergencyReport? report;
+    if (stateSnapshot is EmergencyActive) {
+      report = stateSnapshot.report;
+    } else if (stateSnapshot is EmergencyFailed &&
+        stateSnapshot.activeReport != null) {
+      report = stateSnapshot.activeReport;
+    } else {
+      return;
+    }
 
     emit(const EmergencyState.sending());
-    final result = await _repository.resolveReport(stateSnapshot.report.id);
+    final result = await _repository.resolveReport(report!.id);
 
     if (isClosed) return;
     result.fold(
-      (Failure failure) => emit(EmergencyState.failed(failure: failure)),
+      (Failure failure) => emit(
+        EmergencyState.failed(
+          failure: failure,
+          activeReport: report,
+        ),
+      ),
       (Unit _) => emit(const EmergencyState.idle()),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_data/src/datasources/subscription_remote_datasource.dart';
+import 'package:sayr_data/src/models/subscription_model.dart';
 import '../helpers/mock_supabase.dart';
 
 void main() {
@@ -29,9 +30,15 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<List<Map<String, dynamic>>>();
 
-      mockTransformBuilder.completeWith(Future.value([
-        {'id': 'sub1'}
-      ]));
+      final subJson = {
+        'id': 'sub1',
+        'student_id': 'user1',
+        'route_id': 'route1',
+        'status': 'active',
+        'start_date': '2026-06-21T00:00:00Z',
+      };
+
+      mockTransformBuilder.completeWith(Future.value([subJson]));
 
       when(() => mockClient.from('subscriptions'))
           .thenAnswer((_) => mockQueryBuilder);
@@ -46,7 +53,7 @@ void main() {
       expect(
           result,
           equals([
-            {'id': 'sub1'}
+            SubscriptionModel.fromJson(subJson),
           ]));
     });
 

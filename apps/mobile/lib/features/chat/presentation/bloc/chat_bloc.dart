@@ -47,7 +47,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ConversationId? get conversationId =>
       _conversationId ??
       state.maybeWhen(
-        loaded: (id, _, __) => id,
+        loaded: (id, _, __, ___) => id,
         orElse: () => null,
       );
 
@@ -59,7 +59,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   List<Message> _currentMessages() {
     return state.maybeWhen(
-      loaded: (_, msgs, __) => msgs,
+      loaded: (_, msgs, __, ___) => msgs,
       orElse: () => const <Message>[],
     );
   }
@@ -142,8 +142,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (isClosed) return;
     result.fold(
       (Failure failure) {
-        emit(ChatState.loaded(conversationId: id, messages: current));
-        emit(ChatState.error(failure: failure));
+        emit(
+          ChatState.loaded(
+            conversationId: id,
+            messages: current,
+            sendError: failure,
+          ),
+        );
       },
       (Message _) => add(const _ChatSendCompleted()),
     );

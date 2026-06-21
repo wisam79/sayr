@@ -1,10 +1,12 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:retry/retry.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
-import 'package:sayr_data/src/models/trip_model.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Callback type for triggering background synchronization.
@@ -34,7 +36,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
     Future<List<Trip>> Function() fetch, {
     required String cacheLogLabel,
   }) async {
-    try {
+    final result = await guard(() async {
       final trips = await fetch();
       try {
         await _localDatasource.cacheTrips(trips);
@@ -45,22 +47,27 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           st,
         );
       }
-      return Right<Failure, List<Trip>>(trips);
-    } catch (e) {
-      try {
-        final cached = await _localDatasource.getCachedTrips();
-        if (cached.isNotEmpty) {
-          return Right<Failure, List<Trip>>(cached);
+      return trips;
+    });
+
+    return result.fold(
+      (failure) async {
+        try {
+          final cached = await _localDatasource.getCachedTrips();
+          if (cached.isNotEmpty) {
+            return Right<Failure, List<Trip>>(cached);
+          }
+        } catch (cacheError, st) {
+          log.warning(
+            'Failed to read cached $cacheLogLabel during offline fallback',
+            cacheError,
+            st,
+          );
         }
-      } catch (cacheError, st) {
-        log.warning(
-          'Failed to read cached $cacheLogLabel during offline fallback',
-          cacheError,
-          st,
-        );
-      }
-      return Left<Failure, List<Trip>>(mapException(e));
-    }
+        return Left<Failure, List<Trip>>(failure);
+      },
+      (trips) async => Right<Failure, List<Trip>>(trips),
+    );
   }
 
   @override
@@ -68,9 +75,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
     return _fetchTripsWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveTrips();
-        return response
-            .map((json) => TripModel.fromJson(json).toEntity())
-            .toList();
+        return response.map((model) => model.toEntity()).toList();
       },
       cacheLogLabel: 'active trips',
     );
@@ -90,7 +95,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
       if (response == null) {
         throw const NotFoundFailure(resource: 'trip');
       }
-      return TripModel.fromJson(response).toEntity();
+      return response.toEntity();
     });
   }
 
@@ -100,32 +105,37 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
       if (rows.isEmpty) {
         throw const NotFoundFailure(resource: 'trip');
       }
-      return TripModel.fromJson(rows.first).toEntity();
+      return rows.first.toEntity();
     });
   }
 
   @override
   Future<Either<Failure, Trip>> getById(TripId id) async {
-    try {
+    final result = await guard(() async {
       final response = await _remoteDatasource.getTripById(id.value);
       if (response == null) {
-        return const Left<Failure, Trip>(NotFoundFailure(resource: 'trip'));
+        throw const NotFoundFailure(resource: 'trip');
       }
-      return Right<Failure, Trip>(TripModel.fromJson(response).toEntity());
-    } catch (e) {
-      try {
-        final cached = await _localDatasource.getCachedTrips();
-        final trip = cached.firstWhere((t) => t.id == id);
-        return Right<Failure, Trip>(trip);
-      } catch (cacheError, st) {
-        log.warning(
-          'Failed to read cached trip during offline fallback',
-          cacheError,
-          st,
-        );
-      }
-      return Left<Failure, Trip>(mapException(e));
-    }
+      return response.toEntity();
+    });
+
+    return result.fold(
+      (failure) async {
+        try {
+          final cached = await _localDatasource.getCachedTrips();
+          final trip = cached.firstWhere((t) => t.id == id);
+          return Right<Failure, Trip>(trip);
+        } catch (cacheError, st) {
+          log.warning(
+            'Failed to read cached trip during offline fallback',
+            cacheError,
+            st,
+          );
+        }
+        return Left<Failure, Trip>(failure);
+      },
+      (trip) async => Right<Failure, Trip>(trip),
+    );
   }
 
   @override
@@ -159,9 +169,9 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
               ),
               maxAttempts: 3,
             );
-            updatedTrip = TripModel.fromJson(response).toEntity();
+            updatedTrip = response.toEntity();
             try {
-              final cached = await _localDatasource.getCachedTrips();
+              final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
               final index = cached.indexWhere((t) => t.id == tripId);
               if (index != -1) {
                 cached[index] = updatedTrip;
@@ -183,7 +193,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
                 latitude: location?.latitude,
                 longitude: location?.longitude,
               );
-              final cached = await _localDatasource.getCachedTrips();
+              final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
               final index = cached.indexWhere((t) => t.id == tripId);
               if (index != -1) {
                 final oldTrip = cached[index];
@@ -238,26 +248,33 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
     required double lat,
     required double lng,
   }) async {
-    try {
+    final result = await guard(() async {
       await _remoteDatasource.updateTripLocation(
         tripId: tripId.value,
         lat: lat,
         lng: lng,
       );
-      return const Right<Failure, Unit>(unit);
-    } catch (e) {
-      try {
-        await _localDatasource.enqueueLocation(
-          tripId: tripId.value,
-          latitude: lat,
-          longitude: lng,
-        );
-        syncTrigger?.call();
-        return const Right<Failure, Unit>(unit);
-      } catch (dbErr) {
-        return Left<Failure, Unit>(mapException(dbErr));
-      }
-    }
+      return unit;
+    });
+
+    return result.fold(
+      (failure) async {
+        try {
+          await _localDatasource.enqueueLocation(
+            tripId: tripId.value,
+            latitude: lat,
+            longitude: lng,
+          );
+          syncTrigger?.call();
+          return const Right<Failure, Unit>(unit);
+        } catch (dbErr) {
+          // If queueing fails, we log it via the returned mapped exception,
+          // but we still want to map it to Failure properly.
+          return Left<Failure, Unit>(mapException(dbErr));
+        }
+      },
+      (success) async => Right<Failure, Unit>(success),
+    );
   }
 
   @override
@@ -366,8 +383,9 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
       }
 
       final syncedIds = <int>[];
-      try {
-        for (final statusUpdate in pending) {
+      final failedIds = <int>[];
+      for (final statusUpdate in pending) {
+        try {
           await _remoteDatasource.updateTripStatus(
             tripId: statusUpdate.tripId,
             newStatus: statusUpdate.status,
@@ -375,16 +393,38 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
             lng: statusUpdate.longitude,
           );
           syncedIds.add(statusUpdate.id);
+        } catch (e) {
+          final isNetworkError = e is SocketException ||
+              e is HttpException ||
+              e is TimeoutException ||
+              e.toString().contains('SocketException') ||
+              e.toString().contains('HttpException') ||
+              e.toString().contains('TimeoutException');
+
+          if (isNetworkError) {
+            // Transient network failure: save what succeeded so far and abort sync.
+            if (syncedIds.isNotEmpty) {
+              await _localDatasource.markTripStatusesSynced(syncedIds);
+            }
+            if (failedIds.isNotEmpty) {
+              await _localDatasource.markTripStatusesSynced(failedIds);
+            }
+            rethrow;
+          } else {
+            // Permanent validation/logic failure: log it, skip it (so we don't try it forever),
+            // and add to failedIds to mark as synced/deleted.
+            log.error(
+              'syncPendingStatuses: Permanent failure for status update ${statusUpdate.id} (trip: ${statusUpdate.tripId}). Skipping.',
+              e,
+            );
+            failedIds.add(statusUpdate.id);
+          }
         }
-      } catch (e) {
-        if (syncedIds.isNotEmpty) {
-          await _localDatasource.markTripStatusesSynced(syncedIds);
-        }
-        rethrow;
       }
 
-      if (syncedIds.isNotEmpty) {
-        await _localDatasource.markTripStatusesSynced(syncedIds);
+      final allMarked = [...syncedIds, ...failedIds];
+      if (allMarked.isNotEmpty) {
+        await _localDatasource.markTripStatusesSynced(allMarked);
       }
       return unit;
     });

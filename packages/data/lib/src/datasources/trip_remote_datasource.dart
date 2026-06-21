@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:injectable/injectable.dart';
+import 'package:sayr_data/src/models/driver_model.dart';
+import 'package:sayr_data/src/models/rating_model.dart';
+import 'package:sayr_data/src/models/trip_model.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -11,7 +14,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 /// they share the same domain (the trip itself).
 abstract class TripRemoteDatasource {
   /// Returns currently active trips (scheduled, driver_waiting, in_transit).
-  Future<List<Map<String, dynamic>>> getActiveTrips();
+  Future<List<TripModel>> getActiveTrips();
 
   /// Creates a new trip via the `create_trip` RPC.
   Future<String> createTrip({
@@ -20,13 +23,13 @@ abstract class TripRemoteDatasource {
   });
 
   /// Realtime stream of a single trip row.
-  Stream<List<Map<String, dynamic>>> watchTrip(String tripId);
+  Stream<List<TripModel>> watchTrip(String tripId);
 
   /// Fetches a single trip by id.
-  Future<Map<String, dynamic>?> getTripById(String id);
+  Future<TripModel?> getTripById(String id);
 
   /// Updates a trip's status via the `update_trip_status` RPC.
-  Future<Map<String, dynamic>> updateTripStatus({
+  Future<TripModel> updateTripStatus({
     required String tripId,
     required String newStatus,
     double? lat,
@@ -66,10 +69,10 @@ abstract class TripRemoteDatasource {
   Future<List<Map<String, dynamic>>> getPendingPayments();
 
   /// Fetches a driver row by id.
-  Future<Map<String, dynamic>?> getDriverById(String driverId);
+  Future<DriverModel?> getDriverById(String driverId);
 
   /// Submits a rating for a completed trip.
-  Future<Map<String, dynamic>> submitRating({
+  Future<RatingModel> submitRating({
     required String tripId,
     required String driverId,
     required String studentId,
@@ -78,7 +81,7 @@ abstract class TripRemoteDatasource {
   });
 
   /// Fetches the student's existing rating for a trip, or `null`.
-  Future<Map<String, dynamic>?> getTripRating({
+  Future<RatingModel?> getTripRating({
     required String tripId,
     required String studentId,
   });
@@ -93,14 +96,14 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
   supabase.SupabaseClient get _client => _supabase.client;
 
   @override
-  Future<List<Map<String, dynamic>>> getActiveTrips() async {
-    final response = await _client.from('trips').select().inFilter('status', [
+  Future<List<TripModel>> getActiveTrips() async {
+    return _client.from('trips').select().inFilter('status', [
       'scheduled',
       'driver_waiting',
       'in_transit',
     ]).order('scheduled_at', ascending: true)
+      .withConverter((data) => data.map((e) => TripModel.fromJson(e)).toList())
       .timeout(const Duration(seconds: 15));
-    return List<Map<String, dynamic>>.from(response as Iterable);
   }
 
   @override
@@ -117,33 +120,37 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
       ).timeout(const Duration(seconds: 15));
 
   @override
-  Stream<List<Map<String, dynamic>>> watchTrip(String tripId) => _client
+  Stream<List<TripModel>> watchTrip(String tripId) => _client
       .from('trips')
       .stream(primaryKey: ['id'])
       .eq('id', tripId)
-      .map((List<Map<String, dynamic>> rows) => rows);
+      .map((List<Map<String, dynamic>> rows) => rows.map((e) => TripModel.fromJson(e)).toList());
 
   @override
-  Future<Map<String, dynamic>?> getTripById(String id) =>
-      _client.from('trips').select().eq('id', id).maybeSingle()
+  Future<TripModel?> getTripById(String id) async {
+    final data = await _client.from('trips').select().eq('id', id).maybeSingle()
         .timeout(const Duration(seconds: 15));
+    return data != null ? TripModel.fromJson(data) : null;
+  }
 
   @override
-  Future<Map<String, dynamic>> updateTripStatus({
+  Future<TripModel> updateTripStatus({
     required String tripId,
     required String newStatus,
     double? lat,
     double? lng,
-  }) =>
-      _client.rpc<Map<String, dynamic>>(
-        'update_trip_status',
-        params: {
-          'p_trip_id': tripId,
-          'p_new_status': newStatus,
-          'p_lat': lat,
-          'p_lng': lng,
-        },
-      ).timeout(const Duration(seconds: 15));
+  }) async {
+    final response = await _client.rpc<Map<String, dynamic>>(
+      'update_trip_status',
+      params: {
+        'p_trip_id': tripId,
+        'p_new_status': newStatus,
+        'p_lat': lat,
+        'p_lng': lng,
+      },
+    ).timeout(const Duration(seconds: 15));
+    return TripModel.fromJson(response);
+  }
 
   @override
   Future<void> updateTripLocation({
@@ -220,12 +227,14 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
   }
 
   @override
-  Future<Map<String, dynamic>?> getDriverById(String driverId) =>
-      _client.from('drivers').select().eq('id', driverId).maybeSingle()
+  Future<DriverModel?> getDriverById(String driverId) async {
+    final data = await _client.from('drivers').select().eq('id', driverId).maybeSingle()
         .timeout(const Duration(seconds: 15));
+    return data != null ? DriverModel.fromJson(data) : null;
+  }
 
   @override
-  Future<Map<String, dynamic>> submitRating({
+  Future<RatingModel> submitRating({
     required String tripId,
     required String driverId,
     required String studentId,
@@ -244,19 +253,21 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
         .select()
         .single()
         .timeout(const Duration(seconds: 15));
-    return response;
+    return RatingModel.fromJson(response);
   }
 
   @override
-  Future<Map<String, dynamic>?> getTripRating({
+  Future<RatingModel?> getTripRating({
     required String tripId,
     required String studentId,
-  }) =>
-      _client
-          .from('ratings')
-          .select()
-          .eq('trip_id', tripId)
-          .eq('student_id', studentId)
-          .maybeSingle()
-          .timeout(const Duration(seconds: 15));
+  }) async {
+    final data = await _client
+        .from('ratings')
+        .select()
+        .eq('trip_id', tripId)
+        .eq('student_id', studentId)
+        .maybeSingle()
+        .timeout(const Duration(seconds: 15));
+    return data != null ? RatingModel.fromJson(data) : null;
+  }
 }

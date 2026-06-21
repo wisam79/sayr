@@ -73,6 +73,12 @@ class _ChatPageState extends State<ChatPage> {
             );
           }
           if (state is ChatLoaded) {
+            if (state.sendError != null) {
+              SayrFlash.error(
+                context,
+                state.sendError!.toLocalizedString(context),
+              );
+            }
             _scrollToBottom();
             for (final msg in state.messages) {
               if (msg.senderId.value != _currentUserId && !msg.isRead) {

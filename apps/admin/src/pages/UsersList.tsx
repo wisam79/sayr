@@ -377,8 +377,8 @@ export const UsersList: React.FC = () => {
       setCapacity('14');
       setLicenseNumber('');
       setLicenseExpiry('');
-    } catch (err: any) {
-      if (err.code === '23505') {
+    } catch (err: unknown) {
+      if (err instanceof Error && 'code' in err && (err as any).code === '23505') {
         showToast('رقم لوحة المركبة مسجل بالفعل لمركبة أخرى', 'error');
       } else {
         showToast('فشل في الترقية إلى سائق', 'error');

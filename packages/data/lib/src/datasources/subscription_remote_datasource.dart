@@ -1,11 +1,12 @@
 import 'package:injectable/injectable.dart';
+import 'package:sayr_data/src/models/subscription_model.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 /// Student subscriptions + license activation.
 abstract class SubscriptionRemoteDatasource {
   /// Fetches the student's subscriptions, newest first.
-  Future<List<Map<String, dynamic>>> getMySubscriptions(String studentId);
+  Future<List<SubscriptionModel>> getMySubscriptions(String studentId);
 
   /// Cancels a subscription via the `cancel_subscription` RPC.
   Future<void> cancelSubscription(String subscriptionId);
@@ -27,15 +28,15 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
   supabase.SupabaseClient get _client => _supabase.client;
 
   @override
-  Future<List<Map<String, dynamic>>> getMySubscriptions(
+  Future<List<SubscriptionModel>> getMySubscriptions(
     String studentId,
   ) async {
-    final response = await _client
+    return await _client
         .from('subscriptions')
         .select()
         .eq('student_id', studentId)
-        .order('start_date', ascending: false);
-    return List<Map<String, dynamic>>.from(response as Iterable);
+        .order('start_date', ascending: false)
+        .withConverter((data) => data.map((e) => SubscriptionModel.fromJson(e)).toList());
   }
 
   @override

@@ -3,7 +3,6 @@ import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
-import 'package:sayr_data/src/models/route_model.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of RouteRepository using Remote and Local data sources.
@@ -29,7 +28,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
     Future<List<Route>> Function() fetch, {
     required String cacheLogLabel,
   }) async {
-    try {
+    final result = await guard(() async {
       final routes = await fetch();
       try {
         await _localDatasource.cacheRoutes(routes);
@@ -40,32 +39,36 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
           st,
         );
       }
-      return Right(routes);
-    } catch (e) {
-      try {
-        final cached = await _localDatasource.getCachedRoutes();
-        if (cached.isNotEmpty) {
-          return Right(cached);
+      return routes;
+    });
+
+    return result.fold(
+      (failure) async {
+        try {
+          final cached = await _localDatasource.getCachedRoutes();
+          if (cached.isNotEmpty) {
+            return Right(cached);
+          }
+        } catch (cacheError, st) {
+          log.warning(
+            'Failed to read cached $cacheLogLabel during offline fallback',
+            cacheError,
+            st,
+          );
         }
-      } catch (cacheError, st) {
-        log.warning(
-          'Failed to read cached $cacheLogLabel during offline fallback',
-          cacheError,
-          st,
-        );
-      }
-      return Left(mapException(e));
-    }
+        return Left(failure);
+      },
+      (routes) async => Right(routes),
+    );
   }
+
 
   @override
   Future<Either<Failure, List<Route>>> getActiveRoutes() async {
     return _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveRoutes();
-        return response
-            .map((json) => RouteModel.fromJson(json).toEntity())
-            .toList();
+        return response.map((model) => model.toEntity()).toList();
       },
       cacheLogLabel: 'active routes',
     );
@@ -76,9 +79,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
     return _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getMyDriverRoutes();
-        return response
-            .map((json) => RouteModel.fromJson(json).toEntity())
-            .toList();
+        return response.map((model) => model.toEntity()).toList();
       },
       cacheLogLabel: 'driver routes',
     );
@@ -91,7 +92,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
       if (response == null) {
         return const Left(NotFoundFailure(resource: 'route'));
       }
-      final route = RouteModel.fromJson(response).toEntity();
+      final route = response.toEntity();
       return Right(route);
     } catch (e) {
       // Offline fallback: look the route up in the local cache by id.
@@ -114,9 +115,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   Future<Either<Failure, List<Route>>> search(String query) async {
     return guard(() async {
       final response = await _remoteDatasource.searchRoutes(query);
-      return response
-          .map((json) => RouteModel.fromJson(json).toEntity())
-          .toList();
+      return response.map((model) => model.toEntity()).toList();
     });
   }
 }

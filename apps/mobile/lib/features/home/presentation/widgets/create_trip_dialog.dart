@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
-import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/home/presentation/bloc/create_trip_dialog_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
@@ -124,31 +123,10 @@ class CreateTripDialog extends StatelessWidget {
     BuildContext context,
     CreateTripDialogState state,
   ) async {
-    final route = state.selectedRoute;
-    if (route == null) return;
-
-    final scheduledAt =
-        state.scheduledAt ?? DateTime.now().add(const Duration(minutes: 10));
-
-    if (!scheduledAt.isAfter(DateTime.now())) {
-      context.read<CreateTripDialogCubit>().setError(
-            const core.ValidationFailure(message: 'trip_time_must_be_future'),
-          );
-      return;
+    final trip = await context.read<CreateTripDialogCubit>().createTrip();
+    if (trip != null && context.mounted) {
+      Navigator.of(context).pop(trip);
     }
-
-    context.read<CreateTripDialogCubit>().setSubmitting(isSubmitting: true);
-
-    final result = await sl<core.TripRepository>().createTrip(
-      routeId: route.id,
-      scheduledAt: scheduledAt,
-    );
-
-    if (!context.mounted) return;
-    result.fold(
-      (failure) => context.read<CreateTripDialogCubit>().setError(failure),
-      (trip) => Navigator.of(context).pop(trip),
-    );
   }
 
   Future<void> _pickScheduledAt(

@@ -60,7 +60,19 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
 
     if (isClosed) return;
     result.fold(
-      (failure) => emit(SubscriptionsError(failure)),
+      (failure) {
+        final current = state;
+        final subs = <Subscription>[];
+        final payments = <PaymentInfo>[];
+        if (current is SubscriptionsLoaded) {
+          subs.addAll(current.subscriptions);
+          payments.addAll(current.pendingPayments);
+        } else if (current is SubscriptionsError) {
+          subs.addAll(current.subscriptions);
+          payments.addAll(current.pendingPayments);
+        }
+        emit(SubscriptionsError(failure, subs, payments));
+      },
       (_) => add(const SubscriptionsLoadRequested()),
     );
   }
@@ -71,9 +83,21 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
   ) async {
     final code = LicenseCode.tryParse(event.code);
     if (code == null) {
+      final current = state;
+      final subs = <Subscription>[];
+      final payments = <PaymentInfo>[];
+      if (current is SubscriptionsLoaded) {
+        subs.addAll(current.subscriptions);
+        payments.addAll(current.pendingPayments);
+      } else if (current is SubscriptionsError) {
+        subs.addAll(current.subscriptions);
+        payments.addAll(current.pendingPayments);
+      }
       emit(
-        const SubscriptionsError(
-          ValidationFailure(message: ''),
+        SubscriptionsError(
+          const ValidationFailure(message: 'invalid_license_code'),
+          subs,
+          payments,
         ),
       );
       return;
@@ -85,7 +109,19 @@ class SubscriptionsBloc extends Bloc<SubscriptionsEvent, SubscriptionsState> {
 
     if (isClosed) return;
     result.fold(
-      (failure) => emit(SubscriptionsError(failure)),
+      (failure) {
+        final current = state;
+        final subs = <Subscription>[];
+        final payments = <PaymentInfo>[];
+        if (current is SubscriptionsLoaded) {
+          subs.addAll(current.subscriptions);
+          payments.addAll(current.pendingPayments);
+        } else if (current is SubscriptionsError) {
+          subs.addAll(current.subscriptions);
+          payments.addAll(current.pendingPayments);
+        }
+        emit(SubscriptionsError(failure, subs, payments));
+      },
       (subId) {
         emit(LicenseActivated(subId));
         add(const SubscriptionsLoadRequested());

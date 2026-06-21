@@ -145,7 +145,6 @@ void main() {
       expect: () => [
         isA<ChatLoaded>(),
         isA<ChatLoaded>(),
-        isA<ChatError>(),
       ],
     );
 

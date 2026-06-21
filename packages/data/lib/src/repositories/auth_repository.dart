@@ -189,10 +189,7 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
     if (authUser == null) return null;
     final profile = await _remoteDatasource.fetchCurrentProfile(authUser.id);
     if (profile == null) return null;
-    final model = UserModel.fromJson({
-      ...profile,
-      'email': authUser.email ?? '',
-    });
+    final model = profile.copyWith(email: authUser.email ?? '');
     return model.toEntity();
   }
 

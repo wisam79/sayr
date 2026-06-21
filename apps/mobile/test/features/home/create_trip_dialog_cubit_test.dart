@@ -7,6 +7,7 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/home/presentation/bloc/create_trip_dialog_cubit.dart';
 
 class MockRouteRepository extends Mock implements RouteRepository {}
+class MockTripRepository extends Mock implements TripRepository {}
 
 void main() {
   setUpAll(() {
@@ -14,6 +15,7 @@ void main() {
   });
 
   late MockRouteRepository mockRepo;
+  late MockTripRepository mockTripRepo;
   late CreateTripDialogCubit cubit;
 
   const testRoute = Route(
@@ -30,7 +32,8 @@ void main() {
 
   setUp(() {
     mockRepo = MockRouteRepository();
-    cubit = CreateTripDialogCubit(routeRepository: mockRepo);
+    mockTripRepo = MockTripRepository();
+    cubit = CreateTripDialogCubit(routeRepository: mockRepo, tripRepository: mockTripRepo);
   });
 
   tearDown(() => cubit.close());
@@ -52,7 +55,7 @@ void main() {
         when(() => mockRepo.getMyDriverRoutes()).thenAnswer(
           (_) async => const Right<Failure, List<Route>>([testRoute]),
         );
-        return CreateTripDialogCubit(routeRepository: mockRepo);
+        return CreateTripDialogCubit(routeRepository: mockRepo, tripRepository: mockTripRepo);
       },
       act: (cubit) => cubit.loadRoutes(),
       verify: (cubit) {
@@ -71,7 +74,7 @@ void main() {
             ServerFailure(message: 'network error'),
           ),
         );
-        return CreateTripDialogCubit(routeRepository: mockRepo);
+        return CreateTripDialogCubit(routeRepository: mockRepo, tripRepository: mockTripRepo);
       },
       act: (cubit) => cubit.loadRoutes(),
       verify: (cubit) {
@@ -88,7 +91,7 @@ void main() {
   group('selectRoute', () {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'updates selectedRoute',
-      build: () => CreateTripDialogCubit(routeRepository: mockRepo),
+      build: () => CreateTripDialogCubit(routeRepository: mockRepo, tripRepository: mockTripRepo),
       seed: () => const CreateTripDialogState(routes: [testRoute]),
       act: (cubit) => cubit.selectRoute(testRoute),
       verify: (cubit) {
@@ -100,7 +103,7 @@ void main() {
   group('updateScheduledAt', () {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'updates scheduledAt and clears error',
-      build: () => CreateTripDialogCubit(routeRepository: mockRepo),
+      build: () => CreateTripDialogCubit(routeRepository: mockRepo, tripRepository: mockTripRepo),
       seed: () => const CreateTripDialogState(
         failure: ServerFailure(message: 'old error'),
       ),
@@ -112,22 +115,10 @@ void main() {
     );
   });
 
-  group('setSubmitting / setError', () {
-    blocTest<CreateTripDialogCubit, CreateTripDialogState>(
-      'setSubmitting(true) sets isSubmitting and clears error',
-      build: () => CreateTripDialogCubit(routeRepository: mockRepo),
-      seed: () =>
-          const CreateTripDialogState(failure: ServerFailure(message: 'old')),
-      act: (cubit) => cubit.setSubmitting(isSubmitting: true),
-      verify: (cubit) {
-        expect(cubit.state.isSubmitting, isTrue);
-        expect(cubit.state.failure, isNull);
-      },
-    );
-
+  group('setError', () {
     blocTest<CreateTripDialogCubit, CreateTripDialogState>(
       'setError sets error message and stops submitting',
-      build: () => CreateTripDialogCubit(routeRepository: mockRepo),
+      build: () => CreateTripDialogCubit(routeRepository: mockRepo, tripRepository: mockTripRepo),
       seed: () => const CreateTripDialogState(isSubmitting: true),
       act: (cubit) => cubit.setError(const ServerFailure(message: 'boom')),
       verify: (cubit) {

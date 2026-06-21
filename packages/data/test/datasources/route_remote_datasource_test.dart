@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_data/src/datasources/route_remote_datasource.dart';
+import 'package:sayr_data/src/models/route_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../helpers/mock_supabase.dart';
@@ -30,8 +31,30 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<List<Map<String, dynamic>>>();
 
+      const expectedRoute = RouteModel(
+        id: 'route1',
+        driverId: 'driver1',
+        title: 'Route 1',
+        startLocation: 'Start',
+        endLocation: 'End',
+        price: 1000,
+        capacity: 20,
+        availableSeats: 10,
+        isActive: true,
+      );
+
       mockTransformBuilder.completeWith(Future.value([
-        {'id': 'route1'}
+        {
+          'id': 'route1',
+          'driver_id': 'driver1',
+          'title': 'Route 1',
+          'start_location': 'Start',
+          'end_location': 'End',
+          'price': 1000,
+          'capacity': 20,
+          'available_seats': 10,
+          'is_active': true,
+        }
       ]));
 
       when(() => mockClient.from('routes')).thenAnswer((_) => mockQueryBuilder);
@@ -43,11 +66,7 @@ void main() {
 
       final result = await datasource.getActiveRoutes();
 
-      expect(
-          result,
-          equals([
-            {'id': 'route1'}
-          ]));
+      expect(result, equals([expectedRoute]));
     });
 
     test('getMyDriverRoutes throws AuthException if user is null', () async {
@@ -97,6 +116,38 @@ void main() {
 
       mockDriverTransformBuilder.completeWith(Future.value({'id': 'driver1'}));
 
+      final mockRouteQueryBuilder = MockSupabaseQueryBuilder();
+      final mockRouteFilterBuilder =
+          MockPostgrestFilterBuilder<List<Map<String, dynamic>>>();
+      final mockRouteTransformBuilder =
+          MockPostgrestTransformBuilder<List<Map<String, dynamic>>>();
+
+      const expectedRoute = RouteModel(
+        id: 'route1',
+        driverId: 'driver1',
+        title: 'Route 1',
+        startLocation: 'Start',
+        endLocation: 'End',
+        price: 1000,
+        capacity: 20,
+        availableSeats: 10,
+        isActive: true,
+      );
+
+      mockRouteTransformBuilder.completeWith(Future.value([
+        {
+          'id': 'route1',
+          'driver_id': 'driver1',
+          'title': 'Route 1',
+          'start_location': 'Start',
+          'end_location': 'End',
+          'price': 1000,
+          'capacity': 20,
+          'available_seats': 10,
+          'is_active': true,
+        }
+      ]));
+
       when(() => mockClient.from('drivers'))
           .thenAnswer((_) => mockDriverQueryBuilder);
       when(() => mockDriverQueryBuilder.select('id'))
@@ -105,16 +156,6 @@ void main() {
           .thenAnswer((_) => mockDriverFilterBuilder);
       when(mockDriverFilterBuilder.maybeSingle)
           .thenAnswer((_) => mockDriverTransformBuilder);
-
-      final mockRouteQueryBuilder = MockSupabaseQueryBuilder();
-      final mockRouteFilterBuilder =
-          MockPostgrestFilterBuilder<List<Map<String, dynamic>>>();
-      final mockRouteTransformBuilder =
-          MockPostgrestTransformBuilder<List<Map<String, dynamic>>>();
-
-      mockRouteTransformBuilder.completeWith(Future.value([
-        {'id': 'route1'}
-      ]));
 
       when(() => mockClient.from('routes'))
           .thenAnswer((_) => mockRouteQueryBuilder);
@@ -129,11 +170,7 @@ void main() {
 
       final result = await datasource.getMyDriverRoutes();
 
-      expect(
-          result,
-          equals([
-            {'id': 'route1'}
-          ]));
+      expect(result, equals([expectedRoute]));
     });
 
     test('getRouteById returns route', () async {
@@ -143,7 +180,29 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<Map<String, dynamic>?>();
 
-      mockTransformBuilder.completeWith(Future.value({'id': 'route1'}));
+      const expectedRoute = RouteModel(
+        id: 'route1',
+        driverId: 'driver1',
+        title: 'Route 1',
+        startLocation: 'Start',
+        endLocation: 'End',
+        price: 1000,
+        capacity: 20,
+        availableSeats: 10,
+        isActive: true,
+      );
+
+      mockTransformBuilder.completeWith(Future.value({
+        'id': 'route1',
+        'driver_id': 'driver1',
+        'title': 'Route 1',
+        'start_location': 'Start',
+        'end_location': 'End',
+        'price': 1000,
+        'capacity': 20,
+        'available_seats': 10,
+        'is_active': true,
+      }));
 
       when(() => mockClient.from('routes')).thenAnswer((_) => mockQueryBuilder);
       when(mockQueryBuilder.select).thenAnswer((_) => mockFilterBuilder);
@@ -154,7 +213,7 @@ void main() {
 
       final result = await datasource.getRouteById('route1');
 
-      expect(result, equals({'id': 'route1'}));
+      expect(result, equals(expectedRoute));
     });
 
     test('searchRoutes executes correct query', () async {
@@ -164,8 +223,30 @@ void main() {
       final mockTransformBuilder =
           MockPostgrestTransformBuilder<List<Map<String, dynamic>>>();
 
+      const expectedRoute = RouteModel(
+        id: 'route1',
+        driverId: 'driver1',
+        title: 'Route 1',
+        startLocation: 'Start',
+        endLocation: 'End',
+        price: 1000,
+        capacity: 20,
+        availableSeats: 10,
+        isActive: true,
+      );
+
       mockTransformBuilder.completeWith(Future.value([
-        {'id': 'route1'}
+        {
+          'id': 'route1',
+          'driver_id': 'driver1',
+          'title': 'Route 1',
+          'start_location': 'Start',
+          'end_location': 'End',
+          'price': 1000,
+          'capacity': 20,
+          'available_seats': 10,
+          'is_active': true,
+        }
       ]));
 
       when(() => mockClient.from('routes')).thenAnswer((_) => mockQueryBuilder);
@@ -180,11 +261,7 @@ void main() {
 
       final result = await datasource.searchRoutes('query');
 
-      expect(
-          result,
-          equals([
-            {'id': 'route1'}
-          ]));
+      expect(result, equals([expectedRoute]));
     });
   });
 }

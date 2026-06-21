@@ -4,6 +4,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
+import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_event.dart';
 import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_state.dart';
@@ -57,10 +58,19 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
               ],
             )
           : null,
-      body: BlocBuilder<SubscriptionsBloc, SubscriptionsState>(
+      body: BlocConsumer<SubscriptionsBloc, SubscriptionsState>(
+        listener: (context, state) {
+          if (state is SubscriptionsError && state.subscriptions.isNotEmpty) {
+            SayrFlash.error(
+              context,
+              state.failure.toLocalizedString(context),
+            );
+          }
+        },
         builder: (context, state) {
           final pendingPayments = switch (state) {
             SubscriptionsLoaded(:final pendingPayments) => pendingPayments,
+            SubscriptionsError(:final pendingPayments) => pendingPayments,
             _ => const <PaymentInfo>[],
           };
 
@@ -73,7 +83,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             LicensePreviewLoaded() ||
             LicensePreviewError() =>
               const _SkeletonLoading(),
-            SubscriptionsError(:final failure) => AppErrorWidget(
+            SubscriptionsError(:final failure, :final subscriptions) when subscriptions.isEmpty => AppErrorWidget(
                 message: failure.toLocalizedString(context),
                 title: l10n.error,
                 retryLabel: l10n.retry,
@@ -83,7 +93,7 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                       .add(const SubscriptionsLoadRequested());
                 },
               ),
-            SubscriptionsLoaded(:final subscriptions) => RefreshIndicator(
+            SubscriptionsLoaded(:final subscriptions) || SubscriptionsError(:final subscriptions) => RefreshIndicator(
                 onRefresh: () async {
                   context
                       .read<SubscriptionsBloc>()

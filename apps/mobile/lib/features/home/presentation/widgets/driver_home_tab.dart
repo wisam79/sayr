@@ -127,6 +127,7 @@ class DriverHomeTab extends StatelessWidget {
       builder: (_) => BlocProvider(
         create: (_) => CreateTripDialogCubit(
           routeRepository: sl<core.RouteRepository>(),
+          tripRepository: sl<core.TripRepository>(),
         )..loadRoutes(),
         child: const CreateTripDialog(),
       ),

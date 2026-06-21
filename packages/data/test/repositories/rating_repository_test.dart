@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_data/src/models/rating_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:talker_flutter/talker_flutter.dart';
 
@@ -42,7 +43,7 @@ void main() {
             comment: any(named: 'comment'),
           ),
         ).thenAnswer(
-          (_) async => {
+          (_) async => RatingModel.fromJson(const {
             'id': 'rating-1',
             'trip_id': 'trip-1',
             'student_id': 'user-123',
@@ -50,7 +51,7 @@ void main() {
             'rating': 5,
             'created_at': '2026-06-18T10:00:00Z',
             'comment': 'Great ride',
-          },
+          }),
         );
 
         final result = await repository.submitRating(
@@ -136,14 +137,14 @@ void main() {
             studentId: 'user-123',
           ),
         ).thenAnswer(
-          (_) async => {
+          (_) async => RatingModel.fromJson(const {
             'id': 'rating-1',
             'trip_id': 'trip-1',
             'student_id': 'user-123',
             'driver_id': 'driver-1',
             'rating': 3,
             'created_at': '2026-06-18T10:00:00Z',
-          },
+          }),
         );
 
         final result = await repository.getTripRating(tripId);

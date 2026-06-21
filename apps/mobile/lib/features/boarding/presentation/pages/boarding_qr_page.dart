@@ -47,15 +47,26 @@ class _BoardingQrView extends StatelessWidget {
               prev is BoardingQrReady ? prev.proximityRecord : null;
           final currRecord =
               curr is BoardingQrReady ? curr.proximityRecord : null;
-          return prevRecord == null && currRecord != null;
+          final prevFailure =
+              prev is BoardingQrReady ? prev.proximityFailure : null;
+          final currFailure =
+              curr is BoardingQrReady ? curr.proximityFailure : null;
+          return (prevRecord == null && currRecord != null) ||
+              (prevFailure == null && currFailure != null);
         },
         listener: (context, state) {
-          if (state is BoardingQrReady && state.proximityRecord != null) {
-            final navigator = Navigator.of(context);
-            showDialog<void>(
-              context: context,
-              barrierDismissible: false,
-              builder: (dialogContext) {
+          if (state is BoardingQrReady) {
+            if (state.proximityFailure != null) {
+              SayrFlash.error(
+                context,
+                state.proximityFailure!.toLocalizedString(context),
+              );
+            } else if (state.proximityRecord != null) {
+              final navigator = Navigator.of(context);
+              showDialog<void>(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) {
                 return Dialog(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -105,7 +116,8 @@ class _BoardingQrView extends StatelessWidget {
               }
             });
           }
-        },
+        }
+      },
         child: BlocBuilder<BoardingQrCubit, BoardingQrState>(
           builder: (context, state) {
             return switch (state) {
