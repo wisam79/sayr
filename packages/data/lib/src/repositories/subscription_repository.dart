@@ -55,7 +55,8 @@ class SubscriptionRepositoryImpl extends BaseRepository
         return SubscriptionId(response);
       },
       errorMapper: (e) {
-        final message = e is supabase.PostgrestException ? e.message : e.toString();
+        final message =
+            e is supabase.PostgrestException ? e.message : e.toString();
         if (message.contains('Too many activation attempts')) {
           return const RateLimitFailure();
         }
