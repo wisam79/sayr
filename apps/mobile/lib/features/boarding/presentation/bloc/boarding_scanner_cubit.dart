@@ -79,7 +79,8 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
         );
       },
       onError: (Object error) {
-        emit(BoardingScannerError(failure: UnknownFailure(message: error.toString())));
+        emit(BoardingScannerError(
+            failure: UnknownFailure(message: error.toString())));
       },
     );
   }
@@ -137,7 +138,6 @@ class BoardingScannerCubit extends Cubit<BoardingScannerState> {
       },
     );
   }
-
 
   @override
   Future<void> close() async {

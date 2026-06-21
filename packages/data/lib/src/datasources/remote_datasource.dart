@@ -458,16 +458,13 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   // ---- Routes -------------------------------------------------------------
 
   @override
-  Future<List<RouteModel>> getActiveRoutes() =>
-      _routes.getActiveRoutes();
+  Future<List<RouteModel>> getActiveRoutes() => _routes.getActiveRoutes();
 
   @override
-  Future<List<RouteModel>> getMyDriverRoutes() =>
-      _routes.getMyDriverRoutes();
+  Future<List<RouteModel>> getMyDriverRoutes() => _routes.getMyDriverRoutes();
 
   @override
-  Future<RouteModel?> getRouteById(String id) =>
-      _routes.getRouteById(id);
+  Future<RouteModel?> getRouteById(String id) => _routes.getRouteById(id);
 
   @override
   Future<List<RouteModel>> searchRoutes(String query) =>
@@ -494,8 +491,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
   // ---- Trips --------------------------------------------------------------
 
   @override
-  Future<List<TripModel>> getActiveTrips() =>
-      _trips.getActiveTrips();
+  Future<List<TripModel>> getActiveTrips() => _trips.getActiveTrips();
 
   @override
   Future<String> createTrip({
@@ -505,12 +501,10 @@ class RemoteDatasourceImpl implements RemoteDatasource {
       _trips.createTrip(routeId: routeId, scheduledAt: scheduledAt);
 
   @override
-  Stream<List<TripModel>> watchTrip(String tripId) =>
-      _trips.watchTrip(tripId);
+  Stream<List<TripModel>> watchTrip(String tripId) => _trips.watchTrip(tripId);
 
   @override
-  Future<TripModel?> getTripById(String id) =>
-      _trips.getTripById(id);
+  Future<TripModel?> getTripById(String id) => _trips.getTripById(id);
 
   @override
   Future<TripModel> updateTripStatus({

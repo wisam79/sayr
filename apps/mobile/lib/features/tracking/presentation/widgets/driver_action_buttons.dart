@@ -84,7 +84,8 @@ class _SwipeButton extends StatelessWidget {
     );
   }
 
-  TrackingEvent _buildEvent(TripEvent event, AppLocalizations l10n) => switch (event) {
+  TrackingEvent _buildEvent(TripEvent event, AppLocalizations l10n) =>
+      switch (event) {
         TripEvent.arrive => TrackingDriverArrive(tripId: tripId),
         TripEvent.start => TrackingDriverStart(
             tripId: tripId,

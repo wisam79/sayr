@@ -98,10 +98,10 @@ class BoardingRepositoryImpl extends BaseRepository
             rows.map((r) => r['student_id'] as String).toSet().toList();
 
         try {
-          final profiles = await _remoteDatasource.getPublicProfiles(studentIds);
+          final profiles =
+              await _remoteDatasource.getPublicProfiles(studentIds);
           final nameMap = {
-            for (final p in profiles)
-              p.id: p.fullName,
+            for (final p in profiles) p.id: p.fullName,
           };
 
           return rows.map((r) {
@@ -117,7 +117,8 @@ class BoardingRepositoryImpl extends BaseRepository
             ).toEntity();
           }).toList();
         } catch (e, st) {
-          log.warning('Failed to resolve student names in watchTripPassengers', e, st);
+          log.warning(
+              'Failed to resolve student names in watchTripPassengers', e, st);
           return rows.map((r) {
             final studentId = r['student_id'] as String;
             return BoardingRecordModel(

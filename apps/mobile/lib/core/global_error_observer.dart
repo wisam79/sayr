@@ -29,16 +29,16 @@ class GlobalErrorObserver extends TalkerObserver {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
+          content: Text(
+            message,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Colors.red.shade800,
+          behavior: SnackBarBehavior.floating,
         ),
-        backgroundColor: Colors.red.shade800,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+      );
   }
 }

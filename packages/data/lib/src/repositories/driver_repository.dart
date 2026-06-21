@@ -27,8 +27,7 @@ class DriverRepositoryImpl extends BaseRepository implements DriverRepository {
   @override
   Future<Either<Failure, User>> getDriverProfile(UserId userId) async {
     return guard(() async {
-      final response =
-          await _remoteDatasource.fetchPublicProfile(userId.value);
+      final response = await _remoteDatasource.fetchPublicProfile(userId.value);
       if (response == null) {
         throw const NotFoundFailure(resource: 'profile');
       }

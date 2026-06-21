@@ -20,8 +20,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     LocationService? driverLocationService,
   })  : _tripRepository = tripRepository,
         _authRepository = authRepository,
-        _driverLocationService =
-            driverLocationService ?? sl<LocationService>(),
+        _driverLocationService = driverLocationService ?? sl<LocationService>(),
         super(const TrackingState.initial()) {
     on<TrackingLoadActiveTrips>(_onLoadActiveTrips);
     on<TrackingWatchTrip>(_onWatchTrip);
@@ -201,7 +200,8 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
         trip: trip,
         validActions: actions,
         currentLocation: currentLocation,
-        isTrackingLocation: isTrackingLocation ?? (_driverLocationService.isTracking == true),
+        isTrackingLocation:
+            isTrackingLocation ?? (_driverLocationService.isTracking == true),
         lastUpdated: DateTime.now(),
       ),
     );

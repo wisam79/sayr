@@ -34,7 +34,8 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
         .select()
         .eq('is_active', true)
         .order('title')
-        .withConverter((data) => data.map((e) => RouteModel.fromJson(e)).toList());
+        .withConverter(
+            (data) => data.map((e) => RouteModel.fromJson(e)).toList());
   }
 
   @override
@@ -60,12 +61,14 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
         .eq('driver_id', driverId)
         .eq('is_active', true)
         .order('title')
-        .withConverter((data) => data.map((e) => RouteModel.fromJson(e)).toList());
+        .withConverter(
+            (data) => data.map((e) => RouteModel.fromJson(e)).toList());
   }
 
   @override
   Future<RouteModel?> getRouteById(String id) async {
-    final data = await _client.from('routes').select().eq('id', id).maybeSingle();
+    final data =
+        await _client.from('routes').select().eq('id', id).maybeSingle();
     return data != null ? RouteModel.fromJson(data) : null;
   }
 
@@ -79,6 +82,7 @@ class RouteRemoteDatasourceImpl implements RouteRemoteDatasource {
           'title.ilike.%$query%,start_location.ilike.%$query%,end_location.ilike.%$query%',
         )
         .order('title')
-        .withConverter((data) => data.map((e) => RouteModel.fromJson(e)).toList());
+        .withConverter(
+            (data) => data.map((e) => RouteModel.fromJson(e)).toList());
   }
 }

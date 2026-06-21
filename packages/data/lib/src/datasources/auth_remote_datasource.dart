@@ -107,13 +107,18 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
   @override
   Future<UserModel?> fetchCurrentProfile(String userId) async {
-    final data = await _client.from('profiles').select().eq('id', userId).maybeSingle();
+    final data =
+        await _client.from('profiles').select().eq('id', userId).maybeSingle();
     return data != null ? UserModel.fromJson(data) : null;
   }
 
   @override
   Future<UserModel?> fetchPublicProfile(String userId) async {
-    final data = await _client.from('profiles_public').select().eq('id', userId).maybeSingle();
+    final data = await _client
+        .from('profiles_public')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
     return data != null ? UserModel.fromJson(data) : null;
   }
 
@@ -124,7 +129,8 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         .from('profiles_public')
         .select('id, full_name, avatar_url')
         .inFilter('id', userIds)
-        .withConverter((data) => data.map((e) => UserModel.fromJson(e)).toList());
+        .withConverter(
+            (data) => data.map((e) => UserModel.fromJson(e)).toList());
   }
 
   @override

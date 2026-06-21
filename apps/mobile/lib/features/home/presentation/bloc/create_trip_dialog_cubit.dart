@@ -106,14 +106,19 @@ abstract class CreateTripDialogState with _$CreateTripDialogState {
   const factory CreateTripDialogState({
     /// The list of available routes.
     @Default([]) List<Route> routes,
+
     /// The currently selected route for the trip.
     Route? selectedRoute,
+
     /// The scheduled date and time for the trip.
     DateTime? scheduledAt,
+
     /// Whether the trip is currently being submitted to the server.
     @Default(false) bool isSubmitting,
+
     /// Whether the routes are currently loading.
     @Default(true) bool loadingRoutes,
+
     /// The failure if any occurred during the process.
     Failure? failure,
   }) = _CreateTripDialogState;

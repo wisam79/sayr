@@ -11,19 +11,19 @@ abstract class CompleteProfileState with _$CompleteProfileState {
   const factory CompleteProfileState({
     /// List of available institutions (id, name, city).
     @Default([]) List<({String id, String name, String city})> institutions,
-    
+
     /// The currently selected institution ID.
     String? selectedInstitutionId,
-    
+
     /// The phone number entered by the user.
     @Default('') String phone,
-    
+
     /// Whether a save operation is in progress.
     @Default(false) bool isLoading,
-    
+
     /// Whether institutions are being fetched.
     @Default(true) bool isLoadingInstitutions,
-    
+
     /// Error message, if any.
     String? errorMessage,
   }) = _CompleteProfileState;

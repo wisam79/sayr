@@ -62,7 +62,6 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
     );
   }
 
-
   @override
   Future<Either<Failure, List<Route>>> getActiveRoutes() async {
     return _fetchWithCacheFallback(

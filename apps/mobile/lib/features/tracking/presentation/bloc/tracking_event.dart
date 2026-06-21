@@ -77,7 +77,8 @@ class TrackingDriverComplete extends TrackingEvent {
 /// Driver: Mark trip as absent.
 class TrackingDriverMarkAbsent extends TrackingEvent {
   /// Creates a [TrackingDriverMarkAbsent] event.
-  const TrackingDriverMarkAbsent({required this.tripId, required this.location});
+  const TrackingDriverMarkAbsent(
+      {required this.tripId, required this.location});
 
   /// The ID of the trip.
   final TripId tripId;

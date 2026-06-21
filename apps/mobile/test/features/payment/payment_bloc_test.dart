@@ -151,7 +151,9 @@ void main() {
     ],
   );
 
-  test('emits PaymentFailed with payment_timeout when polling times out after 100 iterations', () {
+  test(
+      'emits PaymentFailed with payment_timeout when polling times out after 100 iterations',
+      () {
     fakeAsync((async) {
       final localMockRepo = MockPaymentRepository();
       final localBloc = PaymentBloc(paymentRepository: localMockRepo);

@@ -102,8 +102,7 @@ abstract class BaseRepository {
           message: 'A required field is missing.',
           errors: ['A required field is missing.'],
         ),
-      _ =>
-        ServerFailure(message: e.message),
+      _ => ServerFailure(message: e.message),
     };
   }
 }

@@ -45,7 +45,8 @@ class BleBeaconService {
       final isSupported = await _blePeripheral.isSupported;
       if (!isSupported) {
         _logger.w(
-            'BLE Peripheral is not supported on this device. Falling back to mock.',);
+          'BLE Peripheral is not supported on this device. Falling back to mock.',
+        );
         _isMockMode = true;
         _startMockAdvertising(tripId, otp);
         return;
@@ -60,8 +61,11 @@ class BleBeaconService {
       await _blePeripheral.start(advertiseData: advertiseData);
       _logger.d('BLE Advertising started successfully');
     } catch (e, st) {
-      _logger.e('Failed to start BLE advertising, falling back to mock',
-          error: e, stackTrace: st,);
+      _logger.e(
+        'Failed to start BLE advertising, falling back to mock',
+        error: e,
+        stackTrace: st,
+      );
       _isMockMode = true;
       _startMockAdvertising(tripId, otp);
     }
@@ -91,7 +95,8 @@ class BleBeaconService {
       final isAvailable = await FlutterBluePlus.isSupported;
       if (!isAvailable) {
         _logger.w(
-            'Bluetooth is not supported on this device. Using mock scanning.',);
+          'Bluetooth is not supported on this device. Using mock scanning.',
+        );
         _isMockMode = true;
         _startMockScanning();
         return false;
@@ -100,7 +105,8 @@ class BleBeaconService {
       final adapterState = await FlutterBluePlus.adapterState.first;
       if (adapterState != BluetoothAdapterState.on) {
         _logger.w(
-            'Bluetooth adapter is off (state: $adapterState). Using mock scanning.',);
+          'Bluetooth adapter is off (state: $adapterState). Using mock scanning.',
+        );
         _isMockMode = true;
         _startMockScanning();
         return false;
@@ -138,8 +144,11 @@ class BleBeaconService {
       _logger.d('Real BLE scanning started successfully');
       return true;
     } catch (e, st) {
-      _logger.e('Failed to start real BLE scan, falling back to mock',
-          error: e, stackTrace: st,);
+      _logger.e(
+        'Failed to start real BLE scan, falling back to mock',
+        error: e,
+        stackTrace: st,
+      );
       _isMockMode = true;
       _startMockScanning();
       return false;
@@ -242,7 +251,8 @@ class BleBeaconService {
     }
 
     updateOtp();
-    _otpSubscription = Stream<int>.periodic(const Duration(seconds: 30)).listen((_) => updateOtp());
+    _otpSubscription = Stream<int>.periodic(const Duration(seconds: 30))
+        .listen((_) => updateOtp());
   }
 
   /// Stops rotating BLE advertising.

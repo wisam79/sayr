@@ -8,7 +8,8 @@ part 'app_database.g.dart';
 
 /// Local SQLite database via Drift for offline location queue + caching.
 @lazySingleton
-@DriftDatabase(tables: [PendingLocationUpdate, CachedTrip, CachedRoute, TripStatusQueue])
+@DriftDatabase(
+    tables: [PendingLocationUpdate, CachedTrip, CachedRoute, TripStatusQueue])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 

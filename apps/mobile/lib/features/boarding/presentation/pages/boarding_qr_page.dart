@@ -67,57 +67,57 @@ class _BoardingQrView extends StatelessWidget {
                 context: context,
                 barrierDismissible: false,
                 builder: (dialogContext) {
-                return Dialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xl),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 120,
-                          width: 120,
-                          child: Lottie.network(
-                            'https://lottie.host/7ca67c51-57d4-469b-9861-12c8b74681f2/Z7oH1oWwK8.json',
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.check_circle,
-                                color: AppColors.success,
-                                size: 80,
-                              );
-                            },
-                            repeat: false,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          l10n.boardingProximitySuccess,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                  return Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                  ),
-                );
-              },
-            );
-            final rootNavigator = Navigator.of(context, rootNavigator: true);
-            Future.delayed(const Duration(seconds: 2), () {
-              if (rootNavigator.mounted) {
-                rootNavigator.pop();
-              }
-              if (navigator.mounted) {
-                navigator.pop();
-              }
-            });
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 120,
+                            width: 120,
+                            child: Lottie.network(
+                              'https://lottie.host/7ca67c51-57d4-469b-9861-12c8b74681f2/Z7oH1oWwK8.json',
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.success,
+                                  size: 80,
+                                );
+                              },
+                              repeat: false,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          Text(
+                            l10n.boardingProximitySuccess,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+              final rootNavigator = Navigator.of(context, rootNavigator: true);
+              Future.delayed(const Duration(seconds: 2), () {
+                if (rootNavigator.mounted) {
+                  rootNavigator.pop();
+                }
+                if (navigator.mounted) {
+                  navigator.pop();
+                }
+              });
+            }
           }
-        }
-      },
+        },
         child: BlocBuilder<BoardingQrCubit, BoardingQrState>(
           builder: (context, state) {
             return switch (state) {

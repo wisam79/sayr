@@ -173,9 +173,8 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
           );
         },
         (coords) {
-          final points = coords
-              .map((c) => LatLng(c.latitude, c.longitude))
-              .toList();
+          final points =
+              coords.map((c) => LatLng(c.latitude, c.longitude)).toList();
           final isApprox = points.length == 2 &&
               points.first.latitude == start.latitude &&
               points.first.longitude == start.longitude &&

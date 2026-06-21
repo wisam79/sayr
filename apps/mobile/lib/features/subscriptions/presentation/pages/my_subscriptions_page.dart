@@ -83,7 +83,9 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
             LicensePreviewLoaded() ||
             LicensePreviewError() =>
               const _SkeletonLoading(),
-            SubscriptionsError(:final failure, :final subscriptions) when subscriptions.isEmpty => AppErrorWidget(
+            SubscriptionsError(:final failure, :final subscriptions)
+                when subscriptions.isEmpty =>
+              AppErrorWidget(
                 message: failure.toLocalizedString(context),
                 title: l10n.error,
                 retryLabel: l10n.retry,
@@ -93,7 +95,9 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
                       .add(const SubscriptionsLoadRequested());
                 },
               ),
-            SubscriptionsLoaded(:final subscriptions) || SubscriptionsError(:final subscriptions) => RefreshIndicator(
+            SubscriptionsLoaded(:final subscriptions) ||
+            SubscriptionsError(:final subscriptions) =>
+              RefreshIndicator(
                 onRefresh: () async {
                   context
                       .read<SubscriptionsBloc>()

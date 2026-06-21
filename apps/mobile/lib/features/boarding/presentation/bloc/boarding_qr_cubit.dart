@@ -74,7 +74,9 @@ class BoardingQrReady extends BoardingQrState {
       proximityRecord: proximityRecord ?? this.proximityRecord,
       refreshFailure:
           clearRefreshFailure ? null : (refreshFailure ?? this.refreshFailure),
-      proximityFailure: clearProximityFailure ? null : (proximityFailure ?? this.proximityFailure),
+      proximityFailure: clearProximityFailure
+          ? null
+          : (proximityFailure ?? this.proximityFailure),
     );
   }
 }
@@ -153,7 +155,8 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final current = state;
     if (current is! BoardingQrReady || current.proximityOtp == null) return;
 
-    emit(current.copyWith(isSubmittingProximity: true, clearProximityFailure: true));
+    emit(current.copyWith(
+        isSubmittingProximity: true, clearProximityFailure: true));
 
     final result = await _boardingRepository.validateBoardingViaProximity(
       tripId: current.tripId,
@@ -239,7 +242,8 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
 
   void _startTimer() {
     if (_timerSubscription != null) return;
-    _timerSubscription = Stream.periodic(const Duration(seconds: 1), (tick) => tick).listen((_) {
+    _timerSubscription =
+        Stream.periodic(const Duration(seconds: 1), (tick) => tick).listen((_) {
       final expires = _currentExpiresAt;
       final current = state;
       if (expires == null || current is! BoardingQrReady) return;
@@ -253,7 +257,8 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
       final lastRefresh = _lastRefreshTime;
       final hasError = current.refreshFailure != null;
       final retryInterval = hasError ? 5 : 25;
-      if (lastRefresh == null || now.difference(lastRefresh).inSeconds >= retryInterval) {
+      if (lastRefresh == null ||
+          now.difference(lastRefresh).inSeconds >= retryInterval) {
         _refreshToken();
       }
     });

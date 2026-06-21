@@ -97,13 +97,18 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
 
   @override
   Future<List<TripModel>> getActiveTrips() async {
-    return _client.from('trips').select().inFilter('status', [
-      'scheduled',
-      'driver_waiting',
-      'in_transit',
-    ]).order('scheduled_at', ascending: true)
-      .withConverter((data) => data.map((e) => TripModel.fromJson(e)).toList())
-      .timeout(const Duration(seconds: 15));
+    return _client
+        .from('trips')
+        .select()
+        .inFilter('status', [
+          'scheduled',
+          'driver_waiting',
+          'in_transit',
+        ])
+        .order('scheduled_at', ascending: true)
+        .withConverter(
+            (data) => data.map((e) => TripModel.fromJson(e)).toList())
+        .timeout(const Duration(seconds: 15));
   }
 
   @override
@@ -124,11 +129,16 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
       .from('trips')
       .stream(primaryKey: ['id'])
       .eq('id', tripId)
-      .map((List<Map<String, dynamic>> rows) => rows.map((e) => TripModel.fromJson(e)).toList());
+      .map((List<Map<String, dynamic>> rows) =>
+          rows.map((e) => TripModel.fromJson(e)).toList());
 
   @override
   Future<TripModel?> getTripById(String id) async {
-    final data = await _client.from('trips').select().eq('id', id).maybeSingle()
+    final data = await _client
+        .from('trips')
+        .select()
+        .eq('id', id)
+        .maybeSingle()
         .timeout(const Duration(seconds: 15));
     return data != null ? TripModel.fromJson(data) : null;
   }
@@ -210,9 +220,12 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
       ).timeout(const Duration(seconds: 15));
 
   @override
-  Future<Map<String, dynamic>?> getPaymentStatus(String paymentId) =>
-      _client.from('payments').select().eq('id', paymentId).maybeSingle()
-        .timeout(const Duration(seconds: 15));
+  Future<Map<String, dynamic>?> getPaymentStatus(String paymentId) => _client
+      .from('payments')
+      .select()
+      .eq('id', paymentId)
+      .maybeSingle()
+      .timeout(const Duration(seconds: 15));
 
   @override
   Future<List<Map<String, dynamic>>> getPendingPayments() async {
@@ -228,7 +241,11 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
 
   @override
   Future<DriverModel?> getDriverById(String driverId) async {
-    final data = await _client.from('drivers').select().eq('id', driverId).maybeSingle()
+    final data = await _client
+        .from('drivers')
+        .select()
+        .eq('id', driverId)
+        .maybeSingle()
         .timeout(const Duration(seconds: 15));
     return data != null ? DriverModel.fromJson(data) : null;
   }

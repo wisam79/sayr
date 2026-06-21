@@ -36,7 +36,8 @@ class SubscriptionRemoteDatasourceImpl implements SubscriptionRemoteDatasource {
         .select()
         .eq('student_id', studentId)
         .order('start_date', ascending: false)
-        .withConverter((data) => data.map((e) => SubscriptionModel.fromJson(e)).toList());
+        .withConverter(
+            (data) => data.map((e) => SubscriptionModel.fromJson(e)).toList());
   }
 
   @override

@@ -10,7 +10,7 @@ class RoutingServiceImpl extends BaseRepository implements RoutingService {
   RoutingServiceImpl({
     required OsrmRemoteDatasource datasource,
     required super.talker,
-  })  : _datasource = datasource;
+  }) : _datasource = datasource;
 
   final OsrmRemoteDatasource _datasource;
 

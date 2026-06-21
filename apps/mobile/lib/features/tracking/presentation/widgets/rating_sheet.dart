@@ -24,8 +24,10 @@ class RatingSheet extends StatefulWidget {
 }
 
 class _RatingState {
-  const _RatingState(
-      {required this.selectedRating, required this.isSubmitting,});
+  const _RatingState({
+    required this.selectedRating,
+    required this.isSubmitting,
+  });
   final int selectedRating;
   final bool isSubmitting;
 }
@@ -203,8 +205,11 @@ class _RatingSheetState extends State<RatingSheet> {
                                               width: 120,
                                               child: Lottie.network(
                                                 'https://lottie.host/7ca67c51-57d4-469b-9861-12c8b74681f2/Z7oH1oWwK8.json',
-                                                errorBuilder: (context, error,
-                                                    stackTrace,) {
+                                                errorBuilder: (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) {
                                                   return const Icon(
                                                     Icons.check_circle,
                                                     color: AppColors.success,
@@ -215,7 +220,8 @@ class _RatingSheetState extends State<RatingSheet> {
                                               ),
                                             ),
                                             const SizedBox(
-                                                height: AppSpacing.lg,),
+                                              height: AppSpacing.lg,
+                                            ),
                                             Text(
                                               l10n.ratingSuccess,
                                               style: Theme.of(context)

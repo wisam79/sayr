@@ -127,12 +127,22 @@ void main() {
 
       when(
         () => mockTripRepo.bulkUpdateLocations(
-          any<List<({TripId tripId, double lat, double lng,})>>(),
+          any<
+              List<
+                  ({
+                    TripId tripId,
+                    double lat,
+                    double lng,
+                  })>>(),
         ),
       ).thenAnswer(
         (invocation) async => Right(
-          invocation.positionalArguments[0]
-              as List<({TripId tripId, double lat, double lng,})>,
+          invocation.positionalArguments[0] as List<
+              ({
+                TripId tripId,
+                double lat,
+                double lng,
+              })>,
         ),
       );
 

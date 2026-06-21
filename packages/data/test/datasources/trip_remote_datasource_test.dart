@@ -112,10 +112,10 @@ void main() {
       };
       final expectedTrip = TripModel.fromJson(tripJson);
 
-      when(() => mockStreamBuilder.map<List<TripModel>>(any()))
-          .thenAnswer(
+      when(() => mockStreamBuilder.map<List<TripModel>>(any())).thenAnswer(
         (invocation) {
-          final callback = invocation.positionalArguments[0] as List<TripModel> Function(List<Map<String, dynamic>>);
+          final callback = invocation.positionalArguments[0] as List<TripModel>
+              Function(List<Map<String, dynamic>>);
           return Stream.value(callback([tripJson]));
         },
       );

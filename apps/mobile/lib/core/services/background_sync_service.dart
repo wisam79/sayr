@@ -130,7 +130,10 @@ class BackgroundSyncService {
           .debug('BackgroundSyncService: Workmanager initialized successfully');
     } catch (e, st) {
       _talker.error(
-          'BackgroundSyncService: Failed to initialize Workmanager', e, st,);
+        'BackgroundSyncService: Failed to initialize Workmanager',
+        e,
+        st,
+      );
     }
   }
 
@@ -147,10 +150,14 @@ class BackgroundSyncService {
         ),
       );
       _talker.debug(
-          'BackgroundSyncService: Registered one-off sync task: $uniqueId',);
+        'BackgroundSyncService: Registered one-off sync task: $uniqueId',
+      );
     } catch (e, st) {
       _talker.error(
-          'BackgroundSyncService: Failed to register one-off task', e, st,);
+        'BackgroundSyncService: Failed to register one-off task',
+        e,
+        st,
+      );
     }
   }
 }

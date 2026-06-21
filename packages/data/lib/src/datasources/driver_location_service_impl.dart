@@ -11,7 +11,8 @@ class DriverLocationServiceImpl implements LocationService {
   DriverLocationServiceImpl();
 
   StreamSubscription<geo.Position>? _positionSubscription;
-  final StreamController<Either<Failure, Coordinates>> _locationStreamController =
+  final StreamController<Either<Failure, Coordinates>>
+      _locationStreamController =
       StreamController<Either<Failure, Coordinates>>.broadcast();
 
   geo.Position? _lastSentPosition;

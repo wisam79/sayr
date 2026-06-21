@@ -32,7 +32,8 @@ class OsrmRemoteDatasource {
     );
 
     if (response.status != 200) {
-      throw Exception('Failed to fetch route geometry: HTTP ${response.status}');
+      throw Exception(
+          'Failed to fetch route geometry: HTTP ${response.status}');
     }
 
     final data = response.data as Map<String, dynamic>?;

@@ -15,7 +15,8 @@ class MockFunctionsClient extends Mock implements FunctionsClient {}
 
 class MockFunctionResponse extends Mock implements FunctionResponse {}
 
-class MockPostgrestBuilder<T, R, C> extends Mock implements PostgrestBuilder<T, R, C> {
+class MockPostgrestBuilder<T, R, C> extends Mock
+    implements PostgrestBuilder<T, R, C> {
   late Future<T> _future;
   void completeWith(Future<T> future) => _future = future;
 
@@ -41,7 +42,8 @@ class MockPostgrestBuilder<T, R, C> extends Mock implements PostgrestBuilder<T, 
 class MockPostgrestFilterBuilder<T> extends MockPostgrestBuilder<T, T, T>
     implements PostgrestFilterBuilder<T> {
   @override
-  PostgrestBuilder<U, U, T> withConverter<U>(PostgrestConverter<U, T> converter) {
+  PostgrestBuilder<U, U, T> withConverter<U>(
+      PostgrestConverter<U, T> converter) {
     final mock = MockPostgrestBuilder<U, U, T>();
     mock.completeWith(_future.then((value) => converter(value)));
     return mock;
@@ -51,7 +53,8 @@ class MockPostgrestFilterBuilder<T> extends MockPostgrestBuilder<T, T, T>
 class MockPostgrestTransformBuilder<T> extends MockPostgrestBuilder<T, T, T>
     implements PostgrestTransformBuilder<T> {
   @override
-  PostgrestBuilder<U, U, T> withConverter<U>(PostgrestConverter<U, T> converter) {
+  PostgrestBuilder<U, U, T> withConverter<U>(
+      PostgrestConverter<U, T> converter) {
     final mock = MockPostgrestBuilder<U, U, T>();
     mock.completeWith(_future.then((value) => converter(value)));
     return mock;

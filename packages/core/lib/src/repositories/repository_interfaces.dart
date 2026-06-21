@@ -117,12 +117,15 @@ abstract class TripRepository {
   });
 
   /// Bulk update locations.
-  Future<Either<Failure, List<
-            ({
-              TripId tripId,
-              double lat,
-              double lng,
-            })>>> bulkUpdateLocations(
+  Future<
+      Either<
+          Failure,
+          List<
+              ({
+                TripId tripId,
+                double lat,
+                double lng,
+              })>>> bulkUpdateLocations(
     List<
             ({
               TripId tripId,

@@ -171,7 +171,8 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
             );
             updatedTrip = response.toEntity();
             try {
-              final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
+              final cached =
+                  List<Trip>.from(await _localDatasource.getCachedTrips());
               final index = cached.indexWhere((t) => t.id == tripId);
               if (index != -1) {
                 cached[index] = updatedTrip;
@@ -193,7 +194,8 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
                 latitude: location?.latitude,
                 longitude: location?.longitude,
               );
-              final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
+              final cached =
+                  List<Trip>.from(await _localDatasource.getCachedTrips());
               final index = cached.indexWhere((t) => t.id == tripId);
               if (index != -1) {
                 final oldTrip = cached[index];
@@ -294,12 +296,15 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
   }
 
   @override
-  Future<Either<Failure, List<
-            ({
-              TripId tripId,
-              double lat,
-              double lng,
-            })>>> bulkUpdateLocations(
+  Future<
+      Either<
+          Failure,
+          List<
+              ({
+                TripId tripId,
+                double lat,
+                double lng,
+              })>>> bulkUpdateLocations(
     List<
             ({
               TripId tripId,
