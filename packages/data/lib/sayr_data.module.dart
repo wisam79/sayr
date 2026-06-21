@@ -57,6 +57,8 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
         () => dataModule.secureStorage);
     gh.lazySingleton<_i583.SayrSupabase>(() => dataModule.supabase);
+    gh.lazySingleton<_i549.BackgroundSyncTrigger>(
+        () => _i549.BackgroundSyncTrigger());
     gh.lazySingleton<_i385.LocationService>(
         () => _i896.DriverLocationServiceImpl());
     gh.lazySingleton<_i368.LocationQueueDao>(
@@ -133,12 +135,13 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
               remoteDatasource: gh<_i263.RemoteDatasource>(),
               talker: gh<_i207.Talker>(),
             ));
-    gh.lazySingleton<_i385.AuthRepository>(() => _i479.AuthRepositoryImpl(
+    gh.lazySingleton<_i385.TripRepository>(() => _i549.TripRepositoryImpl(
           remoteDatasource: gh<_i263.RemoteDatasource>(),
           localDatasource: gh<_i1015.LocalDatasource>(),
           talker: gh<_i207.Talker>(),
+          syncTrigger: gh<_i549.BackgroundSyncTrigger>(),
         ));
-    gh.lazySingleton<_i385.TripRepository>(() => _i549.TripRepositoryImpl(
+    gh.lazySingleton<_i385.AuthRepository>(() => _i479.AuthRepositoryImpl(
           remoteDatasource: gh<_i263.RemoteDatasource>(),
           localDatasource: gh<_i1015.LocalDatasource>(),
           talker: gh<_i207.Talker>(),

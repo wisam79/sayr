@@ -116,10 +116,53 @@ jobs:
       - name: Run tests
         run: melos run test
 
+  build_mobile:
+    name: Flutter Build Check (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: analyze
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install Melos
+        run: dart pub global activate melos
+
+      - name: Bootstrap
+        run: melos bootstrap
+
+      - name: Cache build_runner outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            .dart_tool/build/
+            apps/mobile/.dart_tool/build/
+            packages/core/.dart_tool/build/
+            packages/data/.dart_tool/build/
+          key: ${{ runner.os }}-build-runner-${{ hashFiles('**/pubspec.lock', '**/build.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-runner-
+
+      - name: Run build_runner
+        run: melos run build:runner
+
+      - name: Build Debug APK
+        run: |
+          cd apps/mobile
+          flutter build apk --debug
+
   admin:
     name: Admin Lint & Build Check
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    needs: [analyze, test]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

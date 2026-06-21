@@ -236,7 +236,7 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
         .eq('method', 'zaincash')
         .order('created_at', ascending: false)
         .timeout(const Duration(seconds: 15));
-    return List<Map<String, dynamic>>.from(response as Iterable);
+    return List<Map<String, dynamic>>.from(response);
   }
 
   @override

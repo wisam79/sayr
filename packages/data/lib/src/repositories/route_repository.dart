@@ -86,28 +86,31 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
 
   @override
   Future<Either<Failure, Route>> getById(RouteId id) async {
-    try {
-      final response = await _remoteDatasource.getRouteById(id.value);
-      if (response == null) {
-        return const Left(NotFoundFailure(resource: 'route'));
-      }
-      final route = response.toEntity();
-      return Right(route);
-    } catch (e) {
-      // Offline fallback: look the route up in the local cache by id.
+    return guard(() async {
       try {
-        final cached = await _localDatasource.getCachedRoutes();
-        final route = cached.firstWhere((r) => r.id == id);
-        return Right(route);
-      } catch (cacheError, st) {
-        log.warning(
-          'Failed to read cached route during offline fallback',
-          cacheError,
-          st,
-        );
+        final response = await _remoteDatasource.getRouteById(id.value);
+        if (response == null) {
+          throw const NotFoundFailure(resource: 'route');
+        }
+        return response.toEntity();
+      } on Failure {
+        rethrow;
+      } catch (e) {
+        // Offline fallback: look the route up in the local cache by id.
+        try {
+          final cached = await _localDatasource.getCachedRoutes();
+          final route = cached.firstWhere((r) => r.id == id);
+          return route;
+        } catch (cacheError, st) {
+          log.warning(
+            'Failed to read cached route during offline fallback',
+            cacheError,
+            st,
+          );
+        }
+        rethrow;
       }
-      return Left(mapException(e));
-    }
+    });
   }
 
   @override

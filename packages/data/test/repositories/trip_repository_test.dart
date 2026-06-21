@@ -27,6 +27,7 @@ void main() {
       remoteDatasource: mockRemote,
       localDatasource: mockLocal,
       talker: Talker(),
+      syncTrigger: BackgroundSyncTrigger(),
     );
   });
 
@@ -453,6 +454,11 @@ void main() {
       test('returns ServerFailure when remote throws exception', () async {
         when(() => mockRemote.bulkUpdateTripLocations(any()))
             .thenThrow(Exception('Bulk insert failed'));
+        when(() => mockRemote.updateTripLocation(
+              tripId: any(named: 'tripId'),
+              lat: any(named: 'lat'),
+              lng: any(named: 'lng'),
+            )).thenThrow(Exception('Fallback failed'));
 
         final result = await repository.bulkUpdateLocations([
           (tripId: const TripId('trip-1'), lat: 33.0, lng: 44.0),

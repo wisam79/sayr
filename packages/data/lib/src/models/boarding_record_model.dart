@@ -9,9 +9,9 @@ abstract class BoardingRecordModel with _$BoardingRecordModel {
   const factory BoardingRecordModel({
     required String id,
     @JsonKey(name: 'trip_id') required String tripId,
-    @JsonKey(name: 'subscription_id') required String subscriptionId,
     @JsonKey(name: 'student_id') required String studentId,
     @JsonKey(name: 'boarded_at') required DateTime boardedAt,
+    @JsonKey(name: 'subscription_id') String? subscriptionId,
     @JsonKey(name: 'student_name') String? studentName,
     @JsonKey(name: 'boarding_method') @Default('qr_scan') String boardingMethod,
   }) = _BoardingRecordModel;
@@ -24,7 +24,8 @@ abstract class BoardingRecordModel with _$BoardingRecordModel {
   BoardingRecord toEntity() => BoardingRecord(
         id: BoardingId(id),
         tripId: TripId(tripId),
-        subscriptionId: SubscriptionId(subscriptionId),
+        subscriptionId:
+            subscriptionId != null ? SubscriptionId(subscriptionId!) : null,
         studentId: UserId(studentId),
         studentName: studentName,
         boardedAt: boardedAt,

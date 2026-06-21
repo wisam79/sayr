@@ -199,9 +199,9 @@ Future<void> runSayrApp() async {
 
   // Initialize Background Sync
   await BackgroundSyncService.initialize();
-  TripRepositoryImpl.syncTrigger = () {
+  sl<BackgroundSyncTrigger>().setTrigger(() {
     unawaited(BackgroundSyncService.triggerOneOffSync());
-  };
+  });
 
   // Initialize FCM service (non-blocking)
   unawaited(FcmService.init());

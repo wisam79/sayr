@@ -83,9 +83,14 @@ class ChatRemoteDatasourceImpl implements ChatRemoteDatasource {
         .or('student_id.eq.$currentUserId,driver_user_id.eq.$currentUserId')
         .order('updated_at', ascending: false);
 
-    return List<Map<String, dynamic>>.from(response as Iterable);
+    return List<Map<String, dynamic>>.from(response);
   }
 
+  /// Note: Supabase Realtime `.stream()` does not support complex `.or()` filters
+  /// (e.g. listening only to conversations where student_id == userId OR driver_user_id == userId).
+  /// As a result, we listen to the full conversations stream, rely on Row Level Security (RLS)
+  /// to restrict rows at the database server level, and perform final filtering in-memory
+  /// in the repository layer.
   @override
   Stream<List<Map<String, dynamic>>> watchMyConversations(
     String currentUserId,
@@ -134,7 +139,7 @@ class ChatRemoteDatasourceImpl implements ChatRemoteDatasource {
         .eq('conversation_id', conversationId)
         .order('created_at', ascending: true)
         .limit(50);
-    return List<Map<String, dynamic>>.from(response as Iterable);
+    return List<Map<String, dynamic>>.from(response);
   }
 
   @override

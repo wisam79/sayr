@@ -61,11 +61,15 @@ Future<void> initBackgroundDependencies() async {
   );
   sl.registerSingleton<RemoteDatasource>(remoteDatasource);
 
+  final syncTrigger = BackgroundSyncTrigger();
+  sl.registerSingleton<BackgroundSyncTrigger>(syncTrigger);
+
   // Repositories
   final tripRepository = TripRepositoryImpl(
     remoteDatasource: remoteDatasource,
     localDatasource: localDatasource,
     talker: talker,
+    syncTrigger: syncTrigger,
   );
   sl.registerSingleton<TripRepository>(tripRepository);
 }

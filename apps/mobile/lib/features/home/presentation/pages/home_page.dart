@@ -86,7 +86,7 @@ class _HomeViewState extends State<_HomeView> {
                 if (index == 0) _HeaderActions(l10n: l10n),
               ],
             ),
-            body: IndexedStack(
+            body: LazyIndexedStack(
               index: index,
               children: isDriver
                   ? [
@@ -351,6 +351,49 @@ class _AnimatedNavIcon extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class LazyIndexedStack extends StatefulWidget {
+  const LazyIndexedStack({
+    required this.index,
+    required this.children,
+    super.key,
+  });
+
+  final int index;
+  final List<Widget> children;
+
+  @override
+  State<LazyIndexedStack> createState() => _LazyIndexedStackState();
+}
+
+class _LazyIndexedStackState extends State<LazyIndexedStack> {
+  late List<bool> _activated = List.generate(
+    widget.children.length,
+    (i) => i == widget.index,
+  );
+
+  @override
+  void didUpdateWidget(LazyIndexedStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.children.length != _activated.length) {
+      _activated = List.generate(
+        widget.children.length,
+        (i) => i < _activated.length && _activated[i],
+      );
+    }
+    _activated[widget.index] = true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return IndexedStack(
+      index: widget.index,
+      children: List.generate(widget.children.length, (i) {
+        return _activated[i] ? widget.children[i] : const SizedBox.shrink();
+      }),
     );
   }
 }

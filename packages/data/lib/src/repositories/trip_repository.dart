@@ -9,8 +9,21 @@ import 'package:sayr_data/src/datasources/local_datasource.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
-/// Callback type for triggering background synchronization.
-typedef BackgroundSyncTrigger = void Function();
+/// Trigger for background synchronization.
+@lazySingleton
+class BackgroundSyncTrigger {
+  void Function()? _trigger;
+
+  /// Sets the callback function to be executed when sync is triggered.
+  void setTrigger(void Function() trigger) {
+    _trigger = trigger;
+  }
+
+  /// Triggers the background sync by invoking the set callback.
+  void call() {
+    _trigger?.call();
+  }
+}
 
 /// Concrete implementation of TripRepository using Remote and Local data sources.
 @LazySingleton(as: TripRepository)
@@ -19,13 +32,13 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
     required RemoteDatasource remoteDatasource,
     required LocalDatasource localDatasource,
     required super.talker,
+    required BackgroundSyncTrigger syncTrigger,
   })  : _remoteDatasource = remoteDatasource,
-        _localDatasource = localDatasource;
+        _localDatasource = localDatasource,
+        _syncTrigger = syncTrigger;
   final RemoteDatasource _remoteDatasource;
   final LocalDatasource _localDatasource;
-
-  /// Global trigger for background sync, set by the application.
-  static BackgroundSyncTrigger? syncTrigger;
+  final BackgroundSyncTrigger _syncTrigger;
 
   /// Runs [fetch] against the remote source, caches the result on success, and
   /// transparently falls back to the local cache when the network call fails.
@@ -158,90 +171,120 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           );
         }
         return guard(() async {
-          Trip updatedTrip;
           try {
-            final response = await retry(
-              () => _remoteDatasource.updateTripStatus(
-                tripId: tripId.value,
-                newStatus: _statusToDb(newStatus),
-                lat: location?.latitude,
-                lng: location?.longitude,
-              ),
-              maxAttempts: 3,
+            return await _tryRemoteStatusUpdate(
+              tripId: tripId,
+              newStatus: newStatus,
+              location: location,
             );
-            updatedTrip = response.toEntity();
-            try {
-              final cached =
-                  List<Trip>.from(await _localDatasource.getCachedTrips());
-              final index = cached.indexWhere((t) => t.id == tripId);
-              if (index != -1) {
-                cached[index] = updatedTrip;
-              } else {
-                cached.add(updatedTrip);
-              }
-              await _localDatasource.cacheTrips(cached);
-            } catch (cacheErr, st) {
-              log.warning(
-                  'Failed to update local cache on status change success',
-                  cacheErr,
-                  st);
-            }
           } catch (remoteErr) {
-            try {
-              await _localDatasource.enqueueTripStatus(
-                tripId: tripId.value,
-                status: _statusToDb(newStatus),
-                latitude: location?.latitude,
-                longitude: location?.longitude,
-              );
-              final cached =
-                  List<Trip>.from(await _localDatasource.getCachedTrips());
-              final index = cached.indexWhere((t) => t.id == tripId);
-              if (index != -1) {
-                final oldTrip = cached[index];
-                updatedTrip = oldTrip.copyWith(
-                  status: newStatus,
-                  lastLocation: location ?? oldTrip.lastLocation,
-                  startedAt: newStatus == TripStatus.inTransit
-                      ? DateTime.now()
-                      : oldTrip.startedAt,
-                  endedAt: (newStatus == TripStatus.completed ||
-                          newStatus == TripStatus.cancelled)
-                      ? DateTime.now()
-                      : oldTrip.endedAt,
-                );
-                cached[index] = updatedTrip;
-                await _localDatasource.cacheTrips(cached);
-              } else {
-                updatedTrip = trip.copyWith(
-                  status: newStatus,
-                  lastLocation: location ?? trip.lastLocation,
-                  startedAt: newStatus == TripStatus.inTransit
-                      ? DateTime.now()
-                      : trip.startedAt,
-                  endedAt: (newStatus == TripStatus.completed ||
-                          newStatus == TripStatus.cancelled)
-                      ? DateTime.now()
-                      : trip.endedAt,
-                );
-                await _localDatasource.cacheTrips([...cached, updatedTrip]);
-              }
-              syncTrigger?.call();
-            } catch (cacheErr, st) {
-              log.warning(
-                  'Failed to update local cache during offline fallback',
-                  cacheErr,
-                  st);
-              updatedTrip = trip.copyWith(
-                status: newStatus,
-                lastLocation: location ?? trip.lastLocation,
-              );
-            }
+            return _enqueueStatusOffline(
+              trip: trip,
+              newStatus: newStatus,
+              location: location,
+            );
           }
-          return updatedTrip;
         });
       },
     );
+  }
+
+  Future<Trip> _tryRemoteStatusUpdate({
+    required TripId tripId,
+    required TripStatus newStatus,
+    Coordinates? location,
+  }) async {
+    final response = await retry(
+      () => _remoteDatasource.updateTripStatus(
+        tripId: tripId.value,
+        newStatus: _statusToDb(newStatus),
+        lat: location?.latitude,
+        lng: location?.longitude,
+      ),
+      maxAttempts: 3,
+    );
+    final updatedTrip = response.toEntity();
+    await _updateLocalCacheAfterRemote(updatedTrip);
+    return updatedTrip;
+  }
+
+  Future<void> _updateLocalCacheAfterRemote(Trip updatedTrip) async {
+    try {
+      final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
+      final index = cached.indexWhere((t) => t.id == updatedTrip.id);
+      if (index != -1) {
+        cached[index] = updatedTrip;
+      } else {
+        cached.add(updatedTrip);
+      }
+      await _localDatasource.cacheTrips(cached);
+    } catch (cacheErr, st) {
+      log.warning(
+        'Failed to update local cache on status change success',
+        cacheErr,
+        st,
+      );
+    }
+  }
+
+  Future<Trip> _enqueueStatusOffline({
+    required Trip trip,
+    required TripStatus newStatus,
+    Coordinates? location,
+  }) async {
+    final tripId = trip.id;
+    try {
+      await _localDatasource.enqueueTripStatus(
+        tripId: tripId.value,
+        status: _statusToDb(newStatus),
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+      );
+      final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
+      final index = cached.indexWhere((t) => t.id == tripId);
+      Trip updatedTrip;
+      if (index != -1) {
+        final oldTrip = cached[index];
+        updatedTrip = oldTrip.copyWith(
+          status: newStatus,
+          lastLocation: location ?? oldTrip.lastLocation,
+          startedAt: newStatus == TripStatus.inTransit
+              ? DateTime.now()
+              : oldTrip.startedAt,
+          endedAt: (newStatus == TripStatus.completed ||
+                  newStatus == TripStatus.cancelled)
+              ? DateTime.now()
+              : oldTrip.endedAt,
+        );
+        cached[index] = updatedTrip;
+        await _localDatasource.cacheTrips(cached);
+      } else {
+        updatedTrip = trip.copyWith(
+          status: newStatus,
+          lastLocation: location ?? trip.lastLocation,
+          startedAt: newStatus == TripStatus.inTransit
+              ? DateTime.now()
+              : trip.startedAt,
+          endedAt: (newStatus == TripStatus.completed ||
+                  newStatus == TripStatus.cancelled)
+              ? DateTime.now()
+              : trip.endedAt,
+        );
+        await _localDatasource.cacheTrips([...cached, updatedTrip]);
+      }
+      _syncTrigger();
+      return updatedTrip;
+    } catch (cacheErr, st) {
+      log.warning(
+        'Failed to update local cache during offline fallback',
+        cacheErr,
+        st,
+      );
+      return trip.copyWith(
+        status: newStatus,
+        lastLocation: location ?? trip.lastLocation,
+      );
+    }
   }
 
   @override
@@ -267,7 +310,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
             latitude: lat,
             longitude: lng,
           );
-          syncTrigger?.call();
+          _syncTrigger();
           return const Right<Failure, Unit>(unit);
         } catch (dbErr) {
           // If queueing fails, we log it via the returned mapped exception,

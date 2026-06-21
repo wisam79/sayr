@@ -202,6 +202,8 @@ class FcmService {
   }
 }
 
+bool _backgroundNotificationsInitialized = false;
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   final notification = message.notification;
@@ -223,20 +225,23 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 
   if (title != null || body != null) {
-    // Initialize AwesomeNotifications in the background isolate
-    await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelKey: 'sayr_default',
-          channelName: 'إشعارات سير',
-          channelDescription: 'إشعارات تطبيق سير للنقل الجامعي',
-          defaultColor: const Color(0xFF1E5BFF),
-          importance: NotificationImportance.High,
-          channelShowBadge: true,
-        ),
-      ],
-    );
+    // Initialize AwesomeNotifications in the background isolate only once
+    if (!_backgroundNotificationsInitialized) {
+      await AwesomeNotifications().initialize(
+        null,
+        [
+          NotificationChannel(
+            channelKey: 'sayr_default',
+            channelName: 'إشعارات سير',
+            channelDescription: 'إشعارات تطبيق سير للنقل الجامعي',
+            defaultColor: const Color(0xFF1E5BFF),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          ),
+        ],
+      );
+      _backgroundNotificationsInitialized = true;
+    }
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(

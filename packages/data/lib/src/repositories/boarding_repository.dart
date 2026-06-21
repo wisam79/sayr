@@ -75,8 +75,7 @@ class BoardingRepositoryImpl extends BaseRepository
             (r) => BoardingRecordModel(
               id: r['boarding_id'] as String,
               tripId: tripId.value,
-              subscriptionId:
-                  '', // not returned by RPC; sufficient for list view
+              subscriptionId: null, // not returned by RPC; sufficient for list view
               studentId: r['student_id'] as String,
               studentName: r['student_name'] as String?,
               boardedAt: DateTime.parse(r['boarded_at'] as String),

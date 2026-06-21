@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 /// Concrete implementation of SubscriptionRepository using Remote data source.
 @LazySingleton(as: SubscriptionRepository)
@@ -48,35 +49,29 @@ class SubscriptionRepositoryImpl extends BaseRepository
   Future<Either<Failure, SubscriptionId>> activateLicense(
     LicenseCode code,
   ) async {
-    return guard(() async {
-      final response = await _remoteDatasource.activateLicense(code.value);
-      return SubscriptionId(response);
-    }).then(
-      (result) => result.fold(
-        (failure) {
-          final message = failure.message ?? '';
-          if (message.contains('Too many activation attempts')) {
-            return const Left(RateLimitFailure());
-          }
-          if (message.contains('already have an active subscription')) {
-            return const Left(
-              BusinessRuleFailure(
-                message: 'already_has_active_subscription',
-              ),
-            );
-          }
-          if (message.contains('not active')) {
-            return const Left(
-              BusinessRuleFailure(message: 'license_not_active'),
-            );
-          }
-          if (message.contains('not found')) {
-            return const Left(NotFoundFailure(resource: 'license'));
-          }
-          return Left(failure);
-        },
-        Right.new,
-      ),
+    return guard(
+      () async {
+        final response = await _remoteDatasource.activateLicense(code.value);
+        return SubscriptionId(response);
+      },
+      errorMapper: (e) {
+        final message = e is supabase.PostgrestException ? e.message : e.toString();
+        if (message.contains('Too many activation attempts')) {
+          return const RateLimitFailure();
+        }
+        if (message.contains('already have an active subscription')) {
+          return const BusinessRuleFailure(
+            message: 'already_has_active_subscription',
+          );
+        }
+        if (message.contains('not active')) {
+          return const BusinessRuleFailure(message: 'license_not_active');
+        }
+        if (message.contains('not found')) {
+          return const NotFoundFailure(resource: 'license');
+        }
+        return mapException(e);
+      },
     );
   }
 
