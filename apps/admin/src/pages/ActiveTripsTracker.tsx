@@ -117,7 +117,7 @@ export const ActiveTripsTracker: React.FC = () => {
       });
 
       setTrips(formatted);
-    } catch (err) {
+    } catch {
       showToast('فشل في جلب الرحلات النشطة', 'error');
     } finally {
       setLoading(false);

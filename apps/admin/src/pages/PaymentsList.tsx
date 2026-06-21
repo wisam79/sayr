@@ -46,7 +46,7 @@ export const PaymentsList: React.FC = () => {
     fetchPayments();
   }, []);
 
-  const fetchPayments = async () => {
+  async function fetchPayments() {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -87,7 +87,7 @@ export const PaymentsList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const triggerApprovePayment = (paymentId: string) => {
     setConfirmMessage('هل أنت متأكد من رغبتك في تفعيل هذا الترخيص وتأكيد استلام المبلغ يدوياً؟');

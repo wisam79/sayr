@@ -59,7 +59,7 @@ export const RoutesOverview: React.FC = () => {
     fetchDrivers();
   }, []);
 
-  const fetchRoutes = async () => {
+  async function fetchRoutes() {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -91,9 +91,9 @@ export const RoutesOverview: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const fetchDrivers = async () => {
+  async function fetchDrivers() {
     try {
       const { data, error } = await supabase
         .from('drivers')
@@ -119,7 +119,7 @@ export const RoutesOverview: React.FC = () => {
     } catch (err) {
       showToast('فشل في تحميل قائمة السائقين الموثقين', 'error');
     }
-  };
+  }
 
   const openCreateModal = () => {
     setEditingRoute(null);

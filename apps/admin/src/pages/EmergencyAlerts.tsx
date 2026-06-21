@@ -65,7 +65,7 @@ export const EmergencyAlerts: React.FC = () => {
     };
   }, []);
 
-  const fetchEmergencyReports = async () => {
+  async function fetchEmergencyReports() {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -105,7 +105,7 @@ export const EmergencyAlerts: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const triggerResolveAlert = (reportId: string) => {
     setConfirmMessage('هل أنت متأكد من حل هذه الاستغاثة وإغلاق بلاغ الطوارئ نهائياً؟');

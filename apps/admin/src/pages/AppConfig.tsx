@@ -25,7 +25,7 @@ export const AppConfig: React.FC = () => {
     fetchConfig();
   }, []);
 
-  const fetchConfig = async () => {
+  async function fetchConfig() {
     try {
       setLoading(true);
       setError(null);
@@ -57,7 +57,7 @@ export const AppConfig: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleSaveConfig = async (e: React.FormEvent) => {
     e.preventDefault();

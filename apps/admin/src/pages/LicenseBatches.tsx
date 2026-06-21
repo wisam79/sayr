@@ -56,7 +56,7 @@ export const LicenseBatches: React.FC = () => {
     fetchRoutes();
   }, []);
 
-  const fetchBatches = async () => {
+  async function fetchBatches() {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -87,9 +87,9 @@ export const LicenseBatches: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const fetchRoutes = async () => {
+  async function fetchRoutes() {
     try {
       const { data, error } = await supabase
         .from('routes')
@@ -101,7 +101,7 @@ export const LicenseBatches: React.FC = () => {
     } catch (err) {
       showToast('فشل في جلب خطوط النقل النشطة', 'error');
     }
-  };
+  }
 
   const handleCreateBatch = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -48,7 +48,7 @@ export const DashboardOverview: React.FC = () => {
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
+  async function fetchStats() {
     try {
       setLoading(true);
       setError(null);

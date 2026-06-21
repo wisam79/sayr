@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import type { User } from '@supabase/supabase-js';
@@ -54,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const checkUserRole = async (currentUser: User) => {
+  async function checkUserRole(currentUser: User) {
     try {
       setError(null);
       // Fetch role from profile table
@@ -85,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const signOut = async () => {
     setLoading(true);

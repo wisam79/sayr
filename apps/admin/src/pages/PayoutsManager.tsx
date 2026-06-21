@@ -44,7 +44,7 @@ export const PayoutsManager: React.FC = () => {
     fetchPayouts();
   }, []);
 
-  const fetchPayouts = async () => {
+  async function fetchPayouts() {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -104,7 +104,7 @@ export const PayoutsManager: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const handleActionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

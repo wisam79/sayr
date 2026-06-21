@@ -23,17 +23,17 @@ export const AdminLayout: React.FC = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const systemTheme = typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return savedTheme || systemTheme;
+  });
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Initialize theme from localStorage or system preference
+  // Synchronize document attribute with theme state
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initialTheme = savedTheme || systemTheme;
-    setTheme(initialTheme);
-    document.documentElement.setAttribute('data-theme', initialTheme);
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';

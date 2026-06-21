@@ -67,7 +67,7 @@ export const UsersList: React.FC = () => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
+  async function fetchUsers() {
     try {
       setLoading(true);
       // Fetch profiles and join drivers
@@ -107,7 +107,7 @@ export const UsersList: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   const triggerToggleVerification = (profile: Profile) => {
     const action = profile.is_verified ? 'إلغاء توثيق' : 'توثيق';
