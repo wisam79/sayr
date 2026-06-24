@@ -168,7 +168,8 @@ class FcmService {
 
   /// Fetches the current FCM token and registers it using the [NotificationsRepository].
   static Future<void> registerDeviceToken(
-      NotificationsRepository repository) async {
+    NotificationsRepository repository,
+  ) async {
     if (!_initialized) return;
     try {
       final token = await FirebaseMessaging.instance.getToken();

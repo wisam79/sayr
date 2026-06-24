@@ -90,7 +90,8 @@ void main() {
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
           (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>(
-              (trips: [testTrip], fromCache: false)),
+            (trips: [testTrip], fromCache: false),
+          ),
         );
         return createBloc();
       },
@@ -128,7 +129,8 @@ void main() {
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
           (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>(
-              (trips: [testTrip], fromCache: false)),
+            (trips: [testTrip], fromCache: false),
+          ),
         );
         when(() => mockRepo.getById(any())).thenAnswer(
           (_) async => Right<Failure, Trip>(testTrip),

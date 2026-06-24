@@ -114,7 +114,8 @@ void main() {
       expect(find.byType(SayrDialog), findsOneWidget);
       expect(
         find.text(
-            'هل تريد فعلاً إرسال تنبيه طوارئ؟ سيتم إخطار المسؤولين بموقعك الحالي.'),
+          'هل تريد فعلاً إرسال تنبيه طوارئ؟ سيتم إخطار المسؤولين بموقعك الحالي.',
+        ),
         findsOneWidget,
       );
       expect(find.byType(SwipeButton), findsOneWidget);

@@ -45,7 +45,8 @@ void main() {
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
           (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>(
-              (routes: testRoutes, fromCache: false)),
+            (routes: testRoutes, fromCache: false),
+          ),
         );
         return RoutesBloc(routeRepository: mockRepo);
       },
@@ -113,7 +114,8 @@ void main() {
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
           (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>(
-              (routes: testRoutes, fromCache: false)),
+            (routes: testRoutes, fromCache: false),
+          ),
         );
         return RoutesBloc(routeRepository: mockRepo);
       },
@@ -130,7 +132,8 @@ void main() {
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
           (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>(
-              (routes: testRoutes, fromCache: false)),
+            (routes: testRoutes, fromCache: false),
+          ),
         );
         return RoutesBloc(routeRepository: mockRepo);
       },

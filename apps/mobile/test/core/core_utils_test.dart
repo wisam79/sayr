@@ -9,8 +9,10 @@ class TestTalkerModule extends TalkerModule {}
 void main() {
   group('Core Utilities', () {
     test('GlobalKeys scaffoldMessengerKey is initialized', () {
-      expect(GlobalKeys.scaffoldMessengerKey,
-          isA<GlobalKey<ScaffoldMessengerState>>());
+      expect(
+        GlobalKeys.scaffoldMessengerKey,
+        isA<GlobalKey<ScaffoldMessengerState>>(),
+      );
     });
 
     test('TalkerModule provides Talker instance', () {

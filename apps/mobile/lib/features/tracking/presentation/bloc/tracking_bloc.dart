@@ -67,8 +67,12 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(TrackingState.error(failure: failure)),
-      (data) => emit(TrackingState.activeTripsLoaded(
-          trips: data.trips, fromCache: data.fromCache)),
+      (data) => emit(
+        TrackingState.activeTripsLoaded(
+          trips: data.trips,
+          fromCache: data.fromCache,
+        ),
+      ),
     );
   }
 

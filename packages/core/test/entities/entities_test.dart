@@ -177,9 +177,13 @@ void main() {
       expect(subscription.id, const SubscriptionId('s1'));
       expect(subscription.status, SubscriptionStatus.active);
       expect(
-          subscription.startDate, DateTime.parse('2026-06-24T12:00:00.000Z'));
+        subscription.startDate,
+        DateTime.parse('2026-06-24T12:00:00.000Z'),
+      );
       expect(
-          Subscription.fromJson(subscription.toJson()), equals(subscription));
+        Subscription.fromJson(subscription.toJson()),
+        equals(subscription),
+      );
     });
   });
 
@@ -430,7 +434,9 @@ void main() {
       expect(report.id, const EmergencyReportId('rep-1'));
       expect(report.isActive, isFalse);
       expect(
-          report.location, const Coordinates(latitude: 33.3, longitude: 44.4));
+        report.location,
+        const Coordinates(latitude: 33.3, longitude: 44.4),
+      );
       expect(report.toJson(), json);
     });
   });
