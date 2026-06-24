@@ -21,7 +21,9 @@ void main() {
     );
   }
 
-  testWidgets('SuccessSubscriptionDialog renders success message and button, calls onConfirm', (tester) async {
+  testWidgets(
+      'SuccessSubscriptionDialog renders success message and button, calls onConfirm',
+      (tester) async {
     var confirmed = false;
 
     await tester.pumpWidget(

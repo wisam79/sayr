@@ -305,7 +305,8 @@ class AppRouter {
                   ),
                   child: PaymentPage(
                     routeId: RouteId(state.pathParameters['routeId']!),
-                    amount: int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
+                    amount:
+                        int.tryParse(state.pathParameters['amount'] ?? '') ?? 0,
                     paymentId: paymentId,
                     paymentUrl: paymentUrl,
                   ),

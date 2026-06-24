@@ -23,7 +23,6 @@ import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-
 /// Student view: live tracking of a single trip on a map.
 class TripTrackingPage extends StatefulWidget {
   const TripTrackingPage({
@@ -86,7 +85,6 @@ class _TripTrackingPageState extends State<TripTrackingPage> {
     );
   }
 }
-
 
 class _TripTrackingView extends StatefulWidget {
   const _TripTrackingView({required this.tripId});
@@ -528,6 +526,7 @@ class _TrackingView extends StatelessWidget {
     }
     return SayrMap.defaultCenter;
   }
+
   Widget _buildCard({required Widget child}) {
     if (Platform.environment.containsKey('FLUTTER_TEST')) {
       return child;

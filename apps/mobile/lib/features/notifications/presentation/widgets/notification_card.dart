@@ -28,7 +28,9 @@ class NotificationCard extends StatelessWidget {
         horizontal: AppSpacing.md,
         vertical: AppSpacing.md,
       ),
-      color: isUnread ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.03) : null,
+      color: isUnread
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.03)
+          : null,
       child: Row(
         children: [
           CircleAvatar(
@@ -38,7 +40,9 @@ class NotificationCard extends StatelessWidget {
             child: Icon(
               _iconForType(notification.data['type'] as String?),
               size: 20,
-              color: isUnread ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+              color: isUnread
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: AppSpacing.md),

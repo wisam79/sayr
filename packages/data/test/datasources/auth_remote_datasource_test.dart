@@ -10,8 +10,12 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import '../helpers/mock_supabase.dart';
 
 class MockGoogleSignIn extends Mock implements GoogleSignIn {}
+
 class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}
-class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {}
+
+class MockGoogleSignInAuthentication extends Mock
+    implements GoogleSignInAuthentication {}
+
 class MockUserResponse extends Mock implements supabase.UserResponse {}
 
 void main() {
@@ -124,17 +128,18 @@ void main() {
       final response = MockAuthResponse();
       final user = MockUser();
 
-      when(() => mockGoogleSignIn.signOut()).thenAnswer((_) async => googleUser);
+      when(() => mockGoogleSignIn.signOut())
+          .thenAnswer((_) async => googleUser);
       when(() => mockGoogleSignIn.signIn()).thenAnswer((_) async => googleUser);
       when(() => googleUser.authentication).thenAnswer((_) async => googleAuth);
       when(() => googleAuth.idToken).thenReturn('googleToken');
       when(() => googleAuth.accessToken).thenReturn('accessToken');
 
       when(() => mockAuth.signInWithIdToken(
-        provider: supabase.OAuthProvider.google,
-        idToken: 'googleToken',
-        accessToken: 'accessToken',
-      )).thenAnswer((_) async => response);
+            provider: supabase.OAuthProvider.google,
+            idToken: 'googleToken',
+            accessToken: 'accessToken',
+          )).thenAnswer((_) async => response);
       when(() => response.user).thenReturn(user);
 
       final result = await datasource.signInWithGoogle();
@@ -143,47 +148,48 @@ void main() {
       verify(() => mockGoogleSignIn.signOut()).called(1);
       verify(() => mockGoogleSignIn.signIn()).called(1);
       verify(() => mockAuth.signInWithIdToken(
-        provider: supabase.OAuthProvider.google,
-        idToken: 'googleToken',
-        accessToken: 'accessToken',
-      )).called(1);
+            provider: supabase.OAuthProvider.google,
+            idToken: 'googleToken',
+            accessToken: 'accessToken',
+          )).called(1);
     });
 
     test('signInWithGoogle falls back to OAuth if native throws', () async {
-      when(() => mockGoogleSignIn.signOut()).thenThrow(Exception('Native sign in failed'));
+      when(() => mockGoogleSignIn.signOut())
+          .thenThrow(Exception('Native sign in failed'));
       when(() => mockAuth.getOAuthSignInUrl(
-        provider: any<supabase.OAuthProvider>(named: 'provider'),
-        redirectTo: any<String?>(named: 'redirectTo'),
-        scopes: any<String?>(named: 'scopes'),
-        queryParams: any<Map<String, String>?>(named: 'queryParams'),
-      )).thenAnswer((_) async => const supabase.OAuthResponse(
-        provider: supabase.OAuthProvider.google,
-        url: 'https://mock.url',
-      ));
+            provider: any<supabase.OAuthProvider>(named: 'provider'),
+            redirectTo: any<String?>(named: 'redirectTo'),
+            scopes: any<String?>(named: 'scopes'),
+            queryParams: any<Map<String, String>?>(named: 'queryParams'),
+          )).thenAnswer((_) async => const supabase.OAuthResponse(
+            provider: supabase.OAuthProvider.google,
+            url: 'https://mock.url',
+          ));
 
       final result = await datasource.signInWithGoogle();
 
       expect(result, isTrue);
       verify(() => mockAuth.getOAuthSignInUrl(
-        provider: any<supabase.OAuthProvider>(named: 'provider'),
-        redirectTo: any<String?>(named: 'redirectTo'),
-        scopes: any<String?>(named: 'scopes'),
-        queryParams: any<Map<String, String>?>(named: 'queryParams'),
-      )).called(1);
+            provider: any<supabase.OAuthProvider>(named: 'provider'),
+            redirectTo: any<String?>(named: 'redirectTo'),
+            scopes: any<String?>(named: 'scopes'),
+            queryParams: any<Map<String, String>?>(named: 'queryParams'),
+          )).called(1);
     });
 
     test('sendPasswordResetEmail calls client auth', () async {
       when(() => mockAuth.resetPasswordForEmail(
-        'test@test.com',
-        redirectTo: 'com.sayr.app://reset-password',
-      )).thenAnswer((_) async {});
+            'test@test.com',
+            redirectTo: 'com.sayr.app://reset-password',
+          )).thenAnswer((_) async {});
 
       await datasource.sendPasswordResetEmail('test@test.com');
 
       verify(() => mockAuth.resetPasswordForEmail(
-        'test@test.com',
-        redirectTo: 'com.sayr.app://reset-password',
-      )).called(1);
+            'test@test.com',
+            redirectTo: 'com.sayr.app://reset-password',
+          )).called(1);
     });
 
     test('updatePassword calls client auth', () async {
@@ -198,7 +204,8 @@ void main() {
 
     test('signOut calls client auth and google signout', () async {
       when(() => mockAuth.signOut()).thenAnswer((_) async {});
-      when(() => mockGoogleSignIn.signOut()).thenAnswer((_) async => MockGoogleSignInAccount());
+      when(() => mockGoogleSignIn.signOut())
+          .thenAnswer((_) async => MockGoogleSignInAccount());
 
       await datasource.signOut();
 

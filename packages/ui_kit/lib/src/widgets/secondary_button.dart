@@ -53,9 +53,8 @@ class SecondaryButton extends StatelessWidget {
             ),
     );
 
-    final mainButton = isExpanded
-        ? SizedBox(width: double.infinity, child: button)
-        : button;
+    final mainButton =
+        isExpanded ? SizedBox(width: double.infinity, child: button) : button;
 
     return _TapScaleWrapper(
       enabled: isEnabled,

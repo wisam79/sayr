@@ -73,6 +73,7 @@ void main() {
           collectNames(route.routes);
         }
       }
+
       collectNames(router.config.configuration.routes);
 
       expect(

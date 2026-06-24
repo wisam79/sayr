@@ -29,11 +29,15 @@ class StudentHomeTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final cardBgColor = isDark ? AppColors.darkSurface : Colors.white;
-    final cardBorderColor = isDark ? AppColors.borderDark : Colors.grey.shade200;
+    final cardBorderColor =
+        isDark ? AppColors.borderDark : Colors.grey.shade200;
     final primaryTextColor = isDark ? Colors.white : AppColors.textPrimary;
-    final secondaryTextColor = isDark ? AppColors.textMuted : AppColors.textSecondary;
-    final buttonBorderColor = isDark ? AppColors.borderDark : Colors.grey.shade300;
-    final primaryAccentColor = isDark ? AppColors.primaryDark : AppColors.primary;
+    final secondaryTextColor =
+        isDark ? AppColors.textMuted : AppColors.textSecondary;
+    final buttonBorderColor =
+        isDark ? AppColors.borderDark : Colors.grey.shade300;
+    final primaryAccentColor =
+        isDark ? AppColors.primaryDark : AppColors.primary;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(
@@ -47,7 +51,8 @@ class StudentHomeTab extends StatelessWidget {
         children: [
           // 1. Custom Header
           Row(
-            textDirection: TextDirection.ltr, // Ensures Bell on Left, Chat on Right
+            textDirection:
+                TextDirection.ltr, // Ensures Bell on Left, Chat on Right
             children: [
               // Notifications Bell on Left
               BlocSelector<NotificationsBloc, NotificationsState, int>(
@@ -107,7 +112,9 @@ class StudentHomeTab extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      user != null ? l10n.helloUser(user.displayName) : 'مرحباً بك',
+                      user != null
+                          ? l10n.helloUser(user.displayName)
+                          : 'مرحباً بك',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: primaryTextColor,
@@ -121,10 +128,11 @@ class StudentHomeTab extends StatelessWidget {
                       children: [
                         Text(
                           'مرحباً بك في رحلات',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: secondaryTextColor,
-                                fontSize: 13,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: secondaryTextColor,
+                                    fontSize: 13,
+                                  ),
                         ),
                         const SizedBox(width: 4),
                         const Text(
@@ -160,7 +168,8 @@ class StudentHomeTab extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
-                textDirection: TextDirection.ltr, // Left: avatar, Right: details
+                textDirection:
+                    TextDirection.ltr, // Left: avatar, Right: details
                 children: [
                   CircleAvatar(
                     radius: 26,
@@ -295,7 +304,8 @@ class StudentHomeTab extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.1),
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(

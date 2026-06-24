@@ -44,7 +44,8 @@ void main() {
       'emits [Loading, Loaded] on load success',
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
-          (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>((routes: testRoutes, fromCache: false)),
+          (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>(
+              (routes: testRoutes, fromCache: false)),
         );
         return RoutesBloc(routeRepository: mockRepo);
       },
@@ -59,7 +60,8 @@ void main() {
       'emits [Loading, Error] on load failure',
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
-          (_) async => const Left<Failure, ({List<Route> routes, bool fromCache})>(
+          (_) async =>
+              const Left<Failure, ({List<Route> routes, bool fromCache})>(
             ServerFailure(message: 'Server error'),
           ),
         );
@@ -110,7 +112,8 @@ void main() {
       'dispatches RoutesLoadRequested when query is empty',
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
-          (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>((routes: testRoutes, fromCache: false)),
+          (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>(
+              (routes: testRoutes, fromCache: false)),
         );
         return RoutesBloc(routeRepository: mockRepo);
       },
@@ -126,7 +129,8 @@ void main() {
       'dispatches RoutesLoadRequested when query is only whitespace',
       build: () {
         when(() => mockRepo.getActiveRoutes()).thenAnswer(
-          (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>((routes: testRoutes, fromCache: false)),
+          (_) async => Right<Failure, ({List<Route> routes, bool fromCache})>(
+              (routes: testRoutes, fromCache: false)),
         );
         return RoutesBloc(routeRepository: mockRepo);
       },

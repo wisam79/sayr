@@ -132,10 +132,12 @@ class LocalDatasourceImpl implements LocalDatasource {
   Future<void> clearCachedTrips() => _tripCacheDao.clear();
 
   @override
-  Future<void> upsertCachedTrip(Trip trip) => _tripCacheDao.upsertCachedTrip(trip);
+  Future<void> upsertCachedTrip(Trip trip) =>
+      _tripCacheDao.upsertCachedTrip(trip);
 
   @override
-  Future<Trip?> getCachedTripById(TripId id) => _tripCacheDao.getCachedTripById(id);
+  Future<Trip?> getCachedTripById(TripId id) =>
+      _tripCacheDao.getCachedTripById(id);
 
   // Route Cache
   @override

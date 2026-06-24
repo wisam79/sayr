@@ -14,7 +14,8 @@ void main() {
 
     setUp(() {
       mockConnectivity = MockConnectivity();
-      connectivityController = StreamController<List<ConnectivityResult>>.broadcast();
+      connectivityController =
+          StreamController<List<ConnectivityResult>>.broadcast();
       when(() => mockConnectivity.onConnectivityChanged)
           .thenAnswer((_) => connectivityController.stream);
     });
@@ -29,7 +30,8 @@ void main() {
       cubit.close();
     });
 
-    test('emits true when connectivity result is empty or none (offline)', () async {
+    test('emits true when connectivity result is empty or none (offline)',
+        () async {
       final cubit = ConnectivityCubit(connectivity: mockConnectivity);
       final states = <bool>[];
       final subscription = cubit.stream.listen(states.add);

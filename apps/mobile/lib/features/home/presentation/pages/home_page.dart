@@ -143,82 +143,82 @@ class _HomeViewState extends State<_HomeView> {
                       child: NavigationBar(
                         height: 64,
                         selectedIndex: index,
-                      labelBehavior:
-                          NavigationDestinationLabelBehavior.alwaysHide,
-                      surfaceTintColor: Colors.transparent,
-                      backgroundColor: Colors.transparent,
-                      indicatorColor: Colors.transparent,
-                      onDestinationSelected: (i) =>
-                          context.read<HomeNavCubit>().selectTab(i),
-                      destinations: isDriver
-                          ? [
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.home_outlined,
-                                  selectedIcon: Icons.home_rounded,
-                                  isSelected: index == 0,
+                        labelBehavior:
+                            NavigationDestinationLabelBehavior.alwaysHide,
+                        surfaceTintColor: Colors.transparent,
+                        backgroundColor: Colors.transparent,
+                        indicatorColor: Colors.transparent,
+                        onDestinationSelected: (i) =>
+                            context.read<HomeNavCubit>().selectTab(i),
+                        destinations: isDriver
+                            ? [
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.home_outlined,
+                                    selectedIcon: Icons.home_rounded,
+                                    isSelected: index == 0,
+                                  ),
+                                  label: l10n.homeTitle,
                                 ),
-                                label: l10n.homeTitle,
-                              ),
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.route_outlined,
-                                  selectedIcon: Icons.route_rounded,
-                                  isSelected: index == 1,
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.route_outlined,
+                                    selectedIcon: Icons.route_rounded,
+                                    isSelected: index == 1,
+                                  ),
+                                  label: l10n.activeTrips,
                                 ),
-                                label: l10n.activeTrips,
-                              ),
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.person_outline_rounded,
-                                  selectedIcon: Icons.person_rounded,
-                                  isSelected: index == 2,
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.person_outline_rounded,
+                                    selectedIcon: Icons.person_rounded,
+                                    isSelected: index == 2,
+                                  ),
+                                  label: l10n.profile,
                                 ),
-                                label: l10n.profile,
-                              ),
-                            ]
-                          : [
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.home_outlined,
-                                  selectedIcon: Icons.home_rounded,
-                                  isSelected: index == 0,
+                              ]
+                            : [
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.home_outlined,
+                                    selectedIcon: Icons.home_rounded,
+                                    isSelected: index == 0,
+                                  ),
+                                  label: l10n.homeTitle,
                                 ),
-                                label: l10n.homeTitle,
-                              ),
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.route_outlined,
-                                  selectedIcon: Icons.route_rounded,
-                                  isSelected: index == 1,
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.route_outlined,
+                                    selectedIcon: Icons.route_rounded,
+                                    isSelected: index == 1,
+                                  ),
+                                  label: l10n.routesTitle,
                                 ),
-                                label: l10n.routesTitle,
-                              ),
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.map_outlined,
-                                  selectedIcon: Icons.map_rounded,
-                                  isSelected: index == 2,
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.map_outlined,
+                                    selectedIcon: Icons.map_rounded,
+                                    isSelected: index == 2,
+                                  ),
+                                  label: l10n.activeTrips,
                                 ),
-                                label: l10n.activeTrips,
-                              ),
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.local_activity_outlined,
-                                  selectedIcon: Icons.local_activity_rounded,
-                                  isSelected: index == 3,
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.local_activity_outlined,
+                                    selectedIcon: Icons.local_activity_rounded,
+                                    isSelected: index == 3,
+                                  ),
+                                  label: l10n.mySubscriptions,
                                 ),
-                                label: l10n.mySubscriptions,
-                              ),
-                              NavigationDestination(
-                                icon: _AnimatedNavIcon(
-                                  icon: Icons.person_outline_rounded,
-                                  selectedIcon: Icons.person_rounded,
-                                  isSelected: index == 4,
+                                NavigationDestination(
+                                  icon: _AnimatedNavIcon(
+                                    icon: Icons.person_outline_rounded,
+                                    selectedIcon: Icons.person_rounded,
+                                    isSelected: index == 4,
+                                  ),
+                                  label: l10n.profile,
                                 ),
-                                label: l10n.profile,
-                              ),
-                            ],
+                              ],
                       ),
                     ),
                   ),

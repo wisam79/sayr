@@ -89,7 +89,8 @@ void main() {
       'emits [Loading, ActiveTripsLoaded] when load succeeds',
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
-          (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: [testTrip], fromCache: false)),
+          (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>(
+              (trips: [testTrip], fromCache: false)),
         );
         return createBloc();
       },
@@ -108,7 +109,8 @@ void main() {
       'emits [Loading, Error] when load fails',
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
-          (_) async => const Left<Failure, ({List<Trip> trips, bool fromCache})>(
+          (_) async =>
+              const Left<Failure, ({List<Trip> trips, bool fromCache})>(
             ServerFailure(message: 'Server error'),
           ),
         );
@@ -125,7 +127,8 @@ void main() {
       'emits DriverActive after successful arrive',
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
-          (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: [testTrip], fromCache: false)),
+          (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>(
+              (trips: [testTrip], fromCache: false)),
         );
         when(() => mockRepo.getById(any())).thenAnswer(
           (_) async => Right<Failure, Trip>(testTrip),

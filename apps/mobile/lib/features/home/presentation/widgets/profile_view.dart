@@ -137,7 +137,8 @@ class _ProfileViewState extends State<_ProfileView> {
     final statusBarHeight = MediaQuery.of(context).padding.top;
 
     final cardBgColor = isDark ? AppColors.darkSurface : Colors.white;
-    final cardBorderColor = isDark ? AppColors.borderDark : Colors.grey.shade200;
+    final cardBorderColor =
+        isDark ? AppColors.borderDark : Colors.grey.shade200;
     final primaryTextColor = isDark ? Colors.white : AppColors.textPrimary;
 
     return ListView(
@@ -189,7 +190,8 @@ class _ProfileViewState extends State<_ProfileView> {
           child: Column(
             children: [
               Row(
-                textDirection: TextDirection.ltr, // Left: avatar, Middle: info, Right: chevron
+                textDirection: TextDirection
+                    .ltr, // Left: avatar, Middle: info, Right: chevron
                 children: [
                   CircleAvatar(
                     radius: 26,
@@ -274,9 +276,11 @@ class _ProfileViewState extends State<_ProfileView> {
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                    border:
+                        Border.all(color: Colors.white.withValues(alpha: 0.3)),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

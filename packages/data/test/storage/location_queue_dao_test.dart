@@ -25,7 +25,8 @@ void main() {
   });
 
   group('LocationQueueDao', () {
-    test('enqueues and retrieves pending updates, counts and marks synced', () async {
+    test('enqueues and retrieves pending updates, counts and marks synced',
+        () async {
       var count = await locationQueueDao.pendingCount();
       expect(count, 0);
 
@@ -61,7 +62,8 @@ void main() {
               tripId: 'trip-1',
               latitude: 33.3,
               longitude: 44.4,
-              createdAt: Value(DateTime.now().subtract(const Duration(days: 8))),
+              createdAt:
+                  Value(DateTime.now().subtract(const Duration(days: 8))),
               synced: const Value(true),
             ),
           );
@@ -98,14 +100,16 @@ void main() {
       expect(cached.first.id, const TripId('trip-1'));
       expect(cached.first.status, TripStatus.inTransit);
 
-      final single = await tripCacheDao.getCachedTripById(const TripId('trip-1'));
+      final single =
+          await tripCacheDao.getCachedTripById(const TripId('trip-1'));
       expect(single, isNotNull);
       expect(single!.id, const TripId('trip-1'));
 
       final updatedTrip = testTrip.copyWith(status: TripStatus.completed);
       await tripCacheDao.upsertCachedTrip(updatedTrip);
 
-      final singleUpdated = await tripCacheDao.getCachedTripById(const TripId('trip-1'));
+      final singleUpdated =
+          await tripCacheDao.getCachedTripById(const TripId('trip-1'));
       expect(singleUpdated!.status, TripStatus.completed);
 
       await tripCacheDao.clear();
@@ -180,7 +184,8 @@ void main() {
             TripStatusQueueCompanion.insert(
               tripId: 'trip-1',
               status: 'in_transit',
-              createdAt: Value(DateTime.now().subtract(const Duration(days: 8))),
+              createdAt:
+                  Value(DateTime.now().subtract(const Duration(days: 8))),
               synced: const Value(true),
             ),
           );

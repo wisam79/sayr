@@ -201,7 +201,9 @@ void main() {
         );
       });
 
-      test('falls back to local cache when remote throws exception and cached trip exists', () async {
+      test(
+          'falls back to local cache when remote throws exception and cached trip exists',
+          () async {
         when(() => mockRemote.getTripById('trip-123'))
             .thenThrow(Exception('Network issue'));
         when(() => mockLocal.getCachedTripById(const TripId('trip-123')))
@@ -216,7 +218,9 @@ void main() {
         );
       });
 
-      test('returns original failure when remote throws exception and cache also throws', () async {
+      test(
+          'returns original failure when remote throws exception and cache also throws',
+          () async {
         when(() => mockRemote.getTripById('trip-123'))
             .thenThrow(Exception('Network issue'));
         when(() => mockLocal.getCachedTripById(const TripId('trip-123')))
@@ -558,7 +562,8 @@ void main() {
 
     group('syncPendingStatuses', () {
       test('does nothing when no pending updates exist', () async {
-        when(() => mockLocal.getPendingTripStatuses()).thenAnswer((_) async => []);
+        when(() => mockLocal.getPendingTripStatuses())
+            .thenAnswer((_) async => []);
 
         final result = await repository.syncPendingStatuses();
 
@@ -593,7 +598,8 @@ void main() {
             lng: 44,
           ),
         ).thenAnswer((_) async => mockTrip);
-        when(() => mockLocal.markTripStatusesSynced([1])).thenAnswer((_) async {});
+        when(() => mockLocal.markTripStatusesSynced([1]))
+            .thenAnswer((_) async {});
 
         final result = await repository.syncPendingStatuses();
 
@@ -643,7 +649,8 @@ void main() {
             lng: any(named: 'lng'),
           ),
         ).thenThrow(const SocketException('Failed host lookup'));
-        when(() => mockLocal.markTripStatusesSynced([1])).thenAnswer((_) async {});
+        when(() => mockLocal.markTripStatusesSynced([1]))
+            .thenAnswer((_) async {});
 
         final result = await repository.syncPendingStatuses();
 
@@ -669,7 +676,8 @@ void main() {
             lng: any(named: 'lng'),
           ),
         ).thenThrow(Exception('row does not exist'));
-        when(() => mockLocal.markTripStatusesSynced([1])).thenAnswer((_) async {});
+        when(() => mockLocal.markTripStatusesSynced([1]))
+            .thenAnswer((_) async {});
 
         final result = await repository.syncPendingStatuses();
 

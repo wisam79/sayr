@@ -44,7 +44,8 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
   ///
   /// Mirrors the equivalent helper in `RouteRepositoryImpl`: keeps the offline
   /// behaviour in one place while routing failures through [mapException].
-  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>> _fetchTripsWithCacheFallback(
+  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>>
+      _fetchTripsWithCacheFallback(
     Future<List<Trip>> Function() fetch, {
     required String cacheLogLabel,
   }) async {
@@ -67,7 +68,8 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
         try {
           final cached = await _localDatasource.getCachedTrips();
           if (cached.isNotEmpty) {
-            return Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: cached, fromCache: true));
+            return Right<Failure, ({List<Trip> trips, bool fromCache})>(
+                (trips: cached, fromCache: true));
           }
         } catch (cacheError, st) {
           log.warning(
@@ -78,12 +80,14 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
         }
         return Left<Failure, ({List<Trip> trips, bool fromCache})>(failure);
       },
-      (trips) async => Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: trips, fromCache: false)),
+      (trips) async => Right<Failure, ({List<Trip> trips, bool fromCache})>(
+          (trips: trips, fromCache: false)),
     );
   }
 
   @override
-  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>> getActiveTrips() async {
+  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>>
+      getActiveTrips() async {
     return _fetchTripsWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveTrips();

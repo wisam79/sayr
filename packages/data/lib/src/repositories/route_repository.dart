@@ -24,7 +24,8 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   /// list may have been cached during a previous session) while still routing
   /// every failure through the shared [mapException] mapper so callers receive
   /// a typed [Failure].
-  Future<Either<Failure, ({List<Route> routes, bool fromCache})>> _fetchWithCacheFallback(
+  Future<Either<Failure, ({List<Route> routes, bool fromCache})>>
+      _fetchWithCacheFallback(
     Future<List<Route>> Function() fetch, {
     required String cacheLogLabel,
   }) async {
@@ -63,7 +64,8 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   }
 
   @override
-  Future<Either<Failure, ({List<Route> routes, bool fromCache})>> getActiveRoutes() async {
+  Future<Either<Failure, ({List<Route> routes, bool fromCache})>>
+      getActiveRoutes() async {
     return _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveRoutes();

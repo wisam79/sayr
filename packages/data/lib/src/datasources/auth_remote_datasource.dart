@@ -62,7 +62,7 @@ abstract class AuthRemoteDatasource {
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   AuthRemoteDatasourceImpl({
     SayrSupabase? supabase,
-  })  : _supabase = supabase ?? SayrSupabase.instance;
+  }) : _supabase = supabase ?? SayrSupabase.instance;
   final SayrSupabase _supabase;
 
   /// GoogleSignIn instance used for sign-in flows. Can be overridden in tests.
@@ -111,10 +111,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
         ? webClientId
         : (androidClientId.isNotEmpty ? androidClientId : null);
 
-    final googleSignIn = this.googleSignIn ?? GoogleSignIn(
-      serverClientId: clientId,
-      scopes: ['email', 'profile'],
-    );
+    final googleSignIn = this.googleSignIn ??
+        GoogleSignIn(
+          serverClientId: clientId,
+          scopes: ['email', 'profile'],
+        );
 
     try {
       // Force account chooser dialog by signing out from Google client first

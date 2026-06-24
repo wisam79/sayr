@@ -95,7 +95,9 @@ class TripCacheDao {
 
   /// Single atomic trip upsert to avoid full list scan.
   Future<void> upsertCachedTrip(Trip trip) async {
-    await _db.into(_db.cachedTrip).insertOnConflictUpdate(_tripToCompanion(trip));
+    await _db
+        .into(_db.cachedTrip)
+        .insertOnConflictUpdate(_tripToCompanion(trip));
   }
 
   /// Get a single cached trip by ID.

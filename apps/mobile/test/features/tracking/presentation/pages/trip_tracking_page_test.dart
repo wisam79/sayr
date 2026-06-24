@@ -129,7 +129,8 @@ void main() {
   }
 
   testWidgets('renders loading state initially', (tester) async {
-    when(() => mockTrackingBloc.state).thenReturn(const TrackingState.initial());
+    when(() => mockTrackingBloc.state)
+        .thenReturn(const TrackingState.initial());
     whenListen(
       mockTrackingBloc,
       const Stream<TrackingState>.empty(),

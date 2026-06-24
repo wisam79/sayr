@@ -19,7 +19,9 @@ void main() {
     );
   }
 
-  testWidgets('showSafetyTipsBottomSheet opens sheet and renders all safety tips', (tester) async {
+  testWidgets(
+      'showSafetyTipsBottomSheet opens sheet and renders all safety tips',
+      (tester) async {
     await tester.pumpWidget(
       wrap(
         Builder(
@@ -44,7 +46,8 @@ void main() {
     // Verify title and safety tip rows are present
     expect(find.text('نصائح السلامة في سير'), findsOneWidget);
     expect(
-      find.text('احرص على إبقاء هاتفك قريباً وتفعيل البلوتوث للصعود التلقائي إلى الحافلة.'),
+      find.text(
+          'احرص على إبقاء هاتفك قريباً وتفعيل البلوتوث للصعود التلقائي إلى الحافلة.'),
       findsOneWidget,
     );
     expect(
@@ -52,7 +55,8 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.text('استخدم زر الاستغاثة (SOS) في صفحة التتبع إذا شعرت بعدم الأمان في أي وقت.'),
+      find.text(
+          'استخدم زر الاستغاثة (SOS) في صفحة التتبع إذا شعرت بعدم الأمان في أي وقت.'),
       findsOneWidget,
     );
   });

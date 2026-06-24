@@ -181,9 +181,9 @@ class DigitalTicketPass extends StatelessWidget {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
-                                  ?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                  ),
+                                ?.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                ),
                           ),
                         ],
                       ],

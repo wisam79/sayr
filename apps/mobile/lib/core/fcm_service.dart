@@ -167,7 +167,8 @@ class FcmService {
   }
 
   /// Fetches the current FCM token and registers it using the [NotificationsRepository].
-  static Future<void> registerDeviceToken(NotificationsRepository repository) async {
+  static Future<void> registerDeviceToken(
+      NotificationsRepository repository) async {
     if (!_initialized) return;
     try {
       final token = await FirebaseMessaging.instance.getToken();
@@ -239,10 +240,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final isAr = lang == 'ar';
     if (type == 'chat') {
       title = isAr ? 'رسالة جديدة' : 'New message';
-      body = data['message']?.toString() ?? (isAr ? 'لديك رسالة جديدة' : 'You have a new message');
+      body = data['message']?.toString() ??
+          (isAr ? 'لديك رسالة جديدة' : 'You have a new message');
     } else if (type == 'trip_update') {
       title = isAr ? 'تحديث الرحلة' : 'Trip update';
-      body = data['status_text']?.toString() ?? (isAr ? 'تم تحديث حالة الرحلة' : 'Trip status has been updated');
+      body = data['status_text']?.toString() ??
+          (isAr ? 'تم تحديث حالة الرحلة' : 'Trip status has been updated');
     }
   }
 

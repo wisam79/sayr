@@ -33,7 +33,7 @@ void main() {
 
   setUp(() {
     mockEmergencyBloc = MockEmergencyBloc();
-    
+
     // Mock Geolocator channel responses
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
@@ -91,7 +91,9 @@ void main() {
       expect(find.byIcon(Icons.sos), findsOneWidget);
     });
 
-    testWidgets('opens confirmation dialog on tap and triggers emergency on swipe', (WidgetTester tester) async {
+    testWidgets(
+        'opens confirmation dialog on tap and triggers emergency on swipe',
+        (WidgetTester tester) async {
       tester.view.physicalSize = const Size(400, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(() {
@@ -111,7 +113,8 @@ void main() {
       // Expect confirmation dialog
       expect(find.byType(SayrDialog), findsOneWidget);
       expect(
-        find.text('هل تريد فعلاً إرسال تنبيه طوارئ؟ سيتم إخطار المسؤولين بموقعك الحالي.'),
+        find.text(
+            'هل تريد فعلاً إرسال تنبيه طوارئ؟ سيتم إخطار المسؤولين بموقعك الحالي.'),
         findsOneWidget,
       );
       expect(find.byType(SwipeButton), findsOneWidget);
@@ -128,20 +131,25 @@ void main() {
       expect(find.byType(SayrDialog), findsNothing);
 
       // Verify that trigger event is dispatched
-      verify(() => mockEmergencyBloc.add(any(that: isA<EmergencyTriggered>()))).called(1);
+      verify(() => mockEmergencyBloc.add(any(that: isA<EmergencyTriggered>())))
+          .called(1);
     });
 
-    testWidgets('renders loading state when emergency is sending', (WidgetTester tester) async {
+    testWidgets('renders loading state when emergency is sending',
+        (WidgetTester tester) async {
       when(() => mockEmergencyBloc.state).thenReturn(const EmergencySending());
 
       await tester.pumpWidget(buildTestWidget());
-      await tester.pump(); // Use pump instead of pumpAndSettle due to active animation
+      await tester
+          .pump(); // Use pump instead of pumpAndSettle due to active animation
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.text('جاري الإرسال...'), findsOneWidget);
     });
 
-    testWidgets('renders checkmark and sent status in active state, and cancels on tap', (WidgetTester tester) async {
+    testWidgets(
+        'renders checkmark and sent status in active state, and cancels on tap',
+        (WidgetTester tester) async {
       final report = EmergencyReport(
         id: const EmergencyReportId('report-1'),
         userId: const UserId('user-1'),
@@ -149,7 +157,8 @@ void main() {
         location: const Coordinates(latitude: 33.3, longitude: 44.3),
         createdAt: DateTime.now(),
       );
-      when(() => mockEmergencyBloc.state).thenReturn(EmergencyActive(report: report));
+      when(() => mockEmergencyBloc.state)
+          .thenReturn(EmergencyActive(report: report));
 
       await tester.pumpWidget(buildTestWidget());
       await tester.pumpAndSettle();

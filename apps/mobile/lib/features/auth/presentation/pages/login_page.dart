@@ -91,12 +91,12 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
       animation: _bgController,
       builder: (context, child) {
         final val = _bgController.value;
-        
+
         final alignmentPrimary = Alignment(
           -0.6 + 1.2 * val,
           -0.7 + 0.6 * val,
         );
-        
+
         final alignmentSecondary = Alignment(
           0.6 - 1.2 * val,
           0.7 - 0.6 * val,

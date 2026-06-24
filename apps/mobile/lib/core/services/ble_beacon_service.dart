@@ -251,8 +251,9 @@ class BleBeaconService {
     }
 
     updateOtp();
-    _otpSubscription = Stream<int>.periodic(const Duration(seconds: 30), (x) => x)
-        .listen((_) => updateOtp());
+    _otpSubscription =
+        Stream<int>.periodic(const Duration(seconds: 30), (x) => x)
+            .listen((_) => updateOtp());
   }
 
   /// Stops rotating BLE advertising.

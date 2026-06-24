@@ -42,7 +42,8 @@ void main() {
   });
 
   group('BleBeaconService', () {
-    test('startAdvertising and stopAdvertising fall back to mock mode', () async {
+    test('startAdvertising and stopAdvertising fall back to mock mode',
+        () async {
       // In tests, flutter_ble_peripheral will either throw or report isSupported = false,
       // which will trigger the mock advertising mode.
       await service.startAdvertising(
@@ -54,7 +55,9 @@ void main() {
       await service.stopAdvertising();
     });
 
-    test('startScanning and stopScanning fall back to mock mode and emit scan result', () async {
+    test(
+        'startScanning and stopScanning fall back to mock mode and emit scan result',
+        () async {
       // Since it runs in a test environment, Bluetooth won't be supported or enabled,
       // causing it to fall back to mock scanning.
       final isRealScanStarted = await service.startScanning();
@@ -73,7 +76,8 @@ void main() {
       await service.stopScanning();
     });
 
-    test('startRotatingOtpAdvertising rotates OTP and updates DB periodically', () async {
+    test('startRotatingOtpAdvertising rotates OTP and updates DB periodically',
+        () async {
       // Stub the updateBleOtp call
       when(
         () => mockTripRepo.updateBleOtp(
@@ -103,7 +107,8 @@ void main() {
       service.stopRotatingOtpAdvertising();
     });
 
-    test('startRotatingOtpAdvertising logs error on repository failure', () async {
+    test('startRotatingOtpAdvertising logs error on repository failure',
+        () async {
       when(
         () => mockTripRepo.updateBleOtp(
           tripId: any(named: 'tripId'),

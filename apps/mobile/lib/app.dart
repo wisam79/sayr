@@ -84,45 +84,51 @@ class SayrApp extends StatelessWidget {
 
             final isDark = themeMode == ThemeMode.dark ||
                 (themeMode == ThemeMode.system &&
-                    MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+                    MediaQuery.platformBrightnessOf(context) ==
+                        Brightness.dark);
 
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: SystemUiOverlayStyle(
                 statusBarColor: Colors.transparent,
-                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-                statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
-                systemNavigationBarColor: isDark ? AppColors.backgroundDark : AppColors.background,
-                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                statusBarIconBrightness:
+                    isDark ? Brightness.light : Brightness.dark,
+                statusBarBrightness:
+                    isDark ? Brightness.dark : Brightness.light,
+                systemNavigationBarColor:
+                    isDark ? AppColors.backgroundDark : AppColors.background,
+                systemNavigationBarIconBrightness:
+                    isDark ? Brightness.light : Brightness.dark,
               ),
               child: MaterialApp.router(
                 title: 'Sayr',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: themeMode,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('ar'),
-                Locale('en'),
-              ],
-              locale: locale,
-              builder: (context, child) {
-                return Directionality(
-                  textDirection: isRtl ? TextDirection.rtl : TextDirection.ltr,
-                  child: OfflineBannerWrapper(
-                    child: child ?? const SizedBox.shrink(),
-                  ),
-                );
-              },
-              routerConfig: router.config,
-            ),
-          );
-        },
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: themeMode,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('ar'),
+                  Locale('en'),
+                ],
+                locale: locale,
+                builder: (context, child) {
+                  return Directionality(
+                    textDirection:
+                        isRtl ? TextDirection.rtl : TextDirection.ltr,
+                    child: OfflineBannerWrapper(
+                      child: child ?? const SizedBox.shrink(),
+                    ),
+                  );
+                },
+                routerConfig: router.config,
+              ),
+            );
+          },
         ),
       ),
     );
@@ -140,7 +146,8 @@ Future<void> runSayrApp() async {
   await Hive.initFlutter();
 
   // Initialize Firebase (Only on supported platforms)
-  final isFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
+  final isFirebaseSupported =
+      kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
   if (isFirebaseSupported) {
     try {
       await Firebase.initializeApp();
@@ -179,9 +186,8 @@ Future<void> runSayrApp() async {
             }
 
             final messageText = event.message?.formatted;
-            final scrubbedMessage = messageText != null
-                ? SentryMessage(scrub(messageText))
-                : null;
+            final scrubbedMessage =
+                messageText != null ? SentryMessage(scrub(messageText)) : null;
 
             final exceptions = event.exceptions?.map((ex) {
               return ex.copyWith(
@@ -282,7 +288,8 @@ class OfflineBannerWrapper extends StatelessWidget {
                       vertical: 8,
                       horizontal: 16,
                     ),
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: Colors.redAccent.withValues(alpha: 0.95),
                       borderRadius: BorderRadius.circular(12),
