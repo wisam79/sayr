@@ -43,15 +43,14 @@ void callbackDispatcher() {
       }
 
       // 2. Sync pending locations
-      final pendingCount = await localDatasource.getPendingLocationsCount();
-      if (pendingCount == 0) {
+      final pending = await localDatasource.getPendingLocations();
+      if (pending.isEmpty) {
         return true;
       }
 
       talker.info(
-        'Background Worker: Found $pendingCount pending locations. Syncing...',
+        'Background Worker: Found ${pending.length} pending locations. Syncing...',
       );
-      final pending = await localDatasource.getPendingLocations();
       final locationsToSync = pending
           .map(
             (p) => (

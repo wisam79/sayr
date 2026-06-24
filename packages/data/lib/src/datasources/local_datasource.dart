@@ -30,6 +30,8 @@ abstract class LocalDatasource {
   Future<void> cacheTrips(List<Trip> trips);
   Future<List<Trip>> getCachedTrips();
   Future<void> clearCachedTrips();
+  Future<void> upsertCachedTrip(Trip trip);
+  Future<Trip?> getCachedTripById(TripId id);
 
   // Route Cache
   Future<void> cacheRoutes(List<Route> routes);
@@ -128,6 +130,12 @@ class LocalDatasourceImpl implements LocalDatasource {
 
   @override
   Future<void> clearCachedTrips() => _tripCacheDao.clear();
+
+  @override
+  Future<void> upsertCachedTrip(Trip trip) => _tripCacheDao.upsertCachedTrip(trip);
+
+  @override
+  Future<Trip?> getCachedTripById(TripId id) => _tripCacheDao.getCachedTripById(id);
 
   // Route Cache
   @override

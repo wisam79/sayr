@@ -1,4 +1,6 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/auth_remote_datasource.dart';
@@ -7,31 +9,54 @@ import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 import '../helpers/mock_supabase.dart';
 
+class MockGoogleSignIn extends Mock implements GoogleSignIn {}
+class MockGoogleSignInAccount extends Mock implements GoogleSignInAccount {}
+class MockGoogleSignInAuthentication extends Mock implements GoogleSignInAuthentication {}
+class MockUserResponse extends Mock implements supabase.UserResponse {}
+
 void main() {
   late MockSayrSupabase mockSupabase;
   late MockSupabaseClient mockClient;
+  late MockGoTrueClient mockAuth;
+  late MockGoogleSignIn mockGoogleSignIn;
   late AuthRemoteDatasourceImpl datasource;
 
-  setUpAll(registerSupabaseFallbacks);
+  setUpAll(() {
+    registerSupabaseFallbacks();
+    registerFallbackValue(supabase.UserAttributes(password: ''));
+    registerFallbackValue(supabase.OAuthProvider.google);
+  });
 
   setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    const channel = MethodChannel('plugins.flutter.io/url_launcher');
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+      return true;
+    });
+
     mockSupabase = MockSayrSupabase();
     mockClient = MockSupabaseClient();
+    mockAuth = MockGoTrueClient();
+    mockGoogleSignIn = MockGoogleSignIn();
 
     when(() => mockSupabase.client).thenReturn(mockClient);
+    when(() => mockClient.auth).thenReturn(mockAuth);
 
-    datasource = AuthRemoteDatasourceImpl(supabase: mockSupabase);
+    datasource = AuthRemoteDatasourceImpl(
+      supabase: mockSupabase,
+    )..googleSignIn = mockGoogleSignIn;
   });
 
   group('AuthRemoteDatasourceImpl', () {
-    test('currentUser delegates to SayrSupabase', () {
+    test('currentUser returns from client auth', () {
       final user = MockUser();
-      when(() => mockSupabase.currentUser).thenReturn(user);
+      when(() => mockAuth.currentUser).thenReturn(user);
 
       final result = datasource.currentUser;
 
       expect(result, equals(user));
-      verify(() => mockSupabase.currentUser).called(1);
+      verify(() => mockAuth.currentUser).called(1);
     });
 
     test('authStateChanges delegates to SayrSupabase', () {
@@ -46,9 +71,9 @@ void main() {
       verify(() => mockSupabase.authStateChanges).called(1);
     });
 
-    test('signInWithPassword delegates to SayrSupabase', () async {
+    test('signInWithPassword calls client auth', () async {
       final response = MockAuthResponse();
-      when(() => mockSupabase.signInWithPassword(
+      when(() => mockAuth.signInWithPassword(
           email: 'test@test.com',
           password: 'password')).thenAnswer((_) async => response);
 
@@ -56,18 +81,20 @@ void main() {
           email: 'test@test.com', password: 'password');
 
       expect(result, equals(response));
-      verify(() => mockSupabase.signInWithPassword(
+      verify(() => mockAuth.signInWithPassword(
           email: 'test@test.com', password: 'password')).called(1);
     });
 
-    test('signUp delegates to SayrSupabase', () async {
+    test('signUp calls client auth', () async {
       final response = MockAuthResponse();
       when(
-        () => mockSupabase.signUp(
+        () => mockAuth.signUp(
           email: 'test@test.com',
           password: 'password',
-          fullName: 'Test User',
-          phone: '1234567890',
+          data: {
+            'full_name': 'Test User',
+            'phone': '1234567890',
+          },
         ),
       ).thenAnswer((_) async => response);
 
@@ -80,49 +107,103 @@ void main() {
 
       expect(result, equals(response));
       verify(
-        () => mockSupabase.signUp(
+        () => mockAuth.signUp(
           email: 'test@test.com',
           password: 'password',
-          fullName: 'Test User',
-          phone: '1234567890',
+          data: {
+            'full_name': 'Test User',
+            'phone': '1234567890',
+          },
         ),
       ).called(1);
     });
 
-    test('signInWithGoogle delegates to SayrSupabase', () async {
-      when(() => mockSupabase.signInWithGoogle()).thenAnswer((_) async => true);
+    test('signInWithGoogle signs in using google and client auth', () async {
+      final googleUser = MockGoogleSignInAccount();
+      final googleAuth = MockGoogleSignInAuthentication();
+      final response = MockAuthResponse();
+      final user = MockUser();
+
+      when(() => mockGoogleSignIn.signOut()).thenAnswer((_) async => googleUser);
+      when(() => mockGoogleSignIn.signIn()).thenAnswer((_) async => googleUser);
+      when(() => googleUser.authentication).thenAnswer((_) async => googleAuth);
+      when(() => googleAuth.idToken).thenReturn('googleToken');
+      when(() => googleAuth.accessToken).thenReturn('accessToken');
+
+      when(() => mockAuth.signInWithIdToken(
+        provider: supabase.OAuthProvider.google,
+        idToken: 'googleToken',
+        accessToken: 'accessToken',
+      )).thenAnswer((_) async => response);
+      when(() => response.user).thenReturn(user);
 
       final result = await datasource.signInWithGoogle();
 
       expect(result, isTrue);
-      verify(() => mockSupabase.signInWithGoogle()).called(1);
+      verify(() => mockGoogleSignIn.signOut()).called(1);
+      verify(() => mockGoogleSignIn.signIn()).called(1);
+      verify(() => mockAuth.signInWithIdToken(
+        provider: supabase.OAuthProvider.google,
+        idToken: 'googleToken',
+        accessToken: 'accessToken',
+      )).called(1);
     });
 
-    test('sendPasswordResetEmail delegates to SayrSupabase', () async {
-      when(() => mockSupabase.sendPasswordResetEmail('test@test.com'))
-          .thenAnswer((_) async {});
+    test('signInWithGoogle falls back to OAuth if native throws', () async {
+      when(() => mockGoogleSignIn.signOut()).thenThrow(Exception('Native sign in failed'));
+      when(() => mockAuth.getOAuthSignInUrl(
+        provider: any<supabase.OAuthProvider>(named: 'provider'),
+        redirectTo: any<String?>(named: 'redirectTo'),
+        scopes: any<String?>(named: 'scopes'),
+        queryParams: any<Map<String, String>?>(named: 'queryParams'),
+      )).thenAnswer((_) async => const supabase.OAuthResponse(
+        provider: supabase.OAuthProvider.google,
+        url: 'https://mock.url',
+      ));
+
+      final result = await datasource.signInWithGoogle();
+
+      expect(result, isTrue);
+      verify(() => mockAuth.getOAuthSignInUrl(
+        provider: any<supabase.OAuthProvider>(named: 'provider'),
+        redirectTo: any<String?>(named: 'redirectTo'),
+        scopes: any<String?>(named: 'scopes'),
+        queryParams: any<Map<String, String>?>(named: 'queryParams'),
+      )).called(1);
+    });
+
+    test('sendPasswordResetEmail calls client auth', () async {
+      when(() => mockAuth.resetPasswordForEmail(
+        'test@test.com',
+        redirectTo: 'com.sayr.app://reset-password',
+      )).thenAnswer((_) async {});
 
       await datasource.sendPasswordResetEmail('test@test.com');
 
-      verify(() => mockSupabase.sendPasswordResetEmail('test@test.com'))
-          .called(1);
+      verify(() => mockAuth.resetPasswordForEmail(
+        'test@test.com',
+        redirectTo: 'com.sayr.app://reset-password',
+      )).called(1);
     });
 
-    test('updatePassword delegates to SayrSupabase', () async {
-      when(() => mockSupabase.updatePassword('newPassword'))
-          .thenAnswer((_) async {});
+    test('updatePassword calls client auth', () async {
+      final userResponse = MockUserResponse();
+      when(() => mockAuth.updateUser(any()))
+          .thenAnswer((_) async => userResponse);
 
       await datasource.updatePassword('newPassword');
 
-      verify(() => mockSupabase.updatePassword('newPassword')).called(1);
+      verify(() => mockAuth.updateUser(any())).called(1);
     });
 
-    test('signOut delegates to SayrSupabase', () async {
-      when(() => mockSupabase.signOut()).thenAnswer((_) async {});
+    test('signOut calls client auth and google signout', () async {
+      when(() => mockAuth.signOut()).thenAnswer((_) async {});
+      when(() => mockGoogleSignIn.signOut()).thenAnswer((_) async => MockGoogleSignInAccount());
 
       await datasource.signOut();
 
-      verify(() => mockSupabase.signOut()).called(1);
+      verify(() => mockAuth.signOut()).called(1);
+      verify(() => mockGoogleSignIn.signOut()).called(1);
     });
 
     test('fetchCurrentProfile executes correct supabase query', () async {
@@ -163,11 +244,9 @@ void main() {
           MockPostgrestFilterBuilder<List<Map<String, dynamic>>>();
       mockFilterBuilder.completeWith(Future.value([]));
 
-      final mockAuth = MockGoTrueClient();
       final mockUser = MockUser();
       when(() => mockUser.id).thenReturn('user1');
       when(() => mockAuth.currentUser).thenReturn(mockUser);
-      when(() => mockClient.auth).thenReturn(mockAuth);
 
       when(() => mockClient.from('profiles'))
           .thenAnswer((_) => mockQueryBuilder);

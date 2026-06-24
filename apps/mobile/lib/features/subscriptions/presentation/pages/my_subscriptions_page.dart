@@ -37,11 +37,8 @@ class _MySubscriptionsPageState extends State<MySubscriptionsPage> {
 
     return Scaffold(
       appBar: widget.showAppBar
-          ? AppBar(
+          ? GlassAppBar(
               title: Text(l10n.mySubscriptions),
-              centerTitle: true,
-              elevation: 0,
-              backgroundColor: Colors.transparent,
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add),
@@ -274,26 +271,11 @@ class _DashboardHeader extends StatelessWidget {
       final progress = (daysRemaining / 30.0).clamp(0.0, 1.0);
       final endDateStr =
           activeSub.endDate?.toLocal().toString().split(' ').first ?? '';
-
       return Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary,
-              AppColors.primaryContainer,
-            ],
-          ),
+          color: AppColors.primary,
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withValues(alpha: isDark ? 0.4 : 0.25),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -387,24 +369,17 @@ class _DashboardHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            if (isDark) AppColors.darkSurface else Colors.white,
+            Theme.of(context).colorScheme.surface,
             if (isDark)
-              AppColors.darkSurface.withValues(alpha: 0.8)
+              Theme.of(context).colorScheme.surface.withValues(alpha: 0.8)
             else
-              AppColors.background,
+              Theme.of(context).scaffoldBackgroundColor,
           ],
         ),
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.05),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -416,12 +391,12 @@ class _DashboardHeader extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.card_membership_outlined,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     size: 24,
                   ),
                 ),
@@ -441,7 +416,7 @@ class _DashboardHeader extends StatelessWidget {
                       Text(
                         l10n.noSubscriptionsSubtitle,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                       ),
                     ],
@@ -582,8 +557,6 @@ class _SubscriptionCard extends StatelessWidget {
       }
     }
 
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
       child: Slidable(
@@ -616,16 +589,16 @@ class _SubscriptionCard extends StatelessWidget {
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                       color: (isCancellable
-                              ? AppColors.primary
-                              : AppColors.textMuted)
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).disabledColor)
                           .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
                       Icons.directions_bus,
                       color: isCancellable
-                          ? AppColors.primary
-                          : AppColors.textMuted,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).disabledColor,
                       size: 24,
                     ),
                   ),
@@ -647,7 +620,7 @@ class _SubscriptionCard extends StatelessWidget {
                             l10n.subscriptionEndsOn(endDateStr),
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                           ),
                         ],
@@ -677,8 +650,7 @@ class _SubscriptionCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.md),
                 Divider(
                   height: 1,
-                  color: (isDark ? Colors.white : Colors.black)
-                      .withValues(alpha: 0.05),
+                  color: Theme.of(context).colorScheme.outlineVariant,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Row(
@@ -687,7 +659,7 @@ class _SubscriptionCard extends StatelessWidget {
                     Text(
                       l10n.subscriptionDaysLeft(subscription.daysRemaining!),
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -727,24 +699,16 @@ class _PendingPaymentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: AppColors.warning.withValues(alpha: 0.3),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.warning.withValues(alpha: isDark ? 0.15 : 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),

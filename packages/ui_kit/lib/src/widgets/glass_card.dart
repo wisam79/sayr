@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'package:sayr_ui_kit/src/theme/app_colors.dart';
 import 'package:sayr_ui_kit/src/theme/app_spacing.dart';
 
 /// A premium glassmorphism card with backdrop blur, subtle border, and shadow.
@@ -85,7 +84,7 @@ class GlassCard extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary
+                color: Colors.black
                     .withValues(alpha: shadowOpacity * (isDark ? 0.6 : 0.4)),
                 blurRadius: 24,
                 spreadRadius: -2,

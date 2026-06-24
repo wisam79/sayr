@@ -34,7 +34,7 @@ class RoutesBloc extends Bloc<RoutesEvent, RoutesState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(RoutesError(failure)),
-      (routes) => emit(RoutesLoaded(routes)),
+      (data) => emit(RoutesLoaded(data.routes, fromCache: data.fromCache)),
     );
   }
 

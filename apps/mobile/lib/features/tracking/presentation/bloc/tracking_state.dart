@@ -12,6 +12,7 @@ sealed class TrackingState with _$TrackingState {
 
   const factory TrackingState.activeTripsLoaded({
     required List<Trip> trips,
+    @Default(false) bool fromCache,
     DateTime? lastUpdated,
   }) = TrackingActiveTripsLoaded;
 

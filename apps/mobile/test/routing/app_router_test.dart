@@ -44,25 +44,36 @@ void main() {
       final names = <String>{};
       final routes = router.config.configuration.routes;
 
-      for (final route in routes) {
-        if (route is GoRoute) {
-          expect(route.name, isNotNull);
-          expect(route.name, isNotEmpty);
-          expect(
-            names.contains(route.name),
-            isFalse,
-            reason: 'Duplicate route name: ${route.name}',
-          );
-          names.add(route.name!);
+      void checkRoutes(List<RouteBase> routesList) {
+        for (final route in routesList) {
+          if (route is GoRoute) {
+            expect(route.name, isNotNull);
+            expect(route.name, isNotEmpty);
+            expect(
+              names.contains(route.name),
+              isFalse,
+              reason: 'Duplicate route name: ${route.name}',
+            );
+            names.add(route.name!);
+          }
+          checkRoutes(route.routes);
         }
       }
+
+      checkRoutes(routes);
     });
 
     test('has expected routes registered', () {
-      final routeNames = router.config.configuration.routes
-          .whereType<GoRoute>()
-          .map((r) => r.name)
-          .toList();
+      final routeNames = <String?>[];
+      void collectNames(List<RouteBase> routesList) {
+        for (final route in routesList) {
+          if (route is GoRoute) {
+            routeNames.add(route.name);
+          }
+          collectNames(route.routes);
+        }
+      }
+      collectNames(router.config.configuration.routes);
 
       expect(
         routeNames,

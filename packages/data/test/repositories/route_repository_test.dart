@@ -50,10 +50,11 @@ void main() {
         expect(result.isRight(), true);
         result.fold(
           (failure) => fail('should succeed'),
-          (routes) {
-            expect(routes.length, 1);
-            expect(routes.first.id, const RouteId('route-123'));
-            expect(routes.first.title, 'Baghdad Route');
+          (data) {
+            expect(data.routes.length, 1);
+            expect(data.routes.first.id, const RouteId('route-123'));
+            expect(data.routes.first.title, 'Baghdad Route');
+            expect(data.fromCache, false);
           },
         );
       });

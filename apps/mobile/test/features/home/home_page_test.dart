@@ -165,7 +165,13 @@ void main() {
       find.byIcon(Icons.home_rounded),
       findsOneWidget,
     ); // selected tab (activeIcon)
-    expect(find.byIcon(Icons.route_outlined), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.byIcon(Icons.route_outlined),
+      ),
+      findsOneWidget,
+    );
     expect(find.byIcon(Icons.map_outlined), findsOneWidget);
     expect(find.byIcon(Icons.local_activity_outlined), findsOneWidget);
     expect(find.byIcon(Icons.person_outline_rounded), findsOneWidget);
@@ -200,7 +206,12 @@ void main() {
     await tester.pump();
 
     // Tap on the Routes tab (index 1)
-    await tester.tap(find.byIcon(Icons.route_outlined));
+    await tester.tap(
+      find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.byIcon(Icons.route_outlined),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Verify it is on the routes page (which renders search bar)

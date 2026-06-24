@@ -22,7 +22,7 @@ void main() {
     sl.allowReassignment = true;
     mockRouting = MockRoutingService();
     sl.registerSingleton<RoutingService>(mockRouting);
-    cubit = TrackingUiCubit();
+    cubit = TrackingUiCubit(routingService: mockRouting);
   });
 
   tearDown(() {

@@ -8,7 +8,7 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-class DigitalTicketPass extends StatefulWidget {
+class DigitalTicketPass extends StatelessWidget {
   const DigitalTicketPass({
     required this.subscription,
     required this.user,
@@ -21,71 +21,13 @@ class DigitalTicketPass extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<DigitalTicketPass> createState() => _DigitalTicketPassState();
-}
-
-class _DigitalTicketPassState extends State<DigitalTicketPass>
-    with TickerProviderStateMixin {
-  late AnimationController _shimmerController;
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _shimmerController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 3500),
-    );
-
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-    _pulseAnimation = Tween<double>(begin: 0.3, end: 1).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
-      _shimmerController.stop();
-      _pulseController.stop();
-    } else {
-      if (!_shimmerController.isAnimating) {
-        _shimmerController.repeat();
-      }
-      if (!_pulseController.isAnimating) {
-        _pulseController.repeat(reverse: true);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _shimmerController.dispose();
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final daysLeft = widget.subscription.daysRemaining ?? 0;
+    final daysLeft = subscription.daysRemaining ?? 0;
     const totalDays = 30.0;
     final progress = (daysLeft / totalDays).clamp(0.0, 1.0);
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    final disableAnimations =
-        isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
 
-    final showGlow = daysLeft < 5;
-
-    Widget progressWidget = ClipRRect(
+    final Widget progressWidget = ClipRRect(
       borderRadius: BorderRadius.circular(6),
       child: LinearProgressIndicator(
         value: progress,
@@ -96,40 +38,22 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
       ),
     );
 
-    if (showGlow && !disableAnimations) {
-      progressWidget = AnimatedBuilder(
-        animation: _pulseController,
-        builder: (context, child) {
-          final pulseValue = _pulseAnimation.value;
-          return Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.amber.withValues(alpha: pulseValue * 0.4),
-                  blurRadius: 8 + pulseValue * 4,
-                  spreadRadius: 1,
-                ),
-              ],
-            ),
-            child: child,
-          );
-        },
-        child: progressWidget,
-      );
-    }
-
     return Semantics(
       label: l10n.myDigitalPass,
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF1E293B), // Dark slate
-              Color(0xFF0F172A), // Deep charcoal
-            ],
+            colors: Theme.of(context).brightness == Brightness.dark
+                ? const [
+                    Color(0xFF0F766E), // Dark Teal
+                    Color(0xFF042F2E), // Deepest Teal
+                  ]
+                : const [
+                    Color(0xFF0D9488), // Premium Emerald-Teal
+                    Color(0xFF115E59), // Darker Teal
+                  ],
           ),
           borderRadius: BorderRadius.circular(24),
         ),
@@ -137,32 +61,6 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
           borderRadius: BorderRadius.circular(24),
           child: Stack(
             children: [
-              // Diagonal Holographic Shimmer Overlay
-              if (!disableAnimations)
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: _shimmerController,
-                    builder: (context, child) {
-                      final shimmerPosition = _shimmerController.value;
-                      return ShaderMask(
-                        shaderCallback: (bounds) {
-                          return LinearGradient(
-                            begin: Alignment(-2.0 + 4.0 * shimmerPosition, -2),
-                            end: Alignment(-1.0 + 4.0 * shimmerPosition, -1),
-                            colors: const [
-                              Color(0x00FFFFFF),
-                              Color(0x14FFFFFF),
-                              Color(0x00FFFFFF),
-                            ],
-                            stops: const [0.4, 0.5, 0.6],
-                          ).createShader(bounds);
-                        },
-                        blendMode: BlendMode.srcIn,
-                        child: Container(color: Colors.white),
-                      );
-                    },
-                  ),
-                ),
               Column(
                 children: [
                   Padding(
@@ -234,9 +132,9 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                           ],
                         ),
                         const SizedBox(height: AppSpacing.sm),
-                        if (widget.user != null) ...[
+                        if (user != null) ...[
                           Text(
-                            widget.user!.displayName,
+                            user!.displayName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context)
@@ -248,9 +146,9 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                                 ),
                           ),
                           const SizedBox(height: 2),
-                          if (widget.user!.phone != null)
+                          if (user!.phone != null)
                             Text(
-                              widget.user!.phone!,
+                              user!.phone!,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -270,11 +168,11 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                                 ),
                           ),
                         ],
-                        if (widget.subscription.endDate != null) ...[
+                        if (subscription.endDate != null) ...[
                           const SizedBox(height: 4),
                           Text(
                             l10n.subscriptionEndsOn(
-                              widget.subscription.endDate!
+                              subscription.endDate!
                                   .toLocal()
                                   .toString()
                                   .split(' ')
@@ -283,9 +181,9 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
-                                ?.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                ),
+                                  ?.copyWith(
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
                           ),
                         ],
                       ],
@@ -383,7 +281,7 @@ class _DigitalTicketPassState extends State<DigitalTicketPass>
                                 fontSize: 16,
                               ),
                             ),
-                            onPressed: widget.onTap,
+                            onPressed: onTap,
                           ),
                         ),
                       ],

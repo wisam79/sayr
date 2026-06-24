@@ -1,6 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:logger/logger.dart';
 import 'package:sayr_data/src/supabase/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -13,28 +11,71 @@ class SecureSupabaseStorage extends supabase.LocalStorage {
   );
   static const _kSupabaseSessionKey = 'supabase_session';
 
+  static final Map<String, String> _memoryStorage = {};
+  static bool _useMemoryStorage = false;
+
   @override
-  Future<void> initialize() async {}
+  Future<void> initialize() async {
+    try {
+      await _storage.read(key: _kSupabaseSessionKey);
+    } catch (_) {
+      _useMemoryStorage = true;
+    }
+  }
 
   @override
   Future<bool> hasAccessToken() async {
-    return await _storage.read(key: _kSupabaseSessionKey) != null;
+    if (_useMemoryStorage) {
+      return _memoryStorage.containsKey(_kSupabaseSessionKey);
+    }
+    try {
+      return await _storage.read(key: _kSupabaseSessionKey) != null;
+    } catch (_) {
+      _useMemoryStorage = true;
+      return _memoryStorage.containsKey(_kSupabaseSessionKey);
+    }
   }
 
   @override
   Future<String?> accessToken() async {
-    return _storage.read(key: _kSupabaseSessionKey);
+    if (_useMemoryStorage) {
+      return _memoryStorage[_kSupabaseSessionKey];
+    }
+    try {
+      return await _storage.read(key: _kSupabaseSessionKey);
+    } catch (_) {
+      _useMemoryStorage = true;
+      return _memoryStorage[_kSupabaseSessionKey];
+    }
   }
 
   @override
   Future<void> persistSession(String persistSessionString) async {
-    await _storage.write(
-        key: _kSupabaseSessionKey, value: persistSessionString);
+    if (_useMemoryStorage) {
+      _memoryStorage[_kSupabaseSessionKey] = persistSessionString;
+      return;
+    }
+    try {
+      await _storage.write(
+          key: _kSupabaseSessionKey, value: persistSessionString);
+    } catch (_) {
+      _useMemoryStorage = true;
+      _memoryStorage[_kSupabaseSessionKey] = persistSessionString;
+    }
   }
 
   @override
   Future<void> removePersistedSession() async {
-    await _storage.delete(key: _kSupabaseSessionKey);
+    if (_useMemoryStorage) {
+      _memoryStorage.remove(_kSupabaseSessionKey);
+      return;
+    }
+    try {
+      await _storage.delete(key: _kSupabaseSessionKey);
+    } catch (_) {
+      _useMemoryStorage = true;
+      _memoryStorage.remove(_kSupabaseSessionKey);
+    }
   }
 }
 
@@ -52,7 +93,6 @@ class SayrSupabase {
 
   late supabase.SupabaseClient _client;
   bool _initialized = false;
-  final Logger _logger = Logger();
 
   /// The underlying Supabase client.
   supabase.SupabaseClient get client {
@@ -84,125 +124,6 @@ class SayrSupabase {
 
     _client = supabase.Supabase.instance.client;
     _initialized = true;
-  }
-
-  /// Sign in with email and password.
-  Future<supabase.AuthResponse> signInWithPassword({
-    required String email,
-    required String password,
-  }) async {
-    return _client.auth.signInWithPassword(email: email, password: password);
-  }
-
-  /// Sign up with email and password.
-  Future<supabase.AuthResponse> signUp({
-    required String email,
-    required String password,
-    required String fullName,
-    String? phone,
-  }) async {
-    return _client.auth.signUp(
-      email: email,
-      password: password,
-      data: {
-        'full_name': fullName,
-        if (phone != null) 'phone': phone,
-      },
-    );
-  }
-
-  /// Sign in with Google using native Google Sign-In or OAuth fallback.
-  ///
-  /// Returns true on success.
-  Future<bool> signInWithGoogle() async {
-    const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
-    const androidClientId = String.fromEnvironment('GOOGLE_ANDROID_CLIENT_ID');
-    final clientId = webClientId.isNotEmpty
-        ? webClientId
-        : (androidClientId.isNotEmpty ? androidClientId : null);
-
-    final googleSignIn = GoogleSignIn(
-      serverClientId: clientId,
-      scopes: ['email', 'profile'],
-    );
-
-    try {
-      // Force account chooser dialog by signing out from Google client first
-      try {
-        await googleSignIn.signOut();
-      } catch (e, st) {
-        _logger.d(
-          'Google signOut before re-auth failed; proceeding with signIn',
-          error: e,
-          stackTrace: st,
-        );
-      }
-
-      final googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        // User cancelled the native sign-in dialog
-        return false;
-      }
-
-      final googleAuth = await googleUser.authentication;
-      final idToken = googleAuth.idToken;
-      final accessToken = googleAuth.accessToken;
-
-      if (idToken == null) {
-        throw const supabase.AuthException(
-          'google_id_token_missing',
-        );
-      }
-
-      final response = await _client.auth.signInWithIdToken(
-        provider: supabase.OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
-      );
-
-      return response.user != null;
-    } catch (e) {
-      // Fallback to OAuth if native sign-in fails or is not supported
-      if (e.toString().contains('sign_in_canceled') ||
-          e.toString().contains('canceled')) {
-        return false;
-      }
-
-      // Attempt OAuth fallback
-      return _client.auth.signInWithOAuth(
-        supabase.OAuthProvider.google,
-        redirectTo: 'com.sayr.app://login-callback',
-      );
-    }
-  }
-
-  /// Send a password reset email.
-  Future<void> sendPasswordResetEmail(String email) {
-    return _client.auth.resetPasswordForEmail(
-      email,
-      redirectTo: 'com.sayr.app://reset-password',
-    );
-  }
-
-  /// Update the current user's password.
-  Future<void> updatePassword(String password) async {
-    await _client.auth.updateUser(
-      supabase.UserAttributes(password: password),
-    );
-  }
-
-  /// Sign out the current user.
-  Future<void> signOut() async {
-    await _client.auth.signOut();
-    try {
-      await GoogleSignIn().signOut();
-    } catch (e, st) {
-      _logger.d(
-        'Google signOut during app signOut failed (likely not initialized)',
-        error: e,
-        stackTrace: st,
-      );
-    }
   }
 
   /// Listen to auth state changes.

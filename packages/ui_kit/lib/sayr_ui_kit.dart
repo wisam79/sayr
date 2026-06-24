@@ -10,6 +10,7 @@ export 'src/theme/app_typography.dart';
 export 'src/widgets/app_text_field.dart';
 export 'src/widgets/empty_state.dart';
 export 'src/widgets/error_widget.dart';
+export 'src/widgets/glass_app_bar.dart';
 export 'src/widgets/glass_card.dart';
 export 'src/widgets/greeting_card.dart';
 export 'src/widgets/loading_widget.dart';

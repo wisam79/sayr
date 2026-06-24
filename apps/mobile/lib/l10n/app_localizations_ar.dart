@@ -1065,4 +1065,7 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get tripTrackingActiveText =>
       'تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.';
+
+  @override
+  String get stationsTitle => 'المحطات';
 }

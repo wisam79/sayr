@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAYR | Intelligent Transit Hub</title>
+    
+    <!-- Fonts: Outfit (Display/Technical) + Geist (Interface/Readable) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Geist', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            DEFAULT: '#0D9488', // The requested exact Teal
+                            hover: '#0f766e',
+                            glow: 'rgba(13, 148, 136, 0.4)',
+                        },
+                        ui: {
+                            base: '#09090b',    // Zinc 950
+                            surface: '#18181b', // Zinc 900
+                            edge: '#27272a',    // Zinc 800
+                        }
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "url(\"data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23ffffff' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E\")",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CORE PHYSICS & MATERIALITY */
+        body {
+            background-color: theme('colors.ui.base');
+            color: #fafafa;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient Noise Overlay - strictly fixed and non-interfering */
+        .noise-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* High-End Bento Surfaces */
+        .bento-surface {
+            background: linear-gradient(145deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.9) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            /* Inner refraction edge */
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 20px 40px -15px rgba(0,0,0,0.7);
+            border-radius: 2rem;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        }
+
+        /* Ticket Specific Cutout Effect */
+        .ticket-card {
+            border-radius: 1.5rem;
+            position: relative;
+        }
+        .ticket-divider {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-image: linear-gradient(to right, rgba(255,255,255,0.1) 50%, transparent 50%);
+            background-size: 16px 2px;
+            background-repeat: repeat-x;
+        }
+        /* Pseudo elements for the physical "cutout" holes on the ticket edge */
+        .ticket-divider::before, .ticket-divider::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: theme('colors.ui.base'); /* Match page background */
+            border-radius: 50%;
+            top: -15px;
+            box-shadow: inset 0px 0px 0px 1px rgba(255,255,255,0.06);
+            z-index: 10;
+        }
+        .ticket-divider::before { left: -16px; border-right-color: transparent; }
+        .ticket-divider::after { right: -16px; border-left-color: transparent; }
+
+
+        /* Custom Scrollbar to avoid breaking immersion */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: theme('colors.ui.edge'); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.brand.DEFAULT'); }
+
+        /* --- ANIMATION ORCHESTRATION --- */
+        
+        /* Sequential Loading Waterfall */
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: calc(var(--index) * 100ms);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Map Route Animation */
+        .svg-route-path {
+            stroke-dasharray: 800;
+            stroke-dashoffset: 800;
+            animation: drawLine 3s ease-in-out forwards;
+        }
+        @keyframes drawLine {
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Radar Sweep for Map */
+        .radar-sweep {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: conic-gradient(from 0deg at 50% 50%, transparent 0%, rgba(13, 148, 136, 0.1) 10%, transparent 40%);
+            animation: sweep 4s linear infinite;
+            border-radius: 50%;
+            scale: 2;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        @keyframes sweep {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Live Pulsing Dot */
+        .live-dot {
+            position: relative;
+        }
+        .live-dot::after {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: theme('colors.brand.DEFAULT');
+            z-index: -1;
+            animation: sonar 2s ease-out infinite;
+        }
+        @keyframes sonar {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        /* Form Input Visuals */
+        .code-input-group:focus-within {
+            box-shadow: 0 0 30px rgba(13, 148, 136, 0.15);
+            border-color: theme('colors.brand.DEFAULT');
+        }
+        
+        /* Shimmer effect for active things */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: skewX(-20deg);
+            animation: shimmerSlide 3s infinite;
+        }
+        @keyframes shimmerSlide {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-[100dvh] antialiased selection:bg-brand selection:text-white">
+
+    <div class="noise-layer"></div>
+
+    <!-- MACRO ARCHITECTURE: Persistent Shell -->
+    <!-- Mobile Header (Hidden on Desktop) -->
+    <header class="md:hidden flex items-center justify-between p-4 border-b border-white/5 bg-ui-surface/50 backdrop-blur-md sticky top-0 z-40">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white font-bold font-display tracking-tighter">S</div>
+            <span class="font-display font-bold text-xl tracking-tight">SAYR</span>
+        </div>
+        <button class="p-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors">
+            <i class="ph ph-list text-xl"></i>
+        </button>
+    </header>
+
+    <!-- Desktop Sidebar (Hidden on Mobile) -->
+    <aside class="hidden md:flex flex-col w-20 lg:w-64 border-r border-white/5 bg-ui-surface/30 backdrop-blur-xl h-screen sticky top-0 transition-all duration-300 z-40">
+        <div class="p-6 flex items-center justify-center lg:justify-start gap-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand to-brand-hover shadow-[0_0_20px_rgba(13,148,136,0.3)] flex items-center justify-center text-white font-bold font-display text-xl tracking-tighter">S</div>
+            <span class="hidden lg:block font-display font-bold text-2xl tracking-tight">SAYR</span>
+        </div>
+
+        <nav class="flex-1 px-4 py-8 flex flex-col gap-2">
+            <!-- Active State -->
+            <a href="#" class="group flex items-center gap-4 px-3 lg:px-4 py-3 rounded-xl bg-white/5 border border-white/10 relative overflow-hidden transition-all hover:bg-white/10">
+                <div class="absolute inset-y-0 left-0 w-1 bg-brand rounded-r-full"></div>
+                <i class="ph-fill ph-circles-four text-xl text-brand group-hover:scale-110 transition-transform duration-300"></i>
+                <span class="hidden lg:block font-medium text-sm text-zinc-100">Hub Overview</span>
+            </a>
+            <a href="#" class="group flex items-center gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-zinc-400 hover:text-white">
+                <i class="ph ph-map-trifold text-xl group-hover:scale-110 transition-transform duration-300"></i>
+                <span class="hidden lg:block font-medium text-sm">Live Routes</span>
+            </a>
+            <a href="#" class="group flex items-center gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-zinc-400 hover:text-white">
+                <i class="ph ph-wallet text-xl group-hover:scale-110 transition-transform duration-300"></i>
+                <span class="hidden lg:block font-medium text-sm">Wallet & Pass</span>
+            </a>
+            <a href="#" class="group flex items-center gap-4 px-3 lg:px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-zinc-400 hover:text-white">
+                <i class="ph ph-bell text-xl group-hover:scale-110 transition-transform duration-300"></i>
+                <span class="hidden lg:block font-medium text-sm">Alerts</span>
+                <span class="hidden lg:flex ml-auto bg-brand/20 text-brand text-xs font-bold px-2 py-0.5 rounded-full">3</span>
+            </a>
+        </nav>
+
+        <div class="p-4 mt-auto border-t border-white/5">
+            <button class="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-all">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Youssef H." class="w-10 h-10 rounded-full border border-white/10 object-cover grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="hidden lg:block text-left">
+                    <p class="text-sm font-semibold text-zinc-100">Youssef H.</p>
+                    <p class="text-xs text-brand font-medium">BSc Engineering</p>
+                </div>
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main class="flex-1 relative w-full h-[100dvh] overflow-y-auto bg-grid-pattern relative">
+        <!-- Top Gradient Glow -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-brand/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+            
+            <!-- Contextual Dashboard Header -->
+            <header class="mb-10 stagger-item" style="--index: 1;">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <p class="text-brand font-medium tracking-widest text-sm uppercase mb-2 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand live-dot"></span> System Online
+                        </p>
+                        <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter leading-none text-white">
+                            Al-Mustansiriya <br class="hidden md:block"> Central Hub
+                        </h1>
+                    </div>
+                    <div class="bg-ui-surface/80 backdrop-blur border border-white/10 rounded-full px-5 py-2.5 flex items-center gap-3 w-fit">
+                        <i class="ph ph-clock text-zinc-400"></i>
+                        <span class="font-mono text-sm text-zinc-200" id="live-time">08:42 AM AST</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- BENTO ARCHITECTURE GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-12 auto-rows-min gap-4 lg:gap-6">
+
+                <!-- 1. LIVE ROUTE RADAR (Macro Focus - Col 8, Row 2) -->
+                <div class="bento-surface col-span-1 md:col-span-12 lg:col-span-8 md:row-span-2 min-h-[400px] p-1 flex flex-col stagger-item group" style="--index: 2;">
+                    <div class="absolute top-6 left-6 z-10">
+                        <h2 class="font-display font-semibold text-xl flex items-center gap-2">
+                            <i class="ph-fill ph-navigation-arrow text-brand"></i> Fleet Radar
+                        </h2>
+                        <p class="text-xs font-mono text-zinc-400 mt-1">SATELLITE LINK ACTIVE</p>
+                    </div>
+                    
+                    <!-- Map Visualizer Container -->
+                    <div class="relative w-full h-full bg-zinc-950/50 rounded-[1.8rem] overflow-hidden flex-1 border border-white/5">
+                        <div class="radar-sweep"></div>
+                        
+                        <!-- Simulated Topography / City Grid -->
+                        <div class="absolute inset-0 opacity-[0.15]" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
+                        
+                        <!-- SVG Map Route Logic -->
+                        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 800 400" preserveAspectRatio="none">
+                            <!-- Background generic roads -->
+                            <path d="M-50 150 Q 200 100, 400 200 T 850 180" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/>
+                            <path d="M100 -50 L 150 450" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
+                            <path d="M600 -50 L 550 450" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>
+
+                            <!-- Active Route (Teal) -->
+                            <path id="transit-route" d="M100 300 C 250 300, 300 150, 500 150 S 700 250, 750 200" fill="none" stroke="#0D9488" stroke-width="6" stroke-linecap="round" class="svg-route-path" style="filter: drop-shadow(0 0 8px rgba(13,148,136,0.5));"/>
+                            
+                            <!-- Bus Location Dot -->
+                            <circle cx="500" cy="150" r="6" fill="#fff" class="live-dot" />
+                            
+                            <!-- Nodes / Stops -->
+                            <circle cx="100" cy="300" r="4" fill="#27272a" stroke="#fff" stroke-width="2"/>
+                            <text x="100" y="325" fill="#a1a1aa" font-family="monospace" font-size="10" text-anchor="middle">JADRIYA</text>
+                            
+                            <circle cx="750" cy="200" r="4" fill="#27272a" stroke="#fff" stroke-width="2"/>
+                            <text x="750" y="225" fill="#a1a1aa" font-family="monospace" font-size="10" text-anchor="middle">CAMPUS</text>
+                        </svg>
+
+                        <!-- HUD Overlay Stats -->
+                        <div class="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
+                            <div class="bg-black/80 backdrop-blur px-4 py-3 rounded-xl border border-white/10 flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-brand/20 flex items-center justify-center">
+                                    <i class="ph-fill ph-bus text-brand text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-widest text-zinc-400">Route 14 • Express</p>
+                                    <p class="text-white font-display font-medium text-lg leading-tight">ETA 12 mins</p>
+                                </div>
+                            </div>
+                            
+                            <div class="hidden sm:flex flex-col items-end gap-1">
+                                <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+                                    <span>SPEED</span>
+                                    <span class="text-brand">48 km/h</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+                                    <span>CAPACITY</span>
+                                    <span class="text-white">64%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. DIGITAL BOARDING PASS (Material Cutout UI - Col 4, Row 2) -->
+                <div class="bento-surface ticket-card col-span-1 md:col-span-6 lg:col-span-4 md:row-span-2 flex flex-col stagger-item bg-ui-surface" style="--index: 3;">
+                    
+                    <!-- Top section -->
+                    <div class="p-6 md:p-8 flex-1 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <span class="bg-zinc-800 text-zinc-300 text-[10px] font-bold px-2 py-1 rounded tracking-widest uppercase">Valid Today</span>
+                            </div>
+                            <i class="ph ph-qr-code text-2xl text-zinc-500"></i>
+                        </div>
+                        
+                        <div>
+                            <p class="text-xs text-zinc-400 font-mono mb-1">DEPARTURE</p>
+                            <h3 class="font-display text-3xl font-bold truncate">Baghdad U.</h3>
+                            
+                            <div class="my-4 flex items-center gap-3">
+                                <div class="h-2 w-2 rounded-full bg-brand"></div>
+                                <div class="h-px flex-1 bg-gradient-to-r from-brand to-transparent"></div>
+                            </div>
+                            
+                            <p class="text-xs text-zinc-400 font-mono mb-1">ARRIVAL</p>
+                            <h3 class="font-display text-2xl font-medium text-zinc-300 truncate">Sina'a Street</h3>
+                        </div>
+                    </div>
+
+                    <!-- Perforated Divider -->
+                    <div class="relative h-px w-full">
+                        <div class="ticket-divider"></div>
+                    </div>
+
+                    <!-- Bottom section -->
+                    <div class="p-6 md:p-8 bg-black/20 flex flex-col gap-4">
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <p class="text-xs text-zinc-500 uppercase tracking-widest mb-1">Seat</p>
+                                <p class="font-display text-5xl font-black text-brand tracking-tighter leading-none">14B</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-zinc-500 uppercase tracking-widest mb-1">Time</p>
+                                <p class="font-mono text-xl text-white">09:15<span class="text-sm text-zinc-500">AM</span></p>
+                            </div>
+                        </div>
+                        <button class="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm hover:scale-[0.98] transition-transform active:scale-95 shimmer">
+                            Reveal QR for Boarding
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. ATOMIC CODE ACTIVATION (Meso Interaction - Col 4, Row 1) -->
+                <div class="bento-surface col-span-1 md:col-span-6 lg:col-span-4 p-6 md:p-8 flex flex-col justify-center stagger-item" style="--index: 4;">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 rounded-lg bg-zinc-800 border border-white/5 text-brand">
+                            <i class="ph-fill ph-key text-xl"></i>
+                        </div>
+                        <h3 class="font-display font-semibold text-lg">Activate Pass</h3>
+                    </div>
+                    
+                    <p class="text-sm text-zinc-400 mb-5">Enter your 16-digit university subscription token.</p>
+                    
+                    <form id="activation-form" class="flex flex-col gap-4">
+                        <div class="code-input-group flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 transition-all duration-300 relative overflow-hidden">
+                            <!-- JS will auto-tab these -->
+                            <input type="text" maxlength="4" class="w-[4ch] bg-transparent text-center font-mono text-lg text-white placeholder-zinc-700 outline-none uppercase tracking-widest" placeholder="XXXX" />
+                            <span class="text-zinc-600">-</span>
+                            <input type="text" maxlength="4" class="w-[4ch] bg-transparent text-center font-mono text-lg text-white placeholder-zinc-700 outline-none uppercase tracking-widest" placeholder="XXXX" />
+                            <span class="text-zinc-600">-</span>
+                            <input type="text" maxlength="4" class="w-[4ch] bg-transparent text-center font-mono text-lg text-white placeholder-zinc-700 outline-none uppercase tracking-widest" placeholder="XXXX" />
+                            <span class="text-zinc-600">-</span>
+                            <input type="text" maxlength="4" class="w-[4ch] bg-transparent text-center font-mono text-lg text-white placeholder-zinc-700 outline-none uppercase tracking-widest" placeholder="XXXX" />
+                            
+                            <!-- Success overlay (hidden by default) -->
+                            <div id="success-scan" class="absolute inset-0 bg-brand/20 backdrop-blur-sm border border-brand translate-y-full transition-transform duration-500 flex items-center justify-center gap-2 text-brand font-mono text-sm font-bold">
+                                <i class="ph-bold ph-check-circle"></i> VERIFIED
+                            </div>
+                        </div>
+                        
+                        <button type="button" id="btn-activate" class="relative overflow-hidden w-full py-3 rounded-xl bg-zinc-800 text-white font-medium text-sm hover:bg-zinc-700 transition-colors group">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:animate-[shimmerSlide_1.5s_infinite]"></div>
+                            <span class="relative z-10 flex items-center justify-center gap-2">
+                                Authorize Device <i class="ph ph-arrow-right"></i>
+                            </span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 4. QUICK STATS (Col 4, Row 1) -->
+                <div class="bento-surface col-span-1 md:col-span-6 lg:col-span-4 p-6 stagger-item flex flex-col justify-between" style="--index: 5;">
+                    <h3 class="text-sm font-medium text-zinc-400">Current Semester Status</h3>
+                    
+                    <div class="flex items-end gap-4 mt-6">
+                        <div class="flex-1">
+                            <h4 class="text-[10px] uppercase tracking-widest text-brand mb-1">Days Remaining</h4>
+                            <p class="font-display text-5xl font-bold tracking-tighter">104</p>
+                        </div>
+                        <div class="w-16 h-16 rounded-full border-4 border-zinc-800 border-t-brand border-r-brand flex items-center justify-center transform -rotate-45">
+                            <span class="rotate-45 text-xs font-mono text-white">72%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. QUICK ACTIONS (Col 4, Row 1) -->
+                <div class="bento-surface col-span-1 md:col-span-6 lg:col-span-4 p-6 stagger-item" style="--index: 6;">
+                    <h3 class="text-sm font-medium text-zinc-400 mb-4">Quick Command</h3>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all group">
+                            <i class="ph ph-arrows-left-right text-2xl text-zinc-400 group-hover:text-white transition-colors"></i>
+                            <span class="text-xs font-medium">Change Route</span>
+                        </button>
+                        <button class="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-brand/20 hover:border-brand/50 transition-all group">
+                            <i class="ph ph-warning-circle text-2xl text-zinc-400 group-hover:text-brand transition-colors"></i>
+                            <span class="text-xs font-medium">Report Issue</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- VANILLA JS FOR MICRO-INTERACTIONS (React Port Preparation) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Live Time Update
+            const timeEl = document.getElementById('live-time');
+            setInterval(() => {
+                const now = new Date();
+                timeEl.textContent = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
+            }, 60000);
+
+            // 2. Atomic Code Input Logic (Simulating complex state)
+            const inputs = document.querySelectorAll('.code-input-group input');
+            const submitBtn = document.getElementById('btn-activate');
+            const successScan = document.getElementById('success-scan');
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    // Only allow alphanumeric
+                    e.target.value = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                    
+                    // Auto-advance
+                    if (e.target.value.length === 4 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+
+                    // Check if all filled
+                    checkFormComplete();
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    // Handle backspace cross-input
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                        inputs[index - 1].focus();
+                        // Force cursor to end (browser quirk fix)
+                        setTimeout(() => {
+                            inputs[index-1].selectionStart = inputs[index-1].selectionEnd = inputs[index-1].value.length;
+                        }, 0);
+                    }
+                });
+            });
+
+            function checkFormComplete() {
+                let allFilled = true;
+                inputs.forEach(i => { if(i.value.length < 4) allFilled = false; });
+                
+                if (allFilled) {
+                    submitBtn.classList.remove('bg-zinc-800', 'text-white');
+                    submitBtn.classList.add('bg-brand', 'text-black', 'font-bold', 'shadow-[0_0_20px_rgba(13,148,136,0.4)]');
+                } else {
+                    submitBtn.classList.add('bg-zinc-800', 'text-white');
+                    submitBtn.classList.remove('bg-brand', 'text-black', 'font-bold', 'shadow-[0_0_20px_rgba(13,148,136,0.4)]');
+                }
+            }
+
+            submitBtn.addEventListener('click', (e) => {
+                let allFilled = true;
+                inputs.forEach(i => { if(i.value.length < 4) allFilled = false; });
+                
+                if(!allFilled) {
+                    // Simple shake error
+                    const group = document.querySelector('.code-input-group');
+                    group.style.transform = 'translateX(-5px)';
+                    setTimeout(() => group.style.transform = 'translateX(5px)', 50);
+                    setTimeout(() => group.style.transform = 'translateX(0)', 100);
+                    return;
+                }
+
+                // Simulate Network Request & Success Animation
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="ph ph-spinner animate-spin"></i> Validating...';
+                
+                setTimeout(() => {
+                    successScan.style.transform = 'translateY(0)'; // Slide up cover
+                    submitBtn.innerHTML = '<i class="ph-fill ph-check-circle"></i> Pass Granted';
+                    submitBtn.classList.add('bg-emerald-500'); // distinct success color
+
+                    // Reset after 3s (for testing loop)
+                    setTimeout(() => {
+                        successScan.style.transform = 'translateY(100%)';
+                        inputs.forEach(i => i.value = '');
+                        submitBtn.innerHTML = originalText;
+                        checkFormComplete();
+                        inputs[0].focus();
+                    }, 3000);
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>

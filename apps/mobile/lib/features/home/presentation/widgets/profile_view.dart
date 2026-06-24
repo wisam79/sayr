@@ -58,37 +58,18 @@ abstract class BleSettingsState with _$BleSettingsState {
   }) = _BleSettingsState;
 }
 
-class _ProfileViewState extends State<_ProfileView>
-    with TickerProviderStateMixin {
+class _ProfileViewState extends State<_ProfileView> {
   final ValueNotifier<BleSettingsState> _bleSettingsNotifier =
       ValueNotifier(const BleSettingsState(enabled: false, loading: true));
-  late final AnimationController _avatarRingController;
 
   @override
   void initState() {
     super.initState();
-    _avatarRingController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 4000),
-    );
     _loadBlePreference();
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final isTest =
-        WidgetsBinding.instance.runtimeType.toString().contains('Test');
-    if (isTest || (MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
-      _avatarRingController.stop();
-    } else if (!_avatarRingController.isAnimating) {
-      _avatarRingController.repeat();
-    }
-  }
-
-  @override
   void dispose() {
-    _avatarRingController.dispose();
     _bleSettingsNotifier.dispose();
     super.dispose();
   }
@@ -152,213 +133,185 @@ class _ProfileViewState extends State<_ProfileView>
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final verifiedLabel = l10n.verified;
+
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+
+    final cardBgColor = isDark ? AppColors.darkSurface : Colors.white;
+    final cardBorderColor = isDark ? AppColors.borderDark : Colors.grey.shade200;
+    final primaryTextColor = isDark ? Colors.white : AppColors.textPrimary;
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
         AppSpacing.pagePadding,
-        AppSpacing.pagePadding,
+        statusBarHeight + AppSpacing.sm,
         AppSpacing.pagePadding,
         100, // Extra padding for the floating navigation bar
       ),
       children: [
-        // Premium Profile Card
+        // 1. Custom Header
+        Row(
+          textDirection: TextDirection.ltr, // Ensures Settings on Left
+          children: [
+            IconButton(
+              icon: Icon(
+                LucideIcons.settings,
+                color: primaryTextColor,
+                size: 24,
+              ),
+              onPressed: () {
+                // Settings icon action placeholder
+              },
+            ),
+            Expanded(
+              child: Text(
+                l10n.profile,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: primaryTextColor,
+                  fontSize: 18,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(width: 48), // Balancing spacer
+          ],
+        ),
+        const SizedBox(height: AppSpacing.lg),
+
+        // 2. Profile Details Card (Solid teal with white content, matching home page style)
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF1E293B), // Dark slate
-                Color(0xFF0F172A), // Deep charcoal
-              ],
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.15),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(28),
-            child: Stack(
-              children: [
-                Positioned(
-                  right: -40,
-                  top: -40,
-                  child: Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          Colors.white.withValues(alpha: isDark ? 0.03 : 0.06),
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            children: [
+              Row(
+                textDirection: TextDirection.ltr, // Left: avatar, Middle: info, Right: chevron
+                children: [
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    child: Text(
+                      widget.user.displayName.trim().isNotEmpty
+                          ? widget.user.displayName.trim()[0].toUpperCase()
+                          : '?',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: -30,
-                  bottom: -30,
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color:
-                          Colors.white.withValues(alpha: isDark ? 0.02 : 0.04),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Container(
-                          width: 84,
-                          height: 84,
-                          decoration: const BoxDecoration(
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.user.displayName,
+                          style: const TextStyle(
                             color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              widget.user.displayName.trim().isNotEmpty
-                                  ? widget.user.displayName
-                                      .trim()[0]
-                                      .toUpperCase()
-                                  : '?',
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        widget.user.displayName,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.user.email,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.8),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                        const SizedBox(height: 4),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              widget.user.isDriver
+                                  ? Icons.directions_bus
+                                  : Icons.school,
+                              color: Colors.white.withValues(alpha: 0.9),
+                              size: 14,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  widget.user.isDriver
-                                      ? Icons.directions_bus_rounded
-                                      : Icons.school_rounded,
-                                  color: Colors.white,
-                                  size: 14,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  widget.user.isDriver
-                                      ? l10n.driverBadge
-                                      : l10n.studentBadge,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (widget.user.isVerified) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF00C853),
-                                borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.1),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.verified_rounded,
-                                    color: Colors.white,
-                                    size: 14,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    verifiedLabel,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
+                            const SizedBox(width: 4),
+                            Text(
+                              widget.user.isDriver
+                                  ? l10n.driverBadge
+                                  : l10n.studentBadge,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
-                        ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.user.email,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withValues(alpha: 0.8),
+                    size: 20,
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Button: Edit Profile (تعديل ملف الشخصي)
+              InkWell(
+                onTap: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => EditProfileDialog(user: widget.user),
+                ),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.edit_outlined,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        l10n.editProfile,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
 
         // Section: Account Settings
-        _buildSectionHeader(l10n.accountSettings, theme),
+        _buildSectionHeader(l10n.accountSettings),
         const SizedBox(height: AppSpacing.sm),
-        GlassCard(
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          borderOpacity: isDark ? 0.12 : 0.08,
-          borderRadius: 24,
+        Container(
+          decoration: BoxDecoration(
+            color: cardBgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cardBorderColor),
+          ),
           child: Column(
             children: [
               _SettingsTile(
@@ -375,9 +328,7 @@ class _ProfileViewState extends State<_ProfileView>
                 height: 1,
                 indent: 64,
                 endIndent: 16,
-                color: isDark
-                    ? AppColors.borderDark.withValues(alpha: 0.3)
-                    : AppColors.divider.withValues(alpha: 0.5),
+                color: cardBorderColor,
               ),
               _SettingsTile(
                 icon: LucideIcons.lock,
@@ -395,13 +346,14 @@ class _ProfileViewState extends State<_ProfileView>
         const SizedBox(height: AppSpacing.lg),
 
         // Section: App Preferences
-        _buildSectionHeader(l10n.appPreferences, theme),
+        _buildSectionHeader(l10n.appPreferences),
         const SizedBox(height: AppSpacing.sm),
-        GlassCard(
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          borderOpacity: isDark ? 0.12 : 0.08,
-          borderRadius: 24,
+        Container(
+          decoration: BoxDecoration(
+            color: cardBgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cardBorderColor),
+          ),
           child: Column(
             children: [
               _SettingsTile(
@@ -451,9 +403,7 @@ class _ProfileViewState extends State<_ProfileView>
                 height: 1,
                 indent: 64,
                 endIndent: 16,
-                color: isDark
-                    ? AppColors.borderDark.withValues(alpha: 0.3)
-                    : AppColors.divider.withValues(alpha: 0.5),
+                color: cardBorderColor,
               ),
               _SettingsTile(
                 icon: LucideIcons.palette,
@@ -490,9 +440,7 @@ class _ProfileViewState extends State<_ProfileView>
                 height: 1,
                 indent: 64,
                 endIndent: 16,
-                color: isDark
-                    ? AppColors.borderDark.withValues(alpha: 0.3)
-                    : AppColors.divider.withValues(alpha: 0.5),
+                color: cardBorderColor,
               ),
               ValueListenableBuilder<BleSettingsState>(
                 valueListenable: _bleSettingsNotifier,
@@ -516,13 +464,14 @@ class _ProfileViewState extends State<_ProfileView>
         const SizedBox(height: AppSpacing.lg),
 
         // Section: Sync & Maintenance
-        _buildSectionHeader(l10n.cacheAndSync, theme),
+        _buildSectionHeader(l10n.cacheAndSync),
         const SizedBox(height: AppSpacing.sm),
-        GlassCard(
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          borderOpacity: isDark ? 0.12 : 0.08,
-          borderRadius: 24,
+        Container(
+          decoration: BoxDecoration(
+            color: cardBgColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cardBorderColor),
+          ),
           child: _SettingsTile(
             icon: LucideIcons.refresh_cw,
             iconColor: Colors.purple,
@@ -573,7 +522,7 @@ class _ProfileViewState extends State<_ProfileView>
     );
   }
 
-  Widget _buildSectionHeader(String label, ThemeData theme) {
+  Widget _buildSectionHeader(String label) {
     return Row(
       children: [
         Container(
@@ -587,9 +536,10 @@ class _ProfileViewState extends State<_ProfileView>
         const SizedBox(width: AppSpacing.sm),
         Text(
           label,
-          style: theme.textTheme.titleSmall?.copyWith(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             color: AppColors.textSecondary,
+            fontSize: 14,
           ),
         ),
       ],
@@ -621,7 +571,6 @@ class _ProfileViewState extends State<_ProfileView>
   }
 }
 
-/// A modern, beautiful settings item card.
 class _SettingsTile extends StatelessWidget {
   const _SettingsTile({
     required this.icon,
@@ -646,7 +595,7 @@ class _SettingsTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(

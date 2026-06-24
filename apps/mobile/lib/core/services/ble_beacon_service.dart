@@ -251,7 +251,7 @@ class BleBeaconService {
     }
 
     updateOtp();
-    _otpSubscription = Stream<int>.periodic(const Duration(seconds: 30))
+    _otpSubscription = Stream<int>.periodic(const Duration(seconds: 30), (x) => x)
         .listen((_) => updateOtp());
   }
 

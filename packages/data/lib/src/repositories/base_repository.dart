@@ -105,4 +105,15 @@ abstract class BaseRepository {
       _ => ServerFailure(message: e.message),
     };
   }
+
+  /// Checks if an exception represents a transient network/connection error.
+  static bool isNetworkException(Object e) {
+    if (e is SocketException || e is HttpException || e is TimeoutException) {
+      return true;
+    }
+    final str = e.toString();
+    return str.contains('SocketException') ||
+        str.contains('HttpException') ||
+        str.contains('TimeoutException');
+  }
 }

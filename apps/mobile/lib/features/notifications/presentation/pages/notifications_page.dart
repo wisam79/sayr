@@ -29,7 +29,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: Text(l10n.notifications),
         actions: [
           BlocBuilder<NotificationsBloc, NotificationsState>(

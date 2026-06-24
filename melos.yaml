@@ -52,6 +52,18 @@ scripts:
     description: Run build_runner code generation
     run: melos exec -c 1 --ignore="sayr_ui_kit" -- "dart run build_runner build --delete-conflicting-outputs"
 
+  build:runner:core:
+    description: Run build_runner code generation for sayr_core package only
+    run: melos exec --scope="sayr_core" -- "dart run build_runner build --delete-conflicting-outputs"
+
+  build:runner:data:
+    description: Run build_runner code generation for sayr_data package only
+    run: melos exec --scope="sayr_data" -- "dart run build_runner build --delete-conflicting-outputs"
+
+  build:runner:mobile:
+    description: Run build_runner code generation for sayr_mobile app only
+    run: melos exec --scope="sayr_mobile" -- "dart run build_runner build --delete-conflicting-outputs"
+
   build:runner:watch:
     description: Run build_runner in watch mode
     run: melos exec -c 1 --ignore="sayr_ui_kit" -- "dart run build_runner watch --delete-conflicting-outputs"

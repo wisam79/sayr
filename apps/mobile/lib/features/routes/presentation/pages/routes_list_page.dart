@@ -34,7 +34,7 @@ class _RoutesListPageState extends State<RoutesListPage> {
 
     return Scaffold(
       appBar: widget.showAppBar
-          ? AppBar(
+          ? GlassAppBar(
               title: Text(l10n.routesTitle),
             )
           : null,

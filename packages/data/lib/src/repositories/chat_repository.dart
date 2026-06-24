@@ -143,6 +143,15 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
     required String body,
   }) async {
     return guard(() async {
+      if (body.trim().isEmpty) {
+        throw const ValidationFailure(message: 'Message body cannot be empty');
+      }
+      if (body.length > 2000) {
+        throw const ValidationFailure(
+          message: 'Message body cannot exceed 2000 characters',
+        );
+      }
+
       final currentUserId = _remoteDatasource.currentUser?.id;
       if (currentUserId == null) {
         throw const UnauthorizedFailure();

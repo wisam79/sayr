@@ -20,7 +20,7 @@
 | أين طبقة UI؟ | `apps/mobile/lib/features/<feature>/presentation/` |
 | كيف أتعامل مع الأخطاء؟ | `Either<Failure, T>` عبر `BaseRepository.guard()` |
 | ما هي حالات Trip؟ | `scheduled → driverWaiting → inTransit → completed` |
-| تغطية CI الحالية؟ | ~26% (الحد الأدنى: 25%) |
+| تغطية CI الحالية؟ | 71.50% (الحد الأدنى: 70%) |
 | مكتبة الخرائط؟ | `maplibre_gl` (^‌0.22.0) |
 | نظام Logging؟ | `talker_flutter` + `talker_bloc_logger` |
 | كيف أضيف حزمة جديدة؟ | تحقق pub.dev أولاً — لا تبتكر ما هو موجود |
@@ -408,8 +408,8 @@ class MyPage extends StatelessWidget {
 - ✅ كل entity نقي له test (للـ logic مثل FSM)
 - ✅ كل صفحة لها widget test واحد على الأقل
 - ❌ لا feature يُقبل بدون test
-- **التغطية الحالية**: ~26% (domain + data) — الحد الأدنى المُطبّق في CI حالياً: **25%** (انظر §9.2).
-- **الهدف المرحلي**: رفعها تدريجياً إلى 80% مع كل feature جديد — لا تكتب اختبارات إضافية بشكل اصطناعي للوصول لـ 80% قبل أوانها.
+- **التغطية الحالية**: 71.50% إجمالاً (75.56% لـ domain + data) — الحد الأدنى المُطبّق في CI حالياً: **70%** (انظر §9.2).
+- **الهدف المرحلي**: المحافظة عليها ورفعها تدريجياً لـ 80%.
 
 ### 2.6 لا Dead Code
 
@@ -741,7 +741,7 @@ chore: upgrade bloc dependency
 > ملاحظة: الأسماء أدناه هي الملفات الفعلية الموجودة في `.github/workflows/`.
 
 - `ci.yml` — analyze (format + strict analyze) + test (كل push/PR إلى main)
-- `coverage.yml` — تشغيل الاختبارات مع coverage، دمج التقارير، فرض حدّ أدنى **25%** على `packages/core` + `packages/data`، ثم رفعها إلى Codecov
+- `coverage.yml` — تشغيل الاختبارات مع coverage، دمج التقارير، فرض حدّ أدنى **70%** على `packages/core` + `packages/data`، ثم رفعها إلى Codecov
 - `build-android.yml` - APK + AAB (عند tag `v*`)
 - `database-ci.yml` - `supabase start` + `supabase db lint` + `supabase status` (اختبار الـ migrations محلياً)
 - `deploy-admin.yml` - نشر لوحة الإدارة (React) إلى GitHub Pages
@@ -750,7 +750,7 @@ chore: upgrade bloc dependency
 
 - ✅ `flutter analyze` صفر warnings (مفعّل في `ci.yml` عبر `melos run analyze:strict`)
 - ✅ `flutter test` جميع يجتاز (مفعّل في `ci.yml` عبر `melos run test`)
-- ✅ Coverage ≥ **25%** على domain + data (مُطبّق فعلياً كـ gate في `coverage.yml` عبر `bc` comparison — التغطية الحالية ~26%). الهدف المرحلي الوصول لـ 80% تدريجياً.
+- ✅ Coverage ≥ **70%** على domain + data (مُطبّق فعلياً كـ gate في `coverage.yml` عبر `bc` comparison — التغطية الحالية 75.56% للمجال والبيانات). الهدف المرحلي الوصول لـ 80% تدريجياً.
 - ✅ Build ينجح
 
 ---

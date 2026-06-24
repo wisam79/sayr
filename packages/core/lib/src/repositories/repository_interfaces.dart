@@ -66,7 +66,7 @@ abstract class AuthRepository {
 /// Interface for route operations repository.
 abstract class RouteRepository {
   /// Fetch all active routes.
-  Future<Either<Failure, List<Route>>> getActiveRoutes();
+  Future<Either<Failure, ({List<Route> routes, bool fromCache})>> getActiveRoutes();
 
   /// Fetch active routes owned by the current driver.
   Future<Either<Failure, List<Route>>> getMyDriverRoutes();
@@ -81,7 +81,7 @@ abstract class RouteRepository {
 /// Interface for trip operations repository.
 abstract class TripRepository {
   /// Get all active trips for the current user.
-  Future<Either<Failure, List<Trip>>> getActiveTrips();
+  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>> getActiveTrips();
 
   /// Create a scheduled trip for one of the current driver's routes.
   Future<Either<Failure, Trip>> createTrip({

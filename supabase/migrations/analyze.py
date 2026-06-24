@@ -16,6 +16,16 @@ alter_table_rls_pattern = re.compile(r'alter\s+table\s+(?:public\.)?([a-zA-Z0-9_
 create_function_pattern = re.compile(r'create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?([a-zA-Z0-9_]+)\s*\(', re.IGNORECASE)
 set_search_path_pattern = re.compile(r'set\s+search_path\s*=\s*(?:\'\'|public)', re.IGNORECASE)
 
+# First read all files to build a cumulative schema string for checking revokes
+combined_content = ""
+for file in sql_files:
+    path = os.path.join(MIGRATIONS_DIR, file)
+    with open(path, "r", encoding="utf-8") as f:
+        combined_content += f.read() + "\n"
+
+# Intentionally public endpoints that do not need to be revoked from PUBLIC
+INTENTIONALLY_PUBLIC_FUNCTIONS = {"ping", "get_app_config"}
+
 for file in sql_files:
     path = os.path.join(MIGRATIONS_DIR, file)
     with open(path, 'r', encoding='utf-8') as f:
@@ -40,9 +50,12 @@ for file in sql_files:
             
             has_search_path = bool(set_search_path_pattern.search(snippet))
             
-            # Check for revoke
-            revoke_pattern = re.compile(r'revoke\s+execute\s+on\s+function\s+(?:public\.)?' + re.escape(func_name) + r'\s*\(.*?\)\s+from\s+public', re.IGNORECASE)
-            has_revoke = bool(revoke_pattern.search(content))
+            # Check for revoke in the cumulative contents using a multiline-friendly regex
+            revoke_pattern = re.compile(
+                r'revoke\s+(?:execute|all)\s+on\s+function\s+(?:public\.)?' + re.escape(func_name) + r'\s*\([\s\S]*?\)\s+from\s+[\s\S]*?public',
+                re.IGNORECASE
+            )
+            has_revoke = bool(revoke_pattern.search(combined_content))
             
             # We might have multiple definitions (overloads or replacements)
             # So we keep track of the latest one or if ANY of them misses it
@@ -51,7 +64,7 @@ for file in sql_files:
             
             if has_search_path:
                 functions[func_name]['search_path'] = True
-            if has_revoke:
+            if has_revoke or func_name in INTENTIONALLY_PUBLIC_FUNCTIONS:
                 functions[func_name]['revoke'] = True
 
 print("Tables without RLS:")

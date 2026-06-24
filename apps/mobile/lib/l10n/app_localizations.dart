@@ -2065,6 +2065,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sayr is tracking your location in the background for this trip.'**
   String get tripTrackingActiveText;
+
+  /// No description provided for @stationsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stations'**
+  String get stationsTitle;
 }
 
 class _AppLocalizationsDelegate

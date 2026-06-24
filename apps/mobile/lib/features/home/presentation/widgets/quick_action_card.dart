@@ -128,9 +128,9 @@ class _QuickActionCardState extends State<QuickActionCard>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: widget.color.withValues(alpha: isDark ? 0.08 : 0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -146,7 +146,6 @@ class _QuickActionCardState extends State<QuickActionCard>
               ),
         margin: EdgeInsets.zero,
         borderRadius: 16,
-        color: widget.color.withValues(alpha: isDark ? 0.06 : 0.03),
         borderOpacity: isDark ? 0.12 : 0.08,
         shadowOpacity: 0,
         blurSigma: 8,

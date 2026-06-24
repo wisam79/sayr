@@ -9,10 +9,12 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
+import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/boarding/presentation/bloc/boarding_qr_cubit.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// Student-side page that shows a rotating QR code for boarding.
 class BoardingQrPage extends StatelessWidget {
@@ -21,9 +23,11 @@ class BoardingQrPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<BoardingQrCubit>(
-      create: (_) =>
-          BoardingQrCubit(boardingRepository: sl<BoardingRepository>())
-            ..start(),
+      create: (_) => BoardingQrCubit(
+        boardingRepository: sl<BoardingRepository>(),
+        bleBeaconService: sl<BleBeaconService>(),
+        talker: sl<Talker>(),
+      )..start(),
       child: const _BoardingQrView(),
     );
   }
@@ -276,7 +280,7 @@ class _ReadyView extends StatelessWidget {
                                 l10n.locationUnavailable,
                               );
                             }
-                          } catch (e) {
+                          } on Object catch (_) {
                             if (context.mounted) {
                               SayrFlash.error(
                                 context,

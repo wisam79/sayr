@@ -180,7 +180,7 @@ class _SubmitButton extends StatelessWidget {
             final isLoading = authState is AuthLoading;
             final canSubmit = profileState.isValid && !isLoading;
 
-            return FilledButton.icon(
+            return PrimaryButton(
               onPressed: canSubmit
                   ? () {
                       context.read<AuthBloc>().add(
@@ -192,18 +192,9 @@ class _SubmitButton extends StatelessWidget {
                           );
                     }
                   : null,
-              icon: isLoading
-                  ? const SizedBox.square(
-                      dimension: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Icon(Icons.check_rounded),
-              label: Text(l10n.completeProfile),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(52),
-              ),
+              icon: Icons.check_rounded,
+              label: l10n.completeProfile,
+              isLoading: isLoading,
             );
           },
         );

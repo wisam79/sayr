@@ -73,17 +73,16 @@ class OfflineSyncService {
       }
 
       // 2. Sync pending locations
-      final pendingCount = await _localDatasource.getPendingLocationsCount();
-      if (pendingCount == 0) {
+      final pending = await _localDatasource.getPendingLocations();
+      if (pending.isEmpty) {
         _isSyncing = false;
         return;
       }
 
       _talker.info(
-        'OfflineSyncService: Found $pendingCount pending location updates. '
+        'OfflineSyncService: Found ${pending.length} pending location updates. '
         'Syncing...',
       );
-      final pending = await _localDatasource.getPendingLocations();
 
       final locationsToSync = pending
           .map(
@@ -125,7 +124,7 @@ class OfflineSyncService {
             await _localDatasource.cleanupOldLocations();
             _talker.info(
               'OfflineSyncService: Successfully synced ${successfulIds.length} '
-              'of $pendingCount location updates.',
+              'of ${pending.length} location updates.',
             );
           }
         },

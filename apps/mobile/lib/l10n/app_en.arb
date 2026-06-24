@@ -482,6 +482,7 @@
   "tripTrackingActiveTitle": "Trip Tracking Active",
   "@tripTrackingActiveTitle": {},
   "tripTrackingActiveText": "Sayr is tracking your location in the background for this trip.",
-  "@tripTrackingActiveText": {}
+  "@tripTrackingActiveText": {},
+  "stationsTitle": "Stations"
 }
 

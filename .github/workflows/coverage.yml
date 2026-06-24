@@ -59,10 +59,10 @@ jobs:
             fi
           done
 
-      - name: Enforce minimum coverage (25% on domain + data)
+      - name: Enforce minimum coverage (70% on domain + data)
         run: |
           # Filter to the layers AGENTS.md mandates coverage on.
-          # NOTE: The threshold is set to 25% (current actual measured coverage).
+          # NOTE: The threshold is set to 70% (current actual measured coverage is ~75.56%).
           # The previous 80% gate was not enforced because lcov paths were not
           # prefixed with the package directory, so --extract matched nothing
           # and treated an empty filtered file as 100%. After the path-prefix fix,
@@ -78,7 +78,7 @@ jobs:
           lcov --summary coverage/lcov.filtered.info || true
           COVERAGE_PCT=$(lcov --summary coverage/lcov.filtered.info 2>&1 | grep -oE 'lines\.\.\.\.\.\.: [0-9.]+' | grep -oE '[0-9.]+')
           echo "Domain + data line coverage: ${COVERAGE_PCT}%"
-          THRESHOLD=25
+          THRESHOLD=70
           if [ -z "$COVERAGE_PCT" ]; then
             echo "Could not determine coverage percentage, skipping threshold check"
           elif (( $(echo "$COVERAGE_PCT < $THRESHOLD" | bc -l) )); then

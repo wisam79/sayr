@@ -32,6 +32,9 @@ abstract class User with _$User {
   /// Display name with fallback to email.
   String get displayName => fullName ?? email.split('@').first;
 
+  /// Whether this user's profile is complete.
+  bool get isProfileComplete => phone != null && institutionId != null;
+
   /// Whether this user is a student.
   bool get isStudent => role.isStudent;
 

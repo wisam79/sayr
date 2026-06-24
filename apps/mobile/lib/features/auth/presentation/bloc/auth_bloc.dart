@@ -53,8 +53,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final user = await _authRepository.fetchFullProfile();
         if (isClosed) return;
         if (user != null) {
-          final isComplete = user.phone != null && user.institutionId != null;
-          if (isComplete) {
+          if (user.isProfileComplete) {
             emit(AuthAuthenticated(user));
           } else {
             emit(AuthProfileIncomplete(user));
@@ -62,7 +61,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         } else {
           emit(const AuthUnauthenticated());
         }
-      } catch (e) {
+      } on Object catch (e) {
         if (isClosed) return;
         emit(AuthError(ServerFailure(message: e.toString())));
       }
@@ -94,8 +93,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(const AuthUnauthenticated());
           return;
         }
-        final isComplete = user.phone != null && user.institutionId != null;
-        if (isComplete) {
+        if (user.isProfileComplete) {
           emit(AuthAuthenticated(user));
         } else {
           emit(AuthProfileIncomplete(user));
@@ -128,8 +126,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(const AuthUnauthenticated());
           return;
         }
-        final isComplete = user.phone != null && user.institutionId != null;
-        if (isComplete) {
+        if (user.isProfileComplete) {
           emit(AuthAuthenticated(user));
         } else {
           emit(AuthProfileIncomplete(user));
@@ -158,8 +155,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(const AuthUnauthenticated());
           return;
         }
-        final isComplete = user.phone != null && user.institutionId != null;
-        if (isComplete) {
+        if (user.isProfileComplete) {
           emit(AuthAuthenticated(user));
         } else {
           emit(AuthProfileIncomplete(user));

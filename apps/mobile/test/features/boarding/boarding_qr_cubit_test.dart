@@ -6,10 +6,13 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/features/boarding/presentation/bloc/boarding_qr_cubit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockBoardingRepository extends Mock implements BoardingRepository {}
 
 class MockBleBeaconService extends Mock implements BleBeaconService {}
+
+class MockTalker extends Mock implements Talker {}
 
 void main() {
   setUpAll(() {
@@ -18,16 +21,28 @@ void main() {
 
   late MockBoardingRepository mockRepo;
   late MockBleBeaconService mockBle;
+  late MockTalker mockTalker;
   late StreamController<({TripId tripId, String otp})> bleController;
 
   setUp(() {
     mockRepo = MockBoardingRepository();
     mockBle = MockBleBeaconService();
+    mockTalker = MockTalker();
     bleController = StreamController<({TripId tripId, String otp})>.broadcast();
 
     when(() => mockBle.startScanning()).thenAnswer((_) async => true);
     when(() => mockBle.stopScanning()).thenAnswer((_) async {});
     when(() => mockBle.discoveredTrips).thenAnswer((_) => bleController.stream);
+
+    when(() => mockTalker.info(any<dynamic>())).thenAnswer((_) {});
+    when(() => mockTalker.warning(any<dynamic>())).thenAnswer((_) {});
+    when(
+      () => mockTalker.error(
+        any<dynamic>(),
+        any<Object?>(),
+        any<StackTrace?>(),
+      ),
+    ).thenAnswer((_) {});
   });
 
   tearDown(() {
@@ -39,6 +54,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
       addTearDown(cubit.close);
       expect(cubit.state, isA<BoardingQrInitial>());
@@ -59,6 +75,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
 
       await cubit.start();
@@ -93,6 +110,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
       final emitted = <BoardingQrState>[];
       final sub = cubit.stream.listen(emitted.add);
@@ -117,6 +135,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
       final emitted = <BoardingQrState>[];
       final sub = cubit.stream.listen(emitted.add);
@@ -146,6 +165,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
 
       await cubit.start();
@@ -166,6 +186,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
 
       await cubit.start();
@@ -191,6 +212,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
 
       await cubit.start();
@@ -234,6 +256,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
 
       await cubit.start();
@@ -270,6 +293,7 @@ void main() {
       final cubit = BoardingQrCubit(
         boardingRepository: mockRepo,
         bleBeaconService: mockBle,
+        talker: mockTalker,
       );
 
       await cubit.start();

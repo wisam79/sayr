@@ -24,7 +24,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
   /// list may have been cached during a previous session) while still routing
   /// every failure through the shared [mapException] mapper so callers receive
   /// a typed [Failure].
-  Future<Either<Failure, List<Route>>> _fetchWithCacheFallback(
+  Future<Either<Failure, ({List<Route> routes, bool fromCache})>> _fetchWithCacheFallback(
     Future<List<Route>> Function() fetch, {
     required String cacheLogLabel,
   }) async {
@@ -47,7 +47,7 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
         try {
           final cached = await _localDatasource.getCachedRoutes();
           if (cached.isNotEmpty) {
-            return Right(cached);
+            return Right((routes: cached, fromCache: true));
           }
         } catch (cacheError, st) {
           log.warning(
@@ -58,12 +58,12 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
         }
         return Left(failure);
       },
-      (routes) async => Right(routes),
+      (routes) async => Right((routes: routes, fromCache: false)),
     );
   }
 
   @override
-  Future<Either<Failure, List<Route>>> getActiveRoutes() async {
+  Future<Either<Failure, ({List<Route> routes, bool fromCache})>> getActiveRoutes() async {
     return _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveRoutes();
@@ -75,13 +75,14 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
 
   @override
   Future<Either<Failure, List<Route>>> getMyDriverRoutes() async {
-    return _fetchWithCacheFallback(
+    final result = await _fetchWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getMyDriverRoutes();
         return response.map((model) => model.toEntity()).toList();
       },
       cacheLogLabel: 'driver routes',
     );
+    return result.map((data) => data.routes);
   }
 
   @override

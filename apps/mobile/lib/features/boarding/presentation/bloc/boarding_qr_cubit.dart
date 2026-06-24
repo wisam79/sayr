@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
-import 'package:sayr_mobile/di/di.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 /// State for the student QR boarding page.
@@ -94,13 +93,16 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
   /// Creates a [BoardingQrCubit].
   BoardingQrCubit({
     required BoardingRepository boardingRepository,
-    BleBeaconService? bleBeaconService,
+    required BleBeaconService bleBeaconService,
+    required Talker talker,
   })  : _boardingRepository = boardingRepository,
-        _bleBeaconService = bleBeaconService ?? sl<BleBeaconService>(),
+        _bleBeaconService = bleBeaconService,
+        _talker = talker,
         super(const BoardingQrInitial());
 
   final BoardingRepository _boardingRepository;
   final BleBeaconService _bleBeaconService;
+  final Talker _talker;
 
   StreamSubscription<int>? _timerSubscription;
   StreamSubscription<({TripId tripId, String otp})>? _bleSubscription;
@@ -135,7 +137,7 @@ class BoardingQrCubit extends Cubit<BoardingQrState> {
     final started = await _bleBeaconService.startScanning();
     if (isClosed) return;
     if (!started) {
-      sl<Talker>().warning(
+      _talker.warning(
         'BLE scanning not started. Student will use QR code boarding.',
       );
       return;

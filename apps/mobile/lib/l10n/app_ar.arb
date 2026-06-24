@@ -466,6 +466,7 @@
   "tripTrackingActiveTitle": "تتبع الرحلة نشط",
   "@tripTrackingActiveTitle": {},
   "tripTrackingActiveText": "تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.",
-  "@tripTrackingActiveText": {}
+  "@tripTrackingActiveText": {},
+  "stationsTitle": "المحطات"
 }
 

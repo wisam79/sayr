@@ -91,21 +91,46 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
       animation: _bgController,
       builder: (context, child) {
         final val = _bgController.value;
-        final alignment = Alignment(
-          -0.5 + 1.0 * val,
-          -0.8 + 0.5 * val,
+        
+        final alignmentPrimary = Alignment(
+          -0.6 + 1.2 * val,
+          -0.7 + 0.6 * val,
         );
-        return Container(
-          decoration: BoxDecoration(
-            gradient: RadialGradient(
-              center: alignment,
-              radius: 1.2,
-              colors: [
-                AppColors.primary.withValues(alpha: isDark ? 0.05 : 0.03),
-                Colors.transparent,
-              ],
+        
+        final alignmentSecondary = Alignment(
+          0.6 - 1.2 * val,
+          0.7 - 0.6 * val,
+        );
+
+        return Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: alignmentPrimary,
+                  radius: 1.5,
+                  colors: [
+                    (isDark ? AppColors.primaryDark : AppColors.primary)
+                        .withValues(alpha: isDark ? 0.08 : 0.05),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
             ),
-          ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: alignmentSecondary,
+                  radius: 1.5,
+                  colors: [
+                    (isDark ? AppColors.secondaryDark : AppColors.secondary)
+                        .withValues(alpha: isDark ? 0.05 : 0.03),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ],
         );
       },
     );
@@ -151,8 +176,8 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
                               shape: BoxShape.circle,
                               color: AppColors.primary.withValues(alpha: 0.08),
                             ),
-                            child: const CustomPaint(
-                              painter: _SRoadIconPainter(),
+                            child: CustomPaint(
+                              painter: _SRoadIconPainter(isDark: isDark),
                             ),
                           ),
                         ),
@@ -304,14 +329,21 @@ class _LoginViewState extends State<_LoginView> with TickerProviderStateMixin {
 }
 
 class _SRoadIconPainter extends CustomPainter {
-  const _SRoadIconPainter();
+  const _SRoadIconPainter({required this.isDark});
+
+  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
     final paint = Paint()
-      ..color = AppColors.primary
+      ..shader = LinearGradient(
+        colors: isDark
+            ? const [Color(0xFF2DD4BF), Color(0xFF0D9488)]
+            : const [Color(0xFF0D9488), Color(0xFF0F766E)],
+      ).createShader(rect)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 6.0
+      ..strokeWidth = 7.0
       ..strokeCap = StrokeCap.round;
 
     final path = Path();
@@ -327,5 +359,6 @@ class _SRoadIconPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _SRoadIconPainter oldDelegate) =>
+      oldDelegate.isDark != isDark;
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,14 +10,18 @@ import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
 import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/trip_tracking_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
-class MockTripRepository extends Mock implements TripRepository {}
+class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState>
+    implements TrackingBloc {}
 
-class MockAuthRepository extends Mock implements AuthRepository {}
+class MockEmergencyBloc extends MockBloc<EmergencyEvent, EmergencyState>
+    implements EmergencyBloc {}
 
 class MockRouteRepository extends Mock implements RouteRepository {}
 
@@ -24,57 +29,41 @@ class MockDriverRepository extends Mock implements DriverRepository {}
 
 class MockRatingRepository extends Mock implements RatingRepository {}
 
-class MockDriverLocationService extends Mock implements LocationService {}
-
-class FakeTrackingBloc extends Fake implements TrackingBloc {}
-
-class MockEmergencyBloc extends MockBloc<EmergencyEvent, EmergencyState>
-    implements EmergencyBloc {}
+class MockRoutingService extends Mock implements RoutingService {}
 
 void main() {
-  late MockTripRepository mockTripRepo;
-  late MockAuthRepository mockAuthRepo;
+  late MockTrackingBloc mockTrackingBloc;
+  late MockEmergencyBloc mockEmergencyBloc;
   late MockRouteRepository mockRouteRepo;
   late MockDriverRepository mockDriverRepo;
   late MockRatingRepository mockRatingRepo;
-  late MockDriverLocationService mockLocationService;
-  late MockEmergencyBloc mockEmergencyBloc;
+  late MockRoutingService mockRoutingService;
 
   setUpAll(() {
     registerFallbackValue(const RouteId('fallback'));
     registerFallbackValue(const TripId('fallback'));
     registerFallbackValue(const DriverId('fallback'));
     registerFallbackValue(const UserId('fallback'));
-    registerFallbackValue(FakeTrackingBloc());
+    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
   });
 
   setUp(() {
-    mockTripRepo = MockTripRepository();
-    mockAuthRepo = MockAuthRepository();
+    GetIt.I.allowReassignment = true;
+    mockTrackingBloc = MockTrackingBloc();
+    mockEmergencyBloc = MockEmergencyBloc();
     mockRouteRepo = MockRouteRepository();
     mockDriverRepo = MockDriverRepository();
     mockRatingRepo = MockRatingRepository();
-    mockLocationService = MockDriverLocationService();
-    mockEmergencyBloc = MockEmergencyBloc();
+    mockRoutingService = MockRoutingService();
 
-    when(() => mockLocationService.locationStream)
-        .thenAnswer((_) => const Stream.empty());
-    when(
-      () => mockLocationService.startTracking(
-        any(),
-        notificationTitle: any(named: 'notificationTitle'),
-        notificationText: any(named: 'notificationText'),
-      ),
-    ).thenAnswer((_) async => const Right(unit));
+    when(() => mockRoutingService.getRoute(any(), any()))
+        .thenAnswer((_) => Future.value(const Right([])));
 
-    GetIt.I.registerSingleton<TripRepository>(mockTripRepo);
-    GetIt.I.registerSingleton<AuthRepository>(mockAuthRepo);
     GetIt.I.registerSingleton<RouteRepository>(mockRouteRepo);
     GetIt.I.registerSingleton<DriverRepository>(mockDriverRepo);
     GetIt.I.registerSingleton<RatingRepository>(mockRatingRepo);
-    GetIt.I.registerSingleton<LocationService>(mockLocationService);
+    GetIt.I.registerSingleton<RoutingService>(mockRoutingService);
 
-    when(() => mockAuthRepo.currentUser).thenReturn(null);
     when(() => mockEmergencyBloc.state).thenReturn(const EmergencyIdle());
   });
 
@@ -129,19 +118,32 @@ void main() {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       locale: const Locale('en'),
-      home: BlocProvider<EmergencyBloc>.value(
-        value: mockEmergencyBloc,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<EmergencyBloc>.value(value: mockEmergencyBloc),
+          BlocProvider<TrackingBloc>.value(value: mockTrackingBloc),
+        ],
         child: child,
       ),
     );
   }
 
   testWidgets('renders loading state initially', (tester) async {
-    when(() => mockTripRepo.watchTrip(any()))
-        .thenAnswer((_) => const Stream.empty());
+    when(() => mockTrackingBloc.state).thenReturn(const TrackingState.initial());
+    whenListen(
+      mockTrackingBloc,
+      const Stream<TrackingState>.empty(),
+      initialState: const TrackingState.initial(),
+    );
 
-    await tester
-        .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
+    await tester.pumpWidget(
+      wrap(
+        TripTrackingPage(
+          tripId: const TripId('trip-1'),
+          trackingBloc: mockTrackingBloc,
+        ),
+      ),
+    );
     await tester.pump();
 
     expect(find.byType(LoadingWidget), findsOneWidget);
@@ -150,20 +152,35 @@ void main() {
   testWidgets(
       'renders map and route details when trip watches and details load',
       (tester) async {
-    when(() => mockTripRepo.watchTrip(any()))
-        .thenAnswer((_) => Stream.value(testTrip));
     when(() => mockRouteRepo.getById(any()))
-        .thenAnswer((_) async => const Right(testRoute));
+        .thenAnswer((_) => Future.value(const Right(testRoute)));
     when(() => mockDriverRepo.getDriverById(any()))
-        .thenAnswer((_) async => const Right(testDriver));
+        .thenAnswer((_) => Future.value(const Right(testDriver)));
     when(() => mockDriverRepo.getDriverProfile(any()))
-        .thenAnswer((_) async => const Right(testDriverProfile));
+        .thenAnswer((_) => Future.value(const Right(testDriverProfile)));
     when(() => mockRatingRepo.getTripRating(any()))
-        .thenAnswer((_) async => const Right(null));
+        .thenAnswer((_) => Future.value(const Right(null)));
 
-    await tester
-        .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
-    await tester.pump();
+    final targetState = TrackingTripWatching(
+      trip: testTrip,
+      driverLocation: testTrip.lastLocation,
+    );
+
+    when(() => mockTrackingBloc.state).thenReturn(targetState);
+    whenListen(
+      mockTrackingBloc,
+      Stream.value(targetState),
+      initialState: targetState,
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        TripTrackingPage(
+          tripId: const TripId('trip-1'),
+          trackingBloc: mockTrackingBloc,
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Map should be rendered
@@ -178,19 +195,31 @@ void main() {
   });
 
   testWidgets('renders error view when trip watching fails', (tester) async {
-    when(() => mockTripRepo.watchTrip(any())).thenAnswer(
-      (_) => Stream.error(
-        const ServerFailure(message: 'Connection failed'),
-      ),
+    const errorState = TrackingState.error(
+      failure: ServerFailure(message: 'Connection failed'),
     );
 
-    await tester
-        .pumpWidget(wrap(const TripTrackingPage(tripId: TripId('trip-1'))));
-    await tester.pump();
+    when(() => mockTrackingBloc.state).thenReturn(errorState);
+    whenListen(
+      mockTrackingBloc,
+      Stream.value(errorState),
+      initialState: errorState,
+    );
+
+    await tester.pumpWidget(
+      wrap(
+        TripTrackingPage(
+          tripId: const TripId('trip-1'),
+          trackingBloc: mockTrackingBloc,
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.error_outline), findsOneWidget);
     expect(find.textContaining('Connection failed'), findsAtLeastNWidgets(1));
+
+    // Advance time to allow SayrFlash's auto-dismiss timer to complete
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
   });

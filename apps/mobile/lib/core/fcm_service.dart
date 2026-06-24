@@ -1,14 +1,14 @@
 import 'dart:async';
-
 import 'dart:io' show Platform;
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart' show Color;
+import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/firebase_config.dart';
 import 'package:sayr_mobile/core/models/fcm_payload.dart';
 import 'package:sayr_mobile/di/di.dart';
-import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 /// Firebase Cloud Messaging service using `awesome_notifications` for
@@ -20,6 +20,15 @@ class FcmService {
 
   static bool _initialized = false;
   static StreamSubscription<String>? _tokenRefreshSubscription;
+  static int _notificationCounter = 0;
+
+  /// Generates a collision-resistant notification ID.
+  static int generateNotificationId({String? title, String? body}) {
+    final now = DateTime.now().millisecondsSinceEpoch;
+    final hash = ((title?.hashCode ?? 0) ^ (body?.hashCode ?? 0)).abs();
+    _notificationCounter = (_notificationCounter + 1) % 1000;
+    return (now + hash + _notificationCounter).remainder(2147483647);
+  }
 
   /// Optional navigation callback. The callback receives the parsed type-safe
   /// [FcmPayload]. Called from the app shell after the router is ready.
@@ -27,6 +36,9 @@ class FcmService {
 
   /// Initialize FCM + awesome_notifications.
   static Future<void> init() async {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      return;
+    }
     if (_initialized) return;
     _initialized = true;
 
@@ -78,36 +90,42 @@ class FcmService {
 
   /// Subscribe to all-students topic.
   static Future<void> subscribeToAllStudents() async {
+    if (!_initialized) return;
     await FirebaseMessaging.instance
         .subscribeToTopic(FirebaseConfig.topicAllStudents);
   }
 
   /// Subscribe to all-drivers topic.
   static Future<void> subscribeToAllDrivers() async {
+    if (!_initialized) return;
     await FirebaseMessaging.instance
         .subscribeToTopic(FirebaseConfig.topicAllDrivers);
   }
 
   /// Subscribe to a specific route topic.
   static Future<void> subscribeToRoute(String routeId) async {
+    if (!_initialized) return;
     await FirebaseMessaging.instance
         .subscribeToTopic(FirebaseConfig.routeTopic(routeId));
   }
 
   /// Unsubscribe from a route topic.
   static Future<void> unsubscribeFromRoute(String routeId) async {
+    if (!_initialized) return;
     await FirebaseMessaging.instance
         .unsubscribeFromTopic(FirebaseConfig.routeTopic(routeId));
   }
 
   /// Subscribe to a specific trip topic.
   static Future<void> subscribeToTrip(String tripId) async {
+    if (!_initialized) return;
     await FirebaseMessaging.instance
         .subscribeToTopic(FirebaseConfig.tripTopic(tripId));
   }
 
   /// Unsubscribe from a trip topic.
   static Future<void> unsubscribeFromTrip(String tripId) async {
+    if (!_initialized) return;
     await FirebaseMessaging.instance
         .unsubscribeFromTopic(FirebaseConfig.tripTopic(tripId));
   }
@@ -121,7 +139,7 @@ class FcmService {
   }) async {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
-        id: DateTime.now().millisecondsSinceEpoch.remainder(2147483647),
+        id: generateNotificationId(title: title, body: body),
         channelKey: channelKey,
         title: title,
         body: body,
@@ -148,15 +166,16 @@ class FcmService {
     handler(FcmPayload.fromMap(message.data));
   }
 
-  /// Fetches the current FCM token and registers it using the [NotificationsBloc].
-  static Future<void> registerDeviceToken(NotificationsBloc bloc) async {
+  /// Fetches the current FCM token and registers it using the [NotificationsRepository].
+  static Future<void> registerDeviceToken(NotificationsRepository repository) async {
+    if (!_initialized) return;
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
         final platform =
             Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
-        bloc.add(
-          NotificationRegisterTokenRequested(
+        unawaited(
+          repository.registerPushToken(
             fcmToken: token,
             platform: platform,
           ),
@@ -169,8 +188,8 @@ class FcmService {
           FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
         final platform =
             Platform.isAndroid ? 'android' : (Platform.isIOS ? 'ios' : 'web');
-        bloc.add(
-          NotificationRegisterTokenRequested(
+        unawaited(
+          repository.registerPushToken(
             fcmToken: newToken,
             platform: platform,
           ),
@@ -178,7 +197,7 @@ class FcmService {
       });
     } catch (e, st) {
       _talker.error(
-        'FCM: Failed to retrieve or register token',
+        'FCM: Failed to register device token',
         e,
         st,
       );
@@ -188,6 +207,7 @@ class FcmService {
   /// Cancel the token refresh listener and delete the FCM token (call on logout)
   /// to unsubscribe from all topics.
   static Future<void> dispose() async {
+    if (!_initialized) return;
     await _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
     try {
@@ -215,12 +235,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Fallback messages for data-only payloads
   if (title == null && body == null) {
     final type = data['type']?.toString();
+    final lang = PlatformDispatcher.instance.locale.languageCode;
+    final isAr = lang == 'ar';
     if (type == 'chat') {
-      title = 'رسالة جديدة';
-      body = data['message']?.toString() ?? 'لديك رسالة جديدة';
+      title = isAr ? 'رسالة جديدة' : 'New message';
+      body = data['message']?.toString() ?? (isAr ? 'لديك رسالة جديدة' : 'You have a new message');
     } else if (type == 'trip_update') {
-      title = 'تحديث الرحلة';
-      body = data['status_text']?.toString() ?? 'تم تحديث حالة الرحلة';
+      title = isAr ? 'تحديث الرحلة' : 'Trip update';
+      body = data['status_text']?.toString() ?? (isAr ? 'تم تحديث حالة الرحلة' : 'Trip status has been updated');
     }
   }
 
@@ -245,7 +267,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
-        id: DateTime.now().millisecondsSinceEpoch.remainder(2147483647),
+        id: FcmService.generateNotificationId(title: title, body: body),
         channelKey: 'sayr_default',
         title: title,
         body: body,

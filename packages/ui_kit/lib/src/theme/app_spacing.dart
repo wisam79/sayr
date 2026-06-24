@@ -33,8 +33,8 @@ class AppSpacing {
   static const double pagePadding = lg;
 
   /// Default card border radius
-  static const double cardRadius = 14;
+  static const double cardRadius = 16;
 
   /// Default input border radius
-  static const double inputRadius = 12;
+  static const double inputRadius = 16;
 }

@@ -123,9 +123,11 @@ class DriverTripCard extends StatelessWidget {
       button: true,
       label: '${trip.status.localizedName(l10n)} - $_formattedTime',
       child: InkWell(
-        onTap: () {
-          context.read<TrackingBloc>().add(TrackingWatchTrip(tripId: trip.id));
-          context.push('/driver-trip/${trip.id.value}');
+        onTap: () async {
+          await context.push('/driver-trip/${trip.id.value}');
+          if (context.mounted) {
+            context.read<TrackingBloc>().add(const TrackingLoadActiveTrips());
+          }
         },
         borderRadius: BorderRadius.circular(16),
         child: GlassCard(

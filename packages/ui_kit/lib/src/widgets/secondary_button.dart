@@ -31,6 +31,7 @@ class SecondaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onPressed != null && !isLoading;
     final button = OutlinedButton(
       onPressed: isLoading ? null : onPressed,
       child: isLoading
@@ -52,8 +53,67 @@ class SecondaryButton extends StatelessWidget {
             ),
     );
 
-    return isExpanded
+    final mainButton = isExpanded
         ? SizedBox(width: double.infinity, child: button)
         : button;
+
+    return _TapScaleWrapper(
+      enabled: isEnabled,
+      child: mainButton,
+    );
+  }
+}
+
+class _TapScaleWrapper extends StatefulWidget {
+  const _TapScaleWrapper({
+    required this.child,
+    required this.enabled,
+  });
+
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<_TapScaleWrapper> createState() => _TapScaleWrapperState();
+}
+
+class _TapScaleWrapperState extends State<_TapScaleWrapper>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.97).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      return widget.child;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTapDown: widget.enabled ? (_) => _controller.forward() : null,
+      onTapUp: widget.enabled ? (_) => _controller.reverse() : null,
+      onTapCancel: widget.enabled ? () => _controller.reverse() : null,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: widget.child,
+      ),
+    );
   }
 }

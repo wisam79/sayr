@@ -1,3 +1,4 @@
+import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -64,28 +65,30 @@ class _HomeViewState extends State<_HomeView> {
           },
           child: Scaffold(
             extendBody: true,
-            appBar: AppBar(
-              title: Text(
-                isDriver
-                    ? (switch (index) {
-                        0 => l10n.appTitle,
-                        1 => l10n.activeTrips,
-                        2 => l10n.profile,
-                        _ => l10n.appTitle,
-                      })
-                    : (switch (index) {
-                        0 => l10n.appTitle,
-                        1 => l10n.routesTitle,
-                        2 => l10n.activeTrips,
-                        3 => l10n.mySubscriptions,
-                        4 => l10n.profile,
-                        _ => l10n.appTitle,
-                      }),
-              ),
-              actions: [
-                if (index == 0) _HeaderActions(l10n: l10n),
-              ],
-            ),
+            appBar: (!isDriver && (index == 0 || index == 4))
+                ? null
+                : AppBar(
+                    title: Text(
+                      isDriver
+                          ? (switch (index) {
+                              0 => l10n.appTitle,
+                              1 => l10n.activeTrips,
+                              2 => l10n.profile,
+                              _ => l10n.appTitle,
+                            })
+                          : (switch (index) {
+                              0 => l10n.appTitle,
+                              1 => l10n.routesTitle,
+                              2 => l10n.activeTrips,
+                              3 => l10n.mySubscriptions,
+                              4 => l10n.profile,
+                              _ => l10n.appTitle,
+                            }),
+                    ),
+                    actions: [
+                      if (index == 0) _HeaderActions(l10n: l10n),
+                    ],
+                  ),
             body: LazyIndexedStack(
               index: index,
               children: isDriver
@@ -116,8 +119,8 @@ class _HomeViewState extends State<_HomeView> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: isDark
-                        ? AppColors.darkSurface.withValues(alpha: 0.95)
-                        : AppColors.surface.withValues(alpha: 0.95),
+                        ? AppColors.darkSurface.withValues(alpha: 0.85)
+                        : AppColors.surface.withValues(alpha: 0.85),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -135,9 +138,11 @@ class _HomeViewState extends State<_HomeView> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: NavigationBar(
-                      height: 64,
-                      selectedIndex: index,
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                      child: NavigationBar(
+                        height: 64,
+                        selectedIndex: index,
                       labelBehavior:
                           NavigationDestinationLabelBehavior.alwaysHide,
                       surfaceTintColor: Colors.transparent,
@@ -214,6 +219,7 @@ class _HomeViewState extends State<_HomeView> {
                                 label: l10n.profile,
                               ),
                             ],
+                      ),
                     ),
                   ),
                 ),

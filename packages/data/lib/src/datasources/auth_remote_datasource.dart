@@ -1,4 +1,6 @@
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:sayr_data/src/models/user_model.dart';
 import 'package:sayr_data/src/supabase/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
@@ -58,14 +60,20 @@ abstract class AuthRemoteDatasource {
 
 @LazySingleton(as: AuthRemoteDatasource)
 class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
-  AuthRemoteDatasourceImpl({SayrSupabase? supabase})
-      : _supabase = supabase ?? SayrSupabase.instance;
+  AuthRemoteDatasourceImpl({
+    SayrSupabase? supabase,
+  })  : _supabase = supabase ?? SayrSupabase.instance;
   final SayrSupabase _supabase;
+
+  /// GoogleSignIn instance used for sign-in flows. Can be overridden in tests.
+  GoogleSignIn? googleSignIn;
+
+  final Logger _logger = Logger();
 
   supabase.SupabaseClient get _client => _supabase.client;
 
   @override
-  supabase.User? get currentUser => _supabase.currentUser;
+  supabase.User? get currentUser => _client.auth.currentUser;
 
   @override
   Stream<supabase.AuthState> get authStateChanges => _supabase.authStateChanges;
@@ -74,8 +82,9 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
   Future<supabase.AuthResponse> signInWithPassword({
     required String email,
     required String password,
-  }) =>
-      _supabase.signInWithPassword(email: email, password: password);
+  }) async {
+    return _client.auth.signInWithPassword(email: email, password: password);
+  }
 
   @override
   Future<supabase.AuthResponse> signUp({
@@ -83,27 +92,108 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
     required String password,
     required String fullName,
     String? phone,
-  }) =>
-      _supabase.signUp(
-        email: email,
-        password: password,
-        fullName: fullName,
-        phone: phone,
+  }) async {
+    return _client.auth.signUp(
+      email: email,
+      password: password,
+      data: {
+        'full_name': fullName,
+        if (phone != null) 'phone': phone,
+      },
+    );
+  }
+
+  @override
+  Future<bool> signInWithGoogle() async {
+    const webClientId = String.fromEnvironment('GOOGLE_WEB_CLIENT_ID');
+    const androidClientId = String.fromEnvironment('GOOGLE_ANDROID_CLIENT_ID');
+    final clientId = webClientId.isNotEmpty
+        ? webClientId
+        : (androidClientId.isNotEmpty ? androidClientId : null);
+
+    final googleSignIn = this.googleSignIn ?? GoogleSignIn(
+      serverClientId: clientId,
+      scopes: ['email', 'profile'],
+    );
+
+    try {
+      // Force account chooser dialog by signing out from Google client first
+      try {
+        await googleSignIn.signOut();
+      } catch (e, st) {
+        _logger.d(
+          'Google signOut before re-auth failed; proceeding with signIn',
+          error: e,
+          stackTrace: st,
+        );
+      }
+
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        // User cancelled the native sign-in dialog
+        return false;
+      }
+
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      final accessToken = googleAuth.accessToken;
+
+      if (idToken == null) {
+        throw const supabase.AuthException(
+          'google_id_token_missing',
+        );
+      }
+
+      final response = await _client.auth.signInWithIdToken(
+        provider: supabase.OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
       );
 
-  @override
-  Future<bool> signInWithGoogle() => _supabase.signInWithGoogle();
+      return response.user != null;
+    } catch (e) {
+      // Fallback to OAuth if native sign-in fails or is not supported
+      if (e.toString().contains('sign_in_canceled') ||
+          e.toString().contains('canceled')) {
+        return false;
+      }
+
+      // Attempt OAuth fallback
+      return _client.auth.signInWithOAuth(
+        supabase.OAuthProvider.google,
+        redirectTo: 'com.sayr.app://login-callback',
+      );
+    }
+  }
 
   @override
-  Future<void> sendPasswordResetEmail(String email) =>
-      _supabase.sendPasswordResetEmail(email);
+  Future<void> sendPasswordResetEmail(String email) {
+    return _client.auth.resetPasswordForEmail(
+      email,
+      redirectTo: 'com.sayr.app://reset-password',
+    );
+  }
 
   @override
-  Future<void> updatePassword(String password) =>
-      _supabase.updatePassword(password);
+  Future<void> updatePassword(String password) async {
+    await _client.auth.updateUser(
+      supabase.UserAttributes(password: password),
+    );
+  }
 
   @override
-  Future<void> signOut() => _supabase.signOut();
+  Future<void> signOut() async {
+    await _client.auth.signOut();
+    try {
+      await (googleSignIn ?? GoogleSignIn()).signOut();
+    } catch (e, st) {
+      _logger.d(
+        'Google signOut during app signOut failed (likely not initialized)',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
 
   @override
   Future<UserModel?> fetchCurrentProfile(String userId) async {
@@ -150,11 +240,15 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDatasource {
 
   @override
   Future<List<Map<String, dynamic>>> getInstitutions() async {
-    final response = await _client
+    return await _client
         .from('institutions')
         .select('id, name, city')
         .eq('is_active', true)
-        .order('name');
-    return List<Map<String, dynamic>>.from(response as Iterable);
+        .order('name')
+        .withConverter(
+          (data) => (data as List<dynamic>)
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList(),
+        );
   }
 }

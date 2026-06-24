@@ -109,6 +109,8 @@ Widget buildTestApp(AppRouter router, AuthBloc authBloc) {
         create: (_) => TrackingBloc(
           tripRepository: sl<TripRepository>(),
           authRepository: sl<AuthRepository>(),
+          driverLocationService: sl<LocationService>(),
+          talker: sl<Talker>(),
         ),
       ),
       BlocProvider<ChatBloc>(
@@ -296,7 +298,7 @@ void main() {
           .thenAnswer((_) => const Stream.empty());
 
       when(() => mockRouteRepository.getActiveRoutes())
-          .thenAnswer((_) async => const Right([testRoute]));
+          .thenAnswer((_) async => const Right((routes: [testRoute], fromCache: false)));
       when(() => mockRouteRepository.search(any()))
           .thenAnswer((_) async => const Right([testRoute]));
 
@@ -306,7 +308,7 @@ void main() {
           .thenAnswer((_) async => Right([testSubscription]));
 
       when(() => mockTripRepository.getActiveTrips())
-          .thenAnswer((_) async => Right([testTrip]));
+          .thenAnswer((_) async => Right((trips: [testTrip], fromCache: false)));
       when(() => mockTripRepository.watchTrip(any()))
           .thenAnswer((_) => Stream.value(testTrip));
       when(
@@ -550,7 +552,12 @@ void main() {
       expect(find.text('نشط'), findsOneWidget);
 
       // Navigate to Routes Tab (Index 1)
-      await tester.tap(find.byIcon(Icons.route_outlined));
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.byIcon(Icons.route_outlined),
+        ),
+      );
       await tester.safePumpAndSettle();
       expect(find.byType(TextField), findsOneWidget);
       expect(find.text('خط جامعة بغداد - الجادرية'), findsOneWidget);

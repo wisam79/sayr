@@ -126,6 +126,8 @@ class TripStateMachine {
   }
 
   /// Returns `true` if the state is terminal (no further transitions).
+  ///
+  /// Note: [TripStatus.absent] is a semi-terminal state that can only transition to [TripStatus.cancelled].
   static bool isTerminal(TripStatus state) {
     return state == TripStatus.completed || state == TripStatus.cancelled;
   }

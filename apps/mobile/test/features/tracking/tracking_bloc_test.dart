@@ -34,6 +34,15 @@ void main() {
   late MockDriverLocationService mockLocationService;
   late TrackingBloc bloc;
 
+  TrackingBloc createBloc() {
+    return TrackingBloc(
+      tripRepository: mockRepo,
+      authRepository: mockAuth,
+      driverLocationService: mockLocationService,
+      talker: sl<Talker>(),
+    );
+  }
+
   setUp(() {
     sl.allowReassignment = true;
     sl.registerSingleton<Talker>(Talker());
@@ -55,10 +64,7 @@ void main() {
     mockRepo = MockTripRepository();
     mockAuth = MockAuthRepository();
     when(() => mockAuth.currentUser).thenReturn(null);
-    bloc = TrackingBloc(
-      tripRepository: mockRepo,
-      authRepository: mockAuth,
-    );
+    bloc = createBloc();
   });
 
   tearDown(() {
@@ -83,12 +89,9 @@ void main() {
       'emits [Loading, ActiveTripsLoaded] when load succeeds',
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
-          (_) async => Right<Failure, List<Trip>>([testTrip]),
+          (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: [testTrip], fromCache: false)),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(const TrackingLoadActiveTrips()),
       expect: () => [
@@ -105,14 +108,11 @@ void main() {
       'emits [Loading, Error] when load fails',
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
-          (_) async => const Left<Failure, List<Trip>>(
+          (_) async => const Left<Failure, ({List<Trip> trips, bool fromCache})>(
             ServerFailure(message: 'Server error'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(const TrackingLoadActiveTrips()),
       expect: () => [
@@ -125,7 +125,7 @@ void main() {
       'emits DriverActive after successful arrive',
       build: () {
         when(() => mockRepo.getActiveTrips()).thenAnswer(
-          (_) async => Right<Failure, List<Trip>>([testTrip]),
+          (_) async => Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: [testTrip], fromCache: false)),
         );
         when(() => mockRepo.getById(any())).thenAnswer(
           (_) async => Right<Failure, Trip>(testTrip),
@@ -150,10 +150,7 @@ void main() {
         when(() => mockRepo.watchTrip(any())).thenAnswer(
           (_) => const Stream.empty(),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverArrive(
@@ -185,10 +182,7 @@ void main() {
         when(() => mockRepo.watchTrip(any())).thenAnswer(
           (_) => const Stream.empty(),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         TrackingCreateTrip(
@@ -219,10 +213,7 @@ void main() {
             testTrip.copyWith(status: TripStatus.inTransit),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverStart(
@@ -262,10 +253,7 @@ void main() {
             ServerFailure(message: 'Failed to start trip'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverStart(
@@ -305,11 +293,7 @@ void main() {
             LocationFailure(message: 'GPS disabled'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-          driverLocationService: mockLocationService,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverStart(
@@ -339,10 +323,7 @@ void main() {
             testTrip.copyWith(status: TripStatus.completed),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverComplete(
@@ -374,10 +355,7 @@ void main() {
             ServerFailure(message: 'Failed to complete trip'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverComplete(
@@ -404,10 +382,7 @@ void main() {
             testTrip.copyWith(status: TripStatus.absent),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverMarkAbsent(
@@ -439,10 +414,7 @@ void main() {
             ServerFailure(message: 'Failed to mark absent'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverMarkAbsent(
@@ -468,10 +440,7 @@ void main() {
             testTrip.copyWith(status: TripStatus.cancelled),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverCancel(
@@ -501,10 +470,7 @@ void main() {
             ServerFailure(message: 'Failed to cancel'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingDriverCancel(
@@ -528,10 +494,7 @@ void main() {
         ).thenAnswer(
           (_) async => const Right<Failure, Unit>(unit),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       seed: () => TrackingDriverActive(
         trip: testTrip,
@@ -566,10 +529,7 @@ void main() {
         ).thenAnswer(
           (_) async => const Right<Failure, Unit>(unit),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       seed: () => const TrackingInitial(),
       act: (bloc) => bloc.add(
@@ -596,10 +556,7 @@ void main() {
             ServerFailure(message: 'Failed to update location remotely'),
           ),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       seed: () => TrackingDriverActive(
         trip: testTrip,
@@ -625,10 +582,7 @@ void main() {
             testTrip.copyWith(status: TripStatus.inTransit),
           ]),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingWatchTrip(tripId: TripId('trip-1')),
@@ -653,10 +607,7 @@ void main() {
         when(() => mockRepo.watchTrip(any())).thenAnswer(
           (_) => Stream.error(Exception('Stream error')),
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) => bloc.add(
         const TrackingWatchTrip(tripId: TripId('trip-1')),
@@ -673,10 +624,7 @@ void main() {
         when(() => mockRepo.watchTrip(any())).thenAnswer(
           (_) => controller.stream,
         );
-        return TrackingBloc(
-          tripRepository: mockRepo,
-          authRepository: mockAuth,
-        );
+        return createBloc();
       },
       act: (bloc) async {
         bloc.add(const TrackingWatchTrip(tripId: TripId('trip-1')));

@@ -25,13 +25,16 @@ class RoutesLoading extends RoutesState {
 /// State when active routes list has successfully loaded.
 class RoutesLoaded extends RoutesState {
   /// Constructor for [RoutesLoaded].
-  const RoutesLoaded(this.routes);
+  const RoutesLoaded(this.routes, {this.fromCache = false});
 
   /// Loaded list of active routes.
   final List<Route> routes;
 
+  /// Whether the routes were loaded from local cache.
+  final bool fromCache;
+
   @override
-  List<Object?> get props => [routes];
+  List<Object?> get props => [routes, fromCache];
 }
 
 /// State when loading routes fails.

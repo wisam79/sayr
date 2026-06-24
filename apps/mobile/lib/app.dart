@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
+import 'package:sayr_mobile/core/connectivity_cubit.dart';
 import 'package:sayr_mobile/core/fcm_service.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/models/fcm_payload.dart';
@@ -20,13 +22,6 @@ import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_event.dart';
 import 'package:sayr_mobile/features/auth/presentation/bloc/auth_state.dart';
-import 'package:sayr_mobile/features/chat/presentation/bloc/chat_bloc.dart';
-import 'package:sayr_mobile/features/chat/presentation/bloc/chat_list_bloc.dart';
-import 'package:sayr_mobile/features/emergency/presentation/bloc/emergency_bloc.dart';
-import 'package:sayr_mobile/features/notifications/presentation/bloc/notifications_bloc.dart';
-import 'package:sayr_mobile/features/routes/presentation/bloc/routes_bloc.dart';
-import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
-import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_mobile/routing/app_router.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
@@ -51,60 +46,19 @@ class SayrApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
-
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthBloc>.value(
           value: authBloc,
-        ),
-        BlocProvider<RoutesBloc>(
-          create: (_) => RoutesBloc(
-            routeRepository: sl<RouteRepository>(),
-          ),
-        ),
-        BlocProvider<SubscriptionsBloc>(
-          create: (_) => SubscriptionsBloc(
-            subscriptionRepository: sl<SubscriptionRepository>(),
-            paymentRepository: sl<PaymentRepository>(),
-          ),
-        ),
-        BlocProvider<TrackingBloc>(
-          create: (_) => TrackingBloc(
-            tripRepository: sl<TripRepository>(),
-            authRepository: sl<AuthRepository>(),
-          ),
-        ),
-        BlocProvider<ChatBloc>(
-          create: (_) => ChatBloc(
-            chatRepository: sl<ChatRepository>(),
-          ),
-        ),
-        BlocProvider<ChatListBloc>(
-          create: (_) => ChatListBloc(
-            chatRepository: sl<ChatRepository>(),
-          ),
-        ),
-        BlocProvider<NotificationsBloc>(
-          create: (_) => NotificationsBloc(
-            notificationsRepository: sl<NotificationsRepository>(),
-          ),
-        ),
-        BlocProvider<EmergencyBloc>(
-          create: (_) => EmergencyBloc(
-            emergencyRepository: sl<EmergencyRepository>(),
-          ),
         ),
         BlocProvider<LocaleCubit>(
           create: (_) => LocaleCubit()..load(),
         ),
         BlocProvider<ThemeCubit>(
           create: (_) => ThemeCubit()..load(),
+        ),
+        BlocProvider<ConnectivityCubit>(
+          create: (_) => ConnectivityCubit(),
         ),
       ],
       child: BlocListener<AuthBloc, AuthState>(
@@ -115,7 +69,7 @@ class SayrApp extends StatelessWidget {
             // Register current FCM push token for notifications
             unawaited(
               FcmService.registerDeviceToken(
-                context.read<NotificationsBloc>(),
+                sl<NotificationsRepository>(),
               ),
             );
           } else if (state is AuthUnauthenticated) {
@@ -127,8 +81,21 @@ class SayrApp extends StatelessWidget {
           builder: (context, locale) {
             final isRtl = locale.languageCode == 'ar';
             final themeMode = context.watch<ThemeCubit>().state;
-            return MaterialApp.router(
-              title: 'Sayr',
+
+            final isDark = themeMode == ThemeMode.dark ||
+                (themeMode == ThemeMode.system &&
+                    MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+                statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+                systemNavigationBarColor: isDark ? AppColors.backgroundDark : AppColors.background,
+                systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+              ),
+              child: MaterialApp.router(
+                title: 'Sayr',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
@@ -153,8 +120,9 @@ class SayrApp extends StatelessWidget {
                 );
               },
               routerConfig: router.config,
-            );
-          },
+            ),
+          );
+        },
         ),
       ),
     );
@@ -171,8 +139,15 @@ Future<void> runSayrApp() async {
   // Initialize Hive
   await Hive.initFlutter();
 
-  // Initialize Firebase
-  await Firebase.initializeApp();
+  // Initialize Firebase (Only on supported platforms)
+  final isFirebaseSupported = kIsWeb || Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
+  if (isFirebaseSupported) {
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      debugPrint('Firebase failed to initialize: $e');
+    }
+  }
 
   // Initialize Sentry (if DSN is set)
   const sentryDsn = String.fromEnvironment('SENTRY_DSN');
@@ -186,7 +161,39 @@ Future<void> runSayrApp() async {
             'SENTRY_ENVIRONMENT',
             defaultValue: 'development',
           )
-          ..tracesSampleRate = 0.2;
+          ..tracesSampleRate = 0.2
+          ..beforeSend = (event, hint) {
+            final emailRegex = RegExp(
+              r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}',
+            );
+            final phoneRegex = RegExp(r'\+?[0-9]{10,15}');
+            final uuidRegex = RegExp(
+              '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}',
+            );
+
+            String scrub(String text) {
+              return text
+                  .replaceAll(emailRegex, '[EMAIL_REDACTED]')
+                  .replaceAll(phoneRegex, '[PHONE_REDACTED]')
+                  .replaceAll(uuidRegex, '[UUID_REDACTED]');
+            }
+
+            final messageText = event.message?.formatted;
+            final scrubbedMessage = messageText != null
+                ? SentryMessage(scrub(messageText))
+                : null;
+
+            final exceptions = event.exceptions?.map((ex) {
+              return ex.copyWith(
+                value: ex.value != null ? scrub(ex.value!) : null,
+              );
+            }).toList();
+
+            return event.copyWith(
+              message: scrubbedMessage,
+              exceptions: exceptions,
+            );
+          };
       },
     );
   }
@@ -242,7 +249,7 @@ Future<void> runSayrApp() async {
 
 /// A wrapper widget that listens to network connectivity changes and displays
 /// an elegant banner at the top of the viewport when offline.
-class OfflineBannerWrapper extends StatefulWidget {
+class OfflineBannerWrapper extends StatelessWidget {
   /// Creates an [OfflineBannerWrapper].
   const OfflineBannerWrapper({required this.child, super.key});
 
@@ -250,90 +257,66 @@ class OfflineBannerWrapper extends StatefulWidget {
   final Widget child;
 
   @override
-  State<OfflineBannerWrapper> createState() => _OfflineBannerWrapperState();
-}
-
-class _OfflineBannerWrapperState extends State<OfflineBannerWrapper> {
-  late StreamSubscription<List<ConnectivityResult>> _subscription;
-  bool _isOffline = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _subscription = Connectivity().onConnectivityChanged.listen((results) {
-      final isNowOffline =
-          results.isEmpty || results.every((r) => r == ConnectivityResult.none);
-      if (_isOffline != isNowOffline) {
-        setState(() {
-          _isOffline = isNowOffline;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (!_isOffline) {
-      return widget.child;
-    }
+    return BlocBuilder<ConnectivityCubit, bool>(
+      builder: (context, isOffline) {
+        if (!isOffline) {
+          return child;
+        }
 
-    final l10n = AppLocalizations.of(context);
+        final l10n = AppLocalizations.of(context);
 
-    return Stack(
-      children: [
-        widget.child,
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Material(
-            color: Colors.transparent,
-            child: SafeArea(
-              bottom: false,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 16,
-                ),
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
+        return Stack(
+          children: [
+            child,
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: Material(
+                color: Colors.transparent,
+                child: SafeArea(
+                  bottom: false,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 16,
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.wifi_off, color: Colors.white),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        l10n.browsingOffline,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                    child: Row(
+                      children: [
+                        const Icon(Icons.wifi_off, color: Colors.white),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            l10n.browsingOffline,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

@@ -140,7 +140,7 @@ void main() {
           .thenAnswer((_) => const Stream.empty());
 
       when(() => mockRouteRepository.getActiveRoutes())
-          .thenAnswer((_) async => const Right([testRoute]));
+          .thenAnswer((_) async => const Right((routes: [testRoute], fromCache: false)));
       when(() => mockRouteRepository.search(any()))
           .thenAnswer((_) async => const Right([testRoute]));
 
@@ -150,7 +150,7 @@ void main() {
           .thenAnswer((_) async => Right([testSubscription]));
 
       when(() => mockTripRepository.getActiveTrips())
-          .thenAnswer((_) async => Right([testTrip]));
+          .thenAnswer((_) async => Right((trips: [testTrip], fromCache: false)));
       when(() => mockTripRepository.watchTrip(any()))
           .thenAnswer((_) => Stream.value(testTrip));
       when(

@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/di/di.dart';
 
 /// UI-only state for the trip tracking view.
 class TrackingUiState extends Equatable {
@@ -78,7 +77,11 @@ class TrackingUiState extends Equatable {
 ///
 /// Holds the OSRM route path, rating-guard flag, and computed ETA/distance.
 class TrackingUiCubit extends Cubit<TrackingUiState> {
-  TrackingUiCubit() : super(TrackingUiState.initial);
+  TrackingUiCubit({required RoutingService routingService})
+      : _routingService = routingService,
+        super(TrackingUiState.initial);
+
+  final RoutingService _routingService;
 
   /// Updates the computed ETA and distance using coordinates distance logic.
   void updateEta({
@@ -155,7 +158,7 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
     emit(state.copyWith(isFetchingRoute: true));
 
     try {
-      final result = await sl<RoutingService>().getRoute(start, end);
+      final result = await _routingService.getRoute(start, end);
       if (isClosed) return;
 
       result.fold(

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
@@ -45,7 +44,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
   ///
   /// Mirrors the equivalent helper in `RouteRepositoryImpl`: keeps the offline
   /// behaviour in one place while routing failures through [mapException].
-  Future<Either<Failure, List<Trip>>> _fetchTripsWithCacheFallback(
+  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>> _fetchTripsWithCacheFallback(
     Future<List<Trip>> Function() fetch, {
     required String cacheLogLabel,
   }) async {
@@ -68,7 +67,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
         try {
           final cached = await _localDatasource.getCachedTrips();
           if (cached.isNotEmpty) {
-            return Right<Failure, List<Trip>>(cached);
+            return Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: cached, fromCache: true));
           }
         } catch (cacheError, st) {
           log.warning(
@@ -77,14 +76,14 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
             st,
           );
         }
-        return Left<Failure, List<Trip>>(failure);
+        return Left<Failure, ({List<Trip> trips, bool fromCache})>(failure);
       },
-      (trips) async => Right<Failure, List<Trip>>(trips),
+      (trips) async => Right<Failure, ({List<Trip> trips, bool fromCache})>((trips: trips, fromCache: false)),
     );
   }
 
   @override
-  Future<Either<Failure, List<Trip>>> getActiveTrips() async {
+  Future<Either<Failure, ({List<Trip> trips, bool fromCache})>> getActiveTrips() async {
     return _fetchTripsWithCacheFallback(
       () async {
         final response = await _remoteDatasource.getActiveTrips();
@@ -135,9 +134,10 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
     return result.fold(
       (failure) async {
         try {
-          final cached = await _localDatasource.getCachedTrips();
-          final trip = cached.firstWhere((t) => t.id == id);
-          return Right<Failure, Trip>(trip);
+          final trip = await _localDatasource.getCachedTripById(id);
+          if (trip != null) {
+            return Right<Failure, Trip>(trip);
+          }
         } catch (cacheError, st) {
           log.warning(
             'Failed to read cached trip during offline fallback',
@@ -210,14 +210,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
 
   Future<void> _updateLocalCacheAfterRemote(Trip updatedTrip) async {
     try {
-      final cached = List<Trip>.from(await _localDatasource.getCachedTrips());
-      final index = cached.indexWhere((t) => t.id == updatedTrip.id);
-      if (index != -1) {
-        cached[index] = updatedTrip;
-      } else {
-        cached.add(updatedTrip);
-      }
-      await _localDatasource.cacheTrips(cached);
+      await _localDatasource.upsertCachedTrip(updatedTrip);
     } catch (cacheErr, st) {
       log.warning(
         'Failed to update local cache on status change success',
@@ -442,12 +435,7 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           );
           syncedIds.add(statusUpdate.id);
         } catch (e) {
-          final isNetworkError = e is SocketException ||
-              e is HttpException ||
-              e is TimeoutException ||
-              e.toString().contains('SocketException') ||
-              e.toString().contains('HttpException') ||
-              e.toString().contains('TimeoutException');
+          final isNetworkError = BaseRepository.isNetworkException(e);
 
           if (isNetworkError) {
             // Transient network failure: save what succeeded so far and abort sync.

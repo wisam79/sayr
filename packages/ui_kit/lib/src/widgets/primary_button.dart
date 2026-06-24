@@ -37,7 +37,7 @@ class PrimaryButton extends StatelessWidget {
     final isEnabled = onPressed != null && !isLoading;
 
     final glowShadow = BoxShadow(
-      color: AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.25),
+      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.1),
       blurRadius: 16,
       offset: const Offset(0, 6),
       spreadRadius: -2,
@@ -45,8 +45,10 @@ class PrimaryButton extends StatelessWidget {
 
     final buttonDecoration = BoxDecoration(
       gradient: isEnabled
-          ? const LinearGradient(
-              colors: [AppColors.primary, AppColors.primaryContainer],
+          ? LinearGradient(
+              colors: isDark
+                  ? const [Color(0xFF2DD4BF), Color(0xFF0D9488)]
+                  : const [Color(0xFF0D9488), Color(0xFF0F766E)],
             )
           : null,
       color: isEnabled ? null : theme.disabledColor.withValues(alpha: 0.12),

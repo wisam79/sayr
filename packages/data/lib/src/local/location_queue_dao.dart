@@ -93,6 +93,19 @@ class TripCacheDao {
     await _db.delete(_db.cachedTrip).go();
   }
 
+  /// Single atomic trip upsert to avoid full list scan.
+  Future<void> upsertCachedTrip(Trip trip) async {
+    await _db.into(_db.cachedTrip).insertOnConflictUpdate(_tripToCompanion(trip));
+  }
+
+  /// Get a single cached trip by ID.
+  Future<Trip?> getCachedTripById(TripId id) async {
+    final row = await (_db.select(_db.cachedTrip)
+          ..where((t) => t.id.equals(id.value)))
+        .getSingleOrNull();
+    return row != null ? _rowToTrip(row) : null;
+  }
+
   CachedTripCompanion _tripToCompanion(Trip trip) {
     return CachedTripCompanion.insert(
       id: trip.id.value,

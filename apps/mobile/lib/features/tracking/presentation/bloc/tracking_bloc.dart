@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
-import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 import 'package:talker_flutter/talker_flutter.dart';
@@ -17,10 +16,12 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   TrackingBloc({
     required TripRepository tripRepository,
     required AuthRepository authRepository,
-    LocationService? driverLocationService,
+    required LocationService driverLocationService,
+    required Talker talker,
   })  : _tripRepository = tripRepository,
         _authRepository = authRepository,
-        _driverLocationService = driverLocationService ?? sl<LocationService>(),
+        _driverLocationService = driverLocationService,
+        _talker = talker,
         super(const TrackingState.initial()) {
     on<TrackingLoadActiveTrips>(_onLoadActiveTrips);
     on<TrackingWatchTrip>(_onWatchTrip);
@@ -39,17 +40,22 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   final TripRepository _tripRepository;
   final AuthRepository _authRepository;
   final LocationService _driverLocationService;
+  final Talker _talker;
   StreamSubscription<Trip>? _tripSubscription;
   StreamSubscription<Either<Failure, Coordinates>>? _locationSubscription;
 
   @override
   Future<void> close() async {
-    await _tripSubscription?.cancel();
-    await _locationSubscription?.cancel();
+    if (_tripSubscription != null) {
+      await _tripSubscription!.cancel();
+    }
+    if (_locationSubscription != null) {
+      await _locationSubscription!.cancel();
+    }
     // Release the GPS stream so the foreground service stops when the bloc
     // (and therefore the tracking session) is torn down.
     await _driverLocationService.stopTracking();
-    return super.close();
+    await super.close();
   }
 
   Future<void> _onLoadActiveTrips(
@@ -61,7 +67,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     if (isClosed) return;
     result.fold(
       (failure) => emit(TrackingState.error(failure: failure)),
-      (trips) => emit(TrackingState.activeTripsLoaded(trips: trips)),
+      (data) => emit(TrackingState.activeTripsLoaded(trips: data.trips, fromCache: data.fromCache)),
     );
   }
 
@@ -95,7 +101,10 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     TrackingWatchTrip event,
     Emitter<TrackingState> emit,
   ) async {
-    await _tripSubscription?.cancel();
+    final sub = _tripSubscription;
+    if (sub != null) {
+      await sub.cancel();
+    }
 
     final current = state;
     if (current is TrackingActiveTripsLoaded) {
@@ -116,7 +125,9 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       }
     }
 
-    _tripSubscription = _tripRepository.watchTrip(event.tripId).listen(
+    final stream = _tripRepository.watchTrip(event.tripId);
+
+    _tripSubscription = stream.listen(
       (trip) {
         if (!isClosed) {
           add(_TripUpdated(trip));
@@ -249,7 +260,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
           (_) async => true,
         );
         if (!trackSuccess) return;
-      } catch (e) {
+      } on Object catch (e) {
         emit(
           TrackingState.error(
             failure: UnknownFailure(message: e.toString()),
@@ -320,7 +331,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
       (result) {
         result.fold(
           (failure) {
-            sl<Talker>().warning(
+            _talker.warning(
               'TrackingBloc: location stream failure: $failure',
             );
           },
@@ -409,7 +420,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
 
     if (isClosed) return;
     result.fold(
-      (failure) => sl<Talker>().warning(
+      (failure) => _talker.warning(
         'TrackingBloc: Failed to update location remotely: ${failure.message}',
       ),
       (_) {

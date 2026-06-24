@@ -78,13 +78,18 @@ class _GreetingCardState extends State<GreetingCard>
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF1E293B), // Dark slate
-            Color(0xFF0F172A), // Deep charcoal
-          ],
+          colors: Theme.of(context).brightness == Brightness.dark
+              ? const [
+                  Color(0xFF0F766E), // Dark Teal
+                  Color(0xFF042F2E), // Deepest Teal
+                ]
+              : const [
+                  Color(0xFF0D9488), // Premium Emerald-Teal
+                  Color(0xFF115E59), // Darker Teal
+                ],
         ),
         borderRadius: BorderRadius.circular(20),
       ),

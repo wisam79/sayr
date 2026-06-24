@@ -28,17 +28,17 @@ class NotificationCard extends StatelessWidget {
         horizontal: AppSpacing.md,
         vertical: AppSpacing.md,
       ),
-      color: isUnread ? AppColors.primary.withValues(alpha: 0.03) : null,
+      color: isUnread ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.03) : null,
       child: Row(
         children: [
           CircleAvatar(
             backgroundColor: isUnread
-                ? AppColors.primary.withValues(alpha: 0.15)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
                 : Theme.of(context).colorScheme.surface,
             child: Icon(
               _iconForType(notification.data['type'] as String?),
               size: 20,
-              color: isUnread ? AppColors.primary : AppColors.textSecondary,
+              color: isUnread ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -64,21 +64,21 @@ class NotificationCard extends StatelessWidget {
                 Text(
                   _formatRelative(notification.createdAt),
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
             ),
           ),
           if (isUnread)
-            const Padding(
-              padding: EdgeInsetsDirectional.only(start: AppSpacing.sm),
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
               child: SizedBox(
                 width: 8,
                 height: 8,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
                 ),

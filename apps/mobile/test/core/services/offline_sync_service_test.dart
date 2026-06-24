@@ -75,8 +75,8 @@ void main() {
     });
 
     test('does not sync when pending count is 0', () async {
-      when(() => mockLocal.getPendingLocationsCount())
-          .thenAnswer((_) async => 0);
+      when(() => mockLocal.getPendingLocations())
+          .thenAnswer((_) async => const []);
 
       // Trigger sync manually via connectivity update (has connection)
       service.start();
@@ -85,8 +85,7 @@ void main() {
       // Wait for debounce and async operations
       await Future<void>.delayed(const Duration(seconds: 3));
 
-      verify(() => mockLocal.getPendingLocationsCount()).called(1);
-      verifyNever(() => mockLocal.getPendingLocations());
+      verify(() => mockLocal.getPendingLocations()).called(1);
       verifyNever(
         () => mockTripRepo.bulkUpdateLocations(
           any<List<({TripId tripId, double lat, double lng})>>(),
@@ -117,8 +116,6 @@ void main() {
         ),
       ];
 
-      when(() => mockLocal.getPendingLocationsCount())
-          .thenAnswer((_) async => 2);
       when(() => mockLocal.getPendingLocations())
           .thenAnswer((_) async => pendingUpdates);
       when(() => mockLocal.markLocationsSynced(any<List<int>>()))
@@ -151,7 +148,6 @@ void main() {
 
       await Future<void>.delayed(const Duration(seconds: 3));
 
-      verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verify(() => mockLocal.getPendingLocations()).called(1);
 
       // Capture the argument passed to bulkUpdateLocations
@@ -181,8 +177,6 @@ void main() {
         ),
       ];
 
-      when(() => mockLocal.getPendingLocationsCount())
-          .thenAnswer((_) async => 1);
       when(() => mockLocal.getPendingLocations())
           .thenAnswer((_) async => pendingUpdates);
       when(
@@ -198,7 +192,6 @@ void main() {
 
       await Future<void>.delayed(const Duration(seconds: 3));
 
-      verify(() => mockLocal.getPendingLocationsCount()).called(1);
       verify(() => mockLocal.getPendingLocations()).called(1);
       verify(
         () => mockTripRepo.bulkUpdateLocations(

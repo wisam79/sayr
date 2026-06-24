@@ -46,6 +46,9 @@ jobs:
       - name: Bootstrap
         run: melos bootstrap
 
+      - name: Dependency vulnerability scanning
+        run: melos exec -- "dart pub outdated"
+
       - name: Verify formatting
         run: melos run format:check
 

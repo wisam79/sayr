@@ -1072,4 +1072,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tripTrackingActiveText =>
       'Sayr is tracking your location in the background for this trip.';
+
+  @override
+  String get stationsTitle => 'Stations';
 }

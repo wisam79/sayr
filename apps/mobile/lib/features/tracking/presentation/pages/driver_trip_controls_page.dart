@@ -19,6 +19,7 @@ import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.da
 import 'package:sayr_mobile/features/tracking/presentation/widgets/trip_status_chip.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// Driver view: trip lifecycle controls + live location streaming.
 class DriverTripControlsPage extends StatefulWidget {
@@ -50,6 +51,8 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
         TrackingBloc(
           tripRepository: sl<TripRepository>(),
           authRepository: sl<AuthRepository>(),
+          driverLocationService: sl<LocationService>(),
+          talker: sl<Talker>(),
         );
     if (widget.trackingBloc == null) {
       _trackingBloc.add(TrackingWatchTrip(tripId: widget.tripId));

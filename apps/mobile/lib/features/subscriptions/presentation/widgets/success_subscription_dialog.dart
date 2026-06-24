@@ -72,13 +72,6 @@ class _SuccessSubscriptionDialogState extends State<SuccessSubscriptionDialog>
                     color: AppColors.success,
                     width: 2,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.success.withValues(alpha: 0.15),
-                      blurRadius: 24,
-                      spreadRadius: 4,
-                    ),
-                  ],
                 ),
                 child: Center(
                   child: _AnimatedCheckmark(controller: _controller),
