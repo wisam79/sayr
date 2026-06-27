@@ -331,9 +331,7 @@ class _DashboardHeader extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                activeSub.routeId.value.isNotEmpty
-                    ? l10n.subscriptionType
-                    : l10n.subscriptionType,
+                l10n.subscriptionType,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Colors.white.withValues(alpha: 0.8),
                     ),

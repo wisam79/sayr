@@ -467,6 +467,10 @@
   "@tripTrackingActiveTitle": {},
   "tripTrackingActiveText": "تطبيق سير يتتبع موقعك في الخلفية لضمان وصول الطلاب.",
   "@tripTrackingActiveText": {},
-  "stationsTitle": "المحطات"
+  "stationsTitle": "المحطات",
+  "welcomeGuest": "مرحباً بك",
+  "welcomeSubtitle": "مرحباً بك في رحلات",
+  "comingSoon": "قريباً",
+  "statsComingSoon": "ستتوفر الإحصائيات قريباً"
 }
 

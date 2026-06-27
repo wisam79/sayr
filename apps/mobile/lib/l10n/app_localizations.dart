@@ -2071,6 +2071,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stations'**
   String get stationsTitle;
+
+  /// No description provided for @welcomeGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get welcomeGuest;
+
+  /// No description provided for @welcomeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to your rides'**
+  String get welcomeSubtitle;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get comingSoon;
+
+  /// No description provided for @statsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics will be available soon'**
+  String get statsComingSoon;
 }
 
 class _AppLocalizationsDelegate

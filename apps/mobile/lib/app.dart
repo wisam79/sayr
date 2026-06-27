@@ -151,8 +151,8 @@ Future<void> runSayrApp() async {
   if (isFirebaseSupported) {
     try {
       await Firebase.initializeApp();
-    } catch (e) {
-      debugPrint('Firebase failed to initialize: $e');
+    } catch (e, st) {
+      Talker().error('Firebase failed to initialize', e, st);
     }
   }
 

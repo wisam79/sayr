@@ -1068,4 +1068,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get stationsTitle => 'المحطات';
+
+  @override
+  String get welcomeGuest => 'مرحباً بك';
+
+  @override
+  String get welcomeSubtitle => 'مرحباً بك في رحلات';
+
+  @override
+  String get comingSoon => 'قريباً';
+
+  @override
+  String get statsComingSoon => 'ستتوفر الإحصائيات قريباً';
 }

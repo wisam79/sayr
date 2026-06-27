@@ -74,18 +74,20 @@ class DriverHomeTab extends StatelessWidget {
               Expanded(
                 child: DriverStatCard(
                   icon: Icons.directions_bus,
-                  value: '24',
+                  value: '--',
                   label: l10n.statsTrips,
                   color: AppColors.primary,
+                  subtitle: l10n.comingSoon,
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: DriverStatCard(
                   icon: Icons.star,
-                  value: '4.9',
+                  value: '--',
                   label: l10n.statsRating,
                   color: Colors.amber,
+                  subtitle: l10n.comingSoon,
                 ),
               ),
             ],
@@ -144,6 +146,7 @@ class DriverStatCard extends StatefulWidget {
     required this.value,
     required this.label,
     required this.color,
+    this.subtitle,
     super.key,
   });
 
@@ -151,6 +154,7 @@ class DriverStatCard extends StatefulWidget {
   final String value;
   final String label;
   final Color color;
+  final String? subtitle;
 
   @override
   State<DriverStatCard> createState() => _DriverStatCardState();
@@ -265,6 +269,17 @@ class _DriverStatCardState extends State<DriverStatCard>
                   color: AppColors.textSecondary,
                 ),
           ),
+          if (widget.subtitle != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              widget.subtitle!,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary.withValues(alpha: 0.6),
+                    fontSize: 10,
+                    fontStyle: FontStyle.italic,
+                  ),
+            ),
+          ],
         ],
       ),
     );

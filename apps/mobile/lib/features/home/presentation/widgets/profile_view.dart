@@ -151,30 +151,17 @@ class _ProfileViewState extends State<_ProfileView> {
       children: [
         // 1. Custom Header
         Row(
-          textDirection: TextDirection.ltr, // Ensures Settings on Left
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            IconButton(
-              icon: Icon(
-                LucideIcons.settings,
+            Text(
+              l10n.profile,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
                 color: primaryTextColor,
-                size: 24,
+                fontSize: 18,
               ),
-              onPressed: () {
-                // Settings icon action placeholder
-              },
+              textAlign: TextAlign.center,
             ),
-            Expanded(
-              child: Text(
-                l10n.profile,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: primaryTextColor,
-                  fontSize: 18,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            const SizedBox(width: 48), // Balancing spacer
           ],
         ),
         const SizedBox(height: AppSpacing.lg),

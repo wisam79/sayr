@@ -483,6 +483,10 @@
   "@tripTrackingActiveTitle": {},
   "tripTrackingActiveText": "Sayr is tracking your location in the background for this trip.",
   "@tripTrackingActiveText": {},
-  "stationsTitle": "Stations"
+  "stationsTitle": "Stations",
+  "welcomeGuest": "Welcome",
+  "welcomeSubtitle": "Welcome to your rides",
+  "comingSoon": "Coming soon",
+  "statsComingSoon": "Statistics will be available soon"
 }
 

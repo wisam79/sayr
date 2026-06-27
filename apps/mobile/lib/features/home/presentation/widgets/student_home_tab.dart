@@ -114,7 +114,7 @@ class StudentHomeTab extends StatelessWidget {
                     Text(
                       user != null
                           ? l10n.helloUser(user.displayName)
-                          : 'مرحباً بك',
+                          : l10n.welcomeGuest,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
                             color: primaryTextColor,
@@ -127,7 +127,7 @@ class StudentHomeTab extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'مرحباً بك في رحلات',
+                          l10n.welcomeSubtitle,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: secondaryTextColor,

@@ -1075,4 +1075,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stationsTitle => 'Stations';
+
+  @override
+  String get welcomeGuest => 'Welcome';
+
+  @override
+  String get welcomeSubtitle => 'Welcome to your rides';
+
+  @override
+  String get comingSoon => 'Coming soon';
+
+  @override
+  String get statsComingSoon => 'Statistics will be available soon';
 }
