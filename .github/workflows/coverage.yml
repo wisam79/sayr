@@ -74,6 +74,13 @@ jobs:
               'packages/core/lib/*' \
               'packages/data/lib/*' \
             --output-file coverage/lcov.filtered.info
+          # Exclude generated files from coverage calculations
+          lcov \
+            --remove coverage/lcov.filtered.info \
+              '**/*.g.dart' \
+              '**/*.freezed.dart' \
+              '**/*.module.dart' \
+            --output-file coverage/lcov.filtered.info
           # || true: lcov exits non-zero when functions/branches have no data
           lcov --summary coverage/lcov.filtered.info || true
           COVERAGE_PCT=$(lcov --summary coverage/lcov.filtered.info 2>&1 | grep -oE 'lines\.\.\.\.\.\.: [0-9.]+' | grep -oE '[0-9.]+')
