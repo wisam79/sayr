@@ -80,6 +80,7 @@ jobs:
               '**/*.g.dart' \
               '**/*.freezed.dart' \
               '**/*.module.dart' \
+            --ignore-errors unused \
             --output-file coverage/lcov.filtered.info
           # || true: lcov exits non-zero when functions/branches have no data
           lcov --summary coverage/lcov.filtered.info || true
