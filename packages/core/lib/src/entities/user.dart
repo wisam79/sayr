@@ -3,6 +3,7 @@ import 'package:sayr_core/src/enums/user_role.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'user.freezed.dart';
+
 /// A user (student, driver, or admin) in the system.
 @freezed
 abstract class User with _$User {

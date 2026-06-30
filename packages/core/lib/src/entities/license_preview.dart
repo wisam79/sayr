@@ -4,6 +4,7 @@ import 'package:sayr_core/src/value_objects/ids.dart';
 import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'license_preview.freezed.dart';
+
 /// Pre-activation preview details of a license code.
 @freezed
 abstract class LicensePreview with _$LicensePreview {
@@ -18,5 +19,4 @@ abstract class LicensePreview with _$LicensePreview {
     required int availableSeats,
     required LicenseStatus status,
   }) = _LicensePreview;
-
-  }
+}

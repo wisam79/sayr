@@ -4,6 +4,7 @@ import 'package:sayr_core/src/enums/subscription_status.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'subscription.freezed.dart';
+
 /// A student's subscription to a route.
 @freezed
 abstract class Subscription with _$Subscription {

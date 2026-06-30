@@ -94,8 +94,7 @@ void main() {
     scheduledAt: DateTime(2026, 6, 9, 12),
     startedAt: DateTime(2026, 6, 9, 12, 5),
     lastLocation: Coordinates(latitude: 33.3128, longitude: 44.3615),
-    routeStartLocation:
-        Coordinates(latitude: 33.3120, longitude: 44.3610),
+    routeStartLocation: Coordinates(latitude: 33.3120, longitude: 44.3610),
     routeEndLocation: Coordinates(latitude: 33.3140, longitude: 44.3630),
   );
 

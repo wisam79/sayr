@@ -32,8 +32,7 @@ void main() {
       expect(student.isStudent, isTrue);
       expect(driver.isDriver, isTrue);
     });
-
-    });
+  });
 
   group('Route', () {
     test('hasSeats reflects availableSeats', () {
@@ -80,8 +79,7 @@ void main() {
       );
       expect(route.occupancyRatio, equals(0));
     });
-
-    });
+  });
 
   group('Subscription', () {
     test('isExpired when endDate is in the past', () {
@@ -132,8 +130,7 @@ void main() {
       );
       expect(subscription.isExpired, isFalse);
     });
-
-    });
+  });
 
   group('Trip', () {
     test('isCompleted when status is completed', () {
@@ -237,8 +234,7 @@ void main() {
       );
       expect(trip.duration, isNull);
     });
-
-    });
+  });
 
   group('Rating', () {
     test('rating value is in 1-5 range', () {
@@ -281,8 +277,7 @@ void main() {
       expect(rating.isPositive, isFalse);
       expect(rating.isNegative, isFalse);
     });
-
-    });
+  });
 
   group('AppConfig', () {
     test('isVersionOutdated compared correctly', () {
@@ -292,11 +287,9 @@ void main() {
       expect(config.isVersionOutdated('1.3.0'), isFalse);
       expect(config.isVersionOutdated('2.0.0'), isFalse);
     });
+  });
 
-    });
-
-  group('Driver', () {
-    });
+  group('Driver', () {});
 
   group('EmergencyReport', () {
     test('isActive works', () {
@@ -311,11 +304,9 @@ void main() {
       final resolved = report.copyWith(resolvedAt: DateTime.now());
       expect(resolved.isActive, isFalse);
     });
+  });
 
-    });
-
-  group('Institution', () {
-    });
+  group('Institution', () {});
 
   group('License', () {
     test('isActivatable delegates to status', () {
@@ -330,17 +321,13 @@ void main() {
       );
       expect(license.isActivatable, isTrue);
     });
+  });
 
-    });
+  group('LicensePreview', () {});
 
-  group('LicensePreview', () {
-    });
+  group('Message & Conversation', () {});
 
-  group('Message & Conversation', () {
-    });
-
-  group('AppNotification', () {
-    });
+  group('AppNotification', () {});
 
   group('Payout', () {
     test('isPending works', () {

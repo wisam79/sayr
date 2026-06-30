@@ -118,7 +118,7 @@ abstract class BaseRepository {
       }
     }
     // Fallback: String matching is used as a secure fallback because network/connection
-    // exceptions are often wrapped inside database/platform-specific exceptions 
+    // exceptions are often wrapped inside database/platform-specific exceptions
     // (e.g. PostgrestException or PlatformException) where the underlying type is lost
     // but the error message still contains the connection exception details.
     final errStr = e.toString().toLowerCase();

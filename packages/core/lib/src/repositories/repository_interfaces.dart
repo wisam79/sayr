@@ -19,9 +19,9 @@ import 'package:sayr_core/src/value_objects/license_code.dart';
 abstract class AuthRepository {
   /// The currently signed-in user.
   ///
-  /// Note: The returned [User] object populates name and phone from the local session's 
+  /// Note: The returned [User] object populates name and phone from the local session's
   /// `user_metadata` which can theoretically be tampered with by clients.
-  /// For secure/verified profile attributes (like role, institution_id, phone), 
+  /// For secure/verified profile attributes (like role, institution_id, phone),
   /// use [fetchFullProfile] which fetches securely from the database.
   User? get currentUser;
 

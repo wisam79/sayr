@@ -4,6 +4,7 @@ import 'package:sayr_core/src/value_objects/ids.dart';
 import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'payout.freezed.dart';
+
 /// A driver's payout request.
 @freezed
 abstract class Payout with _$Payout {

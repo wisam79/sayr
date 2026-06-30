@@ -4,6 +4,7 @@ import 'package:sayr_core/src/value_objects/ids.dart';
 import 'package:sayr_core/src/value_objects/license_code.dart';
 
 part 'license.freezed.dart';
+
 /// A license code that grants a student access to a route.
 @freezed
 abstract class License with _$License {
@@ -38,5 +39,4 @@ abstract class LicenseBatch with _$LicenseBatch {
     required int validDays,
     required DateTime createdAt,
   }) = _LicenseBatch;
-
-  }
+}

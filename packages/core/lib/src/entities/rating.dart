@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'rating.freezed.dart';
+
 /// A rating left by a student for a completed trip.
 @freezed
 abstract class Rating with _$Rating {

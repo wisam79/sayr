@@ -9,7 +9,8 @@ void main(List<String> args) {
 
   final featureSnake = args[0].toLowerCase();
   if (!RegExp(r'^[a-z0-9_]+$').hasMatch(featureSnake)) {
-    print('Error: Feature name must be in snake_case (alphanumeric and underscores only).');
+    print(
+        'Error: Feature name must be in snake_case (alphanumeric and underscores only).');
     exit(1);
   }
 
@@ -18,7 +19,8 @@ void main(List<String> args) {
     return word[0].toUpperCase() + word.substring(1);
   }).join('');
 
-  print('Generating Clean Architecture files for feature: $featurePascal ($featureSnake)...');
+  print(
+      'Generating Clean Architecture files for feature: $featurePascal ($featureSnake)...');
 
   try {
     _generateCoreFiles(featureSnake, featurePascal);
@@ -28,9 +30,11 @@ void main(List<String> args) {
 
     print('\n🎉 Feature "$featurePascal" generated successfully!');
     print('Next steps:');
-    print('1. Implement fields and mapping in the generated entities, models, and repositories.');
+    print(
+        '1. Implement fields and mapping in the generated entities, models, and repositories.');
     print('2. Run code generation:');
-    print('   - To run build_runner for the whole project: melos run build:runner');
+    print(
+        '   - To run build_runner for the whole project: melos run build:runner');
     print('   - To run build_runner for core: melos run build:runner:core');
     print('   - To run build_runner for data: melos run build:runner:data');
     print('   - To run build_runner for mobile: melos run build:runner:mobile');
@@ -90,7 +94,8 @@ abstract class ${pascal}Repository {
   Future<Either<Failure, List<$pascal>>> get${pascal}s();
 }
 ''';
-  _createFile('packages/core/lib/src/repositories/${snake}_repository.dart', repoInterfaceContent);
+  _createFile('packages/core/lib/src/repositories/${snake}_repository.dart',
+      repoInterfaceContent);
 }
 
 void _generateDataFiles(String snake, String pascal) {
@@ -162,7 +167,9 @@ class ${pascal}RemoteDatasourceImpl implements ${pascal}RemoteDatasource {
   }
 }
 ''';
-  _createFile('packages/data/lib/src/datasources/${snake}_remote_datasource.dart', dataSourceContent);
+  _createFile(
+      'packages/data/lib/src/datasources/${snake}_remote_datasource.dart',
+      dataSourceContent);
 
   // 3. Repository Implementation
   final repoImplContent = '''
@@ -202,7 +209,8 @@ class ${pascal}RepositoryImpl extends BaseRepository implements ${pascal}Reposit
   }
 }
 ''';
-  _createFile('packages/data/lib/src/repositories/${snake}_repository.dart', repoImplContent);
+  _createFile('packages/data/lib/src/repositories/${snake}_repository.dart',
+      repoImplContent);
 }
 
 void _generateMobileFiles(String snake, String pascal) {
@@ -348,12 +356,13 @@ class ${pascal}Page extends StatelessWidget {
 void _updateCoreExports(String snake) {
   final coreFile = File('packages/core/lib/sayr_core.dart');
   if (!coreFile.existsSync()) {
-    print('⚠️  packages/core/lib/sayr_core.dart not found. Skip export registration.');
+    print(
+        '⚠️  packages/core/lib/sayr_core.dart not found. Skip export registration.');
     return;
   }
 
   var content = coreFile.readAsStringSync();
-  
+
   final entityExport = "export 'src/entities/$snake.dart';";
   final repoExport = "export 'src/repositories/${snake}_repository.dart';";
 
@@ -369,11 +378,16 @@ void _updateCoreExports(String snake) {
   var insertedRepo = false;
 
   for (var line in lines) {
-    if (!insertedEntity && line.startsWith("export 'src/entities/") && line.compareTo("export 'src/entities/$snake.dart';") > 0) {
+    if (!insertedEntity &&
+        line.startsWith("export 'src/entities/") &&
+        line.compareTo("export 'src/entities/$snake.dart';") > 0) {
       newLines.add("export 'src/entities/$snake.dart';");
       insertedEntity = true;
     }
-    if (!insertedRepo && line.startsWith("export 'src/repositories/") && line.compareTo("export 'src/repositories/${snake}_repository.dart';") > 0) {
+    if (!insertedRepo &&
+        line.startsWith("export 'src/repositories/") &&
+        line.compareTo("export 'src/repositories/${snake}_repository.dart';") >
+            0) {
       newLines.add("export 'src/repositories/${snake}_repository.dart';");
       insertedRepo = true;
     }
@@ -382,17 +396,21 @@ void _updateCoreExports(String snake) {
 
   if (!insertedEntity) {
     // If not inserted because it's alphabetically last, find the last entities export
-    final lastEntityIndex = newLines.lastIndexWhere((l) => l.startsWith("export 'src/entities/"));
+    final lastEntityIndex =
+        newLines.lastIndexWhere((l) => l.startsWith("export 'src/entities/"));
     if (lastEntityIndex != -1) {
-      newLines.insert(lastEntityIndex + 1, "export 'src/entities/$snake.dart';");
+      newLines.insert(
+          lastEntityIndex + 1, "export 'src/entities/$snake.dart';");
     }
   }
 
   if (!insertedRepo) {
     // If not inserted because it's alphabetically last, find the last repositories export
-    final lastRepoIndex = newLines.lastIndexWhere((l) => l.startsWith("export 'src/repositories/"));
+    final lastRepoIndex = newLines
+        .lastIndexWhere((l) => l.startsWith("export 'src/repositories/"));
     if (lastRepoIndex != -1) {
-      newLines.insert(lastRepoIndex + 1, "export 'src/repositories/${snake}_repository.dart';");
+      newLines.insert(lastRepoIndex + 1,
+          "export 'src/repositories/${snake}_repository.dart';");
     }
   }
 

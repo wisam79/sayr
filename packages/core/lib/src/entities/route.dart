@@ -4,6 +4,7 @@ import 'package:sayr_core/src/value_objects/ids.dart';
 import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'route.freezed.dart';
+
 /// A bus route from start location to end location.
 @freezed
 abstract class Route with _$Route {
@@ -20,6 +21,7 @@ abstract class Route with _$Route {
     InstitutionId? institutionId,
     Coordinates? startCoordinates,
     Coordinates? endCoordinates,
+
     /// Departure time in 24-hour "HH:mm" format (e.g. "08:30").
     /// Represented as a String for seamless JSON and Database serialization.
     String? departureTime,

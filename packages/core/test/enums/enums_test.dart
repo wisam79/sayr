@@ -48,7 +48,6 @@ void main() {
       expect(TripStatus.completed.isActive, isFalse);
     });
 
-
     test('fromString parses snake_case', () {
       expect(
         TripStatus.fromString('driver_waiting'),

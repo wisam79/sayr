@@ -166,7 +166,8 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
         body: sanitizedBody,
       );
 
-      final createdAt = response['created_at'] as String? ?? DateTime.now().toUtc().toIso8601String();
+      final createdAt = response['created_at'] as String? ??
+          DateTime.now().toUtc().toIso8601String();
 
       // Best-effort: update conversation preview, do not crash if it fails
       try {

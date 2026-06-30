@@ -4,6 +4,7 @@ import 'package:sayr_core/src/value_objects/ids.dart';
 import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'payment_info.freezed.dart';
+
 /// Payment info value object (freezed).
 @freezed
 abstract class PaymentInfo with _$PaymentInfo {
@@ -16,5 +17,4 @@ abstract class PaymentInfo with _$PaymentInfo {
     SubscriptionId? subscriptionId,
     RouteId? routeId,
   }) = _PaymentInfo;
-
-  }
+}

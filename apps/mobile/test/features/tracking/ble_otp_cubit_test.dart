@@ -131,7 +131,8 @@ void main() {
   blocTest<BleOtpCubit, BleOtpState>(
     'stopRotatingOtp stops advertising and cancels timer',
     build: () {
-      when(() => mockBleBeaconService.stopAdvertising()).thenAnswer((_) async {});
+      when(() => mockBleBeaconService.stopAdvertising())
+          .thenAnswer((_) async {});
       return cubit;
     },
     act: (cubit) => cubit.stopRotatingOtp(),

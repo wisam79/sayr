@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'boarding_record.freezed.dart';
+
 /// Method by which a student was recorded as boarded.
 enum BoardingMethod {
   /// Scanned a QR code via the driver app.
@@ -54,10 +55,8 @@ abstract class BoardingRecord with _$BoardingRecord {
     required DateTime boardedAt,
     SubscriptionId? subscriptionId,
     String? studentName,
-    @Default(BoardingMethod.qrScan)
-    BoardingMethod boardingMethod,
+    @Default(BoardingMethod.qrScan) BoardingMethod boardingMethod,
   }) = _BoardingRecord;
 
   const BoardingRecord._();
-
-  }
+}

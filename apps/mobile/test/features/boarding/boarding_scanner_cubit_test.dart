@@ -232,8 +232,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
         await cubit.processToken(
           'token-abc',
-          driverLocation:
-              Coordinates(latitude: 33.315, longitude: 44.366),
+          driverLocation: Coordinates(latitude: 33.315, longitude: 44.366),
         );
       },
       verify: (_) {
@@ -241,8 +240,7 @@ void main() {
           () => mockRepo.validateBoarding(
             token: 'token-abc',
             tripId: testTripId,
-            driverLocation:
-                Coordinates(latitude: 33.315, longitude: 44.366),
+            driverLocation: Coordinates(latitude: 33.315, longitude: 44.366),
           ),
         ).called(1);
       },

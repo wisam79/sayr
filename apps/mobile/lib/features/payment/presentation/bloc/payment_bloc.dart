@@ -132,7 +132,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
             ),
           );
           _currentPollSession++;
-        } else if (payment.status == PaymentStatus.failed || payment.status == PaymentStatus.cancelled) {
+        } else if (payment.status == PaymentStatus.failed ||
+            payment.status == PaymentStatus.cancelled) {
           emit(
             PaymentState.failed(
               failure: BusinessRuleFailure(

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'app_config.freezed.dart';
+
 /// Application configuration (force update, maintenance mode, etc.)
 @freezed
 abstract class AppConfig with _$AppConfig {

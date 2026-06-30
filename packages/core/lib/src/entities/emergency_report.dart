@@ -3,6 +3,7 @@ import 'package:sayr_core/src/value_objects/coordinates.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'emergency_report.freezed.dart';
+
 /// An emergency report (SOS) from a participant in a trip.
 @freezed
 abstract class EmergencyReport with _$EmergencyReport {

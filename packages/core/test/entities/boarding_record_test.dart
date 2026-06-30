@@ -68,8 +68,7 @@ void main() {
       expect(a, equals(b));
       expect(a.hashCode, equals(b.hashCode));
     });
-
-    });
+  });
 
   group('BoardingRecord', () {
     test('boardingMethod is BoardingMethod.qrScan', () {
@@ -108,8 +107,7 @@ void main() {
       );
       expect(record.studentName, isNull);
     });
-
-    });
+  });
 
   group('BoardingMethod', () {
     test('has exactly 3 values', () {

@@ -5,6 +5,7 @@ import 'package:sayr_core/src/value_objects/coordinates.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'trip.freezed.dart';
+
 /// A scheduled or in-progress trip on a route.
 @freezed
 abstract class Trip with _$Trip {
@@ -22,8 +23,6 @@ abstract class Trip with _$Trip {
   }) = _Trip;
 
   const Trip._();
-
-
 
   /// Whether the trip is in a terminal state.
   bool get isCompleted => status == TripStatus.completed;

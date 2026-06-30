@@ -312,7 +312,8 @@ void main() {
                   'studentId',
                   const UserId('user-1'),
                 )
-                .having((r) => r.boardingMethod, 'boardingMethod', BoardingMethod.qrScan),
+                .having((r) => r.boardingMethod, 'boardingMethod',
+                    BoardingMethod.qrScan),
           ],
         ]),
       );

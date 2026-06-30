@@ -261,9 +261,8 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
         updatedTrip = trip.copyWith(
           status: newStatus,
           lastLocation: location ?? trip.lastLocation,
-          startedAt: newStatus == TripStatus.inTransit
-              ? clock.now()
-              : trip.startedAt,
+          startedAt:
+              newStatus == TripStatus.inTransit ? clock.now() : trip.startedAt,
           endedAt: (newStatus == TripStatus.completed ||
                   newStatus == TripStatus.cancelled)
               ? clock.now()

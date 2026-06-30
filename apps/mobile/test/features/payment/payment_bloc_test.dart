@@ -47,7 +47,8 @@ void main() {
       ).thenAnswer((_) async => const Right(testPaymentInfo));
 
       when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) async => Right(testPaymentInfo.copyWith(status: PaymentStatus.pending)),
+        (_) async =>
+            Right(testPaymentInfo.copyWith(status: PaymentStatus.pending)),
       );
 
       bloc.add(
@@ -109,7 +110,8 @@ void main() {
       ).thenAnswer((_) async => const Right(testPaymentInfo));
 
       when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) async => Right(testPaymentInfo.copyWith(status: PaymentStatus.completed)),
+        (_) async =>
+            Right(testPaymentInfo.copyWith(status: PaymentStatus.completed)),
       );
 
       bloc.add(
@@ -133,7 +135,8 @@ void main() {
     build: () => bloc,
     act: (bloc) {
       when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) async => Right(testPaymentInfo.copyWith(status: PaymentStatus.pending)),
+        (_) async =>
+            Right(testPaymentInfo.copyWith(status: PaymentStatus.pending)),
       );
 
       bloc.add(
@@ -169,7 +172,8 @@ void main() {
       ).thenAnswer((_) => Future.value(const Right(testPaymentInfo)));
 
       when(() => localMockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) => Future.value(Right(testPaymentInfo.copyWith(status: PaymentStatus.pending))),
+        (_) => Future.value(
+            Right(testPaymentInfo.copyWith(status: PaymentStatus.pending))),
       );
 
       localBloc.add(
