@@ -55,7 +55,8 @@ void main() {
         build: () {
           when(() => mockRepo.currentUser).thenReturn(completeTestUser);
           when(() => mockRepo.fetchFullProfile()).thenAnswer(
-              (_) async => const Right<Failure, User?>(completeTestUser));
+            (_) async => const Right<Failure, User?>(completeTestUser),
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(const AuthCheckRequested()),
@@ -95,9 +96,11 @@ void main() {
         'emits [AuthLoading, AuthError] when fetchFullProfile returns a failure',
         build: () {
           when(() => mockRepo.currentUser).thenReturn(testUser);
-          when(() => mockRepo.fetchFullProfile()).thenAnswer((_) async =>
-              const Left<Failure, User?>(
-                  ServerFailure(message: 'Profile fetch failed')));
+          when(() => mockRepo.fetchFullProfile()).thenAnswer(
+            (_) async => const Left<Failure, User?>(
+              ServerFailure(message: 'Profile fetch failed'),
+            ),
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(const AuthCheckRequested()),
@@ -121,7 +124,8 @@ void main() {
             (_) async => const Right<Failure, User>(completeTestUser),
           );
           when(() => mockRepo.fetchFullProfile()).thenAnswer(
-              (_) async => const Right<Failure, User?>(completeTestUser));
+            (_) async => const Right<Failure, User?>(completeTestUser),
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(
@@ -179,7 +183,8 @@ void main() {
             (_) async => const Right<Failure, User>(completeTestUser),
           );
           when(() => mockRepo.fetchFullProfile()).thenAnswer(
-              (_) async => const Right<Failure, User?>(completeTestUser));
+            (_) async => const Right<Failure, User?>(completeTestUser),
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(
@@ -236,7 +241,8 @@ void main() {
           );
           when(() => mockRepo.currentUser).thenReturn(completeTestUser);
           when(() => mockRepo.fetchFullProfile()).thenAnswer(
-              (_) async => const Right<Failure, User?>(completeTestUser));
+            (_) async => const Right<Failure, User?>(completeTestUser),
+          );
           return AuthBloc(authRepository: mockRepo);
         },
         act: (bloc) => bloc.add(const AuthGoogleSignInRequested()),

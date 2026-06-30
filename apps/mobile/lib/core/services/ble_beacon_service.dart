@@ -39,7 +39,8 @@ class BleBeaconService {
     required String otp,
   }) async {
     _talker.debug(
-        'Starting BLE Advertising for TripId=${tripId.value} with OTP=$otp');
+      'Starting BLE Advertising for TripId=${tripId.value} with OTP=$otp',
+    );
     _isMockMode = false;
     try {
       final isSupported = await _blePeripheral.isSupported;
@@ -191,7 +192,8 @@ class BleBeaconService {
       return;
     }
     _talker.debug(
-        'Mock BLE scanning started. Will emit a fake trip in 3 seconds...');
+      'Mock BLE scanning started. Will emit a fake trip in 3 seconds...',
+    );
     _mockSubscription = Stream<void>.fromFuture(
       Future<void>.delayed(const Duration(seconds: 3)),
     ).listen((_) {

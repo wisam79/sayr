@@ -173,7 +173,10 @@ void main() {
 
       when(() => localMockRepo.getPaymentStatus(any())).thenAnswer(
         (_) => Future.value(
-            Right(testPaymentInfo.copyWith(status: PaymentStatus.pending))),
+          Right(
+            testPaymentInfo.copyWith(status: PaymentStatus.pending),
+          ),
+        ),
       );
 
       localBloc.add(
