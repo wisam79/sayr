@@ -246,34 +246,24 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
     String? notificationText,
   }) async {
     if (activatesTracking) {
-      try {
-        final trackResult = await _driverLocationService.startTracking(
-          tripId,
-          notificationTitle: notificationTitle ?? '',
-          notificationText: notificationText ?? '',
-        );
-        final trackSuccess = await trackResult.fold(
-          (failure) async {
-            emit(
-              TrackingState.error(
-                failure: failure,
-                previousState: state,
-              ),
-            );
-            return false;
-          },
-          (_) async => true,
-        );
-        if (!trackSuccess) return;
-      } on Object catch (e) {
-        emit(
-          TrackingState.error(
-            failure: UnknownFailure(message: e.toString()),
-            previousState: state,
-          ),
-        );
-        return;
-      }
+      final trackResult = await _driverLocationService.startTracking(
+        tripId,
+        notificationTitle: notificationTitle ?? '',
+        notificationText: notificationText ?? '',
+      );
+      final trackSuccess = await trackResult.fold(
+        (failure) async {
+          emit(
+            TrackingState.error(
+              failure: failure,
+              previousState: state,
+            ),
+          );
+          return false;
+        },
+        (_) async => true,
+      );
+      if (!trackSuccess) return;
     }
 
     final result = await _tripRepository.updateStatus(

@@ -93,6 +93,7 @@ void callbackDispatcher() {
       if (successfulIds.isNotEmpty) {
         await localDatasource.markLocationsSynced(successfulIds);
         await localDatasource.cleanupOldLocations();
+        await localDatasource.cleanupOldTripStatuses();
         talker.info(
           'Background Worker: Successfully synced ${successfulIds.length} locations',
         );

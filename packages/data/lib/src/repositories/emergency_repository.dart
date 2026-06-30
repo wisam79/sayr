@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -37,13 +38,16 @@ class EmergencyRepositoryImpl extends BaseRepository
         description: message ?? '',
       );
 
+      // Constructing the model locally with clock.now() is an intentional optimization.
+      // The Supabase RPC only returns the created report ID to minimize round-trip payload size,
+      // so we construct the entity locally using the parameters we just sent.
       final model = EmergencyReportModel(
         id: reportId,
         userId: currentUserId,
         tripId: tripId.value,
         latitude: location?.latitude,
         longitude: location?.longitude,
-        createdAt: DateTime.now().toUtc(),
+        createdAt: clock.now().toUtc(),
       );
 
       return model.toEntity();
@@ -84,7 +88,7 @@ class EmergencyRepositoryImpl extends BaseRepository
     return guard(() async {
       await _remoteDatasource.resolveEmergencyReport(
         id: id.value,
-        resolvedAt: DateTime.now().toUtc().toIso8601String(),
+        resolvedAt: clock.now().toUtc().toIso8601String(),
       );
       return unit;
     });

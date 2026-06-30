@@ -231,7 +231,7 @@ class _PassengerList extends StatelessWidget {
                           DateFormat.Hm().format(record.boardedAt),
                         ),
                         trailing: Icon(
-                          record.method == BoardingMethod.qrScan
+                          record.boardingMethod == BoardingMethod.qrScan
                               ? Icons.qr_code
                               : Icons.edit,
                           color: AppColors.textSecondary,

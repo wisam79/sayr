@@ -8,7 +8,44 @@ import 'package:latlong2/latlong.dart' as ll;
 /// This is a thin wrapper over [ll.LatLng] that adds type-safety and validation.
 /// All distance/bearing calculations use the [ll.Distance] utility from `latlong2`.
 class Coordinates extends Equatable {
-  const Coordinates({
+  /// Creates [Coordinates] with validation.
+  ///
+  /// Throws [ArgumentError] if latitude or longitude are out of range,
+  /// NaN, or infinite.
+  factory Coordinates({
+    required double latitude,
+    required double longitude,
+  }) {
+    if (latitude.isNaN ||
+        latitude.isInfinite ||
+        latitude < -90 ||
+        latitude > 90) {
+      throw ArgumentError.value(
+        latitude,
+        'latitude',
+        'Must be between -90 and 90 (inclusive) and finite',
+      );
+    }
+    if (longitude.isNaN ||
+        longitude.isInfinite ||
+        longitude < -180 ||
+        longitude > 180) {
+      throw ArgumentError.value(
+        longitude,
+        'longitude',
+        'Must be between -180 and 180 (inclusive) and finite',
+      );
+    }
+    return Coordinates._(
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
+
+  /// Internal const constructor (skips validation).
+  ///
+  /// Used by JSON deserialization and tests where values are known-good.
+  const Coordinates._({
     required this.latitude,
     required this.longitude,
   });
@@ -23,6 +60,9 @@ class Coordinates extends Equatable {
   ll.LatLng get toLatLng => ll.LatLng(latitude, longitude);
 
   /// Whether the coordinates are valid.
+  ///
+  /// Always returns `true` for instances created via the public factory.
+  /// Retained for backward compatibility with code that checks validity.
   bool get isValid {
     return latitude >= -90 &&
         latitude <= 90 &&
@@ -59,13 +99,17 @@ class Coordinates extends Equatable {
     return const ll.Distance().bearing(toLatLng, other.toLatLng);
   }
 
-  /// Midpoint between this and another coordinate.
+  /// Approximate midpoint between this and another coordinate.
+  ///
+  /// Uses arithmetic mean (not geodesic). Accurate for short distances
+  /// (<50 km) typical of intra-city university routes in Iraq.
+  /// Error at equator for 50 km: ~0.004%. For full geodesic midpoint
+  /// use `latlong2.Path.center()`.
   Coordinates midpoint(Coordinates other) {
-    final mid = ll.LatLng(
-      (latitude + other.latitude) / 2,
-      (longitude + other.longitude) / 2,
+    return Coordinates._(
+      latitude: (latitude + other.latitude) / 2,
+      longitude: (longitude + other.longitude) / 2,
     );
-    return Coordinates(latitude: mid.latitude, longitude: mid.longitude);
   }
 
   @override

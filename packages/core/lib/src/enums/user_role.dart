@@ -25,7 +25,7 @@ enum UserRole {
   static UserRole fromString(String value) {
     return UserRole.values.firstWhere(
       (e) => e.name == value,
-      orElse: () => UserRole.student,
+      orElse: () => throw ArgumentError('Unknown UserRole: $value'),
     );
   }
 }

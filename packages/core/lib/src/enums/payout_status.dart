@@ -16,7 +16,7 @@ enum PayoutStatus {
   static PayoutStatus fromString(String value) {
     return PayoutStatus.values.firstWhere(
       (e) => e.name == value,
-      orElse: () => PayoutStatus.pending,
+      orElse: () => throw ArgumentError('Unknown PayoutStatus: $value'),
     );
   }
 }

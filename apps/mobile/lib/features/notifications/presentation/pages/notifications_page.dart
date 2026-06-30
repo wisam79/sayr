@@ -159,12 +159,12 @@ class _NotificationsBody extends StatelessWidget {
       );
 
   void _onNotificationTap(BuildContext context, AppNotification n) {
-    final tripId = n.data['trip_id'] as String?;
+    final tripId = n.data['trip_id'];
     if (tripId != null) {
       context.push('/trip/$tripId');
       return;
     }
-    final conversationId = n.data['conversation_id'] as String?;
+    final conversationId = n.data['conversation_id'];
     if (conversationId != null) {
       context.push('/chat/$conversationId');
     }

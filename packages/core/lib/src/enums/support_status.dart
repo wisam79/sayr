@@ -16,7 +16,7 @@ enum SupportStatus {
     final normalized = value.toCamelCase();
     return SupportStatus.values.firstWhere(
       (e) => e.name == normalized,
-      orElse: () => SupportStatus.open,
+      orElse: () => throw ArgumentError('Unknown SupportStatus: $value'),
     );
   }
 }

@@ -16,6 +16,7 @@ import 'package:sayr_mobile/features/tracking/presentation/pages/trip_tracking_p
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState>
     implements TrackingBloc {}
@@ -31,6 +32,8 @@ class MockRatingRepository extends Mock implements RatingRepository {}
 
 class MockRoutingService extends Mock implements RoutingService {}
 
+class MockTalker extends Mock implements Talker {}
+
 void main() {
   late MockTrackingBloc mockTrackingBloc;
   late MockEmergencyBloc mockEmergencyBloc;
@@ -44,7 +47,7 @@ void main() {
     registerFallbackValue(const TripId('fallback'));
     registerFallbackValue(const DriverId('fallback'));
     registerFallbackValue(const UserId('fallback'));
-    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
   });
 
   setUp(() {
@@ -55,6 +58,18 @@ void main() {
     mockDriverRepo = MockDriverRepository();
     mockRatingRepo = MockRatingRepository();
     mockRoutingService = MockRoutingService();
+
+    final mockTalker = MockTalker();
+    when(() => mockTalker.debug(any<dynamic>())).thenAnswer((_) {});
+    when(() => mockTalker.warning(any<dynamic>())).thenAnswer((_) {});
+    when(
+      () => mockTalker.error(
+        any<dynamic>(),
+        any<Object?>(),
+        any<StackTrace?>(),
+      ),
+    ).thenAnswer((_) {});
+    GetIt.I.registerSingleton<Talker>(mockTalker);
 
     when(() => mockRoutingService.getRoute(any(), any()))
         .thenAnswer((_) => Future.value(const Right([])));
@@ -78,10 +93,10 @@ void main() {
     status: TripStatus.inTransit,
     scheduledAt: DateTime(2026, 6, 9, 12),
     startedAt: DateTime(2026, 6, 9, 12, 5),
-    lastLocation: const Coordinates(latitude: 33.3128, longitude: 44.3615),
+    lastLocation: Coordinates(latitude: 33.3128, longitude: 44.3615),
     routeStartLocation:
-        const Coordinates(latitude: 33.3120, longitude: 44.3610),
-    routeEndLocation: const Coordinates(latitude: 33.3140, longitude: 44.3630),
+        Coordinates(latitude: 33.3120, longitude: 44.3610),
+    routeEndLocation: Coordinates(latitude: 33.3140, longitude: 44.3630),
   );
 
   const testRoute = Route(

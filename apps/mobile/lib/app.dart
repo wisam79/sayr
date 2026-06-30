@@ -14,7 +14,6 @@ import 'package:sayr_data/sayr_data.dart';
 import 'package:sayr_mobile/core/connectivity_cubit.dart';
 import 'package:sayr_mobile/core/fcm_service.dart';
 import 'package:sayr_mobile/core/locale_cubit.dart';
-import 'package:sayr_mobile/core/models/fcm_payload.dart';
 import 'package:sayr_mobile/core/offline_sync_service.dart';
 import 'package:sayr_mobile/core/services/background_sync_service.dart';
 import 'package:sayr_mobile/core/theme_cubit.dart';
@@ -219,6 +218,8 @@ Future<void> runSayrApp() async {
   // Initialize FCM service (non-blocking)
   unawaited(FcmService.init());
 
+  // TODO(anti-gravity): [SAYR-342] Migrate OfflineSyncService manual registration to an injectable class
+  // or a standard @lazySingleton module to unify the dependency injection setup.
   // Register Offline Sync Service in Service Locator
   final offlineSyncService = OfflineSyncService(
     localDatasource: sl<LocalDatasource>(),

@@ -130,7 +130,7 @@ abstract class RemoteDatasource {
   Future<List<SubscriptionModel>> getMySubscriptions(String studentId);
   Future<void> cancelSubscription(String subscriptionId);
   Future<String> activateLicense(String code);
-  Future<Map<String, dynamic>> getLicenseDetails(String code);
+  Future<Map<String, dynamic>?> getLicenseDetails(String code);
 
   // Trips
   Future<List<TripModel>> getActiveTrips();
@@ -485,7 +485,7 @@ class RemoteDatasourceImpl implements RemoteDatasource {
       _subscriptions.activateLicense(code);
 
   @override
-  Future<Map<String, dynamic>> getLicenseDetails(String code) =>
+  Future<Map<String, dynamic>?> getLicenseDetails(String code) =>
       _subscriptions.getLicenseDetails(code);
 
   // ---- Trips --------------------------------------------------------------

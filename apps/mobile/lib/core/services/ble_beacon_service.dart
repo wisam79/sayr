@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_ble_peripheral/flutter_ble_peripheral.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:injectable/injectable.dart';
-import 'package:logger/logger.dart';
 import 'package:sayr_core/sayr_core.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// Service to handle BLE-based proximity boarding.
 ///
@@ -14,15 +13,16 @@ import 'package:sayr_core/sayr_core.dart';
 @lazySingleton
 class BleBeaconService {
   /// Creates a [BleBeaconService].
-  BleBeaconService() : _blePeripheral = FlutterBlePeripheral();
+  BleBeaconService(Talker talker)
+      : _blePeripheral = FlutterBlePeripheral(),
+        _talker = talker;
 
   final FlutterBlePeripheral _blePeripheral;
-  final Logger _logger = Logger();
+  final Talker _talker;
   final _discoveredTripsController =
       StreamController<({TripId tripId, String otp})>.broadcast();
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<void>? _mockSubscription;
-  StreamSubscription<int>? _otpSubscription;
   bool _isMockMode = false;
 
   /// Prefix used in local name advertisement.
@@ -38,13 +38,12 @@ class BleBeaconService {
     required TripId tripId,
     required String otp,
   }) async {
-    _logger
-        .d('Starting BLE Advertising for TripId=${tripId.value} with OTP=$otp');
+    _talker.debug('Starting BLE Advertising for TripId=${tripId.value} with OTP=$otp');
     _isMockMode = false;
     try {
       final isSupported = await _blePeripheral.isSupported;
       if (!isSupported) {
-        _logger.w(
+        _talker.warning(
           'BLE Peripheral is not supported on this device. Falling back to mock.',
         );
         _isMockMode = true;
@@ -59,12 +58,12 @@ class BleBeaconService {
       );
 
       await _blePeripheral.start(advertiseData: advertiseData);
-      _logger.d('BLE Advertising started successfully');
+      _talker.debug('BLE Advertising started successfully');
     } catch (e, st) {
-      _logger.e(
+      _talker.error(
         'Failed to start BLE advertising, falling back to mock',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
       _isMockMode = true;
       _startMockAdvertising(tripId, otp);
@@ -77,24 +76,24 @@ class BleBeaconService {
     if (_isMockMode) return;
     try {
       await _blePeripheral.stop();
-      _logger.d('BLE Advertising stopped');
+      _talker.debug('BLE Advertising stopped');
     } catch (e, st) {
-      _logger.d(
+      _talker.debug(
         'BLE stopAdvertising threw (peripheral may already be stopped)',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
     }
   }
 
   /// Starts scanning for nearby Sayr Beacons.
   Future<bool> startScanning() async {
-    _logger.d('Starting BLE scanning for Sayr Beacons');
+    _talker.debug('Starting BLE scanning for Sayr Beacons');
     _isMockMode = false;
     try {
       final isAvailable = await FlutterBluePlus.isSupported;
       if (!isAvailable) {
-        _logger.w(
+        _talker.warning(
           'Bluetooth is not supported on this device. Using mock scanning.',
         );
         _isMockMode = true;
@@ -102,9 +101,12 @@ class BleBeaconService {
         return false;
       }
 
-      final adapterState = await FlutterBluePlus.adapterState.first;
+      final adapterState = await FlutterBluePlus.adapterState.first.timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => BluetoothAdapterState.unknown,
+      );
       if (adapterState != BluetoothAdapterState.on) {
-        _logger.w(
+        _talker.warning(
           'Bluetooth adapter is off (state: $adapterState). Using mock scanning.',
         );
         _isMockMode = true;
@@ -133,7 +135,7 @@ class BleBeaconService {
           }
         },
         onError: (Object e, StackTrace st) {
-          _logger.e('Error during BLE scan stream', error: e, stackTrace: st);
+          _talker.error('Error during BLE scan stream', e, st);
         },
       );
 
@@ -141,13 +143,13 @@ class BleBeaconService {
         timeout: const Duration(minutes: 10),
         androidUsesFineLocation: true,
       );
-      _logger.d('Real BLE scanning started successfully');
+      _talker.debug('Real BLE scanning started successfully');
       return true;
     } catch (e, st) {
-      _logger.e(
+      _talker.error(
         'Failed to start real BLE scan, falling back to mock',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
       _isMockMode = true;
       _startMockScanning();
@@ -162,12 +164,12 @@ class BleBeaconService {
     if (_isMockMode) return;
     try {
       await FlutterBluePlus.stopScan();
-      _logger.d('BLE Scanning stopped');
+      _talker.debug('BLE Scanning stopped');
     } catch (e, st) {
-      _logger.d(
+      _talker.debug(
         'BLE stopScan threw (scanner may already be stopped)',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
     }
   }
@@ -175,20 +177,19 @@ class BleBeaconService {
   void _startMockAdvertising(TripId tripId, String otp) {
     _mockSubscription?.cancel();
     if (!kDebugMode) {
-      _logger.d('Mock advertising is disabled in non-debug mode.');
+      _talker.debug('Mock advertising is disabled in non-debug mode.');
       return;
     }
-    _logger.d('Mock BLE Advertising: TripId=${tripId.value} OTP=$otp');
+    _talker.debug('Mock BLE Advertising: TripId=${tripId.value} OTP=$otp');
   }
 
   void _startMockScanning() {
     _mockSubscription?.cancel();
     if (!kDebugMode) {
-      _logger.d('Mock scanning is disabled in non-debug mode.');
+      _talker.debug('Mock scanning is disabled in non-debug mode.');
       return;
     }
-    _logger
-        .d('Mock BLE scanning started. Will emit a fake trip in 3 seconds...');
+    _talker.debug('Mock BLE scanning started. Will emit a fake trip in 3 seconds...');
     _mockSubscription = Stream<void>.fromFuture(
       Future<void>.delayed(const Duration(seconds: 3)),
     ).listen((_) {
@@ -198,68 +199,15 @@ class BleBeaconService {
           otp: 'MOCK12',
         ),
       );
-      _logger.d('Mock BLE scan result emitted');
+      _talker.debug('Mock BLE scan result emitted');
     });
   }
 
-  /// Starts rotating BLE advertising for the given trip.
-  /// Automatically generates OTP, updates database via [tripRepository], and advertises.
-  void startRotatingOtpAdvertising({
-    required TripId tripId,
-    required TripRepository tripRepository,
-    required Logger logger,
-  }) {
-    _otpSubscription?.cancel();
-
-    String generateOtp() {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      final rnd = Random.secure();
-      return String.fromCharCodes(
-        Iterable.generate(
-          6,
-          (_) => chars.codeUnitAt(rnd.nextInt(chars.length)),
-        ),
-      );
-    }
-
-    Future<void> updateOtp() async {
-      try {
-        final otp = generateOtp();
-        final expiresAt = DateTime.now().add(const Duration(seconds: 45));
-
-        final result = await tripRepository.updateBleOtp(
-          tripId: tripId,
-          otp: otp,
-          expiresAt: expiresAt,
-        );
-
-        await result.fold(
-          (failure) async {
-            logger.e('Failed to update BLE OTP in repository: $failure');
-          },
-          (_) async {
-            await startAdvertising(tripId: tripId, otp: otp);
-          },
-        );
-      } catch (e, st) {
-        logger.e(
-          'Failed to rotate BLE OTP in periodic timer',
-          error: e,
-          stackTrace: st,
-        );
-      }
-    }
-
-    updateOtp();
-    _otpSubscription =
-        Stream<int>.periodic(const Duration(seconds: 30), (x) => x)
-            .listen((_) => updateOtp());
-  }
-
-  /// Stops rotating BLE advertising.
-  void stopRotatingOtpAdvertising() {
-    unawaited(_otpSubscription?.cancel());
-    _otpSubscription = null;
-    stopAdvertising();
+  /// Closes streams and subscriptions to prevent memory leaks.
+  @disposeMethod
+  void dispose() {
+    _discoveredTripsController.close();
+    _scanSubscription?.cancel();
+    _mockSubscription?.cancel();
   }
 }

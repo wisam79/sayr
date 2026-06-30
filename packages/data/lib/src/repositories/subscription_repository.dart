@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/license_preview.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
@@ -83,7 +84,10 @@ class SubscriptionRepositoryImpl extends BaseRepository
     return guard(
       () async {
         final response = await _remoteDatasource.getLicenseDetails(code.value);
-        return LicensePreview.fromJson(response);
+        if (response == null) {
+          throw const NotFoundFailure(resource: 'license');
+        }
+        return LicensePreviewModel.fromJson(response).toEntity();
       },
       errorMapper: (e) {
         final message =

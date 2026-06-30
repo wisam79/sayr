@@ -15,11 +15,11 @@ void main() {
   late PaymentBloc bloc;
 
   const testPaymentInfo = PaymentInfo(
-    id: 'pay-123',
+    id: PaymentId('pay-123'),
     paymentUrl: 'https://zaincash.iq/pay',
-    status: 'pending',
-    amount: 5000,
-    subscriptionId: 'sub-456',
+    status: PaymentStatus.pending,
+    amount: Money(5000),
+    subscriptionId: SubscriptionId('sub-456'),
   );
 
   setUpAll(() {
@@ -47,7 +47,7 @@ void main() {
       ).thenAnswer((_) async => const Right(testPaymentInfo));
 
       when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) async => Right(testPaymentInfo.copyWith(status: 'pending')),
+        (_) async => Right(testPaymentInfo.copyWith(status: PaymentStatus.pending)),
       );
 
       bloc.add(
@@ -109,7 +109,7 @@ void main() {
       ).thenAnswer((_) async => const Right(testPaymentInfo));
 
       when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) async => Right(testPaymentInfo.copyWith(status: 'completed')),
+        (_) async => Right(testPaymentInfo.copyWith(status: PaymentStatus.completed)),
       );
 
       bloc.add(
@@ -133,7 +133,7 @@ void main() {
     build: () => bloc,
     act: (bloc) {
       when(() => mockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) async => Right(testPaymentInfo.copyWith(status: 'pending')),
+        (_) async => Right(testPaymentInfo.copyWith(status: PaymentStatus.pending)),
       );
 
       bloc.add(
@@ -169,7 +169,7 @@ void main() {
       ).thenAnswer((_) => Future.value(const Right(testPaymentInfo)));
 
       when(() => localMockRepo.getPaymentStatus(any())).thenAnswer(
-        (_) => Future.value(Right(testPaymentInfo.copyWith(status: 'pending'))),
+        (_) => Future.value(Right(testPaymentInfo.copyWith(status: PaymentStatus.pending))),
       );
 
       localBloc.add(

@@ -38,7 +38,7 @@ class NotificationCard extends StatelessWidget {
                 ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
                 : Theme.of(context).colorScheme.surface,
             child: Icon(
-              _iconForType(notification.data['type'] as String?),
+              _iconForType(notification.data['type']),
               size: 20,
               color: isUnread
                   ? Theme.of(context).colorScheme.primary

@@ -24,6 +24,7 @@ class OfflineSyncService {
   final Talker _talker;
   StreamSubscription<List<ConnectivityResult>>? _subscription;
   bool _isSyncing = false;
+  bool _syncPending = false;
 
   /// Start listening to connectivity changes.
   void start() {
@@ -45,8 +46,12 @@ class OfflineSyncService {
   }
 
   Future<void> _syncPendingLocations() async {
-    if (_isSyncing) return;
+    if (_isSyncing) {
+      _syncPending = true;
+      return;
+    }
     _isSyncing = true;
+    _syncPending = false;
 
     try {
       // 1. Sync pending trip statuses first
@@ -122,6 +127,7 @@ class OfflineSyncService {
           if (successfulIds.isNotEmpty) {
             await _localDatasource.markLocationsSynced(successfulIds);
             await _localDatasource.cleanupOldLocations();
+            await _localDatasource.cleanupOldTripStatuses();
             _talker.info(
               'OfflineSyncService: Successfully synced ${successfulIds.length} '
               'of ${pending.length} location updates.',
@@ -133,6 +139,9 @@ class OfflineSyncService {
       _talker.error('OfflineSyncService: Error during synchronization', e, st);
     } finally {
       _isSyncing = false;
+      if (_syncPending) {
+        scheduleMicrotask(_syncPendingLocations);
+      }
     }
   }
 }

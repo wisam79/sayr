@@ -44,12 +44,12 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         emit(
           PaymentState.urlReady(
             paymentUrl: payment.paymentUrl,
-            paymentId: payment.id,
+            paymentId: payment.id.value,
             amount: event.amount,
             currency: event.currency,
           ),
         );
-        add(PaymentPollStatus(paymentId: payment.id));
+        add(PaymentPollStatus(paymentId: payment.id.value));
       },
     );
   }
@@ -125,18 +125,18 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
         }
       },
       (PaymentInfo payment) {
-        if (payment.status == 'completed') {
+        if (payment.status == PaymentStatus.completed) {
           emit(
             PaymentState.success(
-              subscriptionId: SubscriptionId(payment.subscriptionId),
+              subscriptionId: payment.subscriptionId!,
             ),
           );
           _currentPollSession++;
-        } else if (payment.status == 'failed' || payment.status == 'expired') {
+        } else if (payment.status == PaymentStatus.failed || payment.status == PaymentStatus.cancelled) {
           emit(
             PaymentState.failed(
               failure: BusinessRuleFailure(
-                message: 'Payment failed: ${payment.status}',
+                message: 'Payment failed: ${payment.status.name}',
               ),
             ),
           );

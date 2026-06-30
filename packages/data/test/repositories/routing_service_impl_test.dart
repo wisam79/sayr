@@ -19,9 +19,9 @@ void main() {
   });
 
   group('RoutingServiceImpl', () {
-    const start = Coordinates(latitude: 33.3152, longitude: 44.3661);
-    const end = Coordinates(latitude: 33.3400, longitude: 44.4000);
-    const geometry = [
+    final start = Coordinates(latitude: 33.3152, longitude: 44.3661);
+    final end = Coordinates(latitude: 33.3400, longitude: 44.4000);
+    final geometry = [
       Coordinates(latitude: 33.3152, longitude: 44.3661),
       Coordinates(latitude: 33.3400, longitude: 44.4000),
     ];

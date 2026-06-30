@@ -18,6 +18,11 @@ import 'package:sayr_core/src/value_objects/license_code.dart';
 /// Interface for authentication and user management repository.
 abstract class AuthRepository {
   /// The currently signed-in user.
+  ///
+  /// Note: The returned [User] object populates name and phone from the local session's 
+  /// `user_metadata` which can theoretically be tampered with by clients.
+  /// For secure/verified profile attributes (like role, institution_id, phone), 
+  /// use [fetchFullProfile] which fetches securely from the database.
   User? get currentUser;
 
   /// Sign in with email and password.
@@ -60,7 +65,7 @@ abstract class AuthRepository {
   Stream<AuthStatus> get authStateChanges;
 
   /// Fetches the full profile from data storage.
-  Future<User?> fetchFullProfile();
+  Future<Either<Failure, User?>> fetchFullProfile();
 }
 
 /// Interface for route operations repository.

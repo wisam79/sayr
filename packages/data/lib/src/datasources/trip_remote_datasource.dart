@@ -95,6 +95,11 @@ class TripRemoteDatasourceImpl implements TripRemoteDatasource {
 
   supabase.SupabaseClient get _client => _supabase.client;
 
+  /// Returns currently active trips (scheduled, driver_waiting, in_transit).
+  ///
+  /// Note: Authorization and student/driver filtering is implicitly handled 
+  /// at the database level by the Supabase Row-Level Security (RLS) policy 
+  /// `trips_select_authenticated` (see migration 20260618000001).
   @override
   Future<List<TripModel>> getActiveTrips() async {
     return _client

@@ -190,6 +190,9 @@ class AppRouter {
         name: 'complete-profile',
         builder: (_, __) => const CompleteProfilePage(),
       ),
+      // Providing shared Blocs at the ShellRoute builder level keeps them alive
+      // across all authenticated sub-routes to maintain screen/tabs state,
+      // while automatically disposing them when the user logs out and leaves the ShellRoute.
       ShellRoute(
         builder: (context, state, child) {
           return MultiBlocProvider(

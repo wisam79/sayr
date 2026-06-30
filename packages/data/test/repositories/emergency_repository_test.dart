@@ -45,7 +45,7 @@ void main() {
         final result = await repository.triggerEmergency(
           tripId: const TripId('trip-1'),
           routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33, longitude: 44),
+          location: Coordinates(latitude: 33, longitude: 44),
           message: 'SOS Help',
         );
 
@@ -68,7 +68,7 @@ void main() {
         final result = await repository.triggerEmergency(
           tripId: const TripId('trip-1'),
           routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33, longitude: 44),
+          location: Coordinates(latitude: 33, longitude: 44),
           message: 'SOS Help',
         );
 
@@ -95,7 +95,7 @@ void main() {
         final result = await repository.triggerEmergency(
           tripId: const TripId('trip-1'),
           routeId: const RouteId('route-1'),
-          location: const Coordinates(latitude: 33, longitude: 44),
+          location: Coordinates(latitude: 33, longitude: 44),
           message: 'SOS Help',
         );
 

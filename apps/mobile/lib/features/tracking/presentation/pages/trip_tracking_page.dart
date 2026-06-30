@@ -269,12 +269,20 @@ class _TripTrackingViewState extends State<_TripTrackingView> {
             tripWatching: (t, _, __) => t.routeId,
             orElse: () => null,
           );
-          if (tripId == null || routeId == null) {
+          final driverId = state.maybeWhen(
+            tripWatching: (t, _, __) => t.driverId,
+            orElse: () => null,
+          );
+          if (tripId == null || routeId == null || driverId == null) {
             return const SizedBox.shrink();
           }
           return Padding(
             padding: const EdgeInsetsDirectional.only(bottom: 12),
-            child: EmergencySosButton(tripId: tripId, routeId: routeId),
+            child: EmergencySosButton(
+              tripId: tripId,
+              routeId: routeId,
+              driverId: driverId,
+            ),
           );
         },
       ),
@@ -521,8 +529,9 @@ class _TrackingView extends StatelessWidget {
   }
 
   static LatLng _centerFromTrip(Trip trip) {
-    if (trip.routeStartLat != null && trip.routeStartLng != null) {
-      return LatLng(trip.routeStartLat!, trip.routeStartLng!);
+    final start = trip.routeStartLocation;
+    if (start != null) {
+      return LatLng(start.latitude, start.longitude);
     }
     return SayrMap.defaultCenter;
   }

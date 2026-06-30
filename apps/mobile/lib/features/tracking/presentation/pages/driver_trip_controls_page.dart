@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/core/extensions/failure_extension.dart';
@@ -11,6 +10,7 @@ import 'package:sayr_mobile/core/sayr_flash.dart';
 import 'package:sayr_mobile/core/services/ble_beacon_service.dart';
 import 'package:sayr_mobile/di/di.dart';
 import 'package:sayr_mobile/features/emergency/presentation/widgets/emergency_sos_button.dart';
+import 'package:sayr_mobile/features/tracking/presentation/bloc/ble_otp_cubit.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_bloc.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
@@ -41,8 +41,8 @@ class DriverTripControlsPage extends StatefulWidget {
 }
 
 class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
-  final Logger _logger = Logger();
   late final TrackingBloc _trackingBloc;
+  late final BleOtpCubit _bleOtpCubit;
 
   @override
   void initState() {
@@ -54,6 +54,11 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
           driverLocationService: sl<LocationService>(),
           talker: sl<Talker>(),
         );
+    _bleOtpCubit = BleOtpCubit(
+      bleBeaconService: sl<BleBeaconService>(),
+      tripRepository: sl<TripRepository>(),
+      talker: sl<Talker>(),
+    );
     if (widget.trackingBloc == null) {
       _trackingBloc.add(TrackingWatchTrip(tripId: widget.tripId));
     }
@@ -62,20 +67,16 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   @override
   void dispose() {
     _trackingBloc.close();
-    _stopBleProximity();
+    _bleOtpCubit.close();
     super.dispose();
   }
 
   void _startBleProximity(TripId tripId) {
-    sl<BleBeaconService>().startRotatingOtpAdvertising(
-      tripId: tripId,
-      tripRepository: sl<TripRepository>(),
-      logger: _logger,
-    );
+    _bleOtpCubit.startRotatingOtp(tripId);
   }
 
   void _stopBleProximity() {
-    sl<BleBeaconService>().stopRotatingOtpAdvertising();
+    _bleOtpCubit.stopRotatingOtp();
   }
 
   @override
@@ -156,12 +157,20 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
               driverActive: (t, _, __, ___, ____) => t.routeId,
               orElse: () => null,
             );
-            if (tripId == null || routeId == null) {
+            final driverId = state.maybeWhen(
+              driverActive: (t, _, __, ___, ____) => t.driverId,
+              orElse: () => null,
+            );
+            if (tripId == null || routeId == null || driverId == null) {
               return const SizedBox.shrink();
             }
             return Padding(
               padding: const EdgeInsetsDirectional.only(bottom: 12),
-              child: EmergencySosButton(tripId: tripId, routeId: routeId),
+              child: EmergencySosButton(
+                tripId: tripId,
+                routeId: routeId,
+                driverId: driverId,
+              ),
             );
           },
         ),

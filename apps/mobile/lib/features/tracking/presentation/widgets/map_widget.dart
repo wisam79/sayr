@@ -3,10 +3,11 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 
 import 'package:sayr_mobile/core/map_config.dart';
+import 'package:sayr_mobile/di/di.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 /// OpenFreeMap-backed map widget with RTL support.
 class SayrMap extends StatefulWidget {
@@ -55,7 +56,7 @@ class _SayrMapState extends State<SayrMap> {
   final Map<String, Symbol> _symbols = {};
   Line? _routeLine;
   bool _sourceAdded = false;
-  final Logger _logger = Logger();
+  late final Talker _logger;
 
   int _routeSyncRetryCount = 0;
   int _markerSyncRetryCount = 0;
@@ -64,6 +65,7 @@ class _SayrMapState extends State<SayrMap> {
   @override
   void initState() {
     super.initState();
+    _logger = sl<Talker>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         unawaited(_syncMarkers());
@@ -126,18 +128,18 @@ class _SayrMapState extends State<SayrMap> {
       }
     } catch (e, st) {
       if (_routeSyncRetryCount >= _maxRetries) {
-        _logger.e(
+        _logger.error(
           'Route line sync failed after $_maxRetries retries. Aborting.',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
         return;
       }
       _routeSyncRetryCount++;
-      _logger.d(
+      _logger.debug(
         'Route line sync failed (attempt $_routeSyncRetryCount/$_maxRetries); retrying in 1s',
-        error: e,
-        stackTrace: st,
+        e,
+        st,
       );
       if (!mounted) return;
       Future.delayed(const Duration(seconds: 1), () {
@@ -249,18 +251,18 @@ class _SayrMapState extends State<SayrMap> {
       } catch (e, st) {
         _sourceAdded = false;
         if (_markerSyncRetryCount >= _maxRetries) {
-          _logger.e(
+          _logger.error(
             'Marker sync (clustered) failed after $_maxRetries retries. Aborting.',
-            error: e,
-            stackTrace: st,
+            e,
+            st,
           );
           return;
         }
         _markerSyncRetryCount++;
-        _logger.d(
+        _logger.debug(
           'Marker sync (clustered) failed (attempt $_markerSyncRetryCount/$_maxRetries); retrying in 1s',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
         if (!mounted) return;
         Future.delayed(const Duration(seconds: 1), () {
@@ -318,18 +320,18 @@ class _SayrMapState extends State<SayrMap> {
         }
       } catch (e, st) {
         if (_markerSyncRetryCount >= _maxRetries) {
-          _logger.e(
+          _logger.error(
             'Marker sync (non-clustered) failed after $_maxRetries retries. Aborting.',
-            error: e,
-            stackTrace: st,
+            e,
+            st,
           );
           return;
         }
         _markerSyncRetryCount++;
-        _logger.d(
+        _logger.debug(
           'Marker sync (non-clustered) failed (attempt $_markerSyncRetryCount/$_maxRetries); retrying in 1s',
-          error: e,
-          stackTrace: st,
+          e,
+          st,
         );
         if (!mounted) return;
         Future.delayed(const Duration(seconds: 1), () {

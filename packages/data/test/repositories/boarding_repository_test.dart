@@ -137,15 +137,14 @@ void main() {
           expect(record.subscriptionId, const SubscriptionId('sub-1'));
           expect(record.studentId, const UserId('user-1'));
           expect(record.studentName, equals('Ahmed Ali'));
-          expect(record.boardingMethod, equals('qr_scan'));
-          expect(record.method, BoardingMethod.qrScan);
+          expect(record.boardingMethod, BoardingMethod.qrScan);
         },
       );
     });
 
     test('forwards driverLocation latitude/longitude to the remote call',
         () async {
-      const driverLocation = Coordinates(latitude: 33.315, longitude: 44.366);
+      final driverLocation = Coordinates(latitude: 33.315, longitude: 44.366);
       when(
         () => mockRemote.validateBoarding(
           token: 'raw-token-xyz',
@@ -236,9 +235,9 @@ void main() {
           expect(records, hasLength(2));
           expect(records[0].id, const BoardingId('rec-1'));
           expect(records[0].studentName, equals('Ahmed Ali'));
-          expect(records[0].method, BoardingMethod.qrScan);
+          expect(records[0].boardingMethod, BoardingMethod.qrScan);
           expect(records[1].id, const BoardingId('rec-2'));
-          expect(records[1].method, BoardingMethod.manual);
+          expect(records[1].boardingMethod, BoardingMethod.manual);
         },
       );
     });
@@ -262,7 +261,7 @@ void main() {
       result.fold(
         (_) => fail('expected success'),
         (records) {
-          expect(records.first.boardingMethod, equals('qr_scan'));
+          expect(records.first.boardingMethod, BoardingMethod.qrScan);
         },
       );
     });
@@ -313,7 +312,7 @@ void main() {
                   'studentId',
                   const UserId('user-1'),
                 )
-                .having((r) => r.method, 'method', BoardingMethod.qrScan),
+                .having((r) => r.boardingMethod, 'boardingMethod', BoardingMethod.qrScan),
           ],
         ]),
       );
@@ -376,7 +375,7 @@ void main() {
             isA<BoardingRecord>().having(
               (r) => r.boardingMethod,
               'boardingMethod',
-              equals('qr_scan'),
+              BoardingMethod.qrScan,
             ),
           ],
         ]),
@@ -427,15 +426,14 @@ void main() {
           expect(record.subscriptionId, const SubscriptionId('sub-1'));
           expect(record.studentId, const UserId('user-1'));
           expect(record.studentName, equals('Ahmed Ali'));
-          expect(record.boardingMethod, equals('self_check_in'));
-          expect(record.method, BoardingMethod.selfCheckIn);
+          expect(record.boardingMethod, BoardingMethod.selfCheckIn);
         },
       );
     });
 
     test('forwards studentLocation latitude/longitude to the remote call',
         () async {
-      const studentLocation = Coordinates(latitude: 33.315, longitude: 44.366);
+      final studentLocation = Coordinates(latitude: 33.315, longitude: 44.366);
       when(
         () => mockRemote.validateBoardingViaProximity(
           tripId: 'trip-1',

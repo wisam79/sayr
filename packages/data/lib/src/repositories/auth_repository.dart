@@ -133,9 +133,30 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
       // Best-effort — don't block logout if this fails.
       log.warning('Failed to deactivate push tokens during sign-out: $e');
     }
-    await _localDatasource.clearSecureStorage();
-    await _localDatasource.clearCachedTrips();
-    await _remoteDatasource.signOut();
+
+    try {
+      await _localDatasource.clearSecureStorage();
+    } catch (e) {
+      log.error('Failed to clear secure storage during sign-out: $e');
+    }
+
+    try {
+      await _localDatasource.clearCachedTrips();
+    } catch (e) {
+      log.error('Failed to clear cached trips during sign-out: $e');
+    }
+
+    try {
+      await _localDatasource.clearCachedRoutes();
+    } catch (e) {
+      log.error('Failed to clear cached routes during sign-out: $e');
+    }
+
+    try {
+      await _remoteDatasource.signOut();
+    } catch (e) {
+      log.warning('Remote sign-out failed or session already cleared: $e');
+    }
   }
 
   @override
@@ -184,13 +205,15 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   /// Fetches the full profile from `profiles` table and merges it with
   /// auth user data (email). Returns null if the profile doesn't exist yet.
   @override
-  Future<User?> fetchFullProfile() async {
-    final authUser = _remoteDatasource.currentUser;
-    if (authUser == null) return null;
-    final profile = await _remoteDatasource.fetchCurrentProfile(authUser.id);
-    if (profile == null) return null;
-    final model = profile.copyWith(email: authUser.email ?? '');
-    return model.toEntity();
+  Future<Either<Failure, User?>> fetchFullProfile() async {
+    return guard(() async {
+      final authUser = _remoteDatasource.currentUser;
+      if (authUser == null) return null;
+      final profile = await _remoteDatasource.fetchCurrentProfile(authUser.id);
+      if (profile == null) return null;
+      final model = profile.copyWith(email: authUser.email ?? '');
+      return model.toEntity();
+    });
   }
 
   @override

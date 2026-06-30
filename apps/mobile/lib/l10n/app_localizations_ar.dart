@@ -603,6 +603,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get emergencyFailed => 'فشل الإرسال';
 
   @override
+  String get emergencyFailedOffline =>
+      'فشل إرسال تنبيه الطوارئ الرقمي. هل تريد الاتصال هاتفياً بالدعم الأمني؟';
+
+  @override
   String get locationUnavailable => 'تعذر تحديد موقعك. حاول مجدداً.';
 
   @override

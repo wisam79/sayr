@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:retry/retry.dart';
@@ -117,12 +118,10 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
 
   @override
   Stream<Trip> watchTrip(TripId tripId) {
-    return _remoteDatasource.watchTrip(tripId.value).map((rows) {
-      if (rows.isEmpty) {
-        throw const NotFoundFailure(resource: 'trip');
-      }
-      return rows.first.toEntity();
-    });
+    return _remoteDatasource
+        .watchTrip(tripId.value)
+        .where((rows) => rows.isNotEmpty)
+        .map((rows) => rows.first.toEntity());
   }
 
   @override
@@ -182,11 +181,14 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
               location: location,
             );
           } catch (remoteErr) {
-            return _enqueueStatusOffline(
-              trip: trip,
-              newStatus: newStatus,
-              location: location,
-            );
+            if (BaseRepository.isNetworkException(remoteErr)) {
+              return _enqueueStatusOffline(
+                trip: trip,
+                newStatus: newStatus,
+                location: location,
+              );
+            }
+            rethrow;
           }
         });
       },
@@ -246,11 +248,11 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           status: newStatus,
           lastLocation: location ?? oldTrip.lastLocation,
           startedAt: newStatus == TripStatus.inTransit
-              ? DateTime.now()
+              ? clock.now()
               : oldTrip.startedAt,
           endedAt: (newStatus == TripStatus.completed ||
                   newStatus == TripStatus.cancelled)
-              ? DateTime.now()
+              ? clock.now()
               : oldTrip.endedAt,
         );
         cached[index] = updatedTrip;
@@ -260,11 +262,11 @@ class TripRepositoryImpl extends BaseRepository implements TripRepository {
           status: newStatus,
           lastLocation: location ?? trip.lastLocation,
           startedAt: newStatus == TripStatus.inTransit
-              ? DateTime.now()
+              ? clock.now()
               : trip.startedAt,
           endedAt: (newStatus == TripStatus.completed ||
                   newStatus == TripStatus.cancelled)
-              ? DateTime.now()
+              ? clock.now()
               : trip.endedAt,
         );
         await _localDatasource.cacheTrips([...cached, updatedTrip]);

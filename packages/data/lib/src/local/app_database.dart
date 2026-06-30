@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -24,6 +24,14 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             await m.createTable(tripStatusQueue);
+          }
+          if (from < 3) {
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS pending_location_synced_idx ON pending_location_update (synced);',
+            );
+            await customStatement(
+              'CREATE INDEX IF NOT EXISTS trip_status_queue_synced_idx ON trip_status_queue (synced);',
+            );
           }
         },
       );

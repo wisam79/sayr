@@ -60,7 +60,9 @@ class SayrDataPackageModule extends _i526.MicroPackageModule {
     gh.lazySingleton<_i549.BackgroundSyncTrigger>(
         () => _i549.BackgroundSyncTrigger());
     gh.lazySingleton<_i385.LocationService>(
-        () => _i896.DriverLocationServiceImpl());
+      () => _i896.DriverLocationServiceImpl(),
+      dispose: (i) => i.dispose(),
+    );
     gh.lazySingleton<_i368.LocationQueueDao>(
         () => _i368.LocationQueueDao(db: gh<_i961.AppDatabase>()));
     gh.lazySingleton<_i368.TripCacheDao>(

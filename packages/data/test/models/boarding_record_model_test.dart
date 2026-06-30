@@ -31,7 +31,7 @@ void main() {
       expect(entity.boardedAt, DateTime.parse('2026-06-04T08:00:00.000Z'));
       expect(entity.subscriptionId, const SubscriptionId('sub-1'));
       expect(entity.studentName, 'Ahmad');
-      expect(entity.boardingMethod, 'proximity');
+      expect(entity.boardingMethod, BoardingMethod.selfCheckIn);
     });
 
     test('fromJson and toEntity mapping with default and null fields', () {
@@ -50,7 +50,7 @@ void main() {
       final entity = model.toEntity();
       expect(entity.subscriptionId, isNull);
       expect(entity.studentName, isNull);
-      expect(entity.boardingMethod, 'qr_scan');
+      expect(entity.boardingMethod, BoardingMethod.qrScan);
     });
 
     test('toJson serialization', () {

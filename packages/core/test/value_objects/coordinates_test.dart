@@ -4,33 +4,44 @@ import 'package:test/test.dart';
 void main() {
   group('Coordinates - validation', () {
     test('valid coordinates', () {
-      const coords = Coordinates(latitude: 33.3152, longitude: 44.3661);
-      expect(coords.isValid, isTrue);
+      final coords = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      expect(coords.latitude, 33.3152);
+      expect(coords.longitude, 44.3661);
     });
 
     test('invalid latitude (>90)', () {
-      const coords = Coordinates(latitude: 91, longitude: 44.3661);
-      expect(coords.isValid, isFalse);
+      expect(
+        () => Coordinates(latitude: 91, longitude: 44.3661),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('invalid latitude (<-90)', () {
-      const coords = Coordinates(latitude: -91, longitude: 44.3661);
-      expect(coords.isValid, isFalse);
+      expect(
+        () => Coordinates(latitude: -91, longitude: 44.3661),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('invalid longitude (>180)', () {
-      const coords = Coordinates(latitude: 33.3152, longitude: 181);
-      expect(coords.isValid, isFalse);
+      expect(
+        () => Coordinates(latitude: 33.3152, longitude: 181),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('NaN coordinates are invalid', () {
-      const coords = Coordinates(latitude: double.nan, longitude: 44);
-      expect(coords.isValid, isFalse);
+      expect(
+        () => Coordinates(latitude: double.nan, longitude: 44),
+        throwsA(isA<ArgumentError>()),
+      );
     });
 
     test('Infinity coordinates are invalid', () {
-      const coords = Coordinates(latitude: double.infinity, longitude: 44);
-      expect(coords.isValid, isFalse);
+      expect(
+        () => Coordinates(latitude: double.infinity, longitude: 44),
+        throwsA(isA<ArgumentError>()),
+      );
     });
   });
 
@@ -38,43 +49,43 @@ void main() {
     test('Baghdad to Basra is approximately 440-500 km', () {
       // Baghdad: 33.3152, 44.3661
       // Basra:   30.5085, 47.7804
-      const baghdad = Coordinates(latitude: 33.3152, longitude: 44.3661);
-      const basra = Coordinates(latitude: 30.5085, longitude: 47.7804);
+      final baghdad = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      final basra = Coordinates(latitude: 30.5085, longitude: 47.7804);
       final distance = baghdad.distanceToKm(basra);
       expect(distance, greaterThan(400));
       expect(distance, lessThan(550));
     });
 
     test('same coordinates have zero distance', () {
-      const coords = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      final coords = Coordinates(latitude: 33.3152, longitude: 44.3661);
       expect(coords.distanceToMeters(coords), equals(0));
     });
 
     test('distance is symmetric', () {
-      const a = Coordinates(latitude: 33.3152, longitude: 44.3661);
-      const b = Coordinates(latitude: 33.4, longitude: 44.5);
+      final a = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      final b = Coordinates(latitude: 33.4, longitude: 44.5);
       expect(a.distanceToMeters(b), closeTo(b.distanceToMeters(a), 0.001));
     });
   });
 
   group('Coordinates - bearing', () {
     test('bearing north returns ~0 degrees', () {
-      const a = Coordinates(latitude: 33, longitude: 44);
-      const b = Coordinates(latitude: 34, longitude: 44);
+      final a = Coordinates(latitude: 33, longitude: 44);
+      final b = Coordinates(latitude: 34, longitude: 44);
       expect(a.bearingTo(b), closeTo(0, 1));
     });
 
     test('bearing east returns ~90 degrees', () {
-      const a = Coordinates(latitude: 33, longitude: 44);
-      const b = Coordinates(latitude: 33, longitude: 45);
+      final a = Coordinates(latitude: 33, longitude: 44);
+      final b = Coordinates(latitude: 33, longitude: 45);
       expect(a.bearingTo(b), closeTo(90, 1));
     });
   });
 
   group('Coordinates - midpoint', () {
     test('midpoint of two coordinates is between them', () {
-      const a = Coordinates(latitude: 33, longitude: 44);
-      const b = Coordinates(latitude: 34, longitude: 45);
+      final a = Coordinates(latitude: 33, longitude: 44);
+      final b = Coordinates(latitude: 34, longitude: 45);
       final mid = a.midpoint(b);
       expect(mid.latitude, closeTo(33.5, 0.1));
       expect(mid.longitude, closeTo(44.5, 0.1));
@@ -83,14 +94,14 @@ void main() {
 
   group('Coordinates - equality', () {
     test('equal coordinates are equal', () {
-      const a = Coordinates(latitude: 33.3152, longitude: 44.3661);
-      const b = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      final a = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      final b = Coordinates(latitude: 33.3152, longitude: 44.3661);
       expect(a, equals(b));
     });
 
     test('different coordinates are not equal', () {
-      const a = Coordinates(latitude: 33.3152, longitude: 44.3661);
-      const b = Coordinates(latitude: 33.3153, longitude: 44.3661);
+      final a = Coordinates(latitude: 33.3152, longitude: 44.3661);
+      final b = Coordinates(latitude: 33.3153, longitude: 44.3661);
       expect(a, isNot(equals(b)));
     });
   });

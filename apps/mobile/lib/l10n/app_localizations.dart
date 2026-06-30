@@ -1226,6 +1226,12 @@ abstract class AppLocalizations {
   /// **'Failed to send'**
   String get emergencyFailed;
 
+  /// No description provided for @emergencyFailedOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send digital emergency alert. Do you want to call the security helpline?'**
+  String get emergencyFailedOffline;
+
   /// No description provided for @locationUnavailable.
   ///
   /// In en, this message translates to:

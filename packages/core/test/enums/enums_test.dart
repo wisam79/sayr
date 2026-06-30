@@ -27,9 +27,9 @@ void main() {
       expect(UserRole.fromString('driver'), equals(UserRole.driver));
     });
 
-    test('fromString defaults to student on invalid', () {
-      expect(UserRole.fromString('unknown'), equals(UserRole.student));
-      expect(UserRole.fromString(''), equals(UserRole.student));
+    test('fromString throws on invalid', () {
+      expect(() => UserRole.fromString('unknown'), throwsArgumentError);
+      expect(() => UserRole.fromString(''), throwsArgumentError);
     });
   });
 
@@ -44,15 +44,10 @@ void main() {
     test('isActive', () {
       expect(TripStatus.driverWaiting.isActive, isTrue);
       expect(TripStatus.inTransit.isActive, isTrue);
-      expect(TripStatus.scheduled.isActive, isFalse);
+      expect(TripStatus.scheduled.isActive, isTrue);
       expect(TripStatus.completed.isActive, isFalse);
     });
 
-    test('displayNameAr is non-empty', () {
-      for (final status in TripStatus.values) {
-        expect(status.displayNameAr, isNotEmpty);
-      }
-    });
 
     test('fromString parses snake_case', () {
       expect(
@@ -65,8 +60,8 @@ void main() {
       );
     });
 
-    test('fromString defaults to scheduled on invalid', () {
-      expect(TripStatus.fromString('unknown'), equals(TripStatus.scheduled));
+    test('fromString throws on invalid', () {
+      expect(() => TripStatus.fromString('unknown'), throwsArgumentError);
     });
   });
 

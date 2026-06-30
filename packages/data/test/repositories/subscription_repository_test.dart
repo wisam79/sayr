@@ -35,7 +35,7 @@ void main() {
       'student_id': 'student-123',
       'route_id': 'route-456',
       'start_date': '2026-06-01T00:00:00Z',
-      'end_date': '2026-06-30T00:00:00Z',
+      'end_date': '2028-06-30T00:00:00Z',
       'is_active': true,
       'payment_method': 'zaincash',
       'status': 'active',
@@ -105,7 +105,7 @@ void main() {
             'student_id': 'student-123',
             'route_id': 'route-456',
             'start_date': '2026-06-01T00:00:00Z',
-            'end_date': '2026-06-30T00:00:00Z',
+            'end_date': '2028-06-30T00:00:00Z',
             'is_active': true,
             'payment_method': 'zaincash',
             'status': 'cancelled', // Inactive

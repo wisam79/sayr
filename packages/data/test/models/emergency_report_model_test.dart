@@ -27,7 +27,7 @@ void main() {
       expect(entity.tripId, const TripId('trip-1'));
       expect(
         entity.location,
-        const Coordinates(latitude: 33, longitude: 44),
+        Coordinates(latitude: 33, longitude: 44),
       );
       expect(entity.createdAt, DateTime.parse('2026-06-04T12:00:00.000Z'));
       expect(entity.resolvedAt, DateTime.parse('2026-06-04T12:30:00.000Z'));

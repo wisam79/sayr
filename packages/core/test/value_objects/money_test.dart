@@ -6,18 +6,18 @@ void main() {
     test('addition', () {
       const a = Money(1000);
       const b = Money(500);
-      expect((a + b).amountInFils, equals(1500));
+      expect((a + b).amount, equals(1500));
     });
 
     test('subtraction', () {
       const a = Money(1000);
       const b = Money(300);
-      expect((a - b).amountInFils, equals(700));
+      expect((a - b).amount, equals(700));
     });
 
     test('multiplication', () {
       const a = Money(1000);
-      expect((a * 3).amountInFils, equals(3000));
+      expect((a * 3).amount, equals(3000));
     });
 
     test('comparison', () {

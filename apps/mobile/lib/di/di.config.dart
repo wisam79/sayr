@@ -29,8 +29,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     await _i59.SayrDataPackageModule().init(gh);
     final talkerModule = _$TalkerModule();
-    gh.lazySingleton<_i385.BleBeaconService>(() => _i385.BleBeaconService());
     gh.lazySingleton<_i207.Talker>(() => talkerModule.talker);
+    gh.lazySingleton<_i385.BleBeaconService>(
+      () => _i385.BleBeaconService(gh<_i207.Talker>()),
+      dispose: (i) => i.dispose(),
+    );
     return this;
   }
 }

@@ -15,6 +15,7 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.d
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';
 import 'package:sayr_mobile/features/tracking/presentation/pages/driver_trip_controls_page.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState>
     implements TrackingBloc {}
@@ -26,11 +27,14 @@ class MockBleBeaconService extends Mock implements BleBeaconService {}
 
 class MockTripRepository extends Mock implements TripRepository {}
 
+class MockTalker extends Mock implements Talker {}
+
 void main() {
   late MockTrackingBloc mockTrackingBloc;
   late MockEmergencyBloc mockEmergencyBloc;
   late MockBleBeaconService mockBle;
   late MockTripRepository mockTripRepo;
+  late MockTalker mockTalker;
 
   setUpAll(() {
     registerFallbackValue(const TrackingWatchTrip(tripId: TripId('trip-1')));
@@ -45,6 +49,17 @@ void main() {
     mockEmergencyBloc = MockEmergencyBloc();
     mockBle = MockBleBeaconService();
     mockTripRepo = MockTripRepository();
+    mockTalker = MockTalker();
+
+    when(() => mockTalker.debug(any<dynamic>())).thenAnswer((_) {});
+    when(() => mockTalker.warning(any<dynamic>())).thenAnswer((_) {});
+    when(
+      () => mockTalker.error(
+        any<dynamic>(),
+        any<Object?>(),
+        any<StackTrace?>(),
+      ),
+    ).thenAnswer((_) {});
 
     when(() => mockEmergencyBloc.state).thenReturn(const EmergencyIdle());
     when(() => mockBle.stopAdvertising()).thenAnswer((_) async {});
@@ -64,6 +79,7 @@ void main() {
 
     GetIt.I.registerFactory<BleBeaconService>(() => mockBle);
     GetIt.I.registerFactory<TripRepository>(() => mockTripRepo);
+    GetIt.I.registerFactory<Talker>(() => mockTalker);
   });
 
   tearDown(() async {

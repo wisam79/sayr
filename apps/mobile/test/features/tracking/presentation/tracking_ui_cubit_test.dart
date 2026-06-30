@@ -12,7 +12,7 @@ class MockRoutingService extends Mock implements RoutingService {}
 void main() {
   setUpAll(() {
     registerFallbackValue(const LatLng(0, 0));
-    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
   });
 
   late MockRoutingService mockRouting;
@@ -62,8 +62,8 @@ void main() {
         loadedRouteId: RouteId('route-1'),
       ),
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1, longitude: 2),
-        end: const Coordinates(latitude: 3, longitude: 4),
+        start: Coordinates(latitude: 1, longitude: 2),
+        end: Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
       ),
       expect: () => <TrackingUiState>[],
@@ -73,8 +73,8 @@ void main() {
       'fetchRoutePath parses and uses routeGeometry when provided',
       build: () => cubit,
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1, longitude: 2),
-        end: const Coordinates(latitude: 3, longitude: 4),
+        start: Coordinates(latitude: 1, longitude: 2),
+        end: Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
         routeGeometry: '[[2.0, 1.0], [4.0, 3.0]]',
       ),
@@ -90,7 +90,7 @@ void main() {
       'fetchRoutePath calls RoutingService and emits points on success',
       build: () {
         when(() => mockRouting.getRoute(any(), any())).thenAnswer(
-          (_) async => const Right([
+          (_) async => Right([
             Coordinates(latitude: 1.1, longitude: 2.1),
             Coordinates(latitude: 3.1, longitude: 4.1),
           ]),
@@ -98,8 +98,8 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1, longitude: 2),
-        end: const Coordinates(latitude: 3, longitude: 4),
+        start: Coordinates(latitude: 1, longitude: 2),
+        end: Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
       ),
       expect: () => [
@@ -120,8 +120,8 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1, longitude: 2),
-        end: const Coordinates(latitude: 3, longitude: 4),
+        start: Coordinates(latitude: 1, longitude: 2),
+        end: Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
       ),
       expect: () => [
@@ -143,8 +143,8 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.fetchRoutePath(
-        start: const Coordinates(latitude: 1, longitude: 2),
-        end: const Coordinates(latitude: 3, longitude: 4),
+        start: Coordinates(latitude: 1, longitude: 2),
+        end: Coordinates(latitude: 3, longitude: 4),
         routeId: const RouteId('route-1'),
       ),
       expect: () => [

@@ -1,41 +1,22 @@
-import 'package:meta/meta.dart';
-import 'package:sayr_core/sayr_core.dart' show TripStateMachine;
-import 'package:sayr_core/src/fsm/trip_state_machine.dart'
-    show TripStateMachine;
-
 /// Trip state machine events.
 ///
-/// Events trigger state transitions. The transition rules
-/// are defined in [TripStateMachine].
-@immutable
-class TripEvent {
-  const TripEvent._(this.name);
-
-  /// Name of the event (matches key in the transition map)
-  final String name;
-
+/// Events trigger state transitions.
+enum TripEvent {
   /// Driver arrived at pickup point
-  static const arrive = TripEvent._('arrive');
+  arrive,
 
   /// Driver started the trip
-  static const start = TripEvent._('start');
+  start,
 
   /// Trip completed normally
-  static const complete = TripEvent._('complete');
+  complete,
 
   /// Driver was marked absent
-  static const markAbsent = TripEvent._('markAbsent');
+  markAbsent,
 
   /// Trip was cancelled
-  static const cancel = TripEvent._('cancel');
+  cancel;
 
   @override
   String toString() => 'TripEvent.$name';
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (other is TripEvent && other.name == name);
-
-  @override
-  int get hashCode => name.hashCode;
 }

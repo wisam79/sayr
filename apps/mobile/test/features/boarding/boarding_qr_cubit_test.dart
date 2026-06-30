@@ -310,7 +310,7 @@ void main() {
         studentId: const UserId('student-1'),
         studentName: 'Ahmed Ali',
         boardedAt: DateTime.now(),
-        boardingMethod: 'self_check_in',
+        boardingMethod: BoardingMethod.selfCheckIn,
       );
 
       when(

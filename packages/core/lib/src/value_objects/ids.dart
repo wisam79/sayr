@@ -96,3 +96,8 @@ class BoardingId extends Id {
 class BoardingTokenId extends Id {
   const BoardingTokenId(super.value);
 }
+
+/// A payment ID.
+class PaymentId extends Id {
+  const PaymentId(super.value);
+}

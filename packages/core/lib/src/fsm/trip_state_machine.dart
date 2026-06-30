@@ -61,43 +61,62 @@ class TripStateMachine {
     return builder.build();
   }();
 
+  static final _statusToStateMap = {
+    TripStatus.scheduled: Scheduled,
+    TripStatus.driverWaiting: DriverWaiting,
+    TripStatus.inTransit: InTransit,
+    TripStatus.completed: Completed,
+    TripStatus.absent: Absent,
+    TripStatus.cancelled: Cancelled,
+  };
+
+  static final _stateToStatusMap = {
+    Scheduled: TripStatus.scheduled,
+    DriverWaiting: TripStatus.driverWaiting,
+    InTransit: TripStatus.inTransit,
+    Completed: TripStatus.completed,
+    Absent: TripStatus.absent,
+    Cancelled: TripStatus.cancelled,
+  };
+
+  static final _eventToFsmEventTypeMap = {
+    TripEvent.arrive: ArriveEvent,
+    TripEvent.start: StartEvent,
+    TripEvent.complete: CompleteEvent,
+    TripEvent.markAbsent: MarkAbsentEvent,
+    TripEvent.cancel: CancelEvent,
+  };
+
+  static final _fsmEventTypeToEventMap = {
+    ArriveEvent: TripEvent.arrive,
+    StartEvent: TripEvent.start,
+    CompleteEvent: TripEvent.complete,
+    MarkAbsentEvent: TripEvent.markAbsent,
+    CancelEvent: TripEvent.cancel,
+  };
+
   static Type _statusToState(TripStatus status) {
-    return switch (status) {
-      TripStatus.scheduled => Scheduled,
-      TripStatus.driverWaiting => DriverWaiting,
-      TripStatus.inTransit => InTransit,
-      TripStatus.completed => Completed,
-      TripStatus.absent => Absent,
-      TripStatus.cancelled => Cancelled,
-    };
+    final type = _statusToStateMap[status];
+    if (type == null) throw ArgumentError('Unknown status: $status');
+    return type;
   }
 
   static TripStatus _stateToStatus(Type stateType) {
-    if (stateType == Scheduled) return TripStatus.scheduled;
-    if (stateType == DriverWaiting) return TripStatus.driverWaiting;
-    if (stateType == InTransit) return TripStatus.inTransit;
-    if (stateType == Completed) return TripStatus.completed;
-    if (stateType == Absent) return TripStatus.absent;
-    if (stateType == Cancelled) return TripStatus.cancelled;
-    throw ArgumentError('Unknown state type: $stateType');
+    final status = _stateToStatusMap[stateType];
+    if (status == null) throw ArgumentError('Unknown state type: $stateType');
+    return status;
   }
 
   static Type _eventToFsmEventType(TripEvent event) {
-    if (event == TripEvent.arrive) return ArriveEvent;
-    if (event == TripEvent.start) return StartEvent;
-    if (event == TripEvent.complete) return CompleteEvent;
-    if (event == TripEvent.markAbsent) return MarkAbsentEvent;
-    if (event == TripEvent.cancel) return CancelEvent;
-    throw ArgumentError('Unknown event: $event');
+    final type = _eventToFsmEventTypeMap[event];
+    if (type == null) throw ArgumentError('Unknown event: $event');
+    return type;
   }
 
   static TripEvent _fsmEventTypeToEvent(Type eventType) {
-    if (eventType == ArriveEvent) return TripEvent.arrive;
-    if (eventType == StartEvent) return TripEvent.start;
-    if (eventType == CompleteEvent) return TripEvent.complete;
-    if (eventType == MarkAbsentEvent) return TripEvent.markAbsent;
-    if (eventType == CancelEvent) return TripEvent.cancel;
-    throw ArgumentError('Unknown event type: $eventType');
+    final event = _fsmEventTypeToEventMap[eventType];
+    if (event == null) throw ArgumentError('Unknown event type: $eventType');
+    return event;
   }
 
   /// Returns the next [TripStatus] for a given [from] state and [event],

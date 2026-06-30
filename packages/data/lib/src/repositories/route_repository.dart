@@ -102,7 +102,10 @@ class RouteRepositoryImpl extends BaseRepository implements RouteRepository {
         // Offline fallback: look the route up in the local cache by id.
         try {
           final cached = await _localDatasource.getCachedRoutes();
-          final route = cached.firstWhere((r) => r.id == id);
+          final route = cached.firstWhere(
+            (r) => r.id == id,
+            orElse: () => throw const NotFoundFailure(resource: 'route'),
+          );
           return route;
         } catch (cacheError, st) {
           log.warning(

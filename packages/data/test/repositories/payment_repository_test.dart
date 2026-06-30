@@ -52,14 +52,14 @@ void main() {
         result.fold(
           (failure) => fail('should succeed'),
           (payment) {
-            expect(payment.id, 'pay-123');
-            expect(payment.status, 'pending');
-            expect(payment.amount, 15000);
+            expect(payment.id, const PaymentId('pay-123'));
+            expect(payment.status, PaymentStatus.pending);
+            expect(payment.amount, const Money(15000));
             expect(
               payment.paymentUrl,
               'https://test.zaincash.iq/transaction/pay-123',
             );
-            expect(payment.routeId, 'route-789');
+            expect(payment.routeId, const RouteId('route-789'));
           },
         );
       });
@@ -100,14 +100,14 @@ void main() {
         result.fold(
           (failure) => fail('should succeed'),
           (payment) {
-            expect(payment.id, 'pay-123');
-            expect(payment.status, 'pending');
-            expect(payment.amount, 15000);
+            expect(payment.id, const PaymentId('pay-123'));
+            expect(payment.status, PaymentStatus.pending);
+            expect(payment.amount, const Money(15000));
             expect(
               payment.paymentUrl,
               'https://test.zaincash.iq/transaction/pay-123',
             );
-            expect(payment.routeId, 'route-789');
+            expect(payment.routeId, const RouteId('route-789'));
           },
         );
       });
@@ -151,8 +151,8 @@ void main() {
           (failure) => fail('should succeed'),
           (payments) {
             expect(payments.length, 1);
-            expect(payments.first.id, 'pay-123');
-            expect(payments.first.status, 'pending');
+            expect(payments.first.id, const PaymentId('pay-123'));
+            expect(payments.first.status, PaymentStatus.pending);
             expect(
               payments.first.paymentUrl,
               'https://test.zaincash.iq/transaction/pay-123',

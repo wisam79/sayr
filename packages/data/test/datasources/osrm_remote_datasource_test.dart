@@ -25,8 +25,8 @@ void main() {
   });
 
   group('OsrmRemoteDatasource', () {
-    const start = Coordinates(latitude: 33.3152, longitude: 44.3661);
-    const end = Coordinates(latitude: 33.3400, longitude: 44.4000);
+    final start = Coordinates(latitude: 33.3152, longitude: 44.3661);
+    final end = Coordinates(latitude: 33.3400, longitude: 44.4000);
 
     test('getRouteGeometry returns list of Coordinates on success', () async {
       final mockResponse = MockFunctionResponse();

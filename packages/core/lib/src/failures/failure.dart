@@ -4,6 +4,9 @@ import 'package:equatable/equatable.dart';
 ///
 /// A [Failure] is the typed error returned from a use case
 /// or repository operation. UI layer maps these to user-facing messages.
+/// Stored as a subclass of [Exception] to allow throwing inside the repository's
+/// `guard()` blocks and catching them at the repository boundaries to convert them
+/// into typed failure returns, while maintaining clean functional Either types.
 sealed class Failure extends Equatable implements Exception {
   const Failure({this.message});
 

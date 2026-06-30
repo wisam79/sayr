@@ -258,6 +258,7 @@
   "emergencySent": "Emergency sent",
   "emergencySentMessage": "Your emergency alert has been sent. We will contact you soon.",
   "emergencyFailed": "Failed to send",
+  "emergencyFailedOffline": "Failed to send digital emergency alert. Do you want to call the security helpline?",
   "locationUnavailable": "Unable to determine your location. Please try again.",
   "sos": "SOS",
   "sent": "Sent",

@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/src/datasources/remote_datasource.dart';
+import 'package:sayr_data/src/models/payment_info.dart';
 import 'package:sayr_data/src/repositories/base_repository.dart';
 
 /// Concrete implementation of [PaymentRepository] using the remote datasource.
@@ -29,9 +30,7 @@ class PaymentRepositoryImpl extends BaseRepository
         currency: currency,
         method: method,
       );
-      final mappedResponse = Map<String, dynamic>.from(response);
-      mappedResponse['payment_url'] = response['reference_url'];
-      return PaymentInfo.fromJson(mappedResponse);
+      return _mapPaymentResponse(response);
     });
   }
 
@@ -44,9 +43,7 @@ class PaymentRepositoryImpl extends BaseRepository
       if (response == null) {
         throw const NotFoundFailure(resource: 'payment');
       }
-      final mappedResponse = Map<String, dynamic>.from(response);
-      mappedResponse['payment_url'] = response['reference_url'];
-      return PaymentInfo.fromJson(mappedResponse);
+      return _mapPaymentResponse(response);
     });
   }
 
@@ -54,11 +51,13 @@ class PaymentRepositoryImpl extends BaseRepository
   Future<Either<Failure, List<PaymentInfo>>> getPendingPayments() async {
     return guard(() async {
       final response = await _remoteDatasource.getPendingPayments();
-      return response.map((json) {
-        final mapped = Map<String, dynamic>.from(json);
-        mapped['payment_url'] = json['reference_url'];
-        return PaymentInfo.fromJson(mapped);
-      }).toList();
+      return response.map(_mapPaymentResponse).toList();
     });
+  }
+
+  PaymentInfo _mapPaymentResponse(Map<String, dynamic> response) {
+    final mappedResponse = Map<String, dynamic>.from(response);
+    mappedResponse['payment_url'] = response['reference_url'];
+    return PaymentInfoModel.fromJson(mappedResponse).toEntity();
   }
 }

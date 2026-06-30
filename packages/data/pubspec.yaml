@@ -8,6 +8,7 @@ environment:
   flutter: ">=3.22.0"
 
 dependencies:
+  clock: ^1.1.1
   connectivity_plus: ^6.0.5
   drift: ^2.20.0
   drift_flutter: ^0.2.0
@@ -29,7 +30,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.0
   supabase_flutter: ^2.5.0
   talker_dio_logger: ^4.9.3
-  talker_flutter: ^4.4.0
+  talker_flutter: ^4.9.3
 
 dev_dependencies:
   build_runner: ^2.4.13

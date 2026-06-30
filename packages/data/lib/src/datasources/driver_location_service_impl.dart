@@ -147,4 +147,11 @@ class DriverLocationServiceImpl implements LocationService {
       distanceFilter: 10,
     );
   }
+
+  @override
+  @disposeMethod
+  void dispose() {
+    _positionSubscription?.cancel();
+    _locationStreamController.close();
+  }
 }

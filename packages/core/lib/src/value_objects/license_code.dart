@@ -8,10 +8,9 @@ class LicenseCode extends Equatable {
   factory LicenseCode(String input) {
     final code = tryParse(input);
     if (code == null) {
-      throw ArgumentError.value(
-        input,
-        'input',
+      throw FormatException(
         'License code must be exactly 8 uppercase alphanumeric characters',
+        input,
       );
     }
     return code;

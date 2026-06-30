@@ -49,22 +49,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final currentUser = _authRepository.currentUser;
     if (currentUser != null) {
       emit(const AuthLoading());
-      try {
-        final user = await _authRepository.fetchFullProfile();
-        if (isClosed) return;
-        if (user != null) {
-          if (user.isProfileComplete) {
-            emit(AuthAuthenticated(user));
+      final result = await _authRepository.fetchFullProfile();
+      if (isClosed) return;
+      result.fold(
+        (failure) => emit(AuthError(failure)),
+        (user) {
+          if (user != null) {
+            if (user.isProfileComplete) {
+              emit(AuthAuthenticated(user));
+            } else {
+              emit(AuthProfileIncomplete(user));
+            }
           } else {
-            emit(AuthProfileIncomplete(user));
+            emit(const AuthUnauthenticated());
           }
-        } else {
-          emit(const AuthUnauthenticated());
-        }
-      } on Object catch (e) {
-        if (isClosed) return;
-        emit(AuthError(ServerFailure(message: e.toString())));
-      }
+        },
+      );
     } else {
       emit(const AuthUnauthenticated());
     }
@@ -84,21 +84,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (isClosed) return;
     await result.fold(
       (failure) async => emit(AuthError(failure)),
-      (_) async {
-        // Fetch full profile from `profiles` table to check completeness.
-        // JWT alone doesn't carry phone / institution_id.
-        final user = await _authRepository.fetchFullProfile();
-        if (isClosed) return;
-        if (user == null) {
-          emit(const AuthUnauthenticated());
-          return;
-        }
-        if (user.isProfileComplete) {
-          emit(AuthAuthenticated(user));
-        } else {
-          emit(AuthProfileIncomplete(user));
-        }
-      },
+      (_) => _fetchAndResolveProfile(emit, checkCompleteness: true),
     );
   }
 
@@ -118,20 +104,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (isClosed) return;
     await result.fold(
       (failure) async => emit(AuthError(failure)),
-      (_) async {
-        // Fetch full profile to verify completeness after sign-up.
-        final user = await _authRepository.fetchFullProfile();
-        if (isClosed) return;
-        if (user == null) {
-          emit(const AuthUnauthenticated());
-          return;
-        }
-        if (user.isProfileComplete) {
-          emit(AuthAuthenticated(user));
-        } else {
-          emit(AuthProfileIncomplete(user));
-        }
-      },
+      (_) => _fetchAndResolveProfile(emit, checkCompleteness: true),
     );
   }
 
@@ -146,21 +119,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     await result.fold(
       (failure) async => emit(AuthError(failure)),
-      (_) async {
-        // Fetch full profile from `profiles` table to check completeness.
-        // JWT alone doesn't carry phone / institution_id for Google users.
-        final user = await _authRepository.fetchFullProfile();
-        if (isClosed) return;
-        if (user == null) {
-          emit(const AuthUnauthenticated());
-          return;
-        }
-        if (user.isProfileComplete) {
-          emit(AuthAuthenticated(user));
-        } else {
-          emit(AuthProfileIncomplete(user));
-        }
-      },
+      (_) => _fetchAndResolveProfile(emit, checkCompleteness: true),
     );
   }
 
@@ -178,13 +137,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (isClosed) return;
     await result.fold(
       (failure) async => emit(AuthError(failure)),
-      (_) async {
-        final user = await _authRepository.fetchFullProfile();
-        if (isClosed) return;
-        if (user != null) {
-          emit(AuthAuthenticated(user));
-        } else {
+      (_) => _fetchAndResolveProfile(emit, checkCompleteness: false),
+    );
+  }
+
+  Future<void> _fetchAndResolveProfile(
+    Emitter<AuthState> emit, {
+    required bool checkCompleteness,
+  }) async {
+    final profileResult = await _authRepository.fetchFullProfile();
+    if (isClosed) return;
+    profileResult.fold(
+      (failure) => emit(AuthError(failure)),
+      (user) {
+        if (user == null) {
           emit(const AuthUnauthenticated());
+          return;
+        }
+        if (checkCompleteness) {
+          if (user.isProfileComplete) {
+            emit(AuthAuthenticated(user));
+          } else {
+            emit(AuthProfileIncomplete(user));
+          }
+        } else {
+          emit(AuthAuthenticated(user));
         }
       },
     );

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
 import 'package:sayr_core/sayr_core.dart';
 
@@ -30,7 +31,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       : _chatRepository = chatRepository,
         super(const ChatState.initial()) {
     on<ChatStarted>(_onStarted);
-    on<ChatMessageSent>(_onMessageSent);
+    on<ChatMessageSent>(_onMessageSent, transformer: droppable());
     on<ChatMessageRead>(_onMessageRead);
     on<ChatClosed>(_onClosed);
 

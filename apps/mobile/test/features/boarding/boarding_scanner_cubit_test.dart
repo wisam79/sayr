@@ -12,7 +12,7 @@ class MockBoardingRepository extends Mock implements BoardingRepository {}
 void main() {
   setUpAll(() {
     registerFallbackValue(const TripId('fallback'));
-    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
   });
 
   late MockBoardingRepository mockRepo;
@@ -23,7 +23,7 @@ void main() {
     String? id = 'rec-1',
     String? studentId = 'user-1',
     String? studentName = 'Ahmed',
-    String method = 'qr_scan',
+    BoardingMethod method = BoardingMethod.qrScan,
     DateTime? boardedAt,
   }) {
     return BoardingRecord(
@@ -233,7 +233,7 @@ void main() {
         await cubit.processToken(
           'token-abc',
           driverLocation:
-              const Coordinates(latitude: 33.315, longitude: 44.366),
+              Coordinates(latitude: 33.315, longitude: 44.366),
         );
       },
       verify: (_) {
@@ -242,7 +242,7 @@ void main() {
             token: 'token-abc',
             tripId: testTripId,
             driverLocation:
-                const Coordinates(latitude: 33.315, longitude: 44.366),
+                Coordinates(latitude: 33.315, longitude: 44.366),
           ),
         ).called(1);
       },

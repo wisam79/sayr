@@ -21,6 +21,7 @@ export 'src/entities/user.dart';
 // Enums
 export 'src/enums/auth_status.dart';
 export 'src/enums/license_status.dart';
+export 'src/enums/payment_status.dart';
 export 'src/enums/payout_status.dart';
 export 'src/enums/subscription_status.dart';
 export 'src/enums/support_status.dart';

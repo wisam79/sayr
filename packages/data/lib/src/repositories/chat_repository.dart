@@ -143,10 +143,13 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
     required String body,
   }) async {
     return guard(() async {
-      if (body.trim().isEmpty) {
+      // Basic HTML tag stripping sanitization
+      final sanitizedBody = body.replaceAll(RegExp('<[^>]*>'), '').trim();
+
+      if (sanitizedBody.isEmpty) {
         throw const ValidationFailure(message: 'Message body cannot be empty');
       }
-      if (body.length > 2000) {
+      if (sanitizedBody.length > 2000) {
         throw const ValidationFailure(
           message: 'Message body cannot exceed 2000 characters',
         );
@@ -160,14 +163,25 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
       final response = await _remoteDatasource.sendMessage(
         conversationId: conversationId.value,
         senderId: currentUserId,
-        body: body,
+        body: sanitizedBody,
       );
 
-      await _remoteDatasource.updateConversationPreview(
-        conversationId: conversationId.value,
-        body: body,
-        updatedAt: DateTime.now().toUtc().toIso8601String(),
-      );
+      final createdAt = response['created_at'] as String? ?? DateTime.now().toUtc().toIso8601String();
+
+      // Best-effort: update conversation preview, do not crash if it fails
+      try {
+        await _remoteDatasource.updateConversationPreview(
+          conversationId: conversationId.value,
+          body: sanitizedBody,
+          updatedAt: createdAt,
+        );
+      } catch (e, st) {
+        log.warning(
+          'ChatRepository: Failed to update conversation preview (best-effort)',
+          e,
+          st,
+        );
+      }
       return MessageModel.fromJson(response).toEntity();
     });
   }

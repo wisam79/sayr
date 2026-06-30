@@ -1,21 +1,20 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:sayr_core/src/enums/payment_status.dart';
+import 'package:sayr_core/src/value_objects/ids.dart';
+import 'package:sayr_core/src/value_objects/money.dart';
 
 part 'payment_info.freezed.dart';
-part 'payment_info.g.dart';
-
 /// Payment info value object (freezed).
 @freezed
 abstract class PaymentInfo with _$PaymentInfo {
   const factory PaymentInfo({
-    required String id,
-    required String status,
-    required int amount,
-    @Default('') @JsonKey(name: 'payment_url') String paymentUrl,
+    required PaymentId id,
+    required PaymentStatus status,
+    required Money amount,
+    @Default('') String paymentUrl,
     @Default('IQD') String currency,
-    @Default('') @JsonKey(name: 'subscription_id') String subscriptionId,
-    @Default('') @JsonKey(name: 'route_id') String routeId,
+    SubscriptionId? subscriptionId,
+    RouteId? routeId,
   }) = _PaymentInfo;
 
-  factory PaymentInfo.fromJson(Map<String, dynamic> json) =>
-      _$PaymentInfoFromJson(json);
-}
+  }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 /// Queued location updates to be synced when back online.
+@TableIndex(name: 'pending_location_synced_idx', columns: {#synced})
 class PendingLocationUpdate extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get tripId => text()();
@@ -52,6 +53,7 @@ class CachedRoute extends Table {
 }
 
 /// Queued trip status updates to be synced when back online.
+@TableIndex(name: 'trip_status_queue_synced_idx', columns: {#synced})
 class TripStatusQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get tripId => text()();

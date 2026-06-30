@@ -28,6 +28,6 @@ abstract class NotificationModel with _$NotificationModel {
         body: body,
         isRead: isRead,
         createdAt: createdAt,
-        data: data,
+        data: data.map((k, v) => MapEntry(k, v.toString())),
       );
 }

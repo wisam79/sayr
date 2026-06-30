@@ -14,7 +14,7 @@ void main() {
     registerFallbackValue(const TripId('fallback'));
     registerFallbackValue(const RouteId('fallback'));
     registerFallbackValue(const EmergencyReportId('fallback'));
-    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
   });
 
   late MockEmergencyRepository mockRepo;
@@ -31,7 +31,7 @@ void main() {
     id: const EmergencyReportId('report-1'),
     userId: const UserId('user-1'),
     tripId: const TripId('trip-1'),
-    location: const Coordinates(latitude: 33.3, longitude: 44.3),
+    location: Coordinates(latitude: 33.3, longitude: 44.3),
     createdAt: DateTime.now(),
   );
 
@@ -56,9 +56,9 @@ void main() {
         return EmergencyBloc(emergencyRepository: mockRepo);
       },
       act: (bloc) => bloc.add(
-        const EmergencyTriggered(
-          tripId: TripId('trip-1'),
-          routeId: RouteId('route-1'),
+        EmergencyTriggered(
+          tripId: const TripId('trip-1'),
+          routeId: const RouteId('route-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -86,9 +86,9 @@ void main() {
         return EmergencyBloc(emergencyRepository: mockRepo);
       },
       act: (bloc) => bloc.add(
-        const EmergencyTriggered(
-          tripId: TripId('trip-1'),
-          routeId: RouteId('route-1'),
+        EmergencyTriggered(
+          tripId: const TripId('trip-1'),
+          routeId: const RouteId('route-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -149,9 +149,9 @@ void main() {
       },
       act: (bloc) async {
         bloc.add(
-          const EmergencyTriggered(
-            tripId: TripId('trip-1'),
-            routeId: RouteId('route-1'),
+          EmergencyTriggered(
+            tripId: const TripId('trip-1'),
+            routeId: const RouteId('route-1'),
             location: Coordinates(latitude: 33.3, longitude: 44.3),
           ),
         );

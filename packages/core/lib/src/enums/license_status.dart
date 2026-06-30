@@ -22,7 +22,7 @@ enum LicenseStatus {
   static LicenseStatus fromString(String value) {
     return LicenseStatus.values.firstWhere(
       (e) => e.name == value,
-      orElse: () => LicenseStatus.expired,
+      orElse: () => throw ArgumentError('Unknown LicenseStatus: $value'),
     );
   }
 }

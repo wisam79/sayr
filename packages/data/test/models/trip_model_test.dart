@@ -30,15 +30,15 @@ void main() {
       expect(entity.status, TripStatus.inTransit);
       expect(
         entity.lastLocation,
-        const Coordinates(latitude: 33.3, longitude: 44.4),
+        Coordinates(latitude: 33.3, longitude: 44.4),
       );
       expect(
         entity.routeStartLocation,
-        const Coordinates(latitude: 33.1, longitude: 44.1),
+        Coordinates(latitude: 33.1, longitude: 44.1),
       );
       expect(
         entity.routeEndLocation,
-        const Coordinates(latitude: 33.2, longitude: 44.2),
+        Coordinates(latitude: 33.2, longitude: 44.2),
       );
     });
   });

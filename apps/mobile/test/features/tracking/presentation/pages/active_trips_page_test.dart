@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Route;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/home/presentation/bloc/home_nav_cubit.dart';
@@ -15,6 +16,7 @@ import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.d
 import 'package:sayr_mobile/features/tracking/presentation/pages/active_trips_page.dart';
 import 'package:sayr_mobile/features/tracking/presentation/widgets/map_widget.dart';
 import 'package:sayr_mobile/l10n/app_localizations.dart';
+import 'package:talker_flutter/talker_flutter.dart';
 
 class MockTrackingBloc extends MockBloc<TrackingEvent, TrackingState>
     implements TrackingBloc {}
@@ -23,6 +25,8 @@ class MockRoutesBloc extends MockBloc<RoutesEvent, RoutesState>
     implements RoutesBloc {}
 
 class MockHomeNavCubit extends MockCubit<int> implements HomeNavCubit {}
+
+class MockTalker extends Mock implements Talker {}
 
 void main() {
   late MockTrackingBloc mockTrackingBloc;
@@ -39,8 +43,24 @@ void main() {
     mockRoutesBloc = MockRoutesBloc();
     mockHomeNavCubit = MockHomeNavCubit();
 
+    final mockTalker = MockTalker();
+    when(() => mockTalker.debug(any<dynamic>())).thenAnswer((_) {});
+    when(() => mockTalker.warning(any<dynamic>())).thenAnswer((_) {});
+    when(
+      () => mockTalker.error(
+        any<dynamic>(),
+        any<Object?>(),
+        any<StackTrace?>(),
+      ),
+    ).thenAnswer((_) {});
+    GetIt.I.registerFactory<Talker>(() => mockTalker);
+
     // Default route bloc states
     when(() => mockRoutesBloc.state).thenReturn(const RoutesInitial());
+  });
+
+  tearDown(() async {
+    await GetIt.I.reset();
   });
 
   Widget wrap() {
@@ -121,7 +141,7 @@ void main() {
       driverId: const DriverId('driver-1'),
       status: TripStatus.inTransit,
       scheduledAt: DateTime(2026, 6, 9, 12),
-      lastLocation: const Coordinates(latitude: 33.3128, longitude: 44.3615),
+      lastLocation: Coordinates(latitude: 33.3128, longitude: 44.3615),
     );
 
     const testRoute1 = Route(

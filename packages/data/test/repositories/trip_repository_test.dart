@@ -97,18 +97,27 @@ void main() {
         await controller.close();
       });
 
-      test('throws NotFoundFailure when watch stream is empty', () async {
+      test('ignores empty lists and only emits when non-empty', () async {
         final controller = StreamController<List<TripModel>>();
         when(() => mockRemote.watchTrip('trip-123'))
             .thenAnswer((_) => controller.stream);
 
         final stream = repository.watchTrip(const TripId('trip-123'));
 
-        expect(stream, emitsError(isA<NotFoundFailure>()));
+        final expectFuture = expectLater(
+          stream,
+          emitsInOrder([
+            isA<Trip>()
+                .having((t) => t.id, 'id', const TripId('trip-123'))
+                .having((t) => t.status, 'status', TripStatus.scheduled),
+          ]),
+        );
 
         controller.add([]);
+        controller.add([mockTrip]);
 
         await controller.close();
+        await expectFuture;
       });
     });
 
@@ -261,7 +270,7 @@ void main() {
         final result = await repository.updateStatus(
           tripId: const TripId('trip-123'),
           event: TripEvent.arrive,
-          location: const Coordinates(latitude: 33.123, longitude: 44.456),
+          location: Coordinates(latitude: 33.123, longitude: 44.456),
         );
 
         expect(result.isRight(), true);
@@ -330,7 +339,7 @@ void main() {
             lat: any(named: 'lat'),
             lng: any(named: 'lng'),
           ),
-        ).thenThrow(Exception('Status update RPC failed'));
+        ).thenThrow(const SocketException('No Internet'));
 
         final result = await repository.updateStatus(
           tripId: const TripId('trip-123'),

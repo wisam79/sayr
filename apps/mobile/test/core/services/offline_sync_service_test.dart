@@ -121,6 +121,7 @@ void main() {
       when(() => mockLocal.markLocationsSynced(any<List<int>>()))
           .thenAnswer((_) async {});
       when(() => mockLocal.cleanupOldLocations()).thenAnswer((_) async {});
+      when(() => mockLocal.cleanupOldTripStatuses()).thenAnswer((_) async {});
 
       when(
         () => mockTripRepo.bulkUpdateLocations(
@@ -162,6 +163,7 @@ void main() {
 
       verify(() => mockLocal.markLocationsSynced([10, 11])).called(1);
       verify(() => mockLocal.cleanupOldLocations()).called(1);
+      verify(() => mockLocal.cleanupOldTripStatuses()).called(1);
     });
 
     test('stops and warns when repo returns failure', () async {
@@ -202,6 +204,7 @@ void main() {
       // Should not mark synced or clean up
       verifyNever(() => mockLocal.markLocationsSynced(any<List<int>>()));
       verifyNever(() => mockLocal.cleanupOldLocations());
+      verifyNever(() => mockLocal.cleanupOldTripStatuses());
       verify(() => mockTalker.warning(any<dynamic>())).called(1);
     });
   });

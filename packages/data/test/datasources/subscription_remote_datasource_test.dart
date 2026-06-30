@@ -122,7 +122,7 @@ void main() {
       expect(result, equals({'id': 'license1'}));
     });
 
-    test('getLicenseDetails throws Exception if empty', () async {
+    test('getLicenseDetails returns null if empty', () async {
       final mockRpcFilterBuilder = MockPostgrestFilterBuilder<List<dynamic>>();
       mockRpcFilterBuilder.completeWith(Future.value([]));
 
@@ -135,10 +135,8 @@ void main() {
         ),
       ).thenAnswer((_) => mockRpcFilterBuilder);
 
-      expect(
-        () => datasource.getLicenseDetails('ABCDEF'),
-        throwsException,
-      );
+      final result = await datasource.getLicenseDetails('ABCDEF');
+      expect(result, isNull);
     });
   });
 }

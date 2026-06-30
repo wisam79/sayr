@@ -21,14 +21,23 @@ abstract class BoardingRecordModel with _$BoardingRecordModel {
   factory BoardingRecordModel.fromJson(Map<String, dynamic> json) =>
       _$BoardingRecordModelFromJson(json);
 
-  BoardingRecord toEntity() => BoardingRecord(
-        id: BoardingId(id),
-        tripId: TripId(tripId),
-        subscriptionId:
-            subscriptionId != null ? SubscriptionId(subscriptionId!) : null,
-        studentId: UserId(studentId),
-        studentName: studentName,
-        boardedAt: boardedAt,
-        boardingMethod: boardingMethod,
-      );
+  BoardingRecord toEntity() {
+    final method = switch (boardingMethod) {
+      'qr_scan' => BoardingMethod.qrScan,
+      'manual' => BoardingMethod.manual,
+      'proximity' => BoardingMethod.selfCheckIn,
+      'self_check_in' => BoardingMethod.selfCheckIn,
+      _ => BoardingMethod.qrScan,
+    };
+    return BoardingRecord(
+      id: BoardingId(id),
+      tripId: TripId(tripId),
+      subscriptionId:
+          subscriptionId != null ? SubscriptionId(subscriptionId!) : null,
+      studentId: UserId(studentId),
+      studentName: studentName,
+      boardedAt: boardedAt,
+      boardingMethod: method,
+    );
+  }
 }

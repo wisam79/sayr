@@ -102,11 +102,11 @@ void main() {
       expect(entity.isActive, true);
       expect(
         entity.startCoordinates,
-        const Coordinates(latitude: 33, longitude: 44),
+        Coordinates(latitude: 33, longitude: 44),
       );
       expect(
         entity.endCoordinates,
-        const Coordinates(latitude: 33.1, longitude: 44.1),
+        Coordinates(latitude: 33.1, longitude: 44.1),
       );
       expect(entity.departureTime, '09:00');
       expect(entity.returnTime, '17:00');

@@ -21,7 +21,7 @@ enum SubscriptionStatus {
   static SubscriptionStatus fromString(String value) {
     return SubscriptionStatus.values.firstWhere(
       (e) => e.name == value,
-      orElse: () => SubscriptionStatus.expired,
+      orElse: () => throw ArgumentError('Unknown SubscriptionStatus: $value'),
     );
   }
 }

@@ -190,7 +190,7 @@ void main() {
       registerFallbackValue(const RouteId('fake-route-id'));
       registerFallbackValue(const UserId('fake-user-id'));
       registerFallbackValue(
-        const Coordinates(latitude: 33.3128, longitude: 44.3615),
+        Coordinates(latitude: 33.3128, longitude: 44.3615),
       );
       registerFallbackValue(DateTime(2026));
       registerFallbackValue(MockTripRepository());
@@ -265,7 +265,7 @@ void main() {
       driverId: const DriverId('driver-123'),
       status: TripStatus.inTransit,
       scheduledAt: DateTime(2026, 6, 9, 12),
-      lastLocation: const Coordinates(latitude: 33.3128, longitude: 44.3615),
+      lastLocation: Coordinates(latitude: 33.3128, longitude: 44.3615),
     );
 
     final testBoardingRecord = BoardingRecord(
@@ -293,7 +293,7 @@ void main() {
       // Configure default stubs for startup
       when(() => mockAuthRepository.currentUser).thenReturn(null);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async => const Right<Failure, User?>(null));
       when(() => mockAuthRepository.authStateChanges)
           .thenAnswer((_) => const Stream.empty());
 
@@ -422,14 +422,6 @@ void main() {
         ),
       ).thenAnswer((_) async {});
       when(mockBle.stopAdvertising).thenAnswer((_) async {});
-      when(
-        () => mockBle.startRotatingOtpAdvertising(
-          tripId: any(named: 'tripId'),
-          tripRepository: any(named: 'tripRepository'),
-          logger: any(named: 'logger'),
-        ),
-      ).thenAnswer((_) {});
-      when(mockBle.stopRotatingOtpAdvertising).thenAnswer((_) {});
       when(() => mockBle.discoveredTrips).thenAnswer(
         (_) => const Stream.empty(),
       );
@@ -531,7 +523,7 @@ void main() {
       );
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => testStudent);
+          .thenAnswer((_) async => const Right<Failure, User?>(testStudent));
 
       await tester.tap(loginButton);
       await tester.safePumpAndSettle(const Duration(seconds: 1));
@@ -542,7 +534,7 @@ void main() {
     testWidgets('student home: tabs, routes, subscriptions', (tester) async {
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => testStudent);
+          .thenAnswer((_) async => const Right<Failure, User?>(testStudent));
 
       setupGlobalMocks();
       await tester.pumpWidget(buildTestApp(sl<AppRouter>(), sl<AuthBloc>()));
@@ -588,7 +580,7 @@ void main() {
         (tester) async {
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => testStudent);
+          .thenAnswer((_) async => const Right<Failure, User?>(testStudent));
 
       setupGlobalMocks();
       await tester.pumpWidget(buildTestApp(sl<AppRouter>(), sl<AuthBloc>()));
@@ -640,7 +632,7 @@ void main() {
       when(() => mockAuthRepository.signOut()).thenAnswer((_) async {});
       when(() => mockAuthRepository.currentUser).thenReturn(null);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async => const Right<Failure, User?>(null));
 
       final confirmLogoutButton =
           find.widgetWithText(FilledButton, 'تسجيل الخروج');
@@ -693,7 +685,7 @@ void main() {
       );
       when(() => mockAuthRepository.currentUser).thenReturn(testDriver);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => testDriver);
+          .thenAnswer((_) async => const Right<Failure, User?>(testDriver));
 
       await tester.tap(loginButton);
       await tester.safePumpAndSettle(const Duration(seconds: 1));
@@ -728,7 +720,7 @@ void main() {
       // Student boarding QR page
       when(() => mockAuthRepository.currentUser).thenReturn(testStudent);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => testStudent);
+          .thenAnswer((_) async => const Right<Failure, User?>(testStudent));
 
       sl<AppRouter>().config.go('/boarding');
       await tester.pump(const Duration(seconds: 1));
@@ -741,7 +733,7 @@ void main() {
       // Driver Logout Flow
       when(() => mockAuthRepository.currentUser).thenReturn(testDriver);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => testDriver);
+          .thenAnswer((_) async => const Right<Failure, User?>(testDriver));
 
       sl<AppRouter>().config.go('/');
       await tester.pump(const Duration(seconds: 1));
@@ -763,7 +755,7 @@ void main() {
       when(() => mockAuthRepository.signOut()).thenAnswer((_) async {});
       when(() => mockAuthRepository.currentUser).thenReturn(null);
       when(() => mockAuthRepository.fetchFullProfile())
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async => const Right<Failure, User?>(null));
 
       final confirmDriverLogoutButton =
           find.widgetWithText(FilledButton, 'تسجيل الخروج');

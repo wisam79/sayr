@@ -22,6 +22,8 @@ export 'src/local/app_database.dart';
 export 'src/local/location_queue_dao.dart';
 export 'src/local/tables.dart';
 export 'src/models/boarding_record_model.dart';
+export 'src/models/fcm_payload.dart';
+export 'src/models/license_preview.dart';
 export 'src/models/payment_info.dart';
 export 'src/models/route_model.dart';
 // Models

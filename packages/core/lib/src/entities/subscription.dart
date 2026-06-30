@@ -1,25 +1,16 @@
+import 'package:clock/clock.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/src/enums/subscription_status.dart';
-import 'package:sayr_core/src/utils/json_converters.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'subscription.freezed.dart';
-part 'subscription.g.dart';
-
 /// A student's subscription to a route.
 @freezed
 abstract class Subscription with _$Subscription {
   const factory Subscription({
-    @JsonKey(fromJson: subscriptionIdFromJson, toJson: subscriptionIdToJson)
     required SubscriptionId id,
-    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson)
     required UserId studentId,
-    @JsonKey(fromJson: routeIdFromJson, toJson: routeIdToJson)
     required RouteId routeId,
-    @JsonKey(
-      fromJson: subscriptionStatusFromJson,
-      toJson: subscriptionStatusToJson,
-    )
     required SubscriptionStatus status,
     required DateTime startDate,
     DateTime? endDate,
@@ -28,9 +19,6 @@ abstract class Subscription with _$Subscription {
 
   const Subscription._();
 
-  factory Subscription.fromJson(Map<String, dynamic> json) =>
-      _$SubscriptionFromJson(json);
-
   /// Whether the subscription is currently valid.
   bool get isActive => status.isActive;
 
@@ -38,13 +26,13 @@ abstract class Subscription with _$Subscription {
   bool get isExpired {
     if (status == SubscriptionStatus.expired) return true;
     if (endDate == null) return false;
-    return endDate!.isBefore(DateTime.now());
+    return endDate!.isBefore(clock.now());
   }
 
   /// Days remaining until expiry.
   int? get daysRemaining {
     if (endDate == null) return null;
-    final diff = endDate!.difference(DateTime.now()).inDays;
+    final diff = endDate!.difference(clock.now()).inDays;
     return diff < 0 ? 0 : diff;
   }
 }

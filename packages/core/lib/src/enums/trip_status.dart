@@ -1,13 +1,8 @@
-import 'package:sayr_core/sayr_core.dart' show TripStateMachine;
-
-import 'package:sayr_core/src/fsm/trip_state_machine.dart'
-    show TripStateMachine;
-
 import 'package:sayr_core/src/utils/string_utils.dart';
 
 /// Trip status - states in the trip state machine.
 ///
-/// The transition rules are defined in [TripStateMachine].
+/// The transition rules are defined in TripStateMachine.
 enum TripStatus {
   /// Trip is scheduled but not yet started
   scheduled,
@@ -27,32 +22,16 @@ enum TripStatus {
   /// Trip was cancelled
   cancelled;
 
-  /// Display name in Arabic.
-  String get displayNameAr {
-    switch (this) {
-      case TripStatus.scheduled:
-        return 'مجدولة';
-      case TripStatus.driverWaiting:
-        return 'السائق في الانتظار';
-      case TripStatus.inTransit:
-        return 'قيد السير';
-      case TripStatus.completed:
-        return 'مكتملة';
-      case TripStatus.absent:
-        return 'غياب';
-      case TripStatus.cancelled:
-        return 'ملغاة';
-    }
-  }
-
   /// Whether this is a terminal state (no further transitions).
   bool get isTerminal {
     return this == TripStatus.completed || this == TripStatus.cancelled;
   }
 
-  /// Whether the trip is active (in progress or about to start).
+  /// Whether the trip is active (scheduled, in progress, or about to start).
   bool get isActive {
-    return this == TripStatus.driverWaiting || this == TripStatus.inTransit;
+    return this == TripStatus.scheduled ||
+        this == TripStatus.driverWaiting ||
+        this == TripStatus.inTransit;
   }
 
   /// Parse from database string value.
@@ -61,7 +40,7 @@ enum TripStatus {
     final normalized = value.toCamelCase();
     return TripStatus.values.firstWhere(
       (e) => e.name == normalized,
-      orElse: () => TripStatus.scheduled,
+      orElse: () => throw ArgumentError('Unknown TripStatus: $value'),
     );
   }
 }

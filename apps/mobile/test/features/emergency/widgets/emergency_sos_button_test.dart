@@ -23,9 +23,9 @@ void main() {
     registerFallbackValue(const EmergencyCancelled());
     registerFallbackValue(const EmergencyReset());
     registerFallbackValue(
-      const EmergencyTriggered(
-        tripId: TripId('trip-1'),
-        routeId: RouteId('route-1'),
+      EmergencyTriggered(
+        tripId: const TripId('trip-1'),
+        routeId: const RouteId('route-1'),
         location: Coordinates(latitude: 33.3, longitude: 44.3),
       ),
     );
@@ -73,6 +73,7 @@ void main() {
           child: const EmergencySosButton(
             tripId: TripId('trip-1'),
             routeId: RouteId('route-1'),
+            driverId: DriverId('driver-1'),
           ),
         ),
       ),
@@ -155,7 +156,7 @@ void main() {
         id: const EmergencyReportId('report-1'),
         userId: const UserId('user-1'),
         tripId: const TripId('trip-1'),
-        location: const Coordinates(latitude: 33.3, longitude: 44.3),
+        location: Coordinates(latitude: 33.3, longitude: 44.3),
         createdAt: DateTime.now(),
       );
       when(() => mockEmergencyBloc.state)

@@ -1,10 +1,8 @@
+import 'package:clock/clock.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:sayr_core/src/utils/json_converters.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'boarding_record.freezed.dart';
-part 'boarding_record.g.dart';
-
 /// Method by which a student was recorded as boarded.
 enum BoardingMethod {
   /// Scanned a QR code via the driver app.
@@ -24,13 +22,9 @@ enum BoardingMethod {
 @freezed
 abstract class BoardingToken with _$BoardingToken {
   const factory BoardingToken({
-    @JsonKey(fromJson: boardingTokenIdFromJson, toJson: boardingTokenIdToJson)
     required BoardingTokenId id,
-    @JsonKey(fromJson: subscriptionIdFromJson, toJson: subscriptionIdToJson)
     required SubscriptionId subscriptionId,
-    @JsonKey(fromJson: tripIdFromJson, toJson: tripIdToJson)
     required TripId tripId,
-    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson)
     required UserId studentId,
     required String tokenHash,
     required DateTime issuedAt,
@@ -40,15 +34,12 @@ abstract class BoardingToken with _$BoardingToken {
 
   const BoardingToken._();
 
-  factory BoardingToken.fromJson(Map<String, dynamic> json) =>
-      _$BoardingTokenFromJson(json);
-
   /// Whether the token is still valid (not consumed and not expired).
-  bool get isValid => consumedAt == null && DateTime.now().isBefore(expiresAt);
+  bool get isValid => consumedAt == null && clock.now().isBefore(expiresAt);
 
   /// Seconds until this token expires (clamped at 0).
   int get secondsUntilExpiry {
-    final diff = expiresAt.difference(DateTime.now()).inSeconds;
+    final diff = expiresAt.difference(clock.now()).inSeconds;
     return diff < 0 ? 0 : diff;
   }
 }
@@ -57,37 +48,16 @@ abstract class BoardingToken with _$BoardingToken {
 @freezed
 abstract class BoardingRecord with _$BoardingRecord {
   const factory BoardingRecord({
-    @JsonKey(fromJson: boardingIdFromJson, toJson: boardingIdToJson)
     required BoardingId id,
-    @JsonKey(fromJson: tripIdFromJson, toJson: tripIdToJson)
     required TripId tripId,
-    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson)
     required UserId studentId,
     required DateTime boardedAt,
-    @JsonKey(
-      fromJson: nullableSubscriptionIdFromJson,
-      toJson: nullableSubscriptionIdToJson,
-    )
     SubscriptionId? subscriptionId,
     String? studentName,
-    @Default('qr_scan') String boardingMethod,
+    @Default(BoardingMethod.qrScan)
+    BoardingMethod boardingMethod,
   }) = _BoardingRecord;
 
   const BoardingRecord._();
 
-  factory BoardingRecord.fromJson(Map<String, dynamic> json) =>
-      _$BoardingRecordFromJson(json);
-
-  /// Convenience: parse the boarding method string into the enum.
-  BoardingMethod get method {
-    switch (boardingMethod) {
-      case 'manual':
-        return BoardingMethod.manual;
-      case 'self_check_in':
-        return BoardingMethod.selfCheckIn;
-      case 'qr_scan':
-      default:
-        return BoardingMethod.qrScan;
-    }
   }
-}

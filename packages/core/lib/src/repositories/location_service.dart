@@ -20,4 +20,7 @@ abstract class LocationService {
 
   /// Whether the service is currently active and streaming.
   bool get isTracking;
+
+  /// Closes streams and cleans up resources.
+  void dispose();
 }

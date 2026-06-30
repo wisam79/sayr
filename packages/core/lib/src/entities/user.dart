@@ -1,33 +1,23 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:sayr_core/src/enums/user_role.dart';
-import 'package:sayr_core/src/utils/json_converters.dart';
 import 'package:sayr_core/src/value_objects/ids.dart';
 
 part 'user.freezed.dart';
-part 'user.g.dart';
-
 /// A user (student, driver, or admin) in the system.
 @freezed
 abstract class User with _$User {
   const factory User({
-    @JsonKey(fromJson: userIdFromJson, toJson: userIdToJson) required UserId id,
+    required UserId id,
     required String email,
-    @JsonKey(fromJson: userRoleFromJson, toJson: userRoleToJson)
     required UserRole role,
     String? fullName,
     String? phone,
-    @JsonKey(
-      fromJson: nullableInstitutionIdFromJson,
-      toJson: nullableInstitutionIdToJson,
-    )
     InstitutionId? institutionId,
     @Default(false) bool isVerified,
     String? avatarUrl,
   }) = _User;
 
   const User._();
-
-  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
   /// Display name with fallback to email.
   String get displayName => fullName ?? email.split('@').first;

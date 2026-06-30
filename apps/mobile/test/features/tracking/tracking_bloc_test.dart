@@ -24,7 +24,7 @@ void main() {
     registerFallbackValue(const RouteId('fallback'));
     registerFallbackValue(const TripId('fallback'));
     registerFallbackValue(const DriverId('fallback'));
-    registerFallbackValue(const Coordinates(latitude: 0, longitude: 0));
+    registerFallbackValue(Coordinates(latitude: 0, longitude: 0));
     registerFallbackValue(TripEvent.start);
     registerFallbackValue(FakeTrackingBloc());
   });
@@ -158,8 +158,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverArrive(
-          tripId: TripId('trip-1'),
+        TrackingDriverArrive(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -221,8 +221,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverStart(
-          tripId: TripId('trip-1'),
+        TrackingDriverStart(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
           notificationTitle: 'Title',
           notificationText: 'Text',
@@ -261,8 +261,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverStart(
-          tripId: TripId('trip-1'),
+        TrackingDriverStart(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
           notificationTitle: 'Title',
           notificationText: 'Text',
@@ -301,8 +301,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverStart(
-          tripId: TripId('trip-1'),
+        TrackingDriverStart(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
           notificationTitle: 'Title',
           notificationText: 'Text',
@@ -331,8 +331,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverComplete(
-          tripId: TripId('trip-1'),
+        TrackingDriverComplete(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -363,8 +363,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverComplete(
-          tripId: TripId('trip-1'),
+        TrackingDriverComplete(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -390,8 +390,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverMarkAbsent(
-          tripId: TripId('trip-1'),
+        TrackingDriverMarkAbsent(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -422,8 +422,8 @@ void main() {
         return createBloc();
       },
       act: (bloc) => bloc.add(
-        const TrackingDriverMarkAbsent(
-          tripId: TripId('trip-1'),
+        TrackingDriverMarkAbsent(
+          tripId: const TripId('trip-1'),
           location: Coordinates(latitude: 33.3, longitude: 44.3),
         ),
       ),
@@ -517,7 +517,7 @@ void main() {
         isA<TrackingDriverActive>().having(
           (s) => s.currentLocation,
           'currentLocation',
-          const Coordinates(latitude: 12.34, longitude: 56.78),
+          Coordinates(latitude: 12.34, longitude: 56.78),
         ),
       ],
     );

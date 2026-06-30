@@ -43,7 +43,7 @@ void main() {
     test('throws on invalid input', () {
       expect(
         () => LicenseCode('invalid'),
-        throwsA(isA<ArgumentError>()),
+        throwsA(isA<FormatException>()),
       );
     });
 

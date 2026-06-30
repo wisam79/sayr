@@ -86,7 +86,7 @@ void main() {
       scheduledAt: DateTime.parse('2026-06-04T08:00:00.000Z'),
       startedAt: DateTime.parse('2026-06-04T08:05:00.000Z'),
       endedAt: DateTime.parse('2026-06-04T08:45:00.000Z'),
-      lastLocation: const Coordinates(latitude: 33.3, longitude: 44.4),
+      lastLocation: Coordinates(latitude: 33.3, longitude: 44.4),
     );
 
     test('caches, retrieves, updates and clears trips', () async {
@@ -119,13 +119,13 @@ void main() {
   });
 
   group('RouteCacheDao', () {
-    const testRoute = Route(
-      id: RouteId('route-1'),
-      driverId: DriverId('driver-1'),
+    final testRoute = Route(
+      id: const RouteId('route-1'),
+      driverId: const DriverId('driver-1'),
       title: 'Baghdad Route',
       startLocation: 'Start',
       endLocation: 'End',
-      price: Money(50000),
+      price: const Money(50000),
       capacity: 30,
       availableSeats: 10,
       isActive: true,

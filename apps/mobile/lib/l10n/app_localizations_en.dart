@@ -607,6 +607,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emergencyFailed => 'Failed to send';
 
   @override
+  String get emergencyFailedOffline =>
+      'Failed to send digital emergency alert. Do you want to call the security helpline?';
+
+  @override
   String get locationUnavailable =>
       'Unable to determine your location. Please try again.';
 

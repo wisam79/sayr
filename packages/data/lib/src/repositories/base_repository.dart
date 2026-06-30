@@ -59,9 +59,6 @@ abstract class BaseRepository {
     if (e is supabase.PostgrestException) {
       return _mapPostgrestException(e);
     }
-    if (e is FormatException && e.message == 'license_not_found') {
-      return const NotFoundFailure(message: 'license_not_found');
-    }
     if (e is SocketException || e is HttpException || e is TimeoutException) {
       return const NetworkFailure();
     }
@@ -111,9 +108,28 @@ abstract class BaseRepository {
     if (e is SocketException || e is HttpException || e is TimeoutException) {
       return true;
     }
-    final str = e.toString();
-    return str.contains('SocketException') ||
-        str.contains('HttpException') ||
-        str.contains('TimeoutException');
+    if (e is supabase.PostgrestException) {
+      final message = e.message.toLowerCase();
+      if (e.code == null ||
+          message.contains('socketexception') ||
+          message.contains('failed host lookup') ||
+          message.contains('clientexception')) {
+        return true;
+      }
+    }
+    // Fallback: String matching is used as a secure fallback because network/connection
+    // exceptions are often wrapped inside database/platform-specific exceptions 
+    // (e.g. PostgrestException or PlatformException) where the underlying type is lost
+    // but the error message still contains the connection exception details.
+    final errStr = e.toString().toLowerCase();
+    if (errStr.contains('socketexception') ||
+        errStr.contains('httpexception') ||
+        errStr.contains('timeoutexception') ||
+        errStr.contains('clientexception') ||
+        errStr.contains('failed host lookup') ||
+        errStr.contains('connection closed before full header')) {
+      return true;
+    }
+    return false;
   }
 }
