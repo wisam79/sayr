@@ -218,16 +218,6 @@ Future<void> runSayrApp() async {
   // Initialize FCM service (non-blocking)
   unawaited(FcmService.init());
 
-  // TODO(anti-gravity): [SAYR-342] Migrate OfflineSyncService manual registration to an injectable class
-  // or a standard @lazySingleton module to unify the dependency injection setup.
-  // Register Offline Sync Service in Service Locator
-  final offlineSyncService = OfflineSyncService(
-    localDatasource: sl<LocalDatasource>(),
-    tripRepository: sl<TripRepository>(),
-    talker: sl<Talker>(),
-  );
-  sl.registerSingleton<OfflineSyncService>(offlineSyncService);
-
   // Set up bloc observer
   Bloc.observer = TalkerBlocObserver(
     talker: sl<Talker>(),

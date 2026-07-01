@@ -90,3 +90,9 @@ flutter:
     - assets/images/
     - assets/animations/
     - assets/google_fonts/
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 24

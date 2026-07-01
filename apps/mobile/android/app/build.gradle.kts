@@ -35,6 +35,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        testInstrumentationRunner = "pl.leancode.patrol.PatrolJUnitRunner"
     }
 
     signingConfigs {
@@ -51,10 +52,12 @@ android {
 
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
+            val storeFilePath = keystoreProperties.getProperty("storeFile")
+            if (keystorePropertiesFile.exists() && storeFilePath != null && file(storeFilePath).exists()) {
                 signingConfig = signingConfigs.getByName("release")
             } else {
-                logger.warn("key.properties file is missing. Release build cannot be signed.")
+                logger.warn("Keystore file is missing. Falling back to debug keystore for release build.")
+                signingConfig = signingConfigs.getByName("debug")
             }
             isMinifyEnabled = true
             isShrinkResources = true
