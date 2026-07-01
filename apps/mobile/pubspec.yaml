@@ -8,7 +8,7 @@ environment:
   flutter: ">=3.22.0"
 
 dependencies:
-  awesome_notifications: ^0.10.0
+  awesome_notifications: ^0.12.0
   bloc: ^8.1.4
   bloc_concurrency: ^0.2.5
   cached_network_image: ^3.4.1
