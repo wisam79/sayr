@@ -20,7 +20,7 @@ dependencies:
   freezed_annotation: ^3.0.0
   geolocator: ^13.0.0
   get_it: ^7.7.0
-  google_sign_in: ^6.2.1
+  google_sign_in: ^7.2.0
   injectable: ^2.4.4
   json_annotation: ^4.9.0
   logger: ^2.4.0
