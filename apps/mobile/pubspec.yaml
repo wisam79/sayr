@@ -45,7 +45,7 @@ dependencies:
   lottie: ^3.1.2
   maplibre_gl: ^0.22.0
   mobile_scanner: ^7.2.0
-  package_info_plus: ^8.0.2
+  package_info_plus: ^9.0.1
   permission_handler: ^11.3.1
   pretty_qr_code: ^3.5.0
   retry: ^3.1.2
