@@ -147,11 +147,15 @@ class ChatRepositoryImpl extends BaseRepository implements ChatRepository {
       final sanitizedBody = body.replaceAll(RegExp('<[^>]*>'), '').trim();
 
       if (sanitizedBody.isEmpty) {
-        throw const ValidationFailure(message: 'Message body cannot be empty');
+        throw const ValidationFailure(
+          message: 'Message body cannot be empty',
+          errors: ['message_body_empty'],
+        );
       }
       if (sanitizedBody.length > 2000) {
         throw const ValidationFailure(
           message: 'Message body cannot exceed 2000 characters',
+          errors: ['message_body_too_long'],
         );
       }
 

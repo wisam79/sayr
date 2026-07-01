@@ -64,7 +64,10 @@ class BleOtpCubit extends Cubit<BleOtpState> {
     Future<void> updateOtp() async {
       try {
         final otp = generateOtp();
-        final expiresAt = DateTime.now().add(const Duration(seconds: 45));
+        // Expiry is set to 60 s (rotation is every 30 s).
+        // The 30 s buffer absorbs typical RPC latency so the server always
+        // stores an OTP that is valid for at least 30 s from server receipt.
+        final expiresAt = DateTime.now().add(const Duration(seconds: 60));
 
         emit(BleOtpState.rotating(otp: otp, expiresAt: expiresAt));
 

@@ -46,6 +46,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthCheckRequested event,
     Emitter<AuthState> emit,
   ) async {
+    // Guard against duplicate AuthCheckRequested events. These can arrive
+    // concurrently when:
+    //   1. app.dart adds the event explicitly after bloc creation, AND
+    //   2. the authStateChanges subscription fires 'authenticated' at the same time.
+    // If the first run already produced a terminal auth state, the second run
+    // is a no-op to avoid a redundant profile fetch.
+    if (state is AuthAuthenticated || state is AuthProfileIncomplete) return;
+
     final currentUser = _authRepository.currentUser;
     if (currentUser != null) {
       emit(const AuthLoading());

@@ -114,7 +114,10 @@ class TrackingUiCubit extends Cubit<TrackingUiState> {
 
     final distance = driverLocation.distanceToMeters(targetLoc);
     final distanceKm = distance / 1000;
-    final minutes = (distance / 500).round();
+    // Approximate urban speed: ~30 km/h = 500 m/min.
+    // This is a best-effort estimate; clamp to at least 1 min so the UI
+    // never shows "0 min" for a nearby driver.
+    final minutes = (distance / 500).round().clamp(1, 999);
 
     emit(
       state.copyWith(

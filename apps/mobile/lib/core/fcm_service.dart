@@ -17,13 +17,27 @@ class FcmService {
   static Talker get _talker => sl<Talker>();
 
   static bool _initialized = false;
+
+  /// Stores the in-progress (or completed) init future so [registerDeviceToken]
+  /// can await it even when [init] was called with [unawaited].
+  static Future<void>? _initFuture;
   static StreamSubscription<String>? _tokenRefreshSubscription;
 
   /// Optional navigation callback. Receives the parsed type-safe [FcmPayload].
   static void Function(FcmPayload payload)? navigationHandler;
 
   /// Initialize FCM + awesome_notifications.
-  static Future<void> init() async {
+  ///
+  /// Safe to call with [unawaited]; [registerDeviceToken] will internally
+  /// await this future to avoid a race on fast session restores.
+  static Future<void> init() {
+    // Return the existing future to avoid re-initialising on concurrent calls.
+    if (_initFuture != null) return _initFuture!;
+    _initFuture = _doInit();
+    return _initFuture!;
+  }
+
+  static Future<void> _doInit() async {
     if (!Platform.isAndroid && !Platform.isIOS) {
       return;
     }
@@ -86,6 +100,9 @@ class FcmService {
   static Future<void> registerDeviceToken(
     NotificationsRepository repository,
   ) async {
+    // Await init in case it was called with unawaited and is still in progress
+    // (race: auth check can complete before FCM init on a fast session restore).
+    if (_initFuture != null) await _initFuture;
     if (!_initialized) return;
     try {
       final token = await FirebaseMessaging.instance.getToken();

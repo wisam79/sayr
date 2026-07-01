@@ -49,8 +49,8 @@ class DriverLocationServiceImpl implements LocationService {
             requested == geo.LocationPermission.deniedForever) {
           return const Left(LocationFailure(isPermissionDenied: true));
         }
-      }
-      if (permission == geo.LocationPermission.deniedForever) {
+      } else if (permission == geo.LocationPermission.deniedForever) {
+        // Permission was already permanently denied — cannot prompt the user again.
         return const Left(LocationFailure(isPermissionDenied: true));
       }
 
@@ -133,8 +133,8 @@ class DriverLocationServiceImpl implements LocationService {
     if (defaultTargetPlatform == TargetPlatform.android) {
       return geo.AndroidSettings(
         accuracy: geo.LocationAccuracy.high,
-        distanceFilter: 10,
-        intervalDuration: const Duration(seconds: 5),
+        distanceFilter: 20,
+        intervalDuration: const Duration(seconds: 10),
         foregroundNotificationConfig: geo.ForegroundNotificationConfig(
           notificationText: notificationText,
           notificationTitle: notificationTitle,
@@ -144,7 +144,7 @@ class DriverLocationServiceImpl implements LocationService {
     }
     return const geo.LocationSettings(
       accuracy: geo.LocationAccuracy.high,
-      distanceFilter: 10,
+      distanceFilter: 20,
     );
   }
 
