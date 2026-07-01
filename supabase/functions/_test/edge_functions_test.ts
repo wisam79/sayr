@@ -42,7 +42,7 @@ Deno.test("process-payment: amount mismatch detection", () => {
 });
 
 Deno.test("process-payment: idempotency — already processed returns early", () => {
-  const existingPaymentStatus = "completed";
+  const existingPaymentStatus = "completed" as string;
   assertEquals(existingPaymentStatus !== "pending", true, "Non-pending should skip processing");
 });
 
@@ -84,8 +84,8 @@ Deno.test("emergency-alert: rate limit — count 0 allows new report", () => {
 });
 
 Deno.test("emergency-alert: rejects student ID mismatch", () => {
-  const jwtUserId = "user-abc-123";
-  const bodyStudentId = "user-xyz-789";
+  const jwtUserId = "user-abc-123" as string;
+  const bodyStudentId = "user-xyz-789" as string;
   assertEquals(jwtUserId !== bodyStudentId, true, "ID mismatch should be forbidden");
 });
 
@@ -118,7 +118,7 @@ Deno.test("send-push-notification: marks invalid token as inactive on 404", () =
 });
 
 Deno.test("send-push-notification: does NOT deactivate on 500 server error", () => {
-  const fcmResponseStatus = 500;
+  const fcmResponseStatus = 500 as number;
   const shouldDeactivate = fcmResponseStatus === 404 || fcmResponseStatus === 400;
   assertEquals(shouldDeactivate, false);
 });
@@ -144,7 +144,7 @@ Deno.test("trip-status-webhook: status mapping — arrive → driver_waiting", (
 
 Deno.test("trip-status-webhook: driver ownership — rejects mismatch", () => {
   const tripDriverId = "driver-aaa";
-  const requestDriverId = "driver-bbb";
+  const requestDriverId = "driver-bbb" as string;
   assertEquals(tripDriverId !== requestDriverId, true, "Mismatched driver should be forbidden");
 });
 
