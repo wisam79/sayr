@@ -384,24 +384,24 @@ class _SayrMapState extends State<SayrMap> {
     final mapStyle = isDark ? openFreeMapDarkStyle : openFreeMapLightStyle;
 
     return Semantics(
-        label: 'Trip Map', // This map represents the active trip or routes
-        child: MapLibreMap(
-          initialCameraPosition: widget.initialCameraPosition ??
-              const CameraPosition(
-                target: SayrMap.defaultCenter,
-                zoom: 13,
-              ),
-          styleString: mapStyle,
-          myLocationEnabled: widget.myLocationEnabled,
-          onMapCreated: (controller) {
-            _controller = controller;
-            widget.onMapCreated?.call(controller);
-            unawaited(_syncMarkers());
-            unawaited(_syncRouteLine());
-          },
-          onMapLongClick: widget.onMapLongClick,
-        ),
-      );
+      label: 'Trip Map', // This map represents the active trip or routes
+      child: MapLibreMap(
+        initialCameraPosition: widget.initialCameraPosition ??
+            const CameraPosition(
+              target: SayrMap.defaultCenter,
+              zoom: 13,
+            ),
+        styleString: mapStyle,
+        myLocationEnabled: widget.myLocationEnabled,
+        onMapCreated: (controller) {
+          _controller = controller;
+          widget.onMapCreated?.call(controller);
+          unawaited(_syncMarkers());
+          unawaited(_syncRouteLine());
+        },
+        onMapLongClick: widget.onMapLongClick,
+      ),
+    );
   }
 }
 
