@@ -18,8 +18,14 @@ import 'package:sayr_mobile/features/subscriptions/presentation/bloc/subscriptio
 import 'package:sayr_mobile/l10n/app_localizations.dart';
 
 class MockAuthBloc extends MockBloc<AuthEvent, AuthState> implements AuthBloc {}
-class MockSubscriptionsBloc extends MockBloc<SubscriptionsEvent, SubscriptionsState> implements SubscriptionsBloc {}
-class MockNotificationsBloc extends MockBloc<NotificationsEvent, NotificationsState> implements NotificationsBloc {}
+
+class MockSubscriptionsBloc
+    extends MockBloc<SubscriptionsEvent, SubscriptionsState>
+    implements SubscriptionsBloc {}
+
+class MockNotificationsBloc
+    extends MockBloc<NotificationsEvent, NotificationsState>
+    implements NotificationsBloc {}
 
 void main() {
   late MockAuthBloc mockAuthBloc;
@@ -31,8 +37,10 @@ void main() {
     mockSubscriptionsBloc = MockSubscriptionsBloc();
     mockNotificationsBloc = MockNotificationsBloc();
 
-    when(() => mockSubscriptionsBloc.state).thenReturn(const SubscriptionsInitial());
-    when(() => mockNotificationsBloc.state).thenReturn(const NotificationsState.initial());
+    when(() => mockSubscriptionsBloc.state)
+        .thenReturn(const SubscriptionsInitial());
+    when(() => mockNotificationsBloc.state)
+        .thenReturn(const NotificationsState.initial());
   });
 
   Widget wrap(Widget child) {

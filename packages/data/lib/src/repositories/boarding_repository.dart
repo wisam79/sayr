@@ -58,7 +58,8 @@ class BoardingRepositoryImpl extends BaseRepository
         subscriptionId: row['subscription_id']?.toString() ?? '',
         studentId: row['student_id']?.toString() ?? '',
         studentName: row['student_name']?.toString(),
-        boardedAt: DateTime.tryParse(row['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+        boardedAt: DateTime.tryParse(row['boarded_at']?.toString() ?? '') ??
+            DateTime.now(),
       );
       return model.toEntity();
     });
@@ -75,10 +76,12 @@ class BoardingRepositoryImpl extends BaseRepository
             (r) => BoardingRecordModel(
               id: r['boarding_id']?.toString() ?? '',
               tripId: tripId.value,
-              subscriptionId: null, // not returned by RPC; sufficient for list view
+              subscriptionId:
+                  null, // not returned by RPC; sufficient for list view
               studentId: r['student_id']?.toString() ?? '',
               studentName: r['student_name']?.toString(),
-              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ??
+                  DateTime.now(),
               boardingMethod: r['boarding_method']?.toString() ?? 'qr_scan',
             ),
           )
@@ -114,7 +117,8 @@ class BoardingRepositoryImpl extends BaseRepository
               subscriptionId: r['subscription_id']?.toString() ?? '',
               studentId: studentId,
               studentName: nameMap[studentId],
-              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ??
+                  DateTime.now(),
               boardingMethod: r['boarding_method']?.toString() ?? 'qr_scan',
             ).toEntity();
           }).toList();
@@ -129,7 +133,8 @@ class BoardingRepositoryImpl extends BaseRepository
               subscriptionId: r['subscription_id']?.toString() ?? '',
               studentId: studentId,
               studentName: null,
-              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ??
+                  DateTime.now(),
               boardingMethod: r['boarding_method']?.toString() ?? 'qr_scan',
             ).toEntity();
           }).toList();
@@ -157,7 +162,8 @@ class BoardingRepositoryImpl extends BaseRepository
         subscriptionId: row['subscription_id']?.toString() ?? '',
         studentId: row['student_id']?.toString() ?? '',
         studentName: row['student_name']?.toString(),
-        boardedAt: DateTime.tryParse(row['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+        boardedAt: DateTime.tryParse(row['boarded_at']?.toString() ?? '') ??
+            DateTime.now(),
         boardingMethod: 'self_check_in',
       );
       return model.toEntity();

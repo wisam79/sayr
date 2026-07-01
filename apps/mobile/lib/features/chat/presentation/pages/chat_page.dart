@@ -128,7 +128,8 @@ class _ChatBody extends StatelessWidget {
           Container(
             width: double.infinity,
             color: Theme.of(context).colorScheme.errorContainer,
-            padding: const EdgeInsetsDirectional.symmetric(vertical: 4, horizontal: 8),
+            padding: const EdgeInsetsDirectional.symmetric(
+                vertical: 4, horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
