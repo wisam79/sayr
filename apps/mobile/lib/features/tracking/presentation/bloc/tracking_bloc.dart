@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:injectable/injectable.dart';
-
 import 'package:bloc/bloc.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_event.dart';
 import 'package:sayr_mobile/features/tracking/presentation/bloc/tracking_state.dart';

@@ -48,7 +48,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ConversationId? get conversationId =>
       _conversationId ??
       state.maybeWhen(
-        loaded: (id, _, __, ___) => id,
+        loaded: (id, _, __, ___, ____) => id,
         orElse: () => null,
       );
 
@@ -60,7 +60,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   List<Message> _currentMessages() {
     return state.maybeWhen(
-      loaded: (_, msgs, __, ___) => msgs,
+      loaded: (_, msgs, __, ___, ____) => msgs,
       orElse: () => const <Message>[],
     );
   }

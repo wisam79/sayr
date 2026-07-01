@@ -400,7 +400,8 @@ class _SayrMapState extends State<SayrMap> {
             unawaited(_syncRouteLine());
           },
           onMapLongClick: widget.onMapLongClick,
-        ));
+        ),
+      );
   }
 }
 
