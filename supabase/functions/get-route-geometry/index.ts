@@ -8,6 +8,11 @@ interface GetRouteGeometryPayload {
   endLat: number;
 }
 
+// In-memory rate limiter: max requests per user per window.
+const RATE_LIMIT_MAX = 30;
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
 /**
  * Proxy function that calls OSRM (hosted on Hugging Face) on behalf of the client.
  *
@@ -50,6 +55,21 @@ Deno.serve(async (req) => {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Rate limit: max RATE_LIMIT_MAX requests per RATE_LIMIT_WINDOW_MS per user.
+    const now = Date.now();
+    const entry = rateLimitMap.get(user.id);
+    if (entry && now < entry.resetAt) {
+      if (entry.count >= RATE_LIMIT_MAX) {
+        return new Response(JSON.stringify({ error: 'rate limited: too many geometry requests' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      entry.count++;
+    } else {
+      rateLimitMap.set(user.id, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
     }
 
     const payload: GetRouteGeometryPayload = await req.json();

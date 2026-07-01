@@ -5,4 +5,7 @@ class GlobalKeys {
   /// The global scaffold messenger key.
   static GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
+
+  /// The global root navigator key.
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }

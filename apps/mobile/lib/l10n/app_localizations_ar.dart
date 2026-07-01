@@ -1084,4 +1084,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statsComingSoon => 'ستتوفر الإحصائيات قريباً';
+
+  @override
+  String get flashTitleSuccess => 'نجاح';
+
+  @override
+  String get flashTitleError => 'خطأ';
+
+  @override
+  String get flashTitleWarning => 'تنبيه';
+
+  @override
+  String get flashTitleInfo => 'معلومة';
+
+  @override
+  String get genericError => 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get genericException => 'حدث استثناء غير متوقع.';
 }

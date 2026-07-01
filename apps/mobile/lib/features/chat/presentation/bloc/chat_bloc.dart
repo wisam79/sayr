@@ -113,6 +113,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       ChatState.loaded(
         conversationId: id,
         messages: _currentMessages(),
+        streamError: event.failure,
       ),
     );
   }

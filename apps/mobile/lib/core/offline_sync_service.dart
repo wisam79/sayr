@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:sayr_core/sayr_core.dart';
 import 'package:sayr_data/sayr_data.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 /// Service that monitors connectivity and syncs pending locations when online.
+@lazySingleton
 class OfflineSyncService {
   /// Creates an [OfflineSyncService].
   OfflineSyncService({

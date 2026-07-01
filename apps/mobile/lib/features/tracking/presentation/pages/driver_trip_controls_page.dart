@@ -47,13 +47,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
   @override
   void initState() {
     super.initState();
-    _trackingBloc = widget.trackingBloc ??
-        TrackingBloc(
-          tripRepository: sl<TripRepository>(),
-          authRepository: sl<AuthRepository>(),
-          driverLocationService: sl<LocationService>(),
-          talker: sl<Talker>(),
-        );
+    _trackingBloc = widget.trackingBloc ?? sl<TrackingBloc>();
     _bleOtpCubit = BleOtpCubit(
       bleBeaconService: sl<BleBeaconService>(),
       tripRepository: sl<TripRepository>(),
@@ -66,7 +60,7 @@ class _DriverTripControlsPageState extends State<DriverTripControlsPage> {
 
   @override
   void dispose() {
-    _trackingBloc.close();
+    // _trackingBloc is a singleton, do not close it here.
     _bleOtpCubit.close();
     super.dispose();
   }

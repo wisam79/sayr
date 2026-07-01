@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:bloc/bloc.dart';
 import 'package:fpdart/fpdart.dart';
@@ -91,7 +92,8 @@ class PaymentBloc extends Bloc<PaymentEvent, PaymentState> {
   Future<void> _startPolling(String paymentId, int session) async {
     var iterations = 0;
     while (session == _currentPollSession && !isClosed) {
-      await Future<void>.delayed(const Duration(seconds: 3));
+      final delaySeconds = math.min(3 * math.pow(1.2, iterations).toInt(), 15);
+      await Future<void>.delayed(Duration(seconds: delaySeconds));
       if (session != _currentPollSession || isClosed) return;
 
       iterations++;

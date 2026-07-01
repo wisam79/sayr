@@ -21,6 +21,7 @@ sealed class ChatState with _$ChatState {
     required List<Message> messages,
     @Default(false) bool isSending,
     Failure? sendError,
+    Failure? streamError,
   }) = ChatLoaded;
 
   const factory ChatState.error({required Failure failure}) = ChatError;

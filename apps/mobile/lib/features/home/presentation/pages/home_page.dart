@@ -169,10 +169,13 @@ class _HomeViewState extends State<_HomeView> {
                                   label: l10n.activeTrips,
                                 ),
                                 NavigationDestination(
-                                  icon: _AnimatedNavIcon(
-                                    icon: Icons.person_outline_rounded,
-                                    selectedIcon: Icons.person_rounded,
-                                    isSelected: index == 2,
+                                  icon: Semantics(
+                                    label: l10n.profile,
+                                    child: _AnimatedNavIcon(
+                                      icon: Icons.person_outline_rounded,
+                                      selectedIcon: Icons.person_rounded,
+                                      isSelected: index == 2,
+                                    ),
                                   ),
                                   label: l10n.profile,
                                 ),

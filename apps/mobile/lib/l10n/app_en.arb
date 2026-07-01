@@ -488,6 +488,12 @@
   "welcomeGuest": "Welcome",
   "welcomeSubtitle": "Welcome to your rides",
   "comingSoon": "Coming soon",
-  "statsComingSoon": "Statistics will be available soon"
+  "statsComingSoon": "Statistics will be available soon",
+  "flashTitleSuccess": "Success",
+  "flashTitleError": "Error",
+  "flashTitleWarning": "Warning",
+  "flashTitleInfo": "Info",
+  "genericError": "An error occurred. Please try again.",
+  "genericException": "An unexpected error occurred."
 }
 

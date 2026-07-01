@@ -53,12 +53,12 @@ class BoardingRepositoryImpl extends BaseRepository
       );
       // The RPC returns the fields directly (joined with student name).
       final model = BoardingRecordModel(
-        id: row['boarding_id'] as String,
+        id: row['boarding_id']?.toString() ?? '',
         tripId: tripId.value,
-        subscriptionId: row['subscription_id'] as String,
-        studentId: row['student_id'] as String,
-        studentName: row['student_name'] as String?,
-        boardedAt: DateTime.parse(row['boarded_at'] as String),
+        subscriptionId: row['subscription_id']?.toString() ?? '',
+        studentId: row['student_id']?.toString() ?? '',
+        studentName: row['student_name']?.toString(),
+        boardedAt: DateTime.tryParse(row['boarded_at']?.toString() ?? '') ?? DateTime.now(),
       );
       return model.toEntity();
     });
@@ -73,14 +73,13 @@ class BoardingRepositoryImpl extends BaseRepository
       return rows
           .map(
             (r) => BoardingRecordModel(
-              id: r['boarding_id'] as String,
+              id: r['boarding_id']?.toString() ?? '',
               tripId: tripId.value,
-              subscriptionId:
-                  null, // not returned by RPC; sufficient for list view
-              studentId: r['student_id'] as String,
-              studentName: r['student_name'] as String?,
-              boardedAt: DateTime.parse(r['boarded_at'] as String),
-              boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
+              subscriptionId: null, // not returned by RPC; sufficient for list view
+              studentId: r['student_id']?.toString() ?? '',
+              studentName: r['student_name']?.toString(),
+              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+              boardingMethod: r['boarding_method']?.toString() ?? 'qr_scan',
             ),
           )
           .map((m) => m.toEntity())
@@ -94,8 +93,11 @@ class BoardingRepositoryImpl extends BaseRepository
       (rows) async {
         if (rows.isEmpty) return const <BoardingRecord>[];
 
-        final studentIds =
-            rows.map((r) => r['student_id'] as String).toSet().toList();
+        final studentIds = rows
+            .map((r) => r['student_id']?.toString() ?? '')
+            .where((id) => id.isNotEmpty)
+            .toSet()
+            .toList();
 
         try {
           final profiles =
@@ -105,30 +107,30 @@ class BoardingRepositoryImpl extends BaseRepository
           };
 
           return rows.map((r) {
-            final studentId = r['student_id'] as String;
+            final studentId = r['student_id']?.toString() ?? '';
             return BoardingRecordModel(
-              id: r['id'] as String,
+              id: r['id']?.toString() ?? '',
               tripId: tripId.value,
-              subscriptionId: r['subscription_id'] as String? ?? '',
+              subscriptionId: r['subscription_id']?.toString() ?? '',
               studentId: studentId,
               studentName: nameMap[studentId],
-              boardedAt: DateTime.parse(r['boarded_at'] as String),
-              boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
+              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+              boardingMethod: r['boarding_method']?.toString() ?? 'qr_scan',
             ).toEntity();
           }).toList();
         } catch (e, st) {
           log.warning(
               'Failed to resolve student names in watchTripPassengers', e, st);
           return rows.map((r) {
-            final studentId = r['student_id'] as String;
+            final studentId = r['student_id']?.toString() ?? '';
             return BoardingRecordModel(
-              id: r['id'] as String,
+              id: r['id']?.toString() ?? '',
               tripId: tripId.value,
-              subscriptionId: r['subscription_id'] as String? ?? '',
+              subscriptionId: r['subscription_id']?.toString() ?? '',
               studentId: studentId,
               studentName: null,
-              boardedAt: DateTime.parse(r['boarded_at'] as String),
-              boardingMethod: r['boarding_method'] as String? ?? 'qr_scan',
+              boardedAt: DateTime.tryParse(r['boarded_at']?.toString() ?? '') ?? DateTime.now(),
+              boardingMethod: r['boarding_method']?.toString() ?? 'qr_scan',
             ).toEntity();
           }).toList();
         }
@@ -150,12 +152,12 @@ class BoardingRepositoryImpl extends BaseRepository
         lng: studentLocation?.longitude,
       );
       final model = BoardingRecordModel(
-        id: row['boarding_id'] as String,
+        id: row['boarding_id']?.toString() ?? '',
         tripId: tripId.value,
-        subscriptionId: row['subscription_id'] as String,
-        studentId: row['student_id'] as String,
-        studentName: row['student_name'] as String?,
-        boardedAt: DateTime.parse(row['boarded_at'] as String),
+        subscriptionId: row['subscription_id']?.toString() ?? '',
+        studentId: row['student_id']?.toString() ?? '',
+        studentName: row['student_name']?.toString(),
+        boardedAt: DateTime.tryParse(row['boarded_at']?.toString() ?? '') ?? DateTime.now(),
         boardingMethod: 'self_check_in',
       );
       return model.toEntity();

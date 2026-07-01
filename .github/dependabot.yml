@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directory: "/apps/mobile"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pub"
+    directory: "/packages/core"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pub"
+    directory: "/packages/data"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pub"
+    directory: "/packages/ui_kit"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "npm"
+    directory: "/supabase/functions"
+    schedule:
+      interval: "weekly"

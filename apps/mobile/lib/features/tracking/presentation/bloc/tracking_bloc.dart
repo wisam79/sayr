@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:injectable/injectable.dart';
+
 import 'package:bloc/bloc.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:sayr_core/sayr_core.dart';
@@ -11,6 +13,7 @@ import 'package:talker_flutter/talker_flutter.dart';
 ///
 /// Student: loads active trips on map, watches a specific trip.
 /// Driver: manages trip lifecycle (arrive/start/complete/cancel) and streams location.
+@lazySingleton
 class TrackingBloc extends Bloc<TrackingEvent, TrackingState> {
   /// Creates a [TrackingBloc] with the given [tripRepository] and [authRepository].
   TrackingBloc({

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sayr_mobile/core/global_keys.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
 /// Intercepts global errors and exceptions logged by Talker to optionally
@@ -8,7 +9,8 @@ class GlobalErrorObserver extends TalkerObserver {
   @override
   void onError(TalkerError err) {
     super.onError(err);
-    _showErrorSnackBar(err.message ?? 'حدث خطأ. يرجى المحاولة مرة أخرى.');
+    final fallback = _localizedFallback((l10n) => l10n.genericError);
+    _showErrorSnackBar(err.message ?? fallback);
   }
 
   @override
@@ -17,7 +19,22 @@ class GlobalErrorObserver extends TalkerObserver {
     // Ignore cancelled operations or silent exceptions
     if (err.exception.toString().contains('cancelled')) return;
 
-    _showErrorSnackBar(err.message ?? 'حدث استثناء غير متوقع.');
+    final fallback = _localizedFallback((l10n) => l10n.genericException);
+    _showErrorSnackBar(err.message ?? fallback);
+  }
+
+  /// Attempt to resolve a localized string via the current navigator context.
+  /// Falls back to a neutral message if no context is available.
+  String _localizedFallback(String Function(AppLocalizations) selector) {
+    final context = GlobalKeys.navigatorKey.currentContext;
+    if (context != null) {
+      try {
+        return selector(AppLocalizations.of(context));
+      } catch (_) {
+        // AppLocalizations may not be available (e.g., during early startup).
+      }
+    }
+    return 'An error occurred.';
   }
 
   void _showErrorSnackBar(String message) {

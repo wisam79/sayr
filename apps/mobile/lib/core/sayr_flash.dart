@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flash/flash.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:sayr_mobile/l10n/app_localizations.dart';
 import 'package:sayr_ui_kit/sayr_ui_kit.dart';
 
 enum _FlashSeverity {
@@ -90,14 +91,28 @@ class SayrFlash {
         final theme = Theme.of(context);
         final cardColor = theme.cardColor;
 
-        // Determine if current locale is Arabic
-        final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-        final title = switch (severity) {
-          _FlashSeverity.success => isArabic ? 'نجاح' : 'Success',
-          _FlashSeverity.error => isArabic ? 'خطأ' : 'Error',
-          _FlashSeverity.warning => isArabic ? 'تنبيه' : 'Warning',
-          _FlashSeverity.info => isArabic ? 'توضيح' : 'Info',
-        };
+        // Determine title using localized strings via AppLocalizations
+        // Fallback to English if not available.
+        String getLocalizedTitle() {
+          try {
+            final l10n = AppLocalizations.of(context);
+            return switch (severity) {
+              _FlashSeverity.success => l10n.flashTitleSuccess,
+              _FlashSeverity.error => l10n.flashTitleError,
+              _FlashSeverity.warning => l10n.flashTitleWarning,
+              _FlashSeverity.info => l10n.flashTitleInfo,
+            };
+          } catch (_) {
+            return switch (severity) {
+              _FlashSeverity.success => 'Success',
+              _FlashSeverity.error => 'Error',
+              _FlashSeverity.warning => 'Warning',
+              _FlashSeverity.info => 'Info',
+            };
+          }
+        }
+
+        final title = getLocalizedTitle();
 
         // Blend severity color tint with base card color for rich frosted glass look
         final baseColor = cardColor.withValues(alpha: 0.9);

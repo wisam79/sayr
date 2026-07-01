@@ -43,6 +43,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (locations.length > 500) {
+      return new Response(JSON.stringify({ error: 'too many locations: max 500 per request' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Authenticate using the driver's own JWT instead of service_role.
     // This ensures the per-element SQL check (d.user_id = auth.uid()) works.
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

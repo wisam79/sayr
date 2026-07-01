@@ -93,7 +93,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Strip signature and meta from object to prevent circular dependency in HMAC signature calculation
+    // Strip signature and meta from signed data.
+    // IMPORTANT: meta is excluded because it contains arbitrary key-value pairs
+    // whose JSON serialization order can differ between sender and receiver,
+    // causing legitimate payments to fail signature verification.
     const signedData = {
       orderId: payload.orderId,
       status: payload.status,
@@ -101,9 +104,9 @@ Deno.serve(async (req) => {
       currency: payload.currency,
       studentId: payload.studentId,
       routeId: payload.routeId,
-      ...(payload.meta ? { meta: payload.meta } : {})
     };
-    const cleanBody = JSON.stringify(signedData);
+    // Sort keys to guarantee deterministic serialization across environments.
+    const cleanBody = JSON.stringify(signedData, Object.keys(signedData).sort());
 
     const isValid = await verifySignature(cleanBody, signature, merchantSecret);
     if (!isValid) {

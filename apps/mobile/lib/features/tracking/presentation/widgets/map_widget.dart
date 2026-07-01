@@ -383,7 +383,9 @@ class _SayrMapState extends State<SayrMap> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final mapStyle = isDark ? openFreeMapDarkStyle : openFreeMapLightStyle;
 
-    return MapLibreMap(
+    return Semantics(
+      label: 'Trip Map', // This map represents the active trip or routes
+      child: MapLibreMap(
       initialCameraPosition: widget.initialCameraPosition ??
           const CameraPosition(
             target: SayrMap.defaultCenter,
@@ -398,7 +400,7 @@ class _SayrMapState extends State<SayrMap> {
         unawaited(_syncRouteLine());
       },
       onMapLongClick: widget.onMapLongClick,
-    );
+    ));
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hive_ce/hive.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sayr_core/sayr_core.dart' as core;
 import 'package:sayr_mobile/core/locale_cubit.dart';
 import 'package:sayr_mobile/core/sayr_flash.dart';
@@ -502,11 +503,17 @@ class _ProfileViewState extends State<_ProfileView> {
 
         const SizedBox(height: AppSpacing.lg),
         Center(
-          child: Text(
-            l10n.appVersion('1.0.0'),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+          child: FutureBuilder<PackageInfo>(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) {
+              final version = snapshot.hasData ? snapshot.data!.version : '...';
+              return Text(
+                l10n.appVersion(version),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              );
+            },
           ),
         ),
       ],

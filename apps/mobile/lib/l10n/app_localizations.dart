@@ -2101,6 +2101,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Statistics will be available soon'**
   String get statsComingSoon;
+
+  /// No description provided for @flashTitleSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get flashTitleSuccess;
+
+  /// No description provided for @flashTitleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get flashTitleError;
+
+  /// No description provided for @flashTitleWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get flashTitleWarning;
+
+  /// No description provided for @flashTitleInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get flashTitleInfo;
+
+  /// No description provided for @genericError.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get genericError;
+
+  /// No description provided for @genericException.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred.'**
+  String get genericException;
 }
 
 class _AppLocalizationsDelegate

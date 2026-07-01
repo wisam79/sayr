@@ -1091,4 +1091,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statsComingSoon => 'Statistics will be available soon';
+
+  @override
+  String get flashTitleSuccess => 'Success';
+
+  @override
+  String get flashTitleError => 'Error';
+
+  @override
+  String get flashTitleWarning => 'Warning';
+
+  @override
+  String get flashTitleInfo => 'Info';
+
+  @override
+  String get genericError => 'An error occurred. Please try again.';
+
+  @override
+  String get genericException => 'An unexpected error occurred.';
 }
