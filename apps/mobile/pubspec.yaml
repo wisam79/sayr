@@ -79,7 +79,7 @@ dev_dependencies:
   mocktail: ^1.0.4
   patrol: ^3.7.0
   supabase_flutter: ^2.5.0
-  very_good_analysis: ^6.0.0
+  very_good_analysis: ^10.3.0
 
 flutter:
   uses-material-design: true
