@@ -94,8 +94,8 @@ Deno.test("emergency-alert: rejects student ID mismatch", () => {
 // ---------------------------------------------------------------------------
 
 Deno.test("send-push-notification: timing-safe comparison — rejects mismatched keys", () => {
-  const authHeader = "Bearer invalid-token";
-  const serviceRoleKey = "valid-service-role-key";
+  const authHeader = "Bearer invalid-token" as string;
+  const serviceRoleKey = "valid-service-role-key" as string;
   assertEquals(authHeader === `Bearer ${serviceRoleKey}`, false);
 });
 
