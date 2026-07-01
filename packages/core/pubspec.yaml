@@ -13,7 +13,7 @@ dependencies:
   freezed_annotation: ^3.0.0
   fsm2: ^3.3.1
   intl: ^0.20.2
-  latlong2: ^0.9.1
+  latlong2: ^0.10.1
   meta: ^1.11.0
 
 dev_dependencies:
