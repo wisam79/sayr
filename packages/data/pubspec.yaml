@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   clock: ^1.1.1
-  connectivity_plus: ^6.0.5
+  connectivity_plus: ^7.2.0
   drift: ^2.20.0
   drift_flutter: ^0.2.0
   equatable: ^2.0.5
