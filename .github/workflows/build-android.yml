@@ -62,10 +62,28 @@ jobs:
           EOF
 
       - name: Build APK
-        run: cd apps/mobile && flutter build apk --release
+        run: |
+          cd apps/mobile && flutter build apk --release \
+            --dart-define="SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
+            --dart-define="SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
+            --dart-define="SUPABASE_LOGIN_REDIRECT_URL=${{ secrets.SUPABASE_LOGIN_REDIRECT_URL }}" \
+            --dart-define="SUPABASE_RESET_REDIRECT_URL=${{ secrets.SUPABASE_RESET_REDIRECT_URL }}" \
+            --dart-define="GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}" \
+            --dart-define="GOOGLE_ANDROID_CLIENT_ID=${{ secrets.GOOGLE_ANDROID_CLIENT_ID }}" \
+            --dart-define="SENTRY_DSN=${{ secrets.SENTRY_DSN }}" \
+            --dart-define="SENTRY_ENVIRONMENT=production"
 
       - name: Build AAB
-        run: cd apps/mobile && flutter build appbundle --release
+        run: |
+          cd apps/mobile && flutter build appbundle --release \
+            --dart-define="SUPABASE_URL=${{ secrets.SUPABASE_URL }}" \
+            --dart-define="SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" \
+            --dart-define="SUPABASE_LOGIN_REDIRECT_URL=${{ secrets.SUPABASE_LOGIN_REDIRECT_URL }}" \
+            --dart-define="SUPABASE_RESET_REDIRECT_URL=${{ secrets.SUPABASE_RESET_REDIRECT_URL }}" \
+            --dart-define="GOOGLE_WEB_CLIENT_ID=${{ secrets.GOOGLE_WEB_CLIENT_ID }}" \
+            --dart-define="GOOGLE_ANDROID_CLIENT_ID=${{ secrets.GOOGLE_ANDROID_CLIENT_ID }}" \
+            --dart-define="SENTRY_DSN=${{ secrets.SENTRY_DSN }}" \
+            --dart-define="SENTRY_ENVIRONMENT=production"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
